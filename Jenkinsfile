@@ -70,7 +70,7 @@ pipeline {
 
 		stage('Build Docker Image') {
 			steps {
-				sh 'dotnet build "Tgs.Promotion.Client/Tgs.Promotion.Client.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
+				sh 'dotnet build "Tgs.Promotion.Service/Tgs.Promotion.Service.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
 			}
 		}
 
