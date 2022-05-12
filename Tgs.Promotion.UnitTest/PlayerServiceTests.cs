@@ -60,14 +60,15 @@ namespace Tgs.Promotion.UnitTest
             var sut = new PlayerRepository(fakePlayerService.Object);
 
             var playerCode = "ThisIsPlayerCode";
-            var depositOn = DateTimeOffset.UtcNow.DateTime;
+            var depositOn = DateTimeOffset.UtcNow.UtcDateTime;
 
             var fakePlayers = new Player[]
             {
                 new Player
                 {
                     PlayerCode = playerCode,
-                    DefaultWalletCurrencyCode = "CNY",
+                    FirstDepositOn = DateTime.Parse("2021/1/1"),
+					DefaultWalletCurrencyCode = "CNY",
                     Password = Array.Empty<byte>(),
                     Salt = Array.Empty<byte>(),
                     WithdrawPassword = Array.Empty<byte>(),
