@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
+    <PackageReference Include="Tgs.CashService.Client" Version="0.0.18" />
+    <PackageReference Include="Tgs.Payment.Client" Version="0.4.5" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.4.0" />
+    <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
+    <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tgs.Promotion.Domain\Tgs.Promotion.Domain.csproj" />
+    <ProjectReference Include="..\Tgs.Promotion.Repository\Tgs.Promotion.Repository.csproj" />
+  </ItemGroup>
+
+</Project>
