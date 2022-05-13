@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Transactions;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Tgs.Promotion.Core.Extensions;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Domain.Interfaces;
@@ -97,14 +98,15 @@ namespace Tgs.Promotion.Core
             const string sql = "dbo.promotion_update_amount_used";
 
             var conn = _repository.GetDbConnection();
+            var transaction = _repository.CurrentTransaction?.GetDbTransaction();
 
-            return await conn.QueryFirstOrDefaultAsync<bool>(
+			return await conn.QueryFirstOrDefaultAsync<bool>(
                     sql,
                     new Dictionary<string, object>
                     {
                         { "_promotion_id", promotionId },
                         { "_amount", amount }
-                    })
+                    }, commandType: CommandType.StoredProcedure, transaction: transaction)
                 .ConfigureAwait(false);
         }
 
@@ -113,14 +115,15 @@ namespace Tgs.Promotion.Core
             const string sql = "dbo.promotion_revert_amount_used";
 
             var conn = _repository.GetDbConnection();
+            var transaction = _repository.CurrentTransaction?.GetDbTransaction();
 
-            return await conn.QueryFirstOrDefaultAsync<bool>(
+			return await conn.QueryFirstOrDefaultAsync<bool>(
                     sql,
                     new Dictionary<string, object>
                     {
                         { "_promotion_id", promotionId },
                         { "_amount", amount }
-                    })
+                    }, commandType: CommandType.StoredProcedure, transaction: transaction)
                 .ConfigureAwait(false);
         }
 
