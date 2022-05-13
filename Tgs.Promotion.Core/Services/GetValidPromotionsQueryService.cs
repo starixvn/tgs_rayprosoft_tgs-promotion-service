@@ -60,7 +60,7 @@ namespace Tgs.Promotion.Core.Services
                     Number = x.DisplayOrder
                 });
 
-            return promotionQueryable.AsAsyncEnumerable();
+            return promotionQueryable.ToArray().ToAsyncEnumerable();
         }
     }
 }
