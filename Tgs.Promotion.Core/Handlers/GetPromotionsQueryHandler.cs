@@ -59,8 +59,9 @@ public class GetPromotionsQueryHandler : IGetService<GetPromotionsRequest,
                 DesktopBanner = x.DesktopBanner,
                 MobileBanner = x.MobileBanner,
                 LocalizationString = x.Localization,
-                Localization = x.Localization == null ? null : JsonDocument.Parse(x.Localization, new())
-            })
+                Localization = x.Localization == null ? null : JsonDocument.Parse(x.Localization, new()),
+                Number = x.DisplayOrder
+			})
             .AsSingleQuery()
             .CreatePagedResponseAsync(request)
             .ConfigureAwait(false);
