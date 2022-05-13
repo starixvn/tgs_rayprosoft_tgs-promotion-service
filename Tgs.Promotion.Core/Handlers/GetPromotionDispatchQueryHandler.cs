@@ -33,10 +33,21 @@ namespace Tgs.Promotion.Core.Handlers
             var promotionsJson = await _settingRepository
                 .GetSettingAsync(x => x.Key == "PromotionTypes")
                 .ConfigureAwait(false);
-            var promotionTypeGroups = JsonSerializer
+
+            if (promotionsJson is null)
+            {
+	            return new PagedResponse<PromotionDispatchModel>(0,Array.Empty<PromotionDispatchModel>()) { Valid = false, Message = "promotion types is not found." };
+            }
+
+			var promotionTypeGroups = JsonSerializer
                 .Deserialize<PromotionTypeGroup[]>(promotionsJson.Value);
 
-            var promotionGroup = promotionTypeGroups.FirstOrDefault(x => x.Name == request.PromotionGroup);
+			if (promotionTypeGroups is null)
+			{
+				return new PagedResponse<PromotionDispatchModel>(0,Array.Empty<PromotionDispatchModel>()) { Valid = false, Message = "promotion group type is not found." };
+			}
+
+			var promotionGroup = promotionTypeGroups.FirstOrDefault(x => x.Name == request.PromotionGroup);
             var promotionTypes = promotionGroup?.Types.Select(x => x.Name).ToArray() ?? Array.Empty<string>();
 
             var promotion = await _tgsPromotionService

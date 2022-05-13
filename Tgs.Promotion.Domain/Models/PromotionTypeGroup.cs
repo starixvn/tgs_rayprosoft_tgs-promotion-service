@@ -2,8 +2,8 @@
 {
     public record PromotionTypeGroup
     {
-        public string Name { get; set; }
-        public PromotionType[] Types { get; set; }
-        public Translation Trans { get; set; }
-    }
+        public string Name { get; set; } = default!;
+		public PromotionType[] Types { get; set; } = default!;
+		public Translation Trans { get; set; } = default!;
+	}
 }

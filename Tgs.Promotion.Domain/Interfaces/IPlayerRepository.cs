@@ -8,7 +8,7 @@ public interface IPlayerRepository
     ValueTask<bool> ExistsAsync(Expression<Func<Player?, bool>> predicate);
 
     ValueTask<Player?> GetPlayerAsync(
-        Expression<Func<Player?, bool>> predicate,
+        Expression<Func<Player, bool>> predicate,
         Func<IQueryable<Player>, IQueryable<Player>>? preQuery = null);
 
     ValueTask<Player?> GetPlayerByPlayerCodeAsync(string playerCode);

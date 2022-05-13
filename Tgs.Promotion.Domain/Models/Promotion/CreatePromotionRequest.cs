@@ -15,7 +15,7 @@ namespace Tgs.Promotion.Domain.Models.Promotion
 
         public string? DesktopBanner { get; set; }
 
-        public string? EditorUsername { get; set; }
+        public string EditorUsername { get; set; } = default!;
 
         public DateTimeOffset From { get; set; }
 

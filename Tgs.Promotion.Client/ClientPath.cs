@@ -29,10 +29,17 @@ namespace TGS.Core.Infrastructures.Utility
                     if (propertyInfo.PropertyType.IsArray)
                     {
                         var query = string.Empty;
+
+                        if (value == null)
+                        {
+	                        return $"{current}{propertyInfo.Name}=&";
+
+                        }
+
                         var enumerable = (IEnumerable)value;
 
                         query = enumerable.Cast<object>().Aggregate(query,
-                            (current1, itme) => current1 + $"{propertyInfo.Name}={itme}&");
+                            (current1, item) => current1 + $"{propertyInfo.Name}={item}&");
 
                         return $"{current}{query}";
                     }

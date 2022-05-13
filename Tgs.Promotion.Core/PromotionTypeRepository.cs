@@ -24,6 +24,11 @@ public class PromotionTypeRepository : IPromotionTypeRepository
         var promotionTypeGroups =
             JsonSerializer.Deserialize<PromotionTypeGroup[]>(promotionsJson!.Value);
 
+        if (promotionTypeGroups == null)
+        {
+	        return false;
+        }
+
         var promotionGroupType =
             promotionTypeGroups.FirstOrDefault(x => x.Types.Select(t => t.Name).Contains(promotionType));
 

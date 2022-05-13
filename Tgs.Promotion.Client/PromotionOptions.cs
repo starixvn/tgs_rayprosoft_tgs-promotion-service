@@ -2,6 +2,6 @@
 {
     public class PromotionOptions
     {
-        public Uri Url { get; set; }
-    }
+        public Uri Url { get; set; } = default!;
+	}
 }

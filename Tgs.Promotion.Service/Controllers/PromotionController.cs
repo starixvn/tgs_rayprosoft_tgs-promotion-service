@@ -134,28 +134,20 @@ public class PromotionController : ControllerBase
 
         if (!request.ShowAll)
         {
-            return new()
-            {
-                TotalCount = await promotions.CountAsync().ConfigureAwait(false),
-                Items = await promotions
-                    .ApplyOrderBy(paging)
-                    .ToArrayAsync()
-                    .ConfigureAwait(false)
-            };
+            return new(await promotions.CountAsync().ConfigureAwait(false), await promotions
+	            .ApplyOrderBy(paging)
+	            .ToArrayAsync()
+	            .ConfigureAwait(false));
         }
 
         paging.Page = request.Page;
         paging.RowCount = request.Rows;
 
-        return new()
-        {
-            TotalCount = await promotions.CountAsync().ConfigureAwait(false),
-            Items = await promotions
-                .ApplyOrderBy(paging)
-                .ApplyPaging(paging)
-                .ToArrayAsync()
-                .ConfigureAwait(false)
-        };
+        return new(await promotions.CountAsync().ConfigureAwait(false), await promotions
+		        .ApplyOrderBy(paging)
+		        .ApplyPaging(paging)
+		        .ToArrayAsync()
+		        .ConfigureAwait(false));
     }
 
     [HttpDelete("{promotionId}/{amount}", Name = "RevertPromotion")]

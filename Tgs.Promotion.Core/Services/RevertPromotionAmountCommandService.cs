@@ -23,7 +23,7 @@ namespace Tgs.Promotion.Core.Services
         {
             var promotion = await _promotionRepository.GetPromotionByIdAsync(command.PromotionId);
 
-            var amount = promotion.Percentage * command.Amount / 100M;
+            var amount = promotion!.Percentage * command.Amount / 100M;
             amount = amount > promotion.BonusAmountLimit ? promotion.BonusAmountLimit : amount;
 
             _logger.LogInformation($"Revert {amount}");

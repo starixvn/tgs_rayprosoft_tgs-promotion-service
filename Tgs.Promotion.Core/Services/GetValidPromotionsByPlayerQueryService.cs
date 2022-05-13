@@ -34,7 +34,7 @@ internal class GetValidPromotionsByPlayerQueryService : IQueryService<GetValidPr
         var promotions = GetPromotionsAsync(
             query.BrandId,
             query.PlayerCode,
-            player.Vip?.Level,
+            player?.Vip?.Level,
             cancellationToken);
 
         await foreach (var promotion in promotions) yield return promotion;

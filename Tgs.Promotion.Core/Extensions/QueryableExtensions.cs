@@ -26,12 +26,12 @@ namespace Tgs.Promotion.Core.Extensions
             if (request.ShowAll || request.Rows == 0)
             {
                 var allResult = await result.ToArrayAsync();
-                return new() {Valid = true, TotalCount = allResult.Length, Items = allResult};
+                return new(allResult.Length, allResult) {Valid = true};
             }
 
             var pagedResult = await result.ToPagedArrayAsync(request.Page, request.Rows);
 
-            return new() {Valid = true, TotalCount = pagedResult.TotalCount, Items = pagedResult.Items};
+            return new(pagedResult.TotalCount, pagedResult.Items) {Valid = true};
         }
 
         public static PagedResponse<TModel> CreatePagedResponse<TModel>(this IQueryable<TModel> query,
@@ -42,17 +42,17 @@ namespace Tgs.Promotion.Core.Extensions
             if (request.ShowAll || request.Rows == 0)
             {
                 var allResult = result.ToArray();
-                return new() {Valid = true, TotalCount = allResult.Length, Items = allResult};
+                return new(allResult.Length, allResult) {Valid = true};
             }
 
             var pagedResult = result.ToPagedArray(request.Page, request.Rows);
 
-            return new() {Valid = true, TotalCount = pagedResult.TotalCount, Items = pagedResult.Items};
+            return new(pagedResult.TotalCount, pagedResult.Items) {Valid = true};
         }
 
         public static Task<PagedResponse<TModel>> CreatePagedResponseAsync<TModel>(this IEnumerable<TModel> query,
             int totalCount) =>
-            Task.FromResult(new PagedResponse<TModel> {Valid = true, TotalCount = totalCount, Items = query.ToArray()});
+            Task.FromResult(new PagedResponse<TModel>(totalCount, query.ToArray()) {Valid = true});
 
         private static PagedArray<T> ToPagedArray<T>(this IQueryable<T> query, int page, int pageSize)
         {
@@ -89,7 +89,7 @@ namespace Tgs.Promotion.Core.Extensions
 
             var result = genericMethod.Invoke(null, new object[] {source, lambda});
 
-            return (IQueryable<TSource>)result;
+            return (IQueryable<TSource>)result!;
         }
 
 

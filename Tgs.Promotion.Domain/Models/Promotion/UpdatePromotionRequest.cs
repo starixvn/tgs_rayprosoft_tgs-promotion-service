@@ -9,7 +9,7 @@ namespace Tgs.Promotion.Domain.Models.Promotion
 
         public decimal BonusAmountLimit { get; set; }
 
-        public string? EditorUsername { get; set; }
+        public string EditorUsername { get; set; } = default!;
 
         public DateTimeOffset From { get; set; }
 

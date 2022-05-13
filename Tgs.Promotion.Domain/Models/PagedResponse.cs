@@ -2,10 +2,6 @@
 {
     public record PagedResponse<T> : MessageResponse
     {
-        public PagedResponse()
-        {
-        }
-
         public PagedResponse(int count, T[] items)
         {
             TotalCount = count;

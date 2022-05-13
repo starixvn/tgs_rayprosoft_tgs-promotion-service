@@ -27,9 +27,15 @@ namespace Tgs.Promotion.Core.Handlers
                 return new MessageResponse{Valid=false, Message = "Name is existed." };
             }
 
-            var promotionsJson = await _settingsService.GetSettingAsync(x => x.Key == "PromotionTypes");
-            var promotionTypeGroups =
-                JsonSerializer.Deserialize<PromotionTypeGroup[]>(promotionsJson.Value);
+            var promotionsJson = await _settingsService.GetSettingAsync(x => x != null && x.Key == "PromotionTypes");
+
+            if (promotionsJson is null)
+            {
+	            return new MessageResponse { Valid = false, Message = "promotion types is not found." };
+            }
+
+			var promotionTypeGroups =
+                JsonSerializer.Deserialize<PromotionTypeGroup[]>(promotionsJson!.Value);
 
             if (promotionTypeGroups is null || promotionTypeGroups.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
             {

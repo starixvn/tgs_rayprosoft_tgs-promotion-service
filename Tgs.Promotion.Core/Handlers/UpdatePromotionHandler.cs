@@ -34,12 +34,18 @@ namespace Tgs.Promotion.Core.Handlers
             }
 
             var promotionsJson = await _settingsService.GetSettingAsync(x => x.Key == "PromotionTypes");
-            var promotionTypeGroups =
+
+            if (promotionsJson is null)
+            {
+	            return new MessageResponse { Valid = false, Message = "promotion types is not found." };
+            }
+
+			var promotionTypeGroups =
                 JsonSerializer.Deserialize<PromotionTypeGroup[]>(promotionsJson.Value);
 
-            if (promotionTypeGroups.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
+            if (promotionTypeGroups is null || promotionTypeGroups.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
             {
-                return new MessageResponse { Valid = false, Message = "Promotion type is not found" };
+                return new MessageResponse { Valid = false, Message = "Promotion group type is not found" };
             }
 
             var promotionType = promotionTypeGroups.SelectMany(x => x.Types)

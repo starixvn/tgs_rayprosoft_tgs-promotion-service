@@ -20,7 +20,7 @@ public class PlayerRepository : IPlayerRepository
         await _playerService.GetQueries().AnyAsync(predicate).ConfigureAwait(false);
 
     public async ValueTask<Player?> GetPlayerAsync(
-        Expression<Func<Player?, bool>> predicate,
+        Expression<Func<Player, bool>> predicate,
         Func<IQueryable<Player>, IQueryable<Player>>? preQuery = null)
     {
         preQuery ??= c => c;

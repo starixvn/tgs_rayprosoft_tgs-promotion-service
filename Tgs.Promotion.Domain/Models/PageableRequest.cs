@@ -11,7 +11,7 @@ namespace Tgs.Promotion.Domain.Models
 
         public bool IsDesc => OrderBy == SortOrder.Descending;
 
-        public string SortBy { get; set; }
+        public string? SortBy { get; set; }
 
         public bool ShowAll { get; set; }
 

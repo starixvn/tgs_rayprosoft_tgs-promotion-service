@@ -34,7 +34,7 @@ namespace Tgs.Promotion.Core
             _repository = repository;
         }
         public async ValueTask<Domain.Entities.Promotion?> GetPromotionAsync(
-            Expression<Func<Domain.Entities.Promotion?, bool>> predicate,
+            Expression<Func<Domain.Entities.Promotion, bool>> predicate,
             Func<IQueryable<Domain.Entities.Promotion>, IQueryable<Domain.Entities.Promotion>>? preQuery)
         {
             preQuery ??= c => c;

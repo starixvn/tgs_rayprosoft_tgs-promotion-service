@@ -15,7 +15,7 @@ namespace Tgs.Promotion.Core
         }
 
         public async ValueTask<Setting?> GetSettingAsync(
-            Expression<Func<Setting?, bool>> predicate,
+            Expression<Func<Setting, bool>> predicate,
             Func<IQueryable<Setting>, IQueryable<Setting>>? preQuery)
         {
             preQuery ??= c => c;

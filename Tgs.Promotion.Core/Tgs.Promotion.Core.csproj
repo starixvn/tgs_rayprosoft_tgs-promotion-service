@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Tgs.Promotion.Client\Tgs.Promotion.Client.csproj" />
     <ProjectReference Include="..\Tgs.Promotion.Domain\Tgs.Promotion.Domain.csproj" />
     <ProjectReference Include="..\Tgs.Promotion.Repository\Tgs.Promotion.Repository.csproj" />
   </ItemGroup>

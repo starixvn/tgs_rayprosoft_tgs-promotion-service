@@ -19,7 +19,7 @@ namespace Tgs.Promotion.Domain.Interfaces
         ValueTask UpdatePromotionsAsync(Entities.Promotion[] promotions);
         ValueTask<Entities.Promotion?> GetPromotionByIdAsync(Guid promotionId);
         ValueTask<Entities.Promotion?> GetPromotionAsync(
-            Expression<Func<Entities.Promotion?, bool>> predicate,
+            Expression<Func<Entities.Promotion, bool>> predicate,
             Func<IQueryable<Entities.Promotion>, IQueryable<Entities.Promotion>>
                 ? preQuery = null);
         IQueryable<Entities.Promotion> GetPromotionQueries(

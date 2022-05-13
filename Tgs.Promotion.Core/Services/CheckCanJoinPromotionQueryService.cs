@@ -23,7 +23,7 @@ namespace Tgs.Promotion.Core.Services
         {
             var promotionData = await _promotionRepository.GetPromotionByIdAsync(query.PromotionId);
 
-            if (promotionData.BrandId != query.BrandId)
+            if (promotionData?.BrandId != query.BrandId)
             {
                 return false;
             }

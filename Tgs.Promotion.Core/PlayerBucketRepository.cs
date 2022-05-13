@@ -79,7 +79,7 @@ namespace Tgs.Promotion.Core
                 var promotion = await _promotionService.GetQueries()
                     .FirstOrDefaultAsync(x => x.Id == request.PromotionId.Value);
 
-                var bonusAmount = promotion.Percentage * request.DepositAmount / 100M;
+                var bonusAmount = promotion!.Percentage * request.DepositAmount / 100M;
 
                 bonusAmount = bonusAmount > promotion.BonusAmountLimit
                     ? promotion.BonusAmountLimit
