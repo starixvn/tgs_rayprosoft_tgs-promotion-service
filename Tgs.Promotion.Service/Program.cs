@@ -92,7 +92,7 @@ builder.Services
 			{
 				var configuration = sp.GetRequiredService<IConfiguration>();
 
-				options.Url = configuration.GetValue<string>("Nats");
+				options.Url = configuration.GetConnectionString("Nats");
 			})
 			.AddHandler<DepositStatusChangedMessageHandler>(
 				"tgs.payment.deposit.status",
