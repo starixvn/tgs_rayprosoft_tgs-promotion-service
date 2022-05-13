@@ -61,7 +61,7 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
-          VolumeMounts:
+          volumeMounts:
             - mountPath: /diag
               name: diagvol
             - mountPath: /dumps
