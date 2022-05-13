@@ -110,7 +110,7 @@ pipeline {
                         println node_selector
 
                         sh '''
-                            cat << EOF | yq e -P | helm template deployment/k8s/malaki-pay \
+                            cat << EOF | yq e -P | helm template deployment/k8s/promotion-api \
                                 -n ${kube_ns} \
                                 --name-template tgs \
                                 --set image.tag=${TAG} \
@@ -122,7 +122,7 @@ pipeline {
                             }
                         '''
                         sh '''
-                            cat << EOF | yq e -P | helm template deployment/k8s/malaki-pay \
+                            cat << EOF | yq e -P | helm template deployment/k8s/promotion-api \
                                 -n ${kube_ns} \
                                 --set image.tag=${TAG} \
                                 --name-template tgs \
