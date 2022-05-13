@@ -26,10 +26,11 @@ public static class PromotionCoreExtensions
             .RegisterPromotionChecker<AlwaysTrueChecker>("TurnoverRebate")
             .RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyDaily")
             .RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyWeekly")
-            .RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyMonthly");
+            .RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyMonthly")
+            .RegisterPromotionChecker<RegisterChecker>("Register");
 
-        services
-            .AddScoped<IPromotionCheckerFactory>(
+		services
+			.AddScoped<IPromotionCheckerFactory>(
                 sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(
                     sp,
                     configuration.GetAllRegisterCheckerTypes()))

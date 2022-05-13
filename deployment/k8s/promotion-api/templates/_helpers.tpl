@@ -47,6 +47,7 @@ Selector labels
 */}}
 {{- define "promotion-api.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "promotion-api.name" . }}
+app: {{ include "promotion-api.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 tgs.kind: promotion
 {{- end }}
