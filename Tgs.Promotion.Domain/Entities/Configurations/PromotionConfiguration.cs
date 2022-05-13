@@ -97,7 +97,7 @@ namespace Tgs.Promotion.Domain.Entities.Configurations
                 .HasPrecision(18, 6)
                 .HasColumnName("turnover_multiple");
 
-            entity.Property(e => e.Unlimited).HasColumnType("smallint").HasColumnName("unlimited");
+            entity.Property(e => e.Unlimited).HasColumnName("unlimited");
 
             entity.Property(e => e.UpdatedByUsername).HasColumnName("updated_by_username");
 

@@ -270,7 +270,7 @@ public class
         {
             "ReliefMoneyMonthly" => (promotion.PromotionParticipants.Select(p =>
                 {
-                    if (amount > promotion.TotalAmountLimit && !promotion.Unlimited)
+                    if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
                     {
                         return new PromotionBonusPlayerModel
                         {

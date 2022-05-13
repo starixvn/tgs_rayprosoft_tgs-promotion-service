@@ -64,7 +64,7 @@ namespace Tgs.Promotion.Core
                 BonusAmountLimit = request.BonusAmountLimit,
                 SettlementIntervalType = promotionTypeModel.SettlementIntervalType,
                 AmountUsed = 0,
-                Unlimited = request.Unlimited,
+                Unlimited = (short)(request.Unlimited ? 1 : 0),
                 GameType = (short?)request.GameType,
                 Percentage = request.Percentage,
                 TotalAmountLimit = request.TotalAmountLimit,
@@ -163,7 +163,7 @@ namespace Tgs.Promotion.Core
             promotion.AutoSentPlayerBonus = request.AutoSentPlayerBonus;
             promotion.PromotionType = request.PromotionType;
             promotion.BonusAmountLimit = request.BonusAmountLimit;
-            promotion.Unlimited = request.Unlimited;
+            promotion.Unlimited = (short)(request.Unlimited ? 1 : 0);
             promotion.GameType = (short?)request.GameType;
             promotion.Percentage = request.Percentage;
             promotion.TotalAmountLimit = request.TotalAmountLimit;

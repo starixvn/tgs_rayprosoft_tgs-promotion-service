@@ -24,7 +24,7 @@ namespace Tgs.Promotion.Core.Services
 
             var promotionQueryable = _promotionRepository.GetPromotionQueries()
                 .Where(x => x.BrandId == query.BrandId)
-                .Where(x => x.Unlimited || x.TotalAmountLimit > x.AmountUsed)
+                .Where(x => x.Unlimited == 1 || x.TotalAmountLimit > x.AmountUsed)
                 .Where(x => x.Status == (short)PromotionStatus.Enabled
                     && x.From <= now
                     && x.To > now)
@@ -40,7 +40,7 @@ namespace Tgs.Promotion.Core.Services
                     PromotionType = x.PromotionType,
                     BonusAmountLimit = x.BonusAmountLimit,
                     AmountUsed = x.AmountUsed,
-                    Unlimited = x.Unlimited,
+                    Unlimited = x.Unlimited == 1,
                     GameType = (GameType?)x.GameType,
                     Percentage = x.Percentage,
                     TotalAmountLimit = x.TotalAmountLimit,

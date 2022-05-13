@@ -266,7 +266,7 @@ public class
         {
             "TurnoverRebate" => (promotion.PromotionParticipants.Select(p =>
                 {
-                    if (amount > promotion.TotalAmountLimit && !promotion.Unlimited)
+                    if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
                     {
                         return new PromotionBonusPlayerModel
                         {
@@ -298,7 +298,7 @@ public class
                 .ToArray(), amount),
             "ReliefMoneyDaily" => (promotion.PromotionParticipants.Select(p =>
                 {
-                    if (amount > promotion.TotalAmountLimit && !promotion.Unlimited)
+                    if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
                     {
                         return new PromotionBonusPlayerModel
                         {
