@@ -144,7 +144,7 @@ namespace Tgs.Promotion.Core
         {
             preQuery ??= c => c;
             return tracking
-                ? preQuery(_promotionService.GetQueries())
+                ? preQuery(_promotionService.GetQueries()).AsTracking()
                 : preQuery(_promotionService.GetQueries()).AsNoTracking();
         }
 
@@ -157,8 +157,9 @@ namespace Tgs.Promotion.Core
 
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-            await _promotionGameProviderService.DeleteEntitiesAsync(promotion.PromotionGameProviders);
-            await _promotionVipLevelService.DeleteEntitiesAsync(promotion.PromotionVipLevels);
+            _repository.PromotionGameProviders.RemoveRange(promotion.PromotionGameProviders);
+            _repository.PromotionVipLevels.RemoveRange(promotion.PromotionVipLevels);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
 
             promotion.Name = request.Name;
             promotion.From = request.From.UtcDateTime;

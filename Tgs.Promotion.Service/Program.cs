@@ -1,9 +1,14 @@
+using System.Text;
+using System.Text.Json;
+using Microsoft.AspNetCore.Diagnostics;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.MessageQueue;
 using Tgs.Promotion.Core.MessageQueue;
 using Tgs.Promotion.Domain.Interfaces;
+using Tgs.Promotion.Domain.Models;
 using Tgs.Promotion.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -109,6 +114,30 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseExceptionHandler(new ExceptionHandlerOptions
+{
+	ExceptionHandler = async context =>
+	{
+		var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
+		if (exceptionFeature?.Error != null)
+		{
+			var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+			var logger = loggerFactory.CreateLogger("ExceptionHandler");
+
+			logger.LogError(
+				exceptionFeature.Error,
+				"{exceptionFeature.Error.Message}",
+				exceptionFeature.Error.Message);
+
+			await context.Response.WriteAsJsonAsync(new MessageResponse
+			{
+				Message = exceptionFeature.Error.Message,
+				Valid = false
+			});
+		}
+	}
+});
 
 // Configure the HTTP request pipeline.
 app.UseSwaggerUI();

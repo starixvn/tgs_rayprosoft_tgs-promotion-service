@@ -12,6 +12,7 @@ public static class TgsRepositoryExtensions
 		_ = services.AddDbContext<TgsRepository>(options =>
 		  {
 			  _ = options.UseNpgsql(connectionString);
+			  options.UseLazyLoadingProxies();
 		  });
 
 		_ = services.AddScoped<ITgsRepository>(c => c.GetRequiredService<TgsRepository>());

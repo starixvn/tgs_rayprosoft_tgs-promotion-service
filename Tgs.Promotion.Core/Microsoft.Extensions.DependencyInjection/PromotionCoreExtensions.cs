@@ -13,8 +13,7 @@ public static class PromotionCoreExtensions
         services
             .RegisterAllServiceUtilityTypes(
                 Assembly.GetExecutingAssembly(),
-                ServiceLifetime.Transient)
-            .AddMediatR(Assembly.GetExecutingAssembly());
+                ServiceLifetime.Transient);
 
         var configuration = new PromotionConfiguration(services);
 
