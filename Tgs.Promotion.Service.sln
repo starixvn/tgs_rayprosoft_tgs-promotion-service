@@ -11,9 +11,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Repository", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Domain", "Tgs.Promotion.Domain\Tgs.Promotion.Domain.csproj", "{7F4481D7-8940-4AF0-B3E8-ABB3A20C3F75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.Promotion.UnitTest", "Tgs.Promotion.UnitTest\Tgs.Promotion.UnitTest.csproj", "{C30AB184-D4E4-472D-A4CE-2CDF215EB814}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.UnitTest", "Tgs.Promotion.UnitTest\Tgs.Promotion.UnitTest.csproj", "{C30AB184-D4E4-472D-A4CE-2CDF215EB814}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.Promotion.Client", "Tgs.Promotion.Client\Tgs.Promotion.Client.csproj", "{7D813827-BC18-4F3B-ABC1-55607E30D068}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Client", "Tgs.Promotion.Client\Tgs.Promotion.Client.csproj", "{7D813827-BC18-4F3B-ABC1-55607E30D068}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{54AADB21-0C41-4099-A8D1-0B9E3404C71D}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		nuget.config = nuget.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.Promotion.Repository.UnitTests", "Tgs.Promotion.Repository.UnitTests\Tgs.Promotion.Repository.UnitTests.csproj", "{E375AD48-581D-424E-8571-4403F4F70FAC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +53,10 @@ Global
 		{7D813827-BC18-4F3B-ABC1-55607E30D068}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D813827-BC18-4F3B-ABC1-55607E30D068}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D813827-BC18-4F3B-ABC1-55607E30D068}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E375AD48-581D-424E-8571-4403F4F70FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E375AD48-581D-424E-8571-4403F4F70FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E375AD48-581D-424E-8571-4403F4F70FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E375AD48-581D-424E-8571-4403F4F70FAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

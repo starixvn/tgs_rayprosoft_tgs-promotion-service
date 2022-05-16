@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Promotion.Domain.Models;
-using Tgs.Promotion.Domain.Models.PromotionDispatch;
+using Tgs.Promotion.Core.Models;
+using Tgs.Promotion.Core.Models.PromotionDispatch;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Service.Controllers;
@@ -10,17 +10,17 @@ namespace Tgs.Promotion.Service.Controllers;
 [ApiController]
 public class PromotionDispatchController : ControllerBase
 {
-    [HttpGet]
-    [Description("Get promotion dispatches")]
-    public ValueTask<PagedResponse<PromotionDispatchModel>> GetPromotionsAsync(
-        [FromServices] IGetService<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>> getService,
-        [FromQuery] GetPromotionDispatchesRequest request) =>
-        getService.GetAsync(request);
+	[HttpGet]
+	[Description("Get promotion dispatches")]
+	public ValueTask<PagedResponse<PromotionDispatchModel>> GetPromotionsAsync(
+		[FromServices] IGetService<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>> getService,
+		[FromQuery] GetPromotionDispatchesRequest request) =>
+		getService.GetAsync(request);
 
-    [HttpPost]
-    [Description("Dispatch promotion")]
-    public ValueTask<MessageResponse> DispatchPromotionsAsync(
-        [FromServices] IGetService<DispatchPromotionBonusRequest, MessageResponse> getService,
-        [FromBody] DispatchPromotionBonusRequest request) =>
-        getService.GetAsync(request);
+	[HttpPost]
+	[Description("Dispatch promotion")]
+	public ValueTask<MessageResponse> DispatchPromotionsAsync(
+		[FromServices] IGetService<DispatchPromotionBonusRequest, MessageResponse> getService,
+		[FromBody] DispatchPromotionBonusRequest request) =>
+		getService.GetAsync(request);
 }

@@ -1,18 +1,17 @@
-﻿namespace Tgs.Promotion.Client.Models
+﻿namespace Tgs.Promotion.Client.Models;
+
+public record MessageResponse
 {
-    public record MessageResponse
-    {
-        public bool Valid { get; init; }
+	public bool Valid { get; init; }
 
-        public string Message { get; init; } = default!;
+	public string Message { get; init; } = default!;
 
-        public string[] Errors { get; init; }
+	public string[] Errors { get; init; }
 
-        public MessageResponse()
-        {
-            Valid = false;
-            Message = string.Empty;
-            Errors = new string[] { };
-        }
-    }
+	public MessageResponse()
+	{
+		Valid = false;
+		Message = string.Empty;
+		Errors = new string[] { };
+	}
 }

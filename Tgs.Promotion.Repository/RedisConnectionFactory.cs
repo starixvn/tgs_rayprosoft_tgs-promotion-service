@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using Tgs.Promotion.Domain.Interfaces;
 
 namespace Tgs.Promotion.Repository;
 
-public class RedisConnectionFactory : IRedisConnectionFactory, IDisposable
+internal class RedisConnectionFactory : IRedisConnectionFactory, IDisposable
 {
 	private readonly ConnectionMultiplexer _connectionMultiplexer;
 	private bool _disposedValue;
