@@ -1,4 +1,4 @@
-﻿using Tgs.Promotion.Domain.Interfaces;
+﻿using Tgs.Promotion.Domain;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Core.Services

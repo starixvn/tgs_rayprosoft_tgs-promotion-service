@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Tgs.Promotion.Domain.shared;
 
 namespace Tgs.Promotion.Domain.Models.Promotion
 {

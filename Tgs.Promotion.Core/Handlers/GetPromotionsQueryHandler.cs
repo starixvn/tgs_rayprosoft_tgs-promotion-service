@@ -1,10 +1,9 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Promotion.Core.Extensions;
-using Tgs.Promotion.Domain.Interfaces;
+using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Models;
 using Tgs.Promotion.Domain.Models.Promotion;
-using Tgs.Promotion.Domain.shared;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Core.Handlers;

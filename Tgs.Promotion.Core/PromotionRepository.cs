@@ -6,11 +6,10 @@ using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Tgs.Promotion.Core.Extensions;
+using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Domain.Interfaces;
 using Tgs.Promotion.Domain.Models;
 using Tgs.Promotion.Domain.Models.Promotion;
-using Tgs.Promotion.Domain.shared;
 
 namespace Tgs.Promotion.Core
 {

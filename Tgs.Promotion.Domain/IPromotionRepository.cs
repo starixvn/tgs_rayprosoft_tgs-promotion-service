@@ -2,7 +2,7 @@
 using Tgs.Promotion.Domain.Models;
 using Tgs.Promotion.Domain.Models.Promotion;
 
-namespace Tgs.Promotion.Domain.Interfaces
+namespace Tgs.Promotion.Domain
 {
 	public interface IPromotionRepository
 	{

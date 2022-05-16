@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Domain.Interfaces;
 
 namespace Tgs.Promotion.Core
 {

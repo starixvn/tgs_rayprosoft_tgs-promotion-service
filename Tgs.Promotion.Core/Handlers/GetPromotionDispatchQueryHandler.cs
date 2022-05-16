@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using Tgs.Promotion.Core.Extensions;
-using Tgs.Promotion.Domain.Interfaces;
+using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Models;
 using Tgs.Promotion.Domain.Models.PromotionDispatch;
 using Tgs.ServiceUtility;

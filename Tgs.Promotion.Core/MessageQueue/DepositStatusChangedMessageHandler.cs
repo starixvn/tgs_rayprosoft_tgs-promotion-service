@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Tgs.MessageQueue;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
-using Tgs.Promotion.Domain.Interfaces;
+using Tgs.Promotion.Domain;
 
 namespace Tgs.Promotion.Core.MessageQueue
 {

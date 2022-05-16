@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using StackExchange.Redis;
-using Tgs.Promotion.Domain.Interfaces;
+using Tgs.Promotion.Domain;
 
 namespace Tgs.Promotion.Core
 {

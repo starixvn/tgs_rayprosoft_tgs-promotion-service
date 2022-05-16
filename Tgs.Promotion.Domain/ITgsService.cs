@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion.Domain.Interfaces
+﻿namespace Tgs.Promotion.Domain
 {
 	public interface ITgsService<T>
 	{

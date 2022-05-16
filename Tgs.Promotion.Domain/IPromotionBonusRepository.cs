@@ -1,7 +1,7 @@
 ﻿using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Domain.Models.PromotionBonus;
 
-namespace Tgs.Promotion.Domain.Interfaces
+namespace Tgs.Promotion.Domain
 {
 	public interface IPromotionBonusRepository
 	{

@@ -1,6 +1,4 @@
-﻿using Tgs.Promotion.Domain.shared;
-
-namespace Tgs.Promotion.Domain.Models.PromotionBonus
+﻿namespace Tgs.Promotion.Domain.Models.PromotionBonus
 {
 	public class PromotionBonusModel
 	{

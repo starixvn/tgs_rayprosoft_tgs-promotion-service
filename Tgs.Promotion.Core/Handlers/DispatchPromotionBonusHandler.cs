@@ -1,11 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tgs.CashService.Client;
+using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Domain.Interfaces;
 using Tgs.Promotion.Domain.Models;
 using Tgs.Promotion.Domain.Models.PromotionBucket;
 using Tgs.Promotion.Domain.Models.PromotionDispatch;
-using Tgs.Promotion.Domain.shared;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Core.Handlers

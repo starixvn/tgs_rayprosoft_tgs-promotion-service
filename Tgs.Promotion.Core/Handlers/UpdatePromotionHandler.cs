@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using Tgs.Promotion.Domain.Interfaces;
+using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Models;
 using Tgs.Promotion.Domain.Models.Promotion;
 using Tgs.ServiceUtility;

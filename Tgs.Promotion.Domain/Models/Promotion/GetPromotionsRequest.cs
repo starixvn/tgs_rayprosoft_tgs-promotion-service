@@ -1,6 +1,4 @@
-﻿using Tgs.Promotion.Domain.shared;
-
-namespace Tgs.Promotion.Domain.Models.Promotion
+﻿namespace Tgs.Promotion.Domain.Models.Promotion
 {
 	public class GetPromotionsRequest : PageableRequest
 	{

@@ -1,5 +1,4 @@
-﻿using Tgs.Promotion.Domain.Interfaces;
-using Tgs.Promotion.Domain.shared;
+﻿using Tgs.Promotion.Domain;
 
 namespace Tgs.Promotion.Core
 {

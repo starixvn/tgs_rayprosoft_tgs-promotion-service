@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
-using Tgs.Promotion.Domain.Interfaces;
+using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Models.Promotion;
-using Tgs.Promotion.Domain.shared;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Core.Services
