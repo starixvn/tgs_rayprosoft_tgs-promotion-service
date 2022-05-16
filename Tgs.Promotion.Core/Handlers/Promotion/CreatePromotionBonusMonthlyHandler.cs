@@ -52,8 +52,6 @@ public class
         _promotionFactory = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
         _transactionRepository =
             transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
-        _transactionRepository =
-            transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
         _promotionService =
             promotionService ?? throw new ArgumentNullException(nameof(promotionService));
         _promotionBonusService =
@@ -86,17 +84,17 @@ public class
         var promotions = await _promotionService.GetQueries()
             .Where(x => x.Status == (short)PromotionStatus.Enabled)
             .Where(x => x.SettlementIntervalType == "Monthly")
-            .Where(x => x.From >= previousFirstDayOfMonth && x.From <= currentFirstDayOfMonth ||
-                x.To >= previousFirstDayOfMonth && x.To <= currentFirstDayOfMonth ||
-                x.From < previousFirstDayOfMonth && x.To > currentFirstDayOfMonth
-            ).ToArrayAsync(cancellationToken);
+            .Where(x => x.From >= previousFirstDayOfMonth.UtcDateTime && x.From <= currentFirstDayOfMonth.UtcDateTime ||
+                x.To >= previousFirstDayOfMonth.UtcDateTime && x.To <= currentFirstDayOfMonth.UtcDateTime ||
+                x.From < previousFirstDayOfMonth.UtcDateTime && x.To > currentFirstDayOfMonth.UtcDateTime
+			).ToArrayAsync(cancellationToken);
 
         var promotionIds = promotions.Select(x => x.Id);
 
         if (await _promotionBonusService.GetQueries()
                 .AnyAsync(
-                    x => promotionIds.Contains(x.PromotionId) && previousFirstDayOfMonth <= x.From &&
-                        previousLastDayOfMonth >= x.To,
+                    x => promotionIds.Contains(x.PromotionId) && previousFirstDayOfMonth.UtcDateTime <= x.From &&
+                        previousLastDayOfMonth.UtcDateTime >= x.To,
                     cancellationToken))
         {
             return new()
@@ -113,7 +111,7 @@ public class
         var gameTypes = promotions.Select(x => x.GameType).ToArray();
 
         var playerGameRoundAggregate = await _playerGameRebateAggregateService.GetQueries()
-            .Where(x => x.ReportDate >= previousFirstDayOfMonth && x.ReportDate <= currentFirstDayOfMonth)
+            .Where(x => x.ReportDate >= previousFirstDayOfMonth.UtcDateTime && x.ReportDate <= currentFirstDayOfMonth.UtcDateTime)
             .Where(x => gameProviderIds.Contains(x.GameProviderId))
             .Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
             .GroupJoin(_brandGameService.GetQueries(),

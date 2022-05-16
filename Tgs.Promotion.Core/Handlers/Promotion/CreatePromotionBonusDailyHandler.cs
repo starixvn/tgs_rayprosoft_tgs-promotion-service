@@ -91,14 +91,14 @@ public class
             .Include(x => x.PromotionParticipants)
             .Where(x => x.Status == (short)PromotionStatus.Enabled)
             .Where(x => x.SettlementIntervalType == "Daily")
-            .Where(x => x.From <= reportDate && x.To >= reportDate).ToArrayAsync(cancellationToken);
+            .Where(x => x.From <= reportDate.UtcDateTime && x.To >= reportDate.UtcDateTime).ToArrayAsync(cancellationToken);
 
         var promotionIds = promotions.Select(x => x.Id);
 
         if (await _promotionBonusServices.GetQueries()
                 .AnyAsync(
-                    x => promotionIds.Contains(x.PromotionId) && reportDate == x.From &&
-                        reportDate == x.To,
+                    x => promotionIds.Contains(x.PromotionId) && reportDate.UtcDateTime == x.From &&
+                        reportDate.UtcDateTime == x.To,
                     cancellationToken))
         {
             return new()
@@ -114,7 +114,7 @@ public class
         var gameTypes = promotions.Select(x => x.GameType).ToArray();
 
         var playerGameRoundAggregate = await _playerGameRebateAggregateService.GetQueries()
-            .Where(x => x.ReportDate == reportDate)
+            .Where(x => x.ReportDate == reportDate.UtcDateTime)
             .Where(x => gameProviderIds.Contains(x.GameProviderId))
             .Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
             .GroupJoin(_brandGameService.GetQueries(),
@@ -155,8 +155,8 @@ public class
                 Id = id,
                 BrandId = x.BrandId,
                 PromotionId = x.Id,
-                From = reportDate,
-                To = reportDate,
+                From = reportDate.UtcDateTime,
+                To = reportDate.UtcDateTime,
                 AutoSentPlayerBonus = x.AutoSentPlayerBonus,
                 PromotionType = x.PromotionType,
                 TotalAmountLimit = x.TotalAmountLimit,
