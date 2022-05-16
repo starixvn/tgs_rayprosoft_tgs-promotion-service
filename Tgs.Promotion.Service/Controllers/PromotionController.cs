@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Promotion.Core.Services;
-using Tgs.Promotion.Domain;
-using Tgs.Promotion.Domain.Models;
-using Tgs.Promotion.Domain.Models.Promotion;
+using Tgs.Promotion.Core;
+using Tgs.Promotion.Core.ApplicationServices;
+using Tgs.Promotion.Core.Models;
+using Tgs.Promotion.Core.Models.Promotion;
 using Tgs.Promotion.Service.ViewModels;
 using Tgs.ServiceUtility;
 using TGS.Paging;

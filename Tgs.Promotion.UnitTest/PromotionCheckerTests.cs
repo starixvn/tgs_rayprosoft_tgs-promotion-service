@@ -4,8 +4,7 @@ using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.Promotion.Core;
-using Tgs.Promotion.Core.Services;
-using Tgs.Promotion.Domain;
+using Tgs.Promotion.Core.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
 
 namespace Tgs.Promotion.UnitTest

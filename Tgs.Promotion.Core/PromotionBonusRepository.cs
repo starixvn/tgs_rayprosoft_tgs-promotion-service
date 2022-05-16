@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Tgs.Promotion.Core.Models.PromotionBonus;
 using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Domain.Models.PromotionBonus;
 
 namespace Tgs.Promotion.Core;
 

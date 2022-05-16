@@ -9,7 +9,6 @@ using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
 using Tgs.Promotion.Core;
 using Tgs.Promotion.Core.MessageQueue;
-using Tgs.Promotion.Domain;
 
 namespace Tgs.Promotion.UnitTest
 {

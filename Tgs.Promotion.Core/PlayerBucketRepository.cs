@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tgs.CashService.Client;
 using Tgs.Promotion.Core.Extensions;
+using Tgs.Promotion.Core.Models.PromotionBucket;
 using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Domain.Models.PromotionBucket;
 
 namespace Tgs.Promotion.Core
 {

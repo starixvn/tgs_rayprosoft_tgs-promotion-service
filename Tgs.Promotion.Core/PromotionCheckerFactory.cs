@@ -1,6 +1,4 @@
-﻿using Tgs.Promotion.Domain;
-
-namespace Tgs.Promotion.Core
+﻿namespace Tgs.Promotion.Core
 {
 	public class PromotionCheckerFactory : IPromotionCheckerFactory
 	{

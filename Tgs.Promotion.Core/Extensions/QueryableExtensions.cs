@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using Tgs.Promotion.Domain.Models;
+using Tgs.Promotion.Core.Models;
 
 namespace Tgs.Promotion.Core.Extensions
 {

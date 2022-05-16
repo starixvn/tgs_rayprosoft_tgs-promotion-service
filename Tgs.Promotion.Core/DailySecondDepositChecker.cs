@@ -1,6 +1,4 @@
-﻿using Tgs.Promotion.Domain;
-
-namespace Tgs.Promotion.Core
+﻿namespace Tgs.Promotion.Core
 {
 	internal class DailySecondDepositChecker : IPromotionChecker
 	{

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
-using Tgs.Promotion.Domain;
 
 namespace Tgs.Promotion.Core.Configuration
 {

@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Tgs.Promotion.Core;
 using Tgs.Promotion.Core.Configuration;
-using Tgs.Promotion.Domain;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

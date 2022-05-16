@@ -1,4 +1,4 @@
-﻿using Tgs.Promotion.Domain.Models;
+﻿using Tgs.Promotion.Core.Models;
 
 namespace Tgs.Promotion.Service.ViewModels
 {

@@ -4,8 +4,8 @@ using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.Promotion.Core.MessageQueue;
+using Tgs.Promotion.Core.Models;
 using Tgs.Promotion.Domain;
-using Tgs.Promotion.Domain.Models;
 using Tgs.Promotion.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
