@@ -13,12 +13,13 @@ namespace Tgs.Promotion.Core.Handlers
         private readonly IPromotionParticipantRepository _promotionParticipantRepository;
         private readonly IPromotionRepository _promotionRepository;
         private readonly IPromotionTypeRepository _promotionType;
-
-        public CreatePromotionParticipantHandler(
+        private readonly IPromotionJoinLockRepository _promotionJoinLockRepository;
+		public CreatePromotionParticipantHandler(
             IPromotionRepository promotionRepository,
             IPromotionParticipantRepository promotionParticipantRepository,
             IPromotionTypeRepository promotionType,
-            ILogger<CreatePromotionParticipantHandler> logger)
+            IPromotionJoinLockRepository promotionJoinLockRepository,
+			ILogger<CreatePromotionParticipantHandler> logger)
         {
             _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
@@ -27,7 +28,9 @@ namespace Tgs.Promotion.Core.Handlers
 
             _promotionType = promotionType ??
                 throw new ArgumentNullException(nameof(promotionType));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _promotionJoinLockRepository = promotionJoinLockRepository ??
+	            throw new ArgumentNullException(nameof(promotionJoinLockRepository));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async ValueTask<MessageResponse> GetAsync(
@@ -64,7 +67,8 @@ namespace Tgs.Promotion.Core.Handlers
                 return new MessageResponse { Valid = false, Message = "Deposit invalid" };
             }
 
-            if (await _promotionParticipantRepository.ExistsAsync(x
+            if (!await _promotionJoinLockRepository.SetWhenNotExistsAsync(request.PlayerCode, request.PromotionId)
+	                .ConfigureAwait(false) || await _promotionParticipantRepository.ExistsAsync(x
                     => x.PlayerCode == request.PlayerCode && x.PromotionId == request.PromotionId))
             {
                 return new MessageResponse { Valid = false, Message = "Promotion already joined." };
