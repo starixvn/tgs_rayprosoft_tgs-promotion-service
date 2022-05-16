@@ -25,7 +25,7 @@ public class
 	private readonly ITgsService<PromotionBonus> _promotionBonusService;
 	private readonly IPromotionRepository _promotionFactory;
 	private readonly ITgsService<Domain.Entities.Promotion> _promotionService;
-	private readonly ITgsRepository _repository;
+	private readonly TgsContext _repository;
 	private readonly ITransactionRepository _transactionRepository;
 
 	public CreatePromotionBonusMonthlyHandler(
@@ -33,7 +33,7 @@ public class
 		IPlayerBucketRepository playerBucketService,
 		ICashServiceClient cashServiceClient,
 		ITransactionRepository transactionRepository,
-		ITgsRepository repository,
+		TgsContext repository,
 		IPromotionRepository promotionRepository,
 		ITgsService<Domain.Entities.Promotion> promotionService,
 		ITgsService<PromotionBonus> promotionBonusService,

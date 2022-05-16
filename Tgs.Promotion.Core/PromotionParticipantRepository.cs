@@ -8,9 +8,9 @@ namespace Tgs.Promotion.Core;
 public class PromotionParticipantRepository : IPromotionParticipantRepository
 {
 	private readonly ITgsService<PromotionParticipant> _promotionParticipantService;
-	private readonly ITgsRepository _repository;
+	private readonly TgsContext _repository;
 
-	public PromotionParticipantRepository(ITgsRepository tgsRepository,
+	public PromotionParticipantRepository(TgsContext tgsRepository,
 		ITgsService<PromotionParticipant> promotionParticipantService)
 	{
 		_repository = tgsRepository;

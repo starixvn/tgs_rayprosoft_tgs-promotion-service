@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Domain.Interfaces;
 using Tgs.ServiceUtility;
 
@@ -6,9 +7,9 @@ namespace Tgs.Promotion.Core.Services
 {
 	internal class ChangeOrderCommandService : ICommandService<ChangeOrderCommand>
 	{
-		private readonly ITgsRepository _tgsRepository;
+		private readonly TgsContext _tgsRepository;
 
-		public ChangeOrderCommandService(ITgsRepository tgsRepository)
+		public ChangeOrderCommandService(TgsContext tgsRepository)
 		{
 			_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 		}

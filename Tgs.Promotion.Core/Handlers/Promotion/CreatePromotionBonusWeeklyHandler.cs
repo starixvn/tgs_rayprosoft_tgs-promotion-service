@@ -19,7 +19,7 @@ namespace Tgs.Promotion.Core.Handlers.Promotion
 		private readonly IPlayerBucketRepository _playerBucketService;
 		private readonly ITgsService<PromotionBonus> _promotionBonusService;
 		private readonly IPromotionRepository _promotionRepository;
-		private readonly ITgsRepository _repository;
+		private readonly TgsContext _repository;
 		private readonly IPromotionBonusRepository _promotionBonusFactory;
 		private readonly ITransactionRepository _transactionRepository;
 
@@ -27,7 +27,7 @@ namespace Tgs.Promotion.Core.Handlers.Promotion
 			ITgsService<PromotionBonus> promotionBonusService,
 			IPlayerBucketRepository playerBucketService,
 			ICashServiceClient cashServiceClient,
-			ITgsRepository repository,
+			TgsContext repository,
 			IPromotionRepository promotionRepository,
 			IPromotionBonusRepository promotionBonusFactory,
 			ITransactionRepository transactionRepository)

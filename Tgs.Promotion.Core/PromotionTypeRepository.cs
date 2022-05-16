@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Domain.Interfaces;
 using Tgs.Promotion.Domain.Models;
 
@@ -7,9 +8,9 @@ namespace Tgs.Promotion.Core;
 
 public class PromotionTypeRepository : IPromotionTypeRepository
 {
-	private readonly ITgsRepository _repository;
+	private readonly TgsContext _repository;
 
-	public PromotionTypeRepository(ITgsRepository repository)
+	public PromotionTypeRepository(TgsContext repository)
 	{
 		_repository = repository;
 	}

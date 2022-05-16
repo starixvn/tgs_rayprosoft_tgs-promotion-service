@@ -9,10 +9,9 @@ public static class PromotionCoreExtensions
 {
 	public static IServiceCollection AddPromotionCore(this IServiceCollection services)
 	{
-		services
-			.RegisterAllServiceUtilityTypes(
-				Assembly.GetExecutingAssembly(),
-				ServiceLifetime.Transient);
+		services.RegisterAllServiceUtilityTypes(
+			Assembly.GetExecutingAssembly(),
+			ServiceLifetime.Transient);
 
 		var configuration = new PromotionConfiguration(services);
 
@@ -28,10 +27,9 @@ public static class PromotionCoreExtensions
 			.RegisterPromotionChecker<RegisterChecker>("Register");
 
 		services
-			.AddScoped<IPromotionCheckerFactory>(
-				sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(
-					sp,
-					configuration.GetAllRegisterCheckerTypes()))
+			.AddScoped<IPromotionCheckerFactory>(sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(
+				sp,
+				configuration.GetAllRegisterCheckerTypes()))
 			.AddTransient<IPlayerRepository, PlayerRepository>()
 			.AddTransient<ISettingsRepository, SettingsRepository>()
 			.AddTransient<IPromotionTypeRepository, PromotionTypeRepository>()

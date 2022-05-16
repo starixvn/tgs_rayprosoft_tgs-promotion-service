@@ -1,15 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Domain.Interfaces;
 
 namespace Tgs.Promotion.Repository
 {
 	public class TgsService<T> : ITgsService<T> where T : class
 	{
-		private ITgsRepository Repository { get; }
+		private TgsContext Repository { get; }
 
-		public TgsService(ITgsRepository repository)
+		public TgsService(TgsContext dbContext)
 		{
-			Repository = repository;
+			Repository = dbContext;
 		}
 
 		public async ValueTask CreateEntityAsync(T entity)

@@ -21,9 +21,15 @@ namespace Tgs.Promotion.Core
 		private readonly ITgsService<PromotionVipLevel> _promotionVipLevelService;
 		private readonly ITgsService<VipLevel> _vipLevelService;
 		private readonly ITgsService<GameProvider> _gameProviderService;
-		private readonly ITgsRepository _repository;
+		private readonly TgsContext _repository;
 
-		public PromotionRepository(ITgsService<Domain.Entities.Promotion> promotionService, ITgsService<PromotionGameProvider> promotionGameProviderService, ITgsService<PromotionVipLevel> promotionVipLevelService, ITgsService<VipLevel> vipLevelService, ITgsService<GameProvider> gameProviderService, ITgsRepository repository)
+		public PromotionRepository(
+			ITgsService<Domain.Entities.Promotion> promotionService,
+			ITgsService<PromotionGameProvider> promotionGameProviderService,
+			ITgsService<PromotionVipLevel> promotionVipLevelService,
+			ITgsService<VipLevel> vipLevelService,
+			ITgsService<GameProvider> gameProviderService,
+			TgsContext repository)
 		{
 			_promotionService = promotionService;
 			_promotionGameProviderService = promotionGameProviderService;
@@ -96,8 +102,8 @@ namespace Tgs.Promotion.Core
 		{
 			const string sql = "dbo.promotion_update_amount_used";
 
-			var conn = _repository.GetDbConnection();
-			var transaction = _repository.CurrentTransaction?.GetDbTransaction();
+			var conn = _repository.Database.GetDbConnection();
+			var transaction = _repository.Database.CurrentTransaction?.GetDbTransaction();
 
 			return await conn.QueryFirstOrDefaultAsync<bool>(
 					sql,
@@ -113,8 +119,8 @@ namespace Tgs.Promotion.Core
 		{
 			const string sql = "dbo.promotion_revert_amount_used";
 
-			var conn = _repository.GetDbConnection();
-			var transaction = _repository.CurrentTransaction?.GetDbTransaction();
+			var conn = _repository.Database.GetDbConnection();
+			var transaction = _repository.Database.CurrentTransaction?.GetDbTransaction();
 
 			return await conn.QueryFirstOrDefaultAsync<bool>(
 					sql,
