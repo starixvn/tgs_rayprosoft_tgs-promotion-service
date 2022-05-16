@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Promotion.Core;
 using Tgs.Promotion.Core.Models;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Core;
 
 namespace Tgs.Promotion.Repository;
 

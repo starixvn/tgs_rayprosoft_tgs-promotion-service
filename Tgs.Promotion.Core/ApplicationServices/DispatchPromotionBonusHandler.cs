@@ -3,7 +3,6 @@ using Tgs.CashService.Client;
 using Tgs.Promotion.Core.Models;
 using Tgs.Promotion.Core.Models.PromotionBucket;
 using Tgs.Promotion.Core.Models.PromotionDispatch;
-using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.ServiceUtility;
 

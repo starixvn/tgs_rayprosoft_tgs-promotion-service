@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tgs.Promotion.Core;
-using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Repository;
 

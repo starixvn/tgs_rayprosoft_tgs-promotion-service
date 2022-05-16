@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tgs.Promotion.Core.Models;
 using Tgs.Promotion.Core.Models.Promotion;
-using Tgs.Promotion.Domain;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Core.ApplicationServices;

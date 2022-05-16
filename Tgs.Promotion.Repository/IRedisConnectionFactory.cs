@@ -1,6 +1,6 @@
 ﻿using StackExchange.Redis;
 
-namespace Tgs.Promotion.Domain;
+namespace Tgs.Promotion.Repository;
 
 public interface IRedisConnectionFactory
 {

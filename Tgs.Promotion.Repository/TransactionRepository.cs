@@ -1,6 +1,5 @@
-﻿using Tgs.Promotion.Domain;
+﻿using Tgs.Promotion.Core;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Core;
 
 namespace Tgs.Promotion.Repository;
 
@@ -13,6 +12,6 @@ internal class TransactionRepository : ITransactionRepository
 		_transactionPromotionService = transactionPromotionService;
 	}
 
-	public ValueTask CreateTransactionPromotionsAsync(TransactionPromotion[] transactionPromotions) =>
-		_transactionPromotionService.CreateEntitiesAsync(transactionPromotions);
+	public ValueTask CreateTransactionPromotionsAsync(TransactionPromotion[] transactionPromotions)
+		=> _transactionPromotionService.CreateEntitiesAsync(transactionPromotions);
 }

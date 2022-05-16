@@ -29,18 +29,18 @@ public static class PromotionCoreExtensions
 			.AddScoped<IPromotionCheckerFactory>(sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(
 				sp,
 				configuration.GetAllRegisterCheckerTypes()));
-			//.AddTransient<IPlayerRepository, PlayerRepository>()
-			//.AddTransient<ISettingsRepository, SettingsRepository>()
-			//.AddTransient<IPromotionTypeRepository, PromotionTypeRepository>()
-			//.AddTransient<IPromotionJoinLockRepository, PromotionJoinLockRepository>()
-			//.AddTransient<ITransactionRepository, TransactionRepository>()
-			//.AddTransient<IPromotionRepository, PromotionRepository>()
-			//.AddTransient<IPromotionBonusRepository, PromotionBonusRepository>()
-			//.AddTransient<IPromotionParticipantRepository, PromotionParticipantRepository>()
-			//.AddTransient<ISettingsRepository, SettingsRepository>()
-			//.AddTransient<IPromotionPlayerRepository, PromotionPlayerRepository>()
-			//.AddTransient<IPlayerBucketRepository, PlayerBucketRepository>()
-			//.AddTransient<IPlayerDataRepository, RedisPlayerDataRepository>();
+		//.AddTransient<IPlayerRepository, PlayerRepository>()
+		//.AddTransient<ISettingsRepository, SettingsRepository>()
+		//.AddTransient<IPromotionTypeRepository, PromotionTypeRepository>()
+		//.AddTransient<IPromotionJoinLockRepository, PromotionJoinLockRepository>()
+		//.AddTransient<ITransactionRepository, TransactionRepository>()
+		//.AddTransient<IPromotionRepository, PromotionRepository>()
+		//.AddTransient<IPromotionBonusRepository, PromotionBonusRepository>()
+		//.AddTransient<IPromotionParticipantRepository, PromotionParticipantRepository>()
+		//.AddTransient<ISettingsRepository, SettingsRepository>()
+		//.AddTransient<IPromotionPlayerRepository, PromotionPlayerRepository>()
+		//.AddTransient<IPlayerBucketRepository, PlayerBucketRepository>()
+		//.AddTransient<IPlayerDataRepository, RedisPlayerDataRepository>();
 
 		return services;
 	}

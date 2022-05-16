@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
-using Tgs.Promotion.Core;
-using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Repository;
 
 namespace Tgs.Promotion.Repository.UnitTests;
 
@@ -58,7 +53,6 @@ public class PlayerRepositoryTests
 		using var dbContext = new TgsContext(dbContextOptions);
 
 		var sut = new PlayerRepository(dbContext);
-
 
 		var playerCode = "ThisIsPlayerCode";
 		var depositOn = DateTimeOffset.UtcNow.UtcDateTime;

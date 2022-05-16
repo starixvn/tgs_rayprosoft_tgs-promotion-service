@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using Tgs.Promotion.Domain;
 
 namespace Tgs.Promotion.Repository;
 
