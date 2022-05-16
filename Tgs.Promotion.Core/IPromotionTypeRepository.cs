@@ -1,7 +1,6 @@
-﻿namespace Tgs.Promotion.Core
+﻿namespace Tgs.Promotion.Core;
+
+public interface IPromotionTypeRepository
 {
-	public interface IPromotionTypeRepository
-	{
-		ValueTask<bool> IsDepositTypeAsync(string promotionType);
-	}
+	ValueTask<bool> IsDepositTypeAsync(string promotionType);
 }

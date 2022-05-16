@@ -1,9 +1,8 @@
 ﻿using Tgs.Promotion.Domain.Entities;
 
-namespace Tgs.Promotion.Core
+namespace Tgs.Promotion.Core;
+
+public interface ITransactionRepository
 {
-	public interface ITransactionRepository
-	{
-		ValueTask CreateTransactionPromotionsAsync(TransactionPromotion[] transactionPromotion);
-	}
+	ValueTask CreateTransactionPromotionsAsync(TransactionPromotion[] transactionPromotion);
 }

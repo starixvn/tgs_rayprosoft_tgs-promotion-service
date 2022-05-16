@@ -1,9 +1,8 @@
-﻿namespace Tgs.Promotion.Core.Models.Promotion
-{
-	public class ChangeOrderModel
-	{
-		public int DisplayOrder { get; set; }
+﻿namespace Tgs.Promotion.Core.Models.Promotion;
 
-		public Guid Id { get; set; }
-	}
+public class ChangeOrderModel
+{
+	public int DisplayOrder { get; set; }
+
+	public Guid Id { get; set; }
 }

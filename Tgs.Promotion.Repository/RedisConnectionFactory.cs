@@ -4,7 +4,7 @@ using Tgs.Promotion.Domain;
 
 namespace Tgs.Promotion.Repository;
 
-public class RedisConnectionFactory : IRedisConnectionFactory, IDisposable
+internal class RedisConnectionFactory : IRedisConnectionFactory, IDisposable
 {
 	private readonly ConnectionMultiplexer _connectionMultiplexer;
 	private bool _disposedValue;

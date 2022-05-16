@@ -5,8 +5,6 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.Promotion.Core.MessageQueue;
 using Tgs.Promotion.Core.Models;
-using Tgs.Promotion.Domain;
-using Tgs.Promotion.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +61,7 @@ builder.Services.AddProfileViewer();
 
 builder.Services
 	.AddTgsRepository(builder.Configuration.GetConnectionString("Tgs"))
+	.AddRedis((redisOptions, _) => redisOptions.ConnectionString = builder.Configuration.GetConnectionString("Redis"))
 	.AddPromotionCore()
 	.AddPaymentServiceClient((options, sp) =>
 	{
@@ -79,14 +78,7 @@ builder.Services
 	.AddTgsLog();
 
 builder.Services
-	.AddOptions<RedisOptions>()
-	.Configure<IConfiguration>((options, config)
-		=> options.ConnectionString = config.GetConnectionString("Redis"))
-	.Services
-	.AddSingleton<IRedisConnectionFactory, RedisConnectionFactory>();
-
-builder.Services
-.AddMessageQueue()
+	.AddMessageQueue()
 	.AddNatsMessageQueue(config =>
 	{
 		config
@@ -99,14 +91,12 @@ builder.Services
 			.AddHandler<DepositStatusChangedMessageHandler>(
 				"tgs.payment.deposit.status",
 				"tgs.payment.deposit.status");
-	});
+	})
+	.AddNatsGlobPatternExchange("*");
 
 builder.Services.AddHealthChecks();
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -136,9 +126,7 @@ app.UseExceptionHandler(new ExceptionHandlerOptions
 	}
 });
 
-// Configure the HTTP request pipeline.
 app.UseSwaggerUI();
-
 app.MapControllers();
 app.MapSwagger();
 app.MapHealthChecks("/healthz");

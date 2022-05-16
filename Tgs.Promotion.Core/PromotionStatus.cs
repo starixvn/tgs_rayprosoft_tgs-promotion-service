@@ -1,9 +1,8 @@
-﻿namespace Tgs.Promotion.Core
+﻿namespace Tgs.Promotion.Core;
+
+public enum PromotionStatus
 {
-	public enum PromotionStatus
-	{
-		Enabled = 0,
-		Disabled = 1,
-		Archived = 2
-	}
+	Enabled = 0,
+	Disabled = 1,
+	Archived = 2
 }

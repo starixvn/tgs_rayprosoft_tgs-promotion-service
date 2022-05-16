@@ -1,8 +1,7 @@
-﻿namespace Tgs.Promotion.Client.Models.Promotion
+﻿namespace Tgs.Promotion.Client.Models.Promotion;
+
+public record JoinedPromotionModel
 {
-	public record JoinedPromotionModel
-	{
-		public string PromotionName { get; set; } = default!;
-		public DateTimeOffset CreatedOn { get; set; }
-	}
+	public string PromotionName { get; set; } = default!;
+	public DateTimeOffset CreatedOn { get; set; }
 }

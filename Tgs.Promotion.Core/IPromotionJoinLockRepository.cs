@@ -1,7 +1,6 @@
-﻿namespace Tgs.Promotion.Core
+﻿namespace Tgs.Promotion.Core;
+
+public interface IPromotionJoinLockRepository
 {
-	public interface IPromotionJoinLockRepository
-	{
-		ValueTask<bool> SetWhenNotExistsAsync(string playerCode, Guid promotionId);
-	}
+	ValueTask<bool> SetWhenNotExistsAsync(string playerCode, Guid promotionId);
 }

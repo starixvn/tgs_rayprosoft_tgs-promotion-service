@@ -1,12 +1,11 @@
-﻿namespace Tgs.Promotion.Core.Models.PromotionBucket
-{
-	public record CreatePlayerBucketWithDepositRequest(
-		Guid BrandId,
-		Guid? PromotionId,
-		string PlayerCode,
-		Guid DefaultWalletId,
-		decimal DepositAmount,
-		string Remark,
-		Guid FormId,
-		Guid? UserId);
-}
+﻿namespace Tgs.Promotion.Core.Models.PromotionBucket;
+
+public record CreatePlayerBucketWithDepositRequest(
+	Guid BrandId,
+	Guid? PromotionId,
+	string PlayerCode,
+	Guid DefaultWalletId,
+	decimal DepositAmount,
+	string Remark,
+	Guid FormId,
+	Guid? UserId);

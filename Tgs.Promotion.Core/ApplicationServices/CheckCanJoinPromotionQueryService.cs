@@ -1,47 +1,46 @@
 ﻿using Tgs.ServiceUtility;
 
-namespace Tgs.Promotion.Core.ApplicationServices
+namespace Tgs.Promotion.Core.ApplicationServices;
+
+internal class CheckCanJoinPromotionQueryService : IGetService<CheckCanJoinPromotionQuery, bool>
 {
-	internal class CheckCanJoinPromotionQueryService : IGetService<CheckCanJoinPromotionQuery, bool>
+	private readonly IPromotionCheckerFactory _promotionCheckerFactory;
+	private readonly IPromotionRepository _promotionRepository;
+
+	public CheckCanJoinPromotionQueryService(
+		IPromotionRepository promotionRepository,
+		IPromotionCheckerFactory promotionCheckerFactory)
 	{
-		private readonly IPromotionCheckerFactory _promotionCheckerFactory;
-		private readonly IPromotionRepository _promotionRepository;
+		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+		_promotionCheckerFactory = promotionCheckerFactory ??
+			throw new ArgumentNullException(nameof(promotionCheckerFactory));
+	}
 
-		public CheckCanJoinPromotionQueryService(
-			IPromotionRepository promotionRepository,
-			IPromotionCheckerFactory promotionCheckerFactory)
+	public async ValueTask<bool> GetAsync(
+		CheckCanJoinPromotionQuery query,
+		CancellationToken cancellationToken = default)
+	{
+		var promotionData = await _promotionRepository.GetPromotionByIdAsync(query.PromotionId);
+
+		if (promotionData?.BrandId != query.BrandId)
 		{
-			_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-			_promotionCheckerFactory = promotionCheckerFactory ??
-				throw new ArgumentNullException(nameof(promotionCheckerFactory));
+			return false;
 		}
 
-		public async ValueTask<bool> GetAsync(
-			CheckCanJoinPromotionQuery query,
-			CancellationToken cancellationToken = default)
+		var checker = _promotionCheckerFactory.GetPromotionChecker(promotionData.PromotionType);
+
+		var isAllowed = await checker
+			.CheckAsync(query.PlayerCode)
+			.ConfigureAwait(false);
+		if (!isAllowed)
 		{
-			var promotionData = await _promotionRepository.GetPromotionByIdAsync(query.PromotionId);
-
-			if (promotionData?.BrandId != query.BrandId)
-			{
-				return false;
-			}
-
-			var checker = _promotionCheckerFactory.GetPromotionChecker(promotionData.PromotionType);
-
-			var isAllowed = await checker
-				.CheckAsync(query.PlayerCode)
-				.ConfigureAwait(false);
-			if (!isAllowed)
-			{
-				return false;
-			}
-
-			var amount = promotionData.Percentage * query.Amount / 100M;
-			amount = amount > promotionData.BonusAmountLimit ? promotionData.BonusAmountLimit : amount;
-
-			return await _promotionRepository.UpdatePromotionAmountAsync(query.PromotionId, amount)
-				.ConfigureAwait(false);
+			return false;
 		}
+
+		var amount = promotionData.Percentage * query.Amount / 100M;
+		amount = amount > promotionData.BonusAmountLimit ? promotionData.BonusAmountLimit : amount;
+
+		return await _promotionRepository.UpdatePromotionAmountAsync(query.PromotionId, amount)
+			.ConfigureAwait(false);
 	}
 }

@@ -1,13 +1,12 @@
 ﻿using Tgs.Promotion.Core.Models;
 
-namespace Tgs.Promotion.Service.ViewModels
+namespace Tgs.Promotion.Service.ViewModels;
+
+public class GetValidPromotionsRequest : PageableRequest
 {
-	public class GetValidPromotionsRequest : PageableRequest
-	{
-		public Guid BrandId { get; set; }
+	public Guid BrandId { get; set; }
 
-		public string? PlayerCode { get; set; }
+	public string? PlayerCode { get; set; }
 
-		public string? Language { get; set; }
-	}
+	public string? Language { get; set; }
 }

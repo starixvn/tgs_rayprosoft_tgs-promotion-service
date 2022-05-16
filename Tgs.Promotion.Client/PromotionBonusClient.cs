@@ -3,72 +3,71 @@ using System.Text.Json;
 using Tgs.Promotion.Client.Models;
 using Tgs.Promotion.Client.Models.PromotionBonus;
 
-namespace Tgs.Promotion.Client
+namespace Tgs.Promotion.Client;
+
+public interface IPromotionBonusClient
 {
-	public interface IPromotionBonusClient
+	Task<MessageResponse> CreatePromotionSettleDataDailyAsync(CreatePromotionBonusDailyRequest request);
+
+	Task<MessageResponse> CreatePromotionSettleDataWeeklyAsync(CreatePromotionBonusWeeklyRequest request);
+
+	Task<MessageResponse> CreatePromotionSettleDataMonthlyAsync(CreatePromotionBonusMonthlyRequest request);
+}
+
+public class PromotionBonusClient : IPromotionBonusClient
+{
+	private readonly HttpClient _client;
+
+	public PromotionBonusClient(HttpClient client)
 	{
-		Task<MessageResponse> CreatePromotionSettleDataDailyAsync(CreatePromotionBonusDailyRequest request);
-
-		Task<MessageResponse> CreatePromotionSettleDataWeeklyAsync(CreatePromotionBonusWeeklyRequest request);
-
-		Task<MessageResponse> CreatePromotionSettleDataMonthlyAsync(CreatePromotionBonusMonthlyRequest request);
+		_client = client ?? throw new ArgumentNullException(nameof(client));
 	}
 
-	public class PromotionBonusClient : IPromotionBonusClient
+	public async Task<MessageResponse> CreatePromotionSettleDataDailyAsync(
+		CreatePromotionBonusDailyRequest request)
 	{
-		private readonly HttpClient _client;
-
-		public PromotionBonusClient(HttpClient client)
+		var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionBonus/settleDataDaily")
 		{
-			_client = client ?? throw new ArgumentNullException(nameof(client));
-		}
+			Content =
+				new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
+		};
+		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		public async Task<MessageResponse> CreatePromotionSettleDataDailyAsync(
-			CreatePromotionBonusDailyRequest request)
+		response.EnsureSuccessStatusCode();
+
+		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
+			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+	}
+
+	public async Task<MessageResponse> CreatePromotionSettleDataWeeklyAsync(
+		CreatePromotionBonusWeeklyRequest request)
+	{
+		var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionBonus/settleDataWeekly")
 		{
-			var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionBonus/settleDataDaily")
-			{
-				Content =
-					new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
-			};
-			var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
+			Content =
+				new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
+		};
+		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-			response.EnsureSuccessStatusCode();
+		response.EnsureSuccessStatusCode();
 
-			return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
-				new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
-		}
+		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
+			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+	}
 
-		public async Task<MessageResponse> CreatePromotionSettleDataWeeklyAsync(
-			CreatePromotionBonusWeeklyRequest request)
+	public async Task<MessageResponse> CreatePromotionSettleDataMonthlyAsync(
+		CreatePromotionBonusMonthlyRequest request)
+	{
+		var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionBonus/settleDataMonthly")
 		{
-			var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionBonus/settleDataWeekly")
-			{
-				Content =
-					new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
-			};
-			var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
+			Content =
+				new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
+		};
+		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-			response.EnsureSuccessStatusCode();
+		response.EnsureSuccessStatusCode();
 
-			return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
-				new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
-		}
-
-		public async Task<MessageResponse> CreatePromotionSettleDataMonthlyAsync(
-			CreatePromotionBonusMonthlyRequest request)
-		{
-			var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionBonus/settleDataMonthly")
-			{
-				Content =
-					new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
-			};
-			var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
-
-			response.EnsureSuccessStatusCode();
-
-			return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
-				new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
-		}
+		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
+			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 	}
 }

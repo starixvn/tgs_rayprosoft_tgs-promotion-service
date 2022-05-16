@@ -1,7 +1,6 @@
-﻿namespace Tgs.Promotion.Client.Models.Promotion
+﻿namespace Tgs.Promotion.Client.Models.Promotion;
+
+public record ChangeOrderRequest
 {
-	public record ChangeOrderRequest
-	{
-		public ChangeOrderModel[] Orders { get; set; } = default!;
-	}
+	public ChangeOrderModel[] Orders { get; set; } = default!;
 }

@@ -1,7 +1,6 @@
-﻿namespace Tgs.Promotion.Core.Models.PromotionBonus
+﻿namespace Tgs.Promotion.Core.Models.PromotionBonus;
+
+public class CreatePromotionBonusDailyRequest
 {
-	public class CreatePromotionBonusDailyRequest
-	{
-		public string? Date { get; set; }
-	}
+	public string? Date { get; set; }
 }

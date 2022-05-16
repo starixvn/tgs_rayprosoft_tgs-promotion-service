@@ -2,8 +2,9 @@
 using Tgs.Promotion.Core.Models.PromotionBonus;
 using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.Promotion.Core;
 
-namespace Tgs.Promotion.Core;
+namespace Tgs.Promotion.Repository;
 
 public class PromotionBonusRepository : IPromotionBonusRepository
 {

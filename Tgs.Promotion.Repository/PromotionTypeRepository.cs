@@ -2,10 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Tgs.Promotion.Core.Models;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.Promotion.Core;
 
-namespace Tgs.Promotion.Core;
+namespace Tgs.Promotion.Repository;
 
-public class PromotionTypeRepository : IPromotionTypeRepository
+internal class PromotionTypeRepository : IPromotionTypeRepository
 {
 	private readonly TgsContext _repository;
 

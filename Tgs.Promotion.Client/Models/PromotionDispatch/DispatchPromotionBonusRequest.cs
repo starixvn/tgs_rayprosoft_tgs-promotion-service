@@ -1,16 +1,15 @@
-﻿namespace Tgs.Promotion.Client.Models.PromotionDispatch
+﻿namespace Tgs.Promotion.Client.Models.PromotionDispatch;
+
+public class DispatchPromotionBonusRequest
 {
-	public class DispatchPromotionBonusRequest
-	{
-		public Guid OperatorUserId { get; set; }
+	public Guid OperatorUserId { get; set; }
 
-		public DispatchPlayer[] Players { get; set; } = default!;
-	}
+	public DispatchPlayer[] Players { get; set; } = default!;
+}
 
-	public class DispatchPlayer
-	{
-		public Guid PromotionBonusId { get; set; }
+public class DispatchPlayer
+{
+	public Guid PromotionBonusId { get; set; }
 
-		public string PlayerCode { get; set; } = default!;
-	}
+	public string PlayerCode { get; set; } = default!;
 }

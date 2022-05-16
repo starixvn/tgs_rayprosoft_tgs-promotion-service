@@ -1,16 +1,15 @@
 ﻿using Tgs.Promotion.Core.Models.PromotionBonus;
 using Tgs.Promotion.Domain.Entities;
 
-namespace Tgs.Promotion.Core
+namespace Tgs.Promotion.Core;
+
+public interface IPromotionBonusRepository
 {
-	public interface IPromotionBonusRepository
-	{
-		IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
-			Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery = null,
-			bool tracking = false);
+	IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
+		Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery = null,
+		bool tracking = false);
 
-		ValueTask<PromotionBonus[]> CreatePromotionBonusAsync(PromotionBonusModel[] model);
+	ValueTask<PromotionBonus[]> CreatePromotionBonusAsync(PromotionBonusModel[] model);
 
-		ValueTask UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players);
-	}
+	ValueTask UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players);
 }

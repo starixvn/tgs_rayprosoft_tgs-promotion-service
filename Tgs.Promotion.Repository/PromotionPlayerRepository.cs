@@ -2,8 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.Promotion.Core;
 
-namespace Tgs.Promotion.Core;
+namespace Tgs.Promotion.Repository;
 
 public class PromotionPlayerRepository : IPromotionPlayerRepository
 {

@@ -1,7 +1,6 @@
-﻿namespace Tgs.Promotion.Core
+﻿namespace Tgs.Promotion.Core;
+
+public interface IPromotionCheckerFactory
 {
-	public interface IPromotionCheckerFactory
-	{
-		IPromotionChecker GetPromotionChecker(string promotionType);
-	}
+	IPromotionChecker GetPromotionChecker(string promotionType);
 }

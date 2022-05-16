@@ -1,11 +1,10 @@
-﻿namespace Tgs.Promotion.Core.Models.Promotion
+﻿namespace Tgs.Promotion.Core.Models.Promotion;
+
+public class GetJoinedPromotionsRequest : PageableRequest
 {
-	public class GetJoinedPromotionsRequest : PageableRequest
-	{
-		public DateTimeOffset From { get; init; }
+	public DateTimeOffset From { get; init; }
 
-		public string PlayerCode { get; init; } = default!;
+	public string PlayerCode { get; init; } = default!;
 
-		public DateTimeOffset To { get; init; }
-	}
+	public DateTimeOffset To { get; init; }
 }

@@ -1,9 +1,8 @@
-﻿namespace Tgs.Promotion.Client.Models.Promotion
-{
-	public record ChangeOrderModel
-	{
-		public int DisplayOrder { get; set; }
+﻿namespace Tgs.Promotion.Client.Models.Promotion;
 
-		public Guid Id { get; set; }
-	}
+public record ChangeOrderModel
+{
+	public int DisplayOrder { get; set; }
+
+	public Guid Id { get; set; }
 }

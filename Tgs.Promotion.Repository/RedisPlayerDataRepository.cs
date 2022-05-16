@@ -1,7 +1,8 @@
 ﻿using StackExchange.Redis;
 using Tgs.Promotion.Domain;
+using Tgs.Promotion.Core;
 
-namespace Tgs.Promotion.Core;
+namespace Tgs.Promotion.Repository;
 
 internal class RedisPlayerDataRepository : IPlayerDataRepository
 {

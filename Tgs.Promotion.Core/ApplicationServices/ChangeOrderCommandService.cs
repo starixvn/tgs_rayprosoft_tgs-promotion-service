@@ -2,39 +2,38 @@
 using Tgs.Promotion.Domain.Entities;
 using Tgs.ServiceUtility;
 
-namespace Tgs.Promotion.Core.ApplicationServices
+namespace Tgs.Promotion.Core.ApplicationServices;
+
+internal class ChangeOrderCommandService : ICommandService<ChangeOrderCommand>
 {
-	internal class ChangeOrderCommandService : ICommandService<ChangeOrderCommand>
+	private readonly TgsContext _tgsRepository;
+
+	public ChangeOrderCommandService(TgsContext tgsRepository)
 	{
-		private readonly TgsContext _tgsRepository;
+		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+	}
 
-		public ChangeOrderCommandService(TgsContext tgsRepository)
+	public async ValueTask ExecuteAsync(ChangeOrderCommand command, CancellationToken cancellationToken = default)
+	{
+		var ids = command.Orders.Select(q => q.Id);
+
+		var promotions = await _tgsRepository.Promotions
+			.AsQueryable()
+			.Where(q => ids.Contains(q.Id))
+			.ToListAsync(cancellationToken)
+			.ConfigureAwait(false);
+
+		promotions.ForEach(p =>
 		{
-			_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-		}
+			var item = command.Orders.FirstOrDefault(x => x.Id == p.Id);
 
-		public async ValueTask ExecuteAsync(ChangeOrderCommand command, CancellationToken cancellationToken = default)
-		{
-			var ids = command.Orders.Select(q => q.Id);
-
-			var promotions = await _tgsRepository.Promotions
-				.AsQueryable()
-				.Where(q => ids.Contains(q.Id))
-				.ToListAsync(cancellationToken)
-				.ConfigureAwait(false);
-
-			promotions.ForEach(p =>
+			if (item != null)
 			{
-				var item = command.Orders.FirstOrDefault(x => x.Id == p.Id);
+				p.DisplayOrder = item.DisplayOrder;
+			}
+		});
 
-				if (item != null)
-				{
-					p.DisplayOrder = item.DisplayOrder;
-				}
-			});
-
-			_tgsRepository.Promotions.UpdateRange(promotions);
-			_ = await _tgsRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-		}
+		_tgsRepository.Promotions.UpdateRange(promotions);
+		_ = await _tgsRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
 }

@@ -1,15 +1,14 @@
-﻿namespace Tgs.Promotion.Core.Models
+﻿namespace Tgs.Promotion.Core.Models;
+
+public record SortOption
 {
-	public record SortOption
+	public string? PropertyName { get; set; }
+
+	public bool IsDescending { get; set; }
+
+	public SortOption(string? propertyName, bool isDescending)
 	{
-		public string? PropertyName { get; set; }
-
-		public bool IsDescending { get; set; }
-
-		public SortOption(string? propertyName, bool isDescending)
-		{
-			IsDescending = isDescending;
-			PropertyName = propertyName;
-		}
+		IsDescending = isDescending;
+		PropertyName = propertyName;
 	}
 }

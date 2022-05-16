@@ -1,22 +1,21 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using Tgs.Promotion.Domain;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.Promotion.Core;
 
-namespace Tgs.Promotion.Core;
+namespace Tgs.Promotion.Repository;
 
-public class PlayerRepository : IPlayerRepository
+internal class PlayerRepository : IPlayerRepository
 {
-	private readonly ITgsService<Player> _playerService;
+	private readonly TgsContext _tgsContext;
 
-	public PlayerRepository(
-		ITgsService<Player> playerService)
+	public PlayerRepository(TgsContext tgsContext)
 	{
-		_playerService = playerService;
+		_tgsContext = tgsContext ?? throw new ArgumentNullException(nameof(tgsContext));
 	}
 
 	public async ValueTask<bool> ExistsAsync(Expression<Func<Player?, bool>> predicate) =>
-		await _playerService.GetQueries().AnyAsync(predicate).ConfigureAwait(false);
+		await _tgsContext.Players.AnyAsync(predicate).ConfigureAwait(false);
 
 	public async ValueTask<Player?> GetPlayerAsync(
 		Expression<Func<Player, bool>> predicate,
@@ -24,11 +23,11 @@ public class PlayerRepository : IPlayerRepository
 	{
 		preQuery ??= c => c;
 
-		return await preQuery(_playerService.GetQueries()).FirstOrDefaultAsync(predicate);
+		return await preQuery(_tgsContext.Players).FirstOrDefaultAsync(predicate);
 	}
 
 	public async ValueTask<Player?> GetPlayerByPlayerCodeAsync(string playerCode)
-		=> await _playerService.GetQueries()
+		=> await _tgsContext.Players
 			.Where(player => player.PlayerCode == playerCode)
 			.FirstOrDefaultAsync();
 
@@ -38,13 +37,13 @@ public class PlayerRepository : IPlayerRepository
 	{
 		preQuery ??= c => c;
 		return tracking
-			? preQuery(_playerService.GetQueries())
-			: preQuery(_playerService.GetQueries()).AsNoTracking();
+			? preQuery(_tgsContext.Players)
+			: preQuery(_tgsContext.Players).AsNoTracking();
 	}
 
 	public async ValueTask SetFirstDepositTimeAsync(string playerCode, DateTimeOffset time)
 	{
-		var player = await _playerService.GetQueries()
+		var player = await _tgsContext.Players
 			.FirstOrDefaultAsync(x => x.PlayerCode == playerCode)
 			.ConfigureAwait(false);
 
@@ -52,13 +51,13 @@ public class PlayerRepository : IPlayerRepository
 		{
 			player.FirstDepositOn = time.UtcDateTime;
 
-			await _playerService.UpdateEntityAsync(player).ConfigureAwait(false);
+			await _tgsContext.SaveChangesAsync().ConfigureAwait(false);
 		}
 	}
 
 	public async ValueTask SetFirstPromotionTimeAsync(string playerCode, DateTimeOffset time)
 	{
-		var player = await _playerService.GetQueries()
+		var player = await _tgsContext.Players
 			.FirstOrDefaultAsync(x => x.PlayerCode == playerCode)
 			.ConfigureAwait(false);
 
@@ -66,7 +65,7 @@ public class PlayerRepository : IPlayerRepository
 		{
 			player.FirstPromotionOn = time.UtcDateTime;
 
-			await _playerService.UpdateEntityAsync(player).ConfigureAwait(false);
+			await _tgsContext.SaveChangesAsync().ConfigureAwait(false);
 		}
 	}
 }

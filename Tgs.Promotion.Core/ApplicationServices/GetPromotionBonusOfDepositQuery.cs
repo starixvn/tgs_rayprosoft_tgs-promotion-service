@@ -1,4 +1,3 @@
-﻿namespace Tgs.Promotion.Core.ApplicationServices
-{
-	public record GetPromotionBonusOfDepositQuery(int[] PromotionPlayerIds);
-}
+﻿namespace Tgs.Promotion.Core.ApplicationServices;
+
+public record GetPromotionBonusOfDepositQuery(int[] PromotionPlayerIds);

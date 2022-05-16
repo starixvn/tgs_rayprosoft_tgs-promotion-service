@@ -1,7 +1,6 @@
-﻿namespace Tgs.Promotion.Client
+﻿namespace Tgs.Promotion.Client;
+
+public class PromotionOptions
 {
-	public class PromotionOptions
-	{
-		public Uri Url { get; set; } = default!;
-	}
+	public Uri Url { get; set; } = default!;
 }

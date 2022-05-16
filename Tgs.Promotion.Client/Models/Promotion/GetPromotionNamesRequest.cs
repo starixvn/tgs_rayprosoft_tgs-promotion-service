@@ -1,4 +1,3 @@
-﻿namespace Tgs.Promotion.Client.Models.Promotion
-{
-	public record GetPromotionNamesRequest(Guid[] PromotionIds);
-}
+﻿namespace Tgs.Promotion.Client.Models.Promotion;
+
+public record GetPromotionNamesRequest(Guid[] PromotionIds);

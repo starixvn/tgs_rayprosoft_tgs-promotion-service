@@ -1,21 +1,20 @@
-﻿namespace Tgs.Promotion.Domain
+﻿namespace Tgs.Promotion.Domain;
+
+public interface ITgsService<T>
 {
-	public interface ITgsService<T>
-	{
-		IQueryable<T> GetQueries(
-			Func<IQueryable<T>, IQueryable<T>>? preQuery = null,
-			bool tracking = false);
+	IQueryable<T> GetQueries(
+		Func<IQueryable<T>, IQueryable<T>>? preQuery = null,
+		bool tracking = false);
 
-		ValueTask CreateEntityAsync(T entity);
+	ValueTask CreateEntityAsync(T entity);
 
-		ValueTask UpdateEntityAsync(T entity);
+	ValueTask UpdateEntityAsync(T entity);
 
-		ValueTask CreateEntitiesAsync(T[] entities);
+	ValueTask CreateEntitiesAsync(T[] entities);
 
-		ValueTask UpdateEntitiesAsync(T[] entities);
+	ValueTask UpdateEntitiesAsync(T[] entities);
 
-		ValueTask DeleteEntitiesAsync(IEnumerable<T> entities);
+	ValueTask DeleteEntitiesAsync(IEnumerable<T> entities);
 
-		Task<int> SaveChangesAsync();
-	}
+	Task<int> SaveChangesAsync();
 }
