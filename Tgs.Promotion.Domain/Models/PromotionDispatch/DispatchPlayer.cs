@@ -1,9 +1,9 @@
 ﻿namespace Tgs.Promotion.Domain.Models.PromotionDispatch
 {
-    public class DispatchPlayer
-    {
-        public string PlayerCode { get; set; } = default!;
+	public class DispatchPlayer
+	{
+		public string PlayerCode { get; set; } = default!;
 
-        public Guid PromotionBonusId { get; set; }
-    }
+		public Guid PromotionBonusId { get; set; }
+	}
 }

@@ -57,7 +57,7 @@ public class UpdatePromotionHandler : IGetService<UpdatePromotionRequest, Messag
 			JsonSerializer.Deserialize<PromotionTypeGroup[]>(promotionsJson.Value);
 
 		if (promotionTypeGroups is null ||
-		    promotionTypeGroups.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
+			promotionTypeGroups.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
 		{
 			return new()
 			{

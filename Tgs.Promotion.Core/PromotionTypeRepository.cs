@@ -2,36 +2,34 @@
 using Microsoft.EntityFrameworkCore;
 using Tgs.Promotion.Domain.Interfaces;
 using Tgs.Promotion.Domain.Models;
-using Tgs.Promotion.Repository;
-using Tgs.Promotion.Repository.Repositories;
 
 namespace Tgs.Promotion.Core;
 
 public class PromotionTypeRepository : IPromotionTypeRepository
 {
-    private readonly ITgsRepository _repository;
+	private readonly ITgsRepository _repository;
 
-    public PromotionTypeRepository(ITgsRepository repository)
-    {
-        _repository = repository;
-    }
+	public PromotionTypeRepository(ITgsRepository repository)
+	{
+		_repository = repository;
+	}
 
-    public async ValueTask<bool> IsDepositTypeAsync(string promotionType)
-    {
-        var promotionsJson = await _repository.Settings.AsQueryable()
-            .FirstOrDefaultAsync(x => x.Key == "PromotionTypes");
+	public async ValueTask<bool> IsDepositTypeAsync(string promotionType)
+	{
+		var promotionsJson = await _repository.Settings.AsQueryable()
+			.FirstOrDefaultAsync(x => x.Key == "PromotionTypes");
 
-        var promotionTypeGroups =
-            JsonSerializer.Deserialize<PromotionTypeGroup[]>(promotionsJson!.Value);
+		var promotionTypeGroups =
+			JsonSerializer.Deserialize<PromotionTypeGroup[]>(promotionsJson!.Value);
 
-        if (promotionTypeGroups == null)
-        {
-	        return false;
-        }
+		if (promotionTypeGroups == null)
+		{
+			return false;
+		}
 
-        var promotionGroupType =
-            promotionTypeGroups.FirstOrDefault(x => x.Types.Select(t => t.Name).Contains(promotionType));
+		var promotionGroupType =
+			promotionTypeGroups.FirstOrDefault(x => x.Types.Select(t => t.Name).Contains(promotionType));
 
-        return promotionGroupType?.Name == "Deposit";
-    }
+		return promotionGroupType?.Name == "Deposit";
+	}
 }

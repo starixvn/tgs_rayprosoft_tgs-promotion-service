@@ -11,231 +11,230 @@ using Tgs.Promotion.Domain.Interfaces;
 using Tgs.Promotion.Domain.Models;
 using Tgs.Promotion.Domain.Models.Promotion;
 using Tgs.Promotion.Domain.shared;
-using Tgs.Promotion.Repository;
-using Tgs.Promotion.Repository.Repositories;
 
 namespace Tgs.Promotion.Core
 {
-    public class PromotionRepository : IPromotionRepository
-    {
-        private readonly ITgsService<Domain.Entities.Promotion> _promotionService;
-        private readonly ITgsService<PromotionGameProvider> _promotionGameProviderService;
-        private readonly ITgsService<PromotionVipLevel> _promotionVipLevelService;
-        private readonly ITgsService<VipLevel> _vipLevelService;
-        private readonly ITgsService<GameProvider> _gameProviderService;
-        private readonly ITgsRepository _repository;
+	public class PromotionRepository : IPromotionRepository
+	{
+		private readonly ITgsService<Domain.Entities.Promotion> _promotionService;
+		private readonly ITgsService<PromotionGameProvider> _promotionGameProviderService;
+		private readonly ITgsService<PromotionVipLevel> _promotionVipLevelService;
+		private readonly ITgsService<VipLevel> _vipLevelService;
+		private readonly ITgsService<GameProvider> _gameProviderService;
+		private readonly ITgsRepository _repository;
 
-        public PromotionRepository(ITgsService<Domain.Entities.Promotion> promotionService, ITgsService<PromotionGameProvider> promotionGameProviderService, ITgsService<PromotionVipLevel> promotionVipLevelService, ITgsService<VipLevel> vipLevelService, ITgsService<GameProvider> gameProviderService, ITgsRepository repository)
-        {
-            _promotionService = promotionService;
-            _promotionGameProviderService = promotionGameProviderService;
-            _promotionVipLevelService = promotionVipLevelService;
-            _vipLevelService = vipLevelService;
-            _gameProviderService = gameProviderService;
-            _repository = repository;
-        }
-        public async ValueTask<Domain.Entities.Promotion?> GetPromotionAsync(
-            Expression<Func<Domain.Entities.Promotion, bool>> predicate,
-            Func<IQueryable<Domain.Entities.Promotion>, IQueryable<Domain.Entities.Promotion>>? preQuery)
-        {
-            preQuery ??= c => c;
+		public PromotionRepository(ITgsService<Domain.Entities.Promotion> promotionService, ITgsService<PromotionGameProvider> promotionGameProviderService, ITgsService<PromotionVipLevel> promotionVipLevelService, ITgsService<VipLevel> vipLevelService, ITgsService<GameProvider> gameProviderService, ITgsRepository repository)
+		{
+			_promotionService = promotionService;
+			_promotionGameProviderService = promotionGameProviderService;
+			_promotionVipLevelService = promotionVipLevelService;
+			_vipLevelService = vipLevelService;
+			_gameProviderService = gameProviderService;
+			_repository = repository;
+		}
 
-            return await preQuery(_promotionService.GetQueries()).FirstOrDefaultAsync(predicate);
-        }
+		public async ValueTask<Domain.Entities.Promotion?> GetPromotionAsync(
+			Expression<Func<Domain.Entities.Promotion, bool>> predicate,
+			Func<IQueryable<Domain.Entities.Promotion>, IQueryable<Domain.Entities.Promotion>>? preQuery)
+		{
+			preQuery ??= c => c;
 
-    public ValueTask ChangePromotionStatusAsync(Domain.Entities.Promotion promotion) =>
-            _promotionService.UpdateEntityAsync(promotion);
+			return await preQuery(_promotionService.GetQueries()).FirstOrDefaultAsync(predicate);
+		}
 
-        public async ValueTask<Guid> CreatePromotionAsync(
-            CreatePromotionRequest request,
-            PromotionType promotionTypeModel)
-        {
-            var promotionId = GuidExtensions.NewSequentialGuid();
+		public ValueTask ChangePromotionStatusAsync(Domain.Entities.Promotion promotion) =>
+				_promotionService.UpdateEntityAsync(promotion);
 
-            var promotion = new Domain.Entities.Promotion
-            {
-                Id = promotionId,
-                BrandId = request.BrandId,
-                Name = request.Name,
-                From = request.From.UtcDateTime,
-                To = request.To.UtcDateTime,
-                Status = (short)PromotionStatus.Enabled,
-                AutoSentPlayerBonus = request.AutoSentPlayerBonus,
-                PromotionType = request.PromotionType,
-                BonusAmountLimit = request.BonusAmountLimit,
-                SettlementIntervalType = promotionTypeModel.SettlementIntervalType,
-                AmountUsed = 0,
-                Unlimited = (short)(request.Unlimited ? 1 : 0),
-                GameType = (short?)request.GameType,
-                Percentage = request.Percentage,
-                TotalAmountLimit = request.TotalAmountLimit,
-                TurnoverMultiple = request.TurnoverMultiple,
-                CreatedByUsername = request.EditorUsername,
-                UpdatedByUsername = request.EditorUsername,
-                CreatedOn = DateTimeOffset.Now.UtcDateTime,
-                UpdatedOn = DateTimeOffset.Now.UtcDateTime,
-                SubSubject = request.SubSubject,
-                Content = request.Content,
-                Terms = request.Terms,
-                DesktopBanner = request.DesktopBanner,
-                MobileBanner = request.MobileBanner,
-                Localization = request.Localization is not null
-                    ? JsonSerializer.Serialize(request.Localization,
-                        new JsonSerializerOptions { WriteIndented = false })
-                    : null
-            };
+		public async ValueTask<Guid> CreatePromotionAsync(
+			CreatePromotionRequest request,
+			PromotionType promotionTypeModel)
+		{
+			var promotionId = GuidExtensions.NewSequentialGuid();
 
-            promotion.PromotionGameProviders = GeneratePromotionGameProviders(promotion, request);
-            promotion.PromotionVipLevels = GeneratePromotionVipLevels(promotion, request);
+			var promotion = new Domain.Entities.Promotion
+			{
+				Id = promotionId,
+				BrandId = request.BrandId,
+				Name = request.Name,
+				From = request.From.UtcDateTime,
+				To = request.To.UtcDateTime,
+				Status = (short)PromotionStatus.Enabled,
+				AutoSentPlayerBonus = request.AutoSentPlayerBonus,
+				PromotionType = request.PromotionType,
+				BonusAmountLimit = request.BonusAmountLimit,
+				SettlementIntervalType = promotionTypeModel.SettlementIntervalType,
+				AmountUsed = 0,
+				Unlimited = (short)(request.Unlimited ? 1 : 0),
+				GameType = (short?)request.GameType,
+				Percentage = request.Percentage,
+				TotalAmountLimit = request.TotalAmountLimit,
+				TurnoverMultiple = request.TurnoverMultiple,
+				CreatedByUsername = request.EditorUsername,
+				UpdatedByUsername = request.EditorUsername,
+				CreatedOn = DateTimeOffset.Now.UtcDateTime,
+				UpdatedOn = DateTimeOffset.Now.UtcDateTime,
+				SubSubject = request.SubSubject,
+				Content = request.Content,
+				Terms = request.Terms,
+				DesktopBanner = request.DesktopBanner,
+				MobileBanner = request.MobileBanner,
+				Localization = request.Localization is not null
+					? JsonSerializer.Serialize(request.Localization,
+						new JsonSerializerOptions { WriteIndented = false })
+					: null
+			};
 
-            await _promotionService.CreateEntityAsync(promotion);
+			promotion.PromotionGameProviders = GeneratePromotionGameProviders(promotion, request);
+			promotion.PromotionVipLevels = GeneratePromotionVipLevels(promotion, request);
 
-            return promotionId;
-        }
+			await _promotionService.CreateEntityAsync(promotion);
 
-        public async ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount)
-        {
-            const string sql = "dbo.promotion_update_amount_used";
+			return promotionId;
+		}
 
-            var conn = _repository.GetDbConnection();
-            var transaction = _repository.CurrentTransaction?.GetDbTransaction();
+		public async ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount)
+		{
+			const string sql = "dbo.promotion_update_amount_used";
 
-			return await conn.QueryFirstOrDefaultAsync<bool>(
-                    sql,
-                    new Dictionary<string, object>
-                    {
-                        { "_promotion_id", promotionId },
-                        { "_amount", amount }
-                    }, commandType: CommandType.StoredProcedure, transaction: transaction)
-                .ConfigureAwait(false);
-        }
-
-        public async ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount)
-        {
-            const string sql = "dbo.promotion_revert_amount_used";
-
-            var conn = _repository.GetDbConnection();
-            var transaction = _repository.CurrentTransaction?.GetDbTransaction();
+			var conn = _repository.GetDbConnection();
+			var transaction = _repository.CurrentTransaction?.GetDbTransaction();
 
 			return await conn.QueryFirstOrDefaultAsync<bool>(
-                    sql,
-                    new Dictionary<string, object>
-                    {
-                        { "_promotion_id", promotionId },
-                        { "_amount", amount }
-                    }, commandType: CommandType.StoredProcedure, transaction: transaction)
-                .ConfigureAwait(false);
-        }
+					sql,
+					new Dictionary<string, object>
+					{
+						{ "_promotion_id", promotionId },
+						{ "_amount", amount }
+					}, commandType: CommandType.StoredProcedure, transaction: transaction)
+				.ConfigureAwait(false);
+		}
 
-        public async ValueTask<bool> ExistsAsync(
-            Expression<Func<Domain.Entities.Promotion, bool>> predicate)
-            => await _promotionService.GetQueries().AnyAsync(predicate).ConfigureAwait(false);
+		public async ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount)
+		{
+			const string sql = "dbo.promotion_revert_amount_used";
 
-        public async ValueTask<Domain.Entities.Promotion?> GetPromotionAsync(
-            Expression<Func<Domain.Entities.Promotion, bool>> predicate) =>
-            await _promotionService.GetQueries().FirstOrDefaultAsync(predicate).ConfigureAwait(false);
+			var conn = _repository.GetDbConnection();
+			var transaction = _repository.CurrentTransaction?.GetDbTransaction();
 
-        public async ValueTask<Domain.Entities.Promotion?> GetPromotionByIdAsync(Guid promotionId)
-            => await _promotionService.GetQueries().FirstOrDefaultAsync(x => x.Id == promotionId).ConfigureAwait(false);
+			return await conn.QueryFirstOrDefaultAsync<bool>(
+					sql,
+					new Dictionary<string, object>
+					{
+						{ "_promotion_id", promotionId },
+						{ "_amount", amount }
+					}, commandType: CommandType.StoredProcedure, transaction: transaction)
+				.ConfigureAwait(false);
+		}
 
-        public IQueryable<Domain.Entities.Promotion> GetPromotionQueries(
-            Func<IQueryable<Domain.Entities.Promotion>, IQueryable<Domain.Entities.Promotion>>? preQuery,
-            bool tracking)
-        {
-            preQuery ??= c => c;
-            return tracking
-                ? preQuery(_promotionService.GetQueries()).AsTracking()
-                : preQuery(_promotionService.GetQueries()).AsNoTracking();
-        }
+		public async ValueTask<bool> ExistsAsync(
+			Expression<Func<Domain.Entities.Promotion, bool>> predicate)
+			=> await _promotionService.GetQueries().AnyAsync(predicate).ConfigureAwait(false);
 
-        public async ValueTask UpdatePromotionAsync(
-            Domain.Entities.Promotion promotion,
-            UpdatePromotionRequest request)
-        {
-            var vips = await _vipLevelService.GetQueries()
-                .Where(x => x.BrandId == promotion.BrandId && request.VipLevels.Contains(x.Level)).ToArrayAsync();
+		public async ValueTask<Domain.Entities.Promotion?> GetPromotionAsync(
+			Expression<Func<Domain.Entities.Promotion, bool>> predicate) =>
+			await _promotionService.GetQueries().FirstOrDefaultAsync(predicate).ConfigureAwait(false);
 
-            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+		public async ValueTask<Domain.Entities.Promotion?> GetPromotionByIdAsync(Guid promotionId)
+			=> await _promotionService.GetQueries().FirstOrDefaultAsync(x => x.Id == promotionId).ConfigureAwait(false);
 
-            _repository.PromotionGameProviders.RemoveRange(promotion.PromotionGameProviders);
-            _repository.PromotionVipLevels.RemoveRange(promotion.PromotionVipLevels);
-            await _repository.SaveChangesAsync().ConfigureAwait(false);
+		public IQueryable<Domain.Entities.Promotion> GetPromotionQueries(
+			Func<IQueryable<Domain.Entities.Promotion>, IQueryable<Domain.Entities.Promotion>>? preQuery,
+			bool tracking)
+		{
+			preQuery ??= c => c;
+			return tracking
+				? preQuery(_promotionService.GetQueries()).AsTracking()
+				: preQuery(_promotionService.GetQueries()).AsNoTracking();
+		}
 
-            promotion.Name = request.Name;
-            promotion.From = request.From.UtcDateTime;
-            promotion.To = request.To.UtcDateTime;
-            promotion.AutoSentPlayerBonus = request.AutoSentPlayerBonus;
-            promotion.PromotionType = request.PromotionType;
-            promotion.BonusAmountLimit = request.BonusAmountLimit;
-            promotion.Unlimited = (short)(request.Unlimited ? 1 : 0);
-            promotion.GameType = (short?)request.GameType;
-            promotion.Percentage = request.Percentage;
-            promotion.TotalAmountLimit = request.TotalAmountLimit;
-            promotion.TurnoverMultiple = request.TurnoverMultiple;
+		public async ValueTask UpdatePromotionAsync(
+			Domain.Entities.Promotion promotion,
+			UpdatePromotionRequest request)
+		{
+			var vips = await _vipLevelService.GetQueries()
+				.Where(x => x.BrandId == promotion.BrandId && request.VipLevels.Contains(x.Level)).ToArrayAsync();
 
-            promotion.PromotionGameProviders =
-                request.GameProviderIds
-                    .Select(id => new PromotionGameProvider
-                    {
-                        GameProviderId = id,
-                        PromotionId = promotion.Id
-                    })
-                    .ToHashSet();
+			using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-            promotion.PromotionVipLevels =
-                vips.Select(x => new PromotionVipLevel
-                    {
-                        VipLevelId = x.Id,
-                        Level = x.Level,
-                        PromotionId = promotion.Id
-                    })
-                    .ToHashSet();
-            promotion.UpdatedByUsername = request.EditorUsername;
-            promotion.UpdatedOn = DateTime.UtcNow;
-            promotion.SubSubject = request.SubSubject;
-            promotion.Content = request.Content;
-            promotion.Terms = request.Terms;
-            promotion.DesktopBanner = request.DesktopBanner;
-            promotion.MobileBanner = request.MobileBanner;
-            promotion.Localization = request.Localization != null ?JsonSerializer.Serialize(request.Localization, new JsonSerializerOptions { WriteIndented = false }) : null;
+			_repository.PromotionGameProviders.RemoveRange(promotion.PromotionGameProviders);
+			_repository.PromotionVipLevels.RemoveRange(promotion.PromotionVipLevels);
+			await _repository.SaveChangesAsync().ConfigureAwait(false);
 
-            await _promotionService.UpdateEntityAsync(promotion);
+			promotion.Name = request.Name;
+			promotion.From = request.From.UtcDateTime;
+			promotion.To = request.To.UtcDateTime;
+			promotion.AutoSentPlayerBonus = request.AutoSentPlayerBonus;
+			promotion.PromotionType = request.PromotionType;
+			promotion.BonusAmountLimit = request.BonusAmountLimit;
+			promotion.Unlimited = (short)(request.Unlimited ? 1 : 0);
+			promotion.GameType = (short?)request.GameType;
+			promotion.Percentage = request.Percentage;
+			promotion.TotalAmountLimit = request.TotalAmountLimit;
+			promotion.TurnoverMultiple = request.TurnoverMultiple;
 
-            scope.Complete();
-        }
+			promotion.PromotionGameProviders =
+				request.GameProviderIds
+					.Select(id => new PromotionGameProvider
+					{
+						GameProviderId = id,
+						PromotionId = promotion.Id
+					})
+					.ToHashSet();
 
-        public ValueTask UpdatePromotionsAsync(Domain.Entities.Promotion[] promotions) =>
-            _promotionService.UpdateEntitiesAsync(promotions);
+			promotion.PromotionVipLevels =
+				vips.Select(x => new PromotionVipLevel
+				{
+					VipLevelId = x.Id,
+					Level = x.Level,
+					PromotionId = promotion.Id
+				})
+					.ToHashSet();
+			promotion.UpdatedByUsername = request.EditorUsername;
+			promotion.UpdatedOn = DateTime.UtcNow;
+			promotion.SubSubject = request.SubSubject;
+			promotion.Content = request.Content;
+			promotion.Terms = request.Terms;
+			promotion.DesktopBanner = request.DesktopBanner;
+			promotion.MobileBanner = request.MobileBanner;
+			promotion.Localization = request.Localization != null ? JsonSerializer.Serialize(request.Localization, new JsonSerializerOptions { WriteIndented = false }) : null;
 
-        private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
-            Domain.Entities.Promotion promotion,
-            CreatePromotionRequest request)
-        {
-            var promotionGameProviders = _gameProviderService.GetQueries()
-                .Where(x => request.GameProviderIds.Contains(x.Id)).Select(x =>
-                    new PromotionGameProvider
-                    {
-                        PromotionId = promotion.Id,
-                        GameProviderId = x.Id
-                    });
+			await _promotionService.UpdateEntityAsync(promotion);
 
-            return new(promotionGameProviders);
-        }
+			scope.Complete();
+		}
 
-        private HashSet<PromotionVipLevel> GeneratePromotionVipLevels(
-            Domain.Entities.Promotion promotion,
-            CreatePromotionRequest request)
-        {
-            var promotionVipLevels = _vipLevelService.GetQueries()
-                .Where(x => x.BrandId == promotion.BrandId && request.VipLevels.Contains(x.Level)).Select(x =>
-                    new PromotionVipLevel
-                    {
-                        PromotionId = promotion.Id,
-                        VipLevelId = x.Id,
-                        Level = x.Level
-                    });
+		public ValueTask UpdatePromotionsAsync(Domain.Entities.Promotion[] promotions) =>
+			_promotionService.UpdateEntitiesAsync(promotions);
 
-            return new(promotionVipLevels);
-        }
-    }
+		private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
+			Domain.Entities.Promotion promotion,
+			CreatePromotionRequest request)
+		{
+			var promotionGameProviders = _gameProviderService.GetQueries()
+				.Where(x => request.GameProviderIds.Contains(x.Id)).Select(x =>
+					new PromotionGameProvider
+					{
+						PromotionId = promotion.Id,
+						GameProviderId = x.Id
+					});
+
+			return new(promotionGameProviders);
+		}
+
+		private HashSet<PromotionVipLevel> GeneratePromotionVipLevels(
+			Domain.Entities.Promotion promotion,
+			CreatePromotionRequest request)
+		{
+			var promotionVipLevels = _vipLevelService.GetQueries()
+				.Where(x => x.BrandId == promotion.BrandId && request.VipLevels.Contains(x.Level)).Select(x =>
+					new PromotionVipLevel
+					{
+						PromotionId = promotion.Id,
+						VipLevelId = x.Id,
+						Level = x.Level
+					});
+
+			return new(promotionVipLevels);
+		}
+	}
 }

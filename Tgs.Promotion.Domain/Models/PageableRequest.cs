@@ -1,20 +1,19 @@
-﻿
-namespace Tgs.Promotion.Domain.Models
+﻿namespace Tgs.Promotion.Domain.Models
 {
-    public class PageableRequest
-    {
-        public int Page { get; set; }
+	public class PageableRequest
+	{
+		public int Page { get; set; }
 
-        public int Rows { get; set; }
+		public int Rows { get; set; }
 
-        public SortOrder OrderBy { get; set; }
+		public SortOrder OrderBy { get; set; }
 
-        public bool IsDesc => OrderBy == SortOrder.Descending;
+		public bool IsDesc => OrderBy == SortOrder.Descending;
 
-        public string? SortBy { get; set; }
+		public string? SortBy { get; set; }
 
-        public bool ShowAll { get; set; }
+		public bool ShowAll { get; set; }
 
-        public SortOption GetSortOption() => new(SortBy, IsDesc);
-    }
+		public SortOption GetSortOption() => new(SortBy, IsDesc);
+	}
 }

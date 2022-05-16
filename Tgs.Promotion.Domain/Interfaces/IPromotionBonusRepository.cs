@@ -3,14 +3,14 @@ using Tgs.Promotion.Domain.Models.PromotionBonus;
 
 namespace Tgs.Promotion.Domain.Interfaces
 {
-    public interface IPromotionBonusRepository
-    {
-        IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
-            Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery = null,
-            bool tracking = false);
+	public interface IPromotionBonusRepository
+	{
+		IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
+			Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery = null,
+			bool tracking = false);
 
-        ValueTask<PromotionBonus[]> CreatePromotionBonusAsync(PromotionBonusModel[] model);
+		ValueTask<PromotionBonus[]> CreatePromotionBonusAsync(PromotionBonusModel[] model);
 
-        ValueTask UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players);
-    }
+		ValueTask UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players);
+	}
 }

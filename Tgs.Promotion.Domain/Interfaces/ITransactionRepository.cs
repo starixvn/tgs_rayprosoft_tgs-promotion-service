@@ -2,8 +2,8 @@
 
 namespace Tgs.Promotion.Domain.Interfaces
 {
-    public interface ITransactionRepository
-    {
-        ValueTask CreateTransactionPromotionsAsync(TransactionPromotion[] transactionPromotion);
-    }
+	public interface ITransactionRepository
+	{
+		ValueTask CreateTransactionPromotionsAsync(TransactionPromotion[] transactionPromotion);
+	}
 }

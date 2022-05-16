@@ -1,4 +1,4 @@
 ﻿namespace Tgs.Promotion.Core.Services
 {
-    public record GetValidPromotionsQuery(Guid BrandId);
+	public record GetValidPromotionsQuery(Guid BrandId);
 }

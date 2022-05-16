@@ -5,91 +5,91 @@ using Tgs.Promotion.Domain.Interfaces;
 
 namespace Tgs.Promotion.Core.Configuration
 {
-    public class PromotionConfiguration
-    {
-        private readonly Dictionary<string, Type> _checkerTypes = new Dictionary<string, Type>();
+	public class PromotionConfiguration
+	{
+		private readonly Dictionary<string, Type> _checkerTypes = new Dictionary<string, Type>();
 
-        public IServiceCollection Services { get; }
+		public IServiceCollection Services { get; }
 
-        public PromotionConfiguration(IServiceCollection services)
-        {
-            Services = services ?? throw new ArgumentNullException(nameof(services));
-        }
+		public PromotionConfiguration(IServiceCollection services)
+		{
+			Services = services ?? throw new ArgumentNullException(nameof(services));
+		}
 
-        public PromotionConfiguration AddPlayerDataRepository<TPlayerDataRepository>()
-            where TPlayerDataRepository : class, IPlayerDataRepository
-        {
-            Services.AddTransient<IPlayerDataRepository, TPlayerDataRepository>();
+		public PromotionConfiguration AddPlayerDataRepository<TPlayerDataRepository>()
+			where TPlayerDataRepository : class, IPlayerDataRepository
+		{
+			Services.AddTransient<IPlayerDataRepository, TPlayerDataRepository>();
 
-            return this;
-        }
+			return this;
+		}
 
-        public PromotionConfiguration AddPromotionBonusRepository<TPromotionBonusRepository>()
-            where TPromotionBonusRepository : class, IPromotionBonusRepository
-        {
-            Services.AddTransient<IPromotionBonusRepository, TPromotionBonusRepository>();
+		public PromotionConfiguration AddPromotionBonusRepository<TPromotionBonusRepository>()
+			where TPromotionBonusRepository : class, IPromotionBonusRepository
+		{
+			Services.AddTransient<IPromotionBonusRepository, TPromotionBonusRepository>();
 
-            return this;
-        }
+			return this;
+		}
 
-        public PromotionConfiguration AddPromotionParticipantRepository<TPromotionParticipantRepository>()
-            where TPromotionParticipantRepository : class, IPromotionParticipantRepository
-        {
-            Services.AddTransient<IPromotionParticipantRepository, TPromotionParticipantRepository>();
+		public PromotionConfiguration AddPromotionParticipantRepository<TPromotionParticipantRepository>()
+			where TPromotionParticipantRepository : class, IPromotionParticipantRepository
+		{
+			Services.AddTransient<IPromotionParticipantRepository, TPromotionParticipantRepository>();
 
-            return this;
-        }
+			return this;
+		}
 
-        public PromotionConfiguration AddPromotionRepository<TPromotionRepository>()
-            where TPromotionRepository : class, IPromotionRepository
-        {
-            Services.AddTransient<IPromotionRepository, TPromotionRepository>();
+		public PromotionConfiguration AddPromotionRepository<TPromotionRepository>()
+			where TPromotionRepository : class, IPromotionRepository
+		{
+			Services.AddTransient<IPromotionRepository, TPromotionRepository>();
 
-            return this;
-        }
+			return this;
+		}
 
-        public PromotionConfiguration AddPromotionPlayerRepository<TPromotionPlayerRepository>()
-            where TPromotionPlayerRepository : class, IPromotionPlayerRepository
-        {
-            Services.AddTransient<IPromotionPlayerRepository, TPromotionPlayerRepository>();
+		public PromotionConfiguration AddPromotionPlayerRepository<TPromotionPlayerRepository>()
+			where TPromotionPlayerRepository : class, IPromotionPlayerRepository
+		{
+			Services.AddTransient<IPromotionPlayerRepository, TPromotionPlayerRepository>();
 
-            return this;
-        }
+			return this;
+		}
 
-        public PromotionConfiguration AddSettingRepository<TSettingRepository>()
-            where TSettingRepository : class, ISettingsRepository
-        {
-            Services.AddTransient<ISettingsRepository, TSettingRepository>();
+		public PromotionConfiguration AddSettingRepository<TSettingRepository>()
+			where TSettingRepository : class, ISettingsRepository
+		{
+			Services.AddTransient<ISettingsRepository, TSettingRepository>();
 
-            return this;
-        }
+			return this;
+		}
 
-        public PromotionConfiguration RegisterPromotionChecker<TChecker>(string typeName)
-            where TChecker : class, IPromotionChecker
-        {
-            Services.AddTransient<TChecker>();
+		public PromotionConfiguration RegisterPromotionChecker<TChecker>(string typeName)
+			where TChecker : class, IPromotionChecker
+		{
+			Services.AddTransient<TChecker>();
 
-            _checkerTypes[typeName] = typeof(TChecker);
+			_checkerTypes[typeName] = typeof(TChecker);
 
-            return this;
-        }
+			return this;
+		}
 
-        public PromotionConfiguration AddPaymentServiceClient(
-            Action<PaymentServiceClientOptions, IServiceProvider> configure)
-        {
-            Services.AddPaymentServiceClient(configure);
+		public PromotionConfiguration AddPaymentServiceClient(
+			Action<PaymentServiceClientOptions, IServiceProvider> configure)
+		{
+			Services.AddPaymentServiceClient(configure);
 
-            return this;
-        }
+			return this;
+		}
 
-        public PromotionConfiguration AddCashServiceClient(
-            Action<CashServiceClientOptions, IServiceProvider> configure)
-        {
-            Services.AddCashServiceClient(configure);
+		public PromotionConfiguration AddCashServiceClient(
+			Action<CashServiceClientOptions, IServiceProvider> configure)
+		{
+			Services.AddCashServiceClient(configure);
 
-            return this;
-        }
+			return this;
+		}
 
-        internal IDictionary<string, Type> GetAllRegisterCheckerTypes() => _checkerTypes;
-    }
+		internal IDictionary<string, Type> GetAllRegisterCheckerTypes() => _checkerTypes;
+	}
 }

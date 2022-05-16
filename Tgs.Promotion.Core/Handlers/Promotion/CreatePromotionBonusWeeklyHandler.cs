@@ -1,6 +1,6 @@
-﻿using System.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Tgs.CashService.Client;
+using Tgs.Promotion.Core.Extensions;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Domain.Interfaces;
 using Tgs.Promotion.Domain.Models;
@@ -8,7 +8,6 @@ using Tgs.Promotion.Domain.Models.PromotionBonus;
 using Tgs.Promotion.Domain.Models.PromotionBucket;
 using Tgs.Promotion.Domain.shared;
 using Tgs.ServiceUtility;
-using Tgs.Promotion.Core.Extensions;
 
 namespace Tgs.Promotion.Core.Handlers.Promotion
 {
@@ -215,7 +214,7 @@ namespace Tgs.Promotion.Core.Handlers.Promotion
 
 			await _transactionRepository.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());
 
-			return new MessageResponse{Valid=true};
+			return new MessageResponse { Valid = true };
 		}
 
 		private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(
