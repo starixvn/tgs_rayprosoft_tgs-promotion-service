@@ -24,10 +24,7 @@ internal class FirstJoinPromotionChecker : IPromotionChecker
 			.GetPlayerByPlayerCodeAsync(playerCode)
 			.ConfigureAwait(false);
 
-		if (player is null)
-			return false;
-
-		return player.FirstPromotionOn == null;
+		return player is not null && player.FirstPromotionOn == null;
 	}
 
 	public async ValueTask CommitTagAsync(string playerCode, Guid? promotionId)
@@ -46,19 +43,17 @@ internal class FirstJoinPromotionChecker : IPromotionChecker
 
 	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId)
 	{
-		if (promotionId is null)
-			return ValueTask.CompletedTask;
-
-		return _playerDataRepository
+		return promotionId is null
+			? ValueTask.CompletedTask
+			: _playerDataRepository
 			.RemovePlayerFirstJoinPromotionAsync(playerCode);
 	}
 
 	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId)
 	{
-		if (promotionId == null)
-			return ValueTask.CompletedTask;
-
-		return _playerDataRepository
+		return promotionId == null
+			? ValueTask.CompletedTask
+			: _playerDataRepository
 			.SetPlayerFirstJoinPromotionAsync(playerCode);
 	}
 }

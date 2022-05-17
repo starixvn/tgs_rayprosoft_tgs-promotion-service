@@ -42,10 +42,13 @@ public class DepositStatusChangedMessageHandler : IMessageHandler
 		if (formEvent == null)
 			return;
 
-		_logger.LogInformation($"formEvent: ({JsonFormatter.Default.Format(formEvent)})");
+		_logger.LogInformation("formEvent: ({JsonFormatter.Default.Format(formEvent)})", JsonFormatter.Default.Format(formEvent));
 
 		var depositForm = await _paymentServiceClient
-			.GetDepositFormAsync(Guid.Parse(formEvent.BrandId), Guid.Parse(formEvent.FormId))
+			.GetDepositFormAsync(
+				Guid.Parse(formEvent.BrandId),
+				Guid.Parse(formEvent.FormId),
+				cancellationToken)
 			.ConfigureAwait(false);
 
 		if (depositForm == null)

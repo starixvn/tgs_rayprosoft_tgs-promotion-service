@@ -8,13 +8,13 @@ public static class PromotionCoreExtensions
 {
 	public static IServiceCollection AddPromotionCore(this IServiceCollection services)
 	{
-		services.RegisterAllServiceUtilityTypes(
+		_ = services.RegisterAllServiceUtilityTypes(
 			Assembly.GetExecutingAssembly(),
 			ServiceLifetime.Transient);
 
 		var configuration = new PromotionConfiguration(services);
 
-		configuration
+		_ = configuration
 			.RegisterPromotionChecker<FirstDepositChecker>("AccountFirstDeposit")
 			.RegisterPromotionChecker<FirstJoinPromotionChecker>("FirstDeposit")
 			.RegisterPromotionChecker<DailyFirstDepositChecker>("DailyFirstDeposit")
@@ -25,22 +25,10 @@ public static class PromotionCoreExtensions
 			.RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyMonthly")
 			.RegisterPromotionChecker<RegisterChecker>("Register");
 
-		services
+		_ = services
 			.AddScoped<IPromotionCheckerFactory>(sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(
 				sp,
 				configuration.GetAllRegisterCheckerTypes()));
-		//.AddTransient<IPlayerRepository, PlayerRepository>()
-		//.AddTransient<ISettingsRepository, SettingsRepository>()
-		//.AddTransient<IPromotionTypeRepository, PromotionTypeRepository>()
-		//.AddTransient<IPromotionJoinLockRepository, PromotionJoinLockRepository>()
-		//.AddTransient<ITransactionRepository, TransactionRepository>()
-		//.AddTransient<IPromotionRepository, PromotionRepository>()
-		//.AddTransient<IPromotionBonusRepository, PromotionBonusRepository>()
-		//.AddTransient<IPromotionParticipantRepository, PromotionParticipantRepository>()
-		//.AddTransient<ISettingsRepository, SettingsRepository>()
-		//.AddTransient<IPromotionPlayerRepository, PromotionPlayerRepository>()
-		//.AddTransient<IPlayerBucketRepository, PlayerBucketRepository>()
-		//.AddTransient<IPlayerDataRepository, RedisPlayerDataRepository>();
 
 		return services;
 	}

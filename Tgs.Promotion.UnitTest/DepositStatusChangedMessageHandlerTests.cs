@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -23,7 +24,7 @@ public class DepositStatusChangedMessageHandlerTests
 		var fakeServiceProvider = Substitute.For<IServiceProvider>();
 		var fakePromotionChecker = Substitute.For<IPromotionChecker>();
 
-		fakeServiceProvider.GetService(Arg.Any<Type>())
+		_ = fakeServiceProvider.GetService(Arg.Any<Type>())
 			.Returns(fakePromotionChecker);
 
 		var fakeCheckFactory = new PromotionCheckerFactory(
@@ -48,7 +49,7 @@ public class DepositStatusChangedMessageHandlerTests
 			BrandId = Guid.NewGuid().ToString()
 		};
 
-		fakePaymentServiceClient.GetDepositFormAsync(Arg.Any<Guid>(), Arg.Any<Guid>())
+		_ = fakePaymentServiceClient.GetDepositFormAsync(Arg.Any<Guid>(), Arg.Any<Guid>())
 			.Returns(new DepositFormInfo
 			{
 				Id = Guid.Parse(formEvent.FormId),
@@ -73,9 +74,8 @@ public class DepositStatusChangedMessageHandlerTests
 
 		var fakeServiceProvider = Substitute.For<IServiceProvider>();
 		var fakePromotionChecker = Substitute.For<IPromotionChecker>();
-		var fakePromotionParticipantRepository = Substitute.For<IPromotionParticipantRepository>();
 
-		fakeServiceProvider.GetService(Arg.Any<Type>())
+		_ = fakeServiceProvider.GetService(Arg.Any<Type>())
 			.Returns(fakePromotionChecker);
 
 		var fakeCheckFactory = new PromotionCheckerFactory(
@@ -100,7 +100,7 @@ public class DepositStatusChangedMessageHandlerTests
 			BrandId = Guid.NewGuid().ToString()
 		};
 
-		fakePaymentServiceClient.GetDepositFormAsync(Arg.Any<Guid>(), Arg.Any<Guid>())
+		_ = fakePaymentServiceClient.GetDepositFormAsync(Arg.Any<Guid>(), Arg.Any<Guid>())
 			.Returns(new DepositFormInfo
 			{
 				Id = Guid.Parse(formEvent.FormId),

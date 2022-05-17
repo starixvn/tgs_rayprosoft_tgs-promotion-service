@@ -51,7 +51,7 @@ internal class PlayerRepository : IPlayerRepository
 		{
 			player.FirstDepositOn = time.UtcDateTime;
 
-			await _tgsContext.SaveChangesAsync().ConfigureAwait(false);
+			_ = await _tgsContext.SaveChangesAsync().ConfigureAwait(false);
 		}
 	}
 
@@ -65,7 +65,7 @@ internal class PlayerRepository : IPlayerRepository
 		{
 			player.FirstPromotionOn = time.UtcDateTime;
 
-			await _tgsContext.SaveChangesAsync().ConfigureAwait(false);
+			_ = await _tgsContext.SaveChangesAsync().ConfigureAwait(false);
 		}
 	}
 }

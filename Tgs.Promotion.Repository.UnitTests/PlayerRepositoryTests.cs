@@ -22,7 +22,7 @@ public class PlayerRepositoryTests
 		var playerCode = "ThisIsPlayerCode";
 		var depositOn = DateTime.UtcNow;
 
-		await dbContext.Players.AddAsync(new Player
+		_ = await dbContext.Players.AddAsync(new Player
 		{
 			PlayerCode = playerCode,
 			DefaultWalletCurrencyCode = "CNY",
@@ -33,7 +33,7 @@ public class PlayerRepositoryTests
 			Username = "Tester"
 		});
 
-		await dbContext.SaveChangesAsync();
+		_ = await dbContext.SaveChangesAsync();
 
 		await sut.SetFirstDepositTimeAsync(playerCode, depositOn);
 
@@ -57,7 +57,7 @@ public class PlayerRepositoryTests
 		var playerCode = "ThisIsPlayerCode";
 		var depositOn = DateTimeOffset.UtcNow.UtcDateTime;
 
-		await dbContext.Players.AddAsync(new Player
+		_ = await dbContext.Players.AddAsync(new Player
 		{
 			PlayerCode = playerCode,
 			FirstDepositOn = DateTime.Parse("2021/1/1"),
@@ -69,7 +69,7 @@ public class PlayerRepositoryTests
 			Username = "Tester"
 		});
 
-		await dbContext.SaveChangesAsync();
+		_ = await dbContext.SaveChangesAsync();
 
 		await sut.SetFirstDepositTimeAsync(playerCode, depositOn);
 

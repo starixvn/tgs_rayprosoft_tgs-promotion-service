@@ -4,12 +4,14 @@ using Tgs.Promotion.Core;
 using Tgs.Promotion.Core.Extensions;
 using Tgs.Promotion.Core.Models.PromotionBucket;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.SerialNumberGenerator;
 
 namespace Tgs.Promotion.Repository;
 
 internal class PlayerBucketRepository : IPlayerBucketRepository
 {
 	private readonly ICashServiceClient _cashServiceClient;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly ITgsService<PlayerBucket> _playerBucketService;
 	private readonly ITgsService<PromotionBonus> _promotionBonusService;
 	private readonly ITgsService<Domain.Entities.Promotion> _promotionService;
@@ -20,10 +22,12 @@ internal class PlayerBucketRepository : IPlayerBucketRepository
 		ITgsService<Domain.Entities.Promotion> promotionService,
 		ITgsService<PromotionBonus> promotionBonusService,
 		ITgsService<TransactionPromotion> transactionPromotionService,
-		ICashServiceClient cashServiceClient)
+		ICashServiceClient cashServiceClient,
+		ISerialNumberGenerator serialNumberGenerator)
 	{
 		_playerBucketService = playerBucketService ?? throw new ArgumentNullException(nameof(playerBucketService));
 		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
+		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 		_promotionService = promotionService ?? throw new ArgumentNullException(nameof(promotionService));
 		_promotionBonusService =
 			promotionBonusService ?? throw new ArgumentNullException(nameof(promotionBonusService));
@@ -39,7 +43,7 @@ internal class PlayerBucketRepository : IPlayerBucketRepository
 				x.CurrentBucketAmount = x.BucketAmount;
 				x.IsFull = true;
 			}).ConfigureAwait(false);
-		await _playerBucketService.SaveChangesAsync().ConfigureAwait(false);
+		_ = await _playerBucketService.SaveChangesAsync().ConfigureAwait(false);
 
 		return await _playerBucketService.GetQueries().Where(x => x.PlayerCode == playerCode && x.IsFull)
 			.SumAsync(x => x.BucketAmount - x.CurrentBucketAmount);
@@ -65,7 +69,7 @@ internal class PlayerBucketRepository : IPlayerBucketRepository
 		var depositBonusAmount = request.DepositAmount;
 		var promotionPlayerId = default(int?);
 
-		await _cashServiceClient.DepositAsync(
+		_ = await _cashServiceClient.DepositAsync(
 			request.DefaultWalletId,
 			request.DepositAmount,
 			request.Remark,
@@ -104,7 +108,7 @@ internal class PlayerBucketRepository : IPlayerBucketRepository
 				0,
 				now.Offset);
 
-			var bonusId = GuidExtensions.NewSequentialGuid();
+			var bonusId = await _serialNumberGenerator.GenerateAsync().ConfigureAwait(false);
 
 			var bonus = new PromotionBonus
 			{

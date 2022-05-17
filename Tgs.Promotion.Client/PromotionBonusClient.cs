@@ -33,7 +33,7 @@ public class PromotionBonusClient : IPromotionBonusClient
 		};
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -49,7 +49,7 @@ public class PromotionBonusClient : IPromotionBonusClient
 		};
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -65,7 +65,7 @@ public class PromotionBonusClient : IPromotionBonusClient
 		};
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;

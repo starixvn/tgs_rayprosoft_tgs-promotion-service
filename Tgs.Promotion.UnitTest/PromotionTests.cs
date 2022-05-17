@@ -51,7 +51,7 @@ public class PromotionTests
 			promotion.BrandId = request.BrandId;
 		}
 
-		promotionServiceMock.Setup(x =>
+		_ = promotionServiceMock.Setup(x =>
 				x.GetPromotionQueries(
 					It.IsAny<Func<IQueryable<Domain.Entities.Promotion>,
 						IQueryable<Domain.Entities.Promotion>>>(),
@@ -105,11 +105,10 @@ public class PromotionTests
 			index++;
 		}
 
-		promotionServiceMock.Setup(x =>
-				x.GetPromotionQueries(
-					It.IsAny<Func<IQueryable<Domain.Entities.Promotion>,
-						IQueryable<Domain.Entities.Promotion>>>(),
-					false))
+		_ = promotionServiceMock
+			.Setup(x => x.GetPromotionQueries(
+				It.IsAny<Func<IQueryable<Domain.Entities.Promotion>, IQueryable<Domain.Entities.Promotion>>>(),
+				false))
 			.Returns(list);
 
 		var result = await promotionsQueryHandlerMock.GetAsync(request, new());
@@ -136,7 +135,7 @@ public class PromotionTests
 		var percentage = 10M;
 		var bonusAmountLimit = 500M;
 
-		fakePromotionRepository.GetPromotionByIdAsync(command.PromotionId).Returns(
+		_ = fakePromotionRepository.GetPromotionByIdAsync(command.PromotionId).Returns(
 			new Domain.Entities.Promotion
 			{
 				Percentage = percentage,
@@ -174,7 +173,7 @@ public class PromotionTests
 			Guid.NewGuid(),
 			100);
 
-		fakePromotionRepository
+		_ = fakePromotionRepository
 			.GetPromotionByIdAsync(query.PromotionId)
 			.Returns(new Domain.Entities.Promotion
 			{
@@ -184,15 +183,15 @@ public class PromotionTests
 
 		var fakeChecker = Substitute.For<IPromotionChecker>();
 
-		fakeChecker
+		_ = fakeChecker
 			.CheckAsync(Arg.Any<string>())
 			.Returns(true);
 
-		fakeServiceProvider
+		_ = fakeServiceProvider
 			.GetService(Arg.Any<Type>())
 			.Returns(fakeChecker);
 
-		fakePromotionRepository
+		_ = fakePromotionRepository
 			.UpdatePromotionAmountAsync(query.PromotionId, Arg.Any<decimal>())
 			.Returns(true);
 
@@ -215,10 +214,10 @@ public class PromotionTests
 			fakePlayerService,
 			fakePromotionCheckerFactory);
 
-		fakePromotionCheckerFactory.GetPromotionChecker(Arg.Any<string>())
+		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Any<string>())
 			.Returns(fakePromotionChecker);
 
-		fakePromotionChecker.CheckAsync(Arg.Any<string>())
+		_ = fakePromotionChecker.CheckAsync(Arg.Any<string>())
 			.Returns(true);
 
 		var testData = new[]
@@ -244,7 +243,7 @@ public class PromotionTests
 
 		var query = new GetValidPromotionsByPlayerQuery(Guid.NewGuid(), "ThisIsPlayerCode");
 
-		fakePlayerService
+		_ = fakePlayerService
 			.GetPlayerAsync(
 				Arg.Any<Expression<Func<Player, bool>>>(),
 				Arg.Any<Func<IQueryable<Player>, IQueryable<Player>>>())
@@ -257,7 +256,7 @@ public class PromotionTests
 				}
 			});
 
-		fakeValidPromotionQueryService.QueryAsync(Arg.Any<GetValidPromotionsQuery>())
+		_ = fakeValidPromotionQueryService.QueryAsync(Arg.Any<GetValidPromotionsQuery>())
 			.Returns(testData.ToAsyncEnumerable());
 
 		var actual = await sut.QueryAsync(query).ToArrayAsync();
@@ -270,15 +269,15 @@ public class PromotionTests
 	{
 		var fakePromotionRepository = new Mock<IPromotionRepository>();
 
-		fakePromotionRepository
+		_ = fakePromotionRepository
 			.Setup(x => x.GetPromotionQueries(It.IsAny<Func<IQueryable<Domain.Entities.Promotion>, IQueryable<Domain.Entities.Promotion>>?>(), default))
-			.Returns(new Domain.Entities.Promotion[] { }.AsQueryable().BuildMock());
+			.Returns(Array.Empty<Domain.Entities.Promotion>().AsQueryable().BuildMock());
 
 		var sut = new GetValidPromotionsQueryService(fakePromotionRepository.Object);
 
 		var query = new GetValidPromotionsQuery(Guid.NewGuid());
 
-		sut.QueryAsync(query);
+		_ = sut.QueryAsync(query);
 
 		fakePromotionRepository.Verify(x => x.GetPromotionQueries(It.IsAny<Func<
 				IQueryable<Domain.Entities.Promotion>,
@@ -286,27 +285,21 @@ public class PromotionTests
 			It.IsAny<bool>()), Times.Once());
 	}
 
-	private Fixture CreatePromotionFixture()
+	private static Fixture CreatePromotionFixture()
 	{
 		var fixture = new Fixture();
 
 		fixture.Customize<Domain.Entities.Promotion>(u => u
 			.With(s => s.PromotionGameProviders,
-				new PromotionGameProvider[]
-				{
-				})
+				Array.Empty<PromotionGameProvider>())
 			.With(s => s.PromotionVipLevels,
-				new PromotionVipLevel[]
-				{
-				})
+				Array.Empty<PromotionVipLevel>())
 			.With(s => s.PromotionParticipants,
-				new PromotionParticipant[]
-				{
-				})
+				Array.Empty<PromotionParticipant>())
 			.With(s => s.Localization, "{}")
 			.With(s => s.Status, (short)PromotionStatus.Enabled)
-			.With(s => s.PromotionBonus, new PromotionBonus[] { })
-			.With(s => s.TransactionPromotions, new TransactionPromotion[] { })
+			.With(s => s.PromotionBonus, Array.Empty<PromotionBonus>())
+			.With(s => s.TransactionPromotions, Array.Empty<TransactionPromotion>())
 			.With(s => s.VipLevel, new VipLevel { }));
 		fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 

@@ -5,6 +5,7 @@ using Tgs.Promotion.Core.Models;
 using Tgs.Promotion.Core.Models.PromotionBonus;
 using Tgs.Promotion.Core.Models.PromotionBucket;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Core.ApplicationServices.Promotion;
@@ -19,11 +20,11 @@ public class
 	private readonly IPlayerBucketRepository _playerBucketService;
 	private readonly ITgsService<PlayerGameRebateAggregate> _playerGameRebateAggregateService;
 	private readonly ITgsService<Player> _playerService;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly IPromotionBonusRepository _promotionBonusFactory;
 	private readonly ITgsService<PromotionBonus> _promotionBonusService;
 	private readonly IPromotionRepository _promotionFactory;
 	private readonly ITgsService<Domain.Entities.Promotion> _promotionService;
-	private readonly TgsContext _repository;
 	private readonly ITransactionRepository _transactionRepository;
 
 	public CreatePromotionBonusMonthlyHandler(
@@ -31,19 +32,18 @@ public class
 		IPlayerBucketRepository playerBucketService,
 		ICashServiceClient cashServiceClient,
 		ITransactionRepository transactionRepository,
-		TgsContext repository,
 		IPromotionRepository promotionRepository,
 		ITgsService<Domain.Entities.Promotion> promotionService,
 		ITgsService<PromotionBonus> promotionBonusService,
 		ITgsService<PlayerGameRebateAggregate> playerGameRebateAggregateService,
 		ITgsService<BrandGame> brandGameService,
-		ITgsService<Player> playerService)
+		ITgsService<Player> playerService,
+		ISerialNumberGenerator serialNumberGenerator)
 	{
 		_promotionBonusFactory =
 			promotionBonusFactory ?? throw new ArgumentNullException(nameof(promotionBonusFactory));
 		_playerBucketService = playerBucketService ?? throw new ArgumentNullException(nameof(playerBucketService));
 		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-		_repository = repository ?? throw new ArgumentNullException(nameof(repository));
 		_promotionFactory = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 		_transactionRepository =
 			transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
@@ -58,6 +58,7 @@ public class
 			brandGameService ?? throw new ArgumentNullException(nameof(brandGameService));
 		_playerService =
 			playerService ?? throw new ArgumentNullException(nameof(playerService));
+		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 	}
 
 	public async ValueTask<MessageResponse> GetAsync(
@@ -133,9 +134,9 @@ public class
 				})
 			.Where(x => x.brandGame == null || x.brandGame.Rebate).ToArrayAsync(cancellationToken);
 
-		var promotionBonus = promotions.Select(x =>
+		var promotionBonus = await promotions.ToAsyncEnumerable().SelectAwait(async x =>
 		{
-			var id = GuidExtensions.NewSequentialGuid();
+			var id = await _serialNumberGenerator.GenerateAsync().ConfigureAwait(false);
 			var from = x.From > previousFirstDayOfMonth ? x.From : previousFirstDayOfMonth;
 			var to = x.To < currentFirstDayOfMonth ? x.To : previousLastDayOfMonth;
 
@@ -161,7 +162,7 @@ public class
 				SentOn = x.AutoSentPlayerBonus ? DateTimeOffset.Now : null,
 				Players = players.Where(p => p.BonusAmount > 0M).ToArray()
 			};
-		}).ToArray();
+		}).ToArrayAsync(cancellationToken: cancellationToken);
 
 		var autoSentPlayerBonuses = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray();
 		var playerCodes = autoSentPlayerBonuses.SelectMany(p => p.Players).Select(p => p.PlayerCode);
@@ -180,30 +181,30 @@ public class
 		var bonus = await _promotionBonusFactory.CreatePromotionBonusAsync(promotionBonus);
 
 		var playerBuckets = bonus
-			.SelectMany(x =>
-			{
-				return x.PromotionPlayers.Join(players,
-						pb => pb.PlayerCode,
-						p => p.PlayerCode,
-						(pb, p) => new
-						{
-							pb,
-							p
-						})
-					.Select(p => new
+			.SelectMany(x => x.PromotionPlayers
+				.Join(
+					players,
+					pb => pb.PlayerCode,
+					p => p.PlayerCode,
+					(pb, p) => new
 					{
-						p.pb.Id,
-						x.BrandId,
-						p.p.PlayerCode,
-						p.p.DefaultWalletId,
-						BucketAmount = p.pb.BonusAmount * x.TurnoverMultiple,
-						p.pb.BonusAmount,
-						BucketType = BucketType.Promotion,
-						x.PromotionId,
-						PromotionBonusId = x.Id,
-						x.PromotionType
-					});
-			}).ToArray();
+						pb,
+						p
+					})
+				.Select(p => new
+				{
+					p.pb.Id,
+					x.BrandId,
+					p.p.PlayerCode,
+					p.p.DefaultWalletId,
+					BucketAmount = p.pb.BonusAmount * x.TurnoverMultiple,
+					p.pb.BonusAmount,
+					BucketType = BucketType.Promotion,
+					x.PromotionId,
+					PromotionBonusId = x.Id,
+					x.PromotionType
+				}))
+			.ToArray();
 
 		await _playerBucketService.CreatePlayerBucketsAsync(playerBuckets.Select(x =>
 			new CreatePlayerBucketRequest(x.BrandId,

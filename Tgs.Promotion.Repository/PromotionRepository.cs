@@ -10,32 +10,30 @@ using Tgs.Promotion.Core.Extensions;
 using Tgs.Promotion.Core.Models;
 using Tgs.Promotion.Core.Models.Promotion;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.SerialNumberGenerator;
 
 namespace Tgs.Promotion.Repository;
 
 public class PromotionRepository : IPromotionRepository
 {
 	private readonly ITgsService<Domain.Entities.Promotion> _promotionService;
-	private readonly ITgsService<PromotionGameProvider> _promotionGameProviderService;
-	private readonly ITgsService<PromotionVipLevel> _promotionVipLevelService;
 	private readonly ITgsService<VipLevel> _vipLevelService;
 	private readonly ITgsService<GameProvider> _gameProviderService;
 	private readonly TgsContext _repository;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
 
 	public PromotionRepository(
 		ITgsService<Domain.Entities.Promotion> promotionService,
-		ITgsService<PromotionGameProvider> promotionGameProviderService,
-		ITgsService<PromotionVipLevel> promotionVipLevelService,
 		ITgsService<VipLevel> vipLevelService,
 		ITgsService<GameProvider> gameProviderService,
-		TgsContext repository)
+		TgsContext repository,
+		ISerialNumberGenerator serialNumberGenerator)
 	{
-		_promotionService = promotionService;
-		_promotionGameProviderService = promotionGameProviderService;
-		_promotionVipLevelService = promotionVipLevelService;
-		_vipLevelService = vipLevelService;
-		_gameProviderService = gameProviderService;
-		_repository = repository;
+		_promotionService = promotionService ?? throw new ArgumentNullException(nameof(promotionService));
+		_vipLevelService = vipLevelService ?? throw new ArgumentNullException(nameof(vipLevelService));
+		_gameProviderService = gameProviderService ?? throw new ArgumentNullException(nameof(gameProviderService));
+		_repository = repository ?? throw new ArgumentNullException(nameof(repository));
+		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 	}
 
 	public async ValueTask<Domain.Entities.Promotion?> GetPromotionAsync(
@@ -54,7 +52,7 @@ public class PromotionRepository : IPromotionRepository
 		CreatePromotionRequest request,
 		PromotionType promotionTypeModel)
 	{
-		var promotionId = GuidExtensions.NewSequentialGuid();
+		var promotionId = await _serialNumberGenerator.GenerateAsync().ConfigureAwait(false);
 
 		var promotion = new Domain.Entities.Promotion
 		{
@@ -163,7 +161,7 @@ public class PromotionRepository : IPromotionRepository
 
 		_repository.PromotionGameProviders.RemoveRange(promotion.PromotionGameProviders);
 		_repository.PromotionVipLevels.RemoveRange(promotion.PromotionVipLevels);
-		await _repository.SaveChangesAsync().ConfigureAwait(false);
+		_ = await _repository.SaveChangesAsync().ConfigureAwait(false);
 
 		promotion.Name = request.Name;
 		promotion.From = request.From.UtcDateTime;
