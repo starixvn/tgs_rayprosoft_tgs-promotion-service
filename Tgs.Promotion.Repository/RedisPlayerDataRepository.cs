@@ -55,7 +55,7 @@ internal class RedisPlayerDataRepository : IPlayerDataRepository
 
 		if (count <= 0)
 		{
-			await _redisDatabase
+			_ = await _redisDatabase
 				.KeyDeleteAsync(dataKey, CommandFlags.FireAndForget)
 				.ConfigureAwait(false);
 		}
@@ -71,7 +71,7 @@ internal class RedisPlayerDataRepository : IPlayerDataRepository
 
 		if (count <= 0)
 		{
-			await _redisDatabase
+			_ = await _redisDatabase
 				.KeyDeleteAsync(dataKey, CommandFlags.FireAndForget)
 				.ConfigureAwait(false);
 		}
@@ -87,7 +87,7 @@ internal class RedisPlayerDataRepository : IPlayerDataRepository
 
 		if (count <= 0)
 		{
-			await _redisDatabase
+			_ = await _redisDatabase
 				.KeyDeleteAsync(dataKey, CommandFlags.FireAndForget)
 				.ConfigureAwait(false);
 		}
@@ -98,7 +98,7 @@ internal class RedisPlayerDataRepository : IPlayerDataRepository
 		var currentDate = DateTimeOffset.Now.ToOffset(_TimeZone);
 		var key = $"{_KeyPrefix}:{currentDate:yyyyMMdd}:{playerCode}";
 
-		await _redisDatabase
+		_ = await _redisDatabase
 			.StringSetAsync(
 				$"{_KeyPrefix}:{currentDate:yyyyMMdd}:{playerCode}",
 				"0",
@@ -107,7 +107,7 @@ internal class RedisPlayerDataRepository : IPlayerDataRepository
 				CommandFlags.FireAndForget)
 			.ConfigureAwait(false);
 
-		await _redisDatabase
+		_ = await _redisDatabase
 			.StringIncrementAsync(key, flags: CommandFlags.FireAndForget)
 			.ConfigureAwait(false);
 	}
@@ -116,7 +116,7 @@ internal class RedisPlayerDataRepository : IPlayerDataRepository
 	{
 		var dataKey = $"{_KeyPrefix}:{playerCode}";
 
-		await _redisDatabase
+		_ = await _redisDatabase
 			.StringIncrementAsync(dataKey, flags: CommandFlags.FireAndForget)
 			.ConfigureAwait(false);
 	}
@@ -125,7 +125,7 @@ internal class RedisPlayerDataRepository : IPlayerDataRepository
 	{
 		var dataKey = $"{_KeyPrefix}:{playerCode}:Join";
 
-		await _redisDatabase
+		_ = await _redisDatabase
 			.StringIncrementAsync(dataKey, flags: CommandFlags.FireAndForget)
 			.ConfigureAwait(false);
 	}

@@ -39,7 +39,7 @@ public class CreatePromotionHandler : IGetService<CreatePromotionRequest, Messag
 		var promotionType = promotionTypeGroups.SelectMany(x => x.Types)
 			.First(x => x.Name == request.PromotionType);
 
-		await _service.CreatePromotionAsync(request, promotionType);
+		_ = await _service.CreatePromotionAsync(request, promotionType);
 
 		return new MessageResponse { Valid = true };
 	}

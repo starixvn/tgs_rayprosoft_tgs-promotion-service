@@ -32,7 +32,7 @@ public class PromotionDispatchClient : IPromotionDispatchClient
 		};
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -46,7 +46,7 @@ public class PromotionDispatchClient : IPromotionDispatchClient
 		var httpRequest = new HttpRequestMessage(HttpMethod.Post, path);
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<PagedResponse<PromotionDispatchModel>>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;

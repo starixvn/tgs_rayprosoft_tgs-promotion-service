@@ -5,13 +5,13 @@ using Tgs.Promotion.Core.Models;
 using Tgs.Promotion.Core.Models.PromotionBonus;
 using Tgs.Promotion.Core.Models.PromotionBucket;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Core.ApplicationServices.Promotion;
 
-public class
-	CreatePromotionBonusWeeklyHandler : IGetService<CreatePromotionBonusWeeklyRequest,
-		MessageResponse>
+public class CreatePromotionBonusWeeklyHandler
+	: IGetService<CreatePromotionBonusWeeklyRequest, MessageResponse>
 {
 	private readonly ICashServiceClient _cashServiceClient;
 	private readonly IPlayerBucketRepository _playerBucketService;
@@ -20,6 +20,7 @@ public class
 	private readonly TgsContext _repository;
 	private readonly IPromotionBonusRepository _promotionBonusFactory;
 	private readonly ITransactionRepository _transactionRepository;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
 
 	public CreatePromotionBonusWeeklyHandler(
 		ITgsService<PromotionBonus> promotionBonusService,
@@ -28,7 +29,8 @@ public class
 		TgsContext repository,
 		IPromotionRepository promotionRepository,
 		IPromotionBonusRepository promotionBonusFactory,
-		ITransactionRepository transactionRepository)
+		ITransactionRepository transactionRepository,
+		ISerialNumberGenerator serialNumberGenerator)
 	{
 		_promotionBonusFactory =
 			promotionBonusFactory ?? throw new ArgumentNullException(nameof(promotionBonusFactory));
@@ -40,6 +42,7 @@ public class
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 		_transactionRepository =
 			transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
+		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 	}
 
 	public async ValueTask<MessageResponse> GetAsync(
@@ -110,34 +113,41 @@ public class
 				})
 			.Where(x => x.brandGame == null || x.brandGame.Rebate).ToArrayAsync(cancellationToken);
 
-		var promotionBonus = promotions.Select(x =>
-		{
-			var id = GuidExtensions.NewSequentialGuid();
-			var from = x.From > previousMonday ? x.From : previousMonday;
-			var to = x.To < previousSunday ? x.To : previousSunday;
-
-			var (players, amountUsed) =
-				GetPromotionBonusPlayers(id, x, playerGameRoundAggregate.Select(p => p.aggregate), from, to);
-			x.AmountUsed = amountUsed;
-
-			return new PromotionBonusModel
+		var promotionBonus = await promotions.ToAsyncEnumerable()
+			.SelectAwait(async x =>
 			{
-				Id = id,
-				BrandId = x.BrandId,
-				PromotionId = x.Id,
-				From = from,
-				To = to,
-				PromotionType = x.PromotionType,
-				TotalAmountLimit = x.TotalAmountLimit,
-				GameType = (GameType?)x.GameType,
-				Percentage = x.Percentage,
-				BonusAmountLimit = x.BonusAmountLimit,
-				TurnoverMultiple = x.TurnoverMultiple,
-				CreatedOn = DateTimeOffset.Now,
-				SentOn = x.AutoSentPlayerBonus ? DateTimeOffset.Now : null,
-				Players = players.Where(p => p.BonusAmount > 0M).ToArray()
-			};
-		}).ToArray();
+				var id = await _serialNumberGenerator.GenerateAsync().ConfigureAwait(false);
+				var from = x.From > previousMonday ? x.From : previousMonday;
+				var to = x.To < previousSunday ? x.To : previousSunday;
+
+				var (players, amountUsed) = GetPromotionBonusPlayers(
+					id,
+					x,
+					playerGameRoundAggregate.Select(p => p.aggregate),
+					from,
+					to);
+				x.AmountUsed = amountUsed;
+
+				return new PromotionBonusModel
+				{
+					Id = id,
+					BrandId = x.BrandId,
+					PromotionId = x.Id,
+					From = from,
+					To = to,
+					PromotionType = x.PromotionType,
+					TotalAmountLimit = x.TotalAmountLimit,
+					GameType = (GameType?)x.GameType,
+					Percentage = x.Percentage,
+					BonusAmountLimit = x.BonusAmountLimit,
+					TurnoverMultiple = x.TurnoverMultiple,
+					CreatedOn = DateTimeOffset.Now,
+					SentOn = x.AutoSentPlayerBonus ? DateTimeOffset.Now : null,
+					Players = players.Where(p => p.BonusAmount > 0M).ToArray()
+				};
+			})
+			.ToArrayAsync(cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
 
 		var autoSentPlayerBonuses = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray();
 		var playerCodes = autoSentPlayerBonuses.SelectMany(p => p.Players).Select(p => p.PlayerCode);
@@ -156,30 +166,30 @@ public class
 		var bonus = await _promotionBonusFactory.CreatePromotionBonusAsync(promotionBonus);
 
 		var playerBuckets = bonus
-			.SelectMany(x =>
-			{
-				return x.PromotionPlayers.Join(players,
-						pb => pb.PlayerCode,
-						p => p.PlayerCode,
-						(pb, p) => new
-						{
-							pb,
-							p
-						})
-					.Select(p => new
+			.SelectMany(x => x.PromotionPlayers
+				.Join(
+					players,
+					pb => pb.PlayerCode,
+					p => p.PlayerCode,
+					(pb, p) => new
 					{
-						p.pb.Id,
-						x.BrandId,
-						p.p.PlayerCode,
-						p.p.DefaultWalletId,
-						BucketAmount = p.pb.BonusAmount * x.TurnoverMultiple,
-						p.pb.BonusAmount,
-						BucketType = BucketType.Promotion,
-						x.PromotionId,
-						PromotionBonusId = x.Id,
-						x.PromotionType
-					});
-			}).ToArray();
+						pb,
+						p
+					})
+				.Select(p => new
+				{
+					p.pb.Id,
+					x.BrandId,
+					p.p.PlayerCode,
+					p.p.DefaultWalletId,
+					BucketAmount = p.pb.BonusAmount * x.TurnoverMultiple,
+					p.pb.BonusAmount,
+					BucketType = BucketType.Promotion,
+					x.PromotionId,
+					PromotionBonusId = x.Id,
+					x.PromotionType
+				}))
+			.ToArray();
 
 		await _playerBucketService.CreatePlayerBucketsAsync(playerBuckets.Select(x =>
 			new CreatePlayerBucketRequest(x.BrandId,

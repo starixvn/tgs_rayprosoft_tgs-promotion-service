@@ -35,7 +35,7 @@ public class
 
 		if (promotion == null)
 		{
-			_logger.LogWarning($"Promotion({request.PromotionId}) is null");
+			_logger.LogWarning("Promotion({request.PromotionId}) is null", request.PromotionId);
 
 			return new MessageResponse { Valid = false, Message = "Can't find promotion" };
 		}
@@ -46,7 +46,7 @@ public class
 			&& promotion.From <= currentDate
 			&& promotion.To > currentDate)
 		{
-			_logger.LogWarning($"Promotion({request.PromotionId}) invalid.");
+			_logger.LogWarning("Promotion({request.PromotionId}) invalid.", request.PromotionId);
 
 			return new MessageResponse { Valid = false, Message = "Promotion invalid" };
 		}

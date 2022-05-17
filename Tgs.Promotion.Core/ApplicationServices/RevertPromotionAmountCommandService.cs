@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Core.ApplicationServices;
@@ -25,12 +26,12 @@ internal class RevertPromotionAmountCommandService : ICommandService<RevertPromo
 		var amount = promotion!.Percentage * command.Amount / 100M;
 		amount = amount > promotion.BonusAmountLimit ? promotion.BonusAmountLimit : amount;
 
-		_logger.LogInformation($"Revert {amount}");
+		_logger.LogInformation("Revert {amount}", amount);
 
 		var result = await _promotionRepository
 			.RevertPromotionAmountAsync(command.PromotionId, amount)
 			.ConfigureAwait(false);
 
-		_logger.LogInformation($"Revert result: {result}");
+		_logger.LogInformation("Revert result: {result}", result);
 	}
 }

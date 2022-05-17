@@ -5,19 +5,13 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceExtensions
 {
-	/// <summary>
-	///     Dependency Injection of Operations, need to add the following dependencies beforehand:
-	///     1. AddOperations() in Infrastructures.Operations
-	///     2. AddApiClient() in Infrastructure.ApiClient
-	/// </summary>
 	public static IServiceCollection AddPromotionClientServices(
 		this IServiceCollection services,
 		Action<PromotionOptions, IServiceProvider> configure)
-	{
-		services
+		=> services
 			.AddOptions<PromotionOptions>()
-			.Configure(configure);
-		services
+			.Configure(configure)
+			.Services
 			.AddHttpClient<PromotionClient>((sp, c) =>
 			{
 				var options = sp.GetRequiredService<IOptions<PromotionOptions>>().Value;
@@ -42,7 +36,4 @@ public static class ServiceExtensions
 			.AddTransient<IPromotionClient>(sp => sp.GetRequiredService<PromotionClient>())
 			.AddTransient<IPromotionBonusClient>(sp => sp.GetRequiredService<PromotionBonusClient>())
 			.AddTransient<IPromotionDispatchClient>(sp => sp.GetRequiredService<PromotionDispatchClient>());
-
-		return services;
-	}
 }

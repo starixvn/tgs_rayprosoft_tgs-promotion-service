@@ -24,10 +24,7 @@ internal class FirstDepositChecker : IPromotionChecker
 			.GetPlayerByPlayerCodeAsync(playerCode)
 			.ConfigureAwait(false);
 
-		if (player == null)
-			return false;
-
-		return player.FirstDepositOn == null;
+		return player != null && player.FirstDepositOn == null;
 	}
 
 	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId)

@@ -8,13 +8,11 @@ namespace Tgs.Promotion.Repository;
 public class PromotionParticipantRepository : IPromotionParticipantRepository
 {
 	private readonly ITgsService<PromotionParticipant> _promotionParticipantService;
-	private readonly TgsContext _repository;
 
-	public PromotionParticipantRepository(TgsContext tgsRepository,
+	public PromotionParticipantRepository(
 		ITgsService<PromotionParticipant> promotionParticipantService)
 	{
-		_repository = tgsRepository;
-		_promotionParticipantService = promotionParticipantService;
+		_promotionParticipantService = promotionParticipantService ?? throw new ArgumentNullException(nameof(promotionParticipantService));
 	}
 
 	public IQueryable<PromotionParticipant> GetPromotionParticipantQueries(

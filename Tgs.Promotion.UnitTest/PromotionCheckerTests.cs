@@ -20,7 +20,7 @@ public class PromotionCheckerTests
 
 		var sut = new FirstDepositChecker(fakePlayerService, fakePlayerDataRepository);
 
-		fakePlayerService
+		_ = fakePlayerService
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
 			.Returns(new Player
 			{
@@ -40,7 +40,7 @@ public class PromotionCheckerTests
 
 		var sut = new FirstDepositChecker(fakePlayerService, fakePlayerDataRepository);
 
-		fakePlayerService
+		_ = fakePlayerService
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
 			.Returns(new Player
 			{
@@ -60,7 +60,7 @@ public class PromotionCheckerTests
 
 		var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
 
-		fakePlayerService
+		_ = fakePlayerService
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
 			.Returns(new Player
 			{
@@ -80,7 +80,7 @@ public class PromotionCheckerTests
 
 		var sut = new DailyFirstDepositChecker(fakePlayerDataService);
 
-		fakePlayerDataService
+		_ = fakePlayerDataService
 			.CheckPlayerIsDailyFirstDepositAsync(Arg.Any<string>())
 			.Returns(true);
 
@@ -148,7 +148,7 @@ public class PromotionCheckerTests
 
 		var sut = new DailySecondDepositChecker(fakePlayerDataService);
 
-		fakePlayerDataService
+		_ = fakePlayerDataService
 			.CheckPlayerIsDailyFirstDepositAsync(Arg.Any<string>())
 			.Returns(false);
 
@@ -179,7 +179,7 @@ public class PromotionCheckerTests
 
 		var sut = new FirstDepositChecker(fakePlayerService, fakePlayerDataRepository);
 
-		fakePlayerService
+		_ = fakePlayerService
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
 			.Returns(new Player { FirstDepositOn = null });
 
@@ -254,7 +254,7 @@ public class PromotionCheckerTests
 
 		var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
 
-		fakePlayerService
+		_ = fakePlayerService
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
 			.Returns(new Player { FirstPromotionOn = null });
 
@@ -333,7 +333,7 @@ public class PromotionCheckerTests
 		var fakeServiceProvider = Substitute.For<IServiceProvider>();
 		var fakePromotionChecker = Substitute.For<IPromotionChecker>();
 
-		fakeServiceProvider.GetService(Arg.Any<Type>())
+		_ = fakeServiceProvider.GetService(Arg.Any<Type>())
 			.Returns(fakePromotionChecker);
 
 		var fakeCheckFactory = new PromotionCheckerFactory(

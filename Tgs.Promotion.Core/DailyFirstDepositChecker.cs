@@ -16,18 +16,12 @@ internal class DailyFirstDepositChecker : IPromotionChecker
 		=> ValueTask.CompletedTask;
 
 	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId)
-	{
-		if (promotionId is null)
-			return ValueTask.CompletedTask;
-
-		return _playerDataRepository.RemovePlayerDailyDepositFlagAsync(playerCode);
-	}
+		=> promotionId is null
+			? ValueTask.CompletedTask
+			: _playerDataRepository.RemovePlayerDailyDepositFlagAsync(playerCode);
 
 	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId)
-	{
-		if (promotionId is null)
-			return ValueTask.CompletedTask;
-
-		return _playerDataRepository.SetPlayerDailyDepositFlagAsync(playerCode);
-	}
+		=> promotionId is null
+			? ValueTask.CompletedTask
+			: _playerDataRepository.SetPlayerDailyDepositFlagAsync(playerCode);
 }

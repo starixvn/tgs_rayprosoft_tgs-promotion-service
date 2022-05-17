@@ -14,7 +14,7 @@ public class PromotionModel
 
 	public string? Content { get; set; } = default!;
 
-	public string CreatedByUsername { get; set; } = default!;
+	public string? CreatedByUsername { get; set; }
 
 	public DateTimeOffset CreatedOn { get; set; }
 
@@ -54,7 +54,7 @@ public class PromotionModel
 
 	public bool Unlimited { get; set; }
 
-	public string UpdatedByUsername { get; set; } = default!;
+	public string? UpdatedByUsername { get; set; }
 
 	public DateTimeOffset UpdatedOn { get; set; }
 

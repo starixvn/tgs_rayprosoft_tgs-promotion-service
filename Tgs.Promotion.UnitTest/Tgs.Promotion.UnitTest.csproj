@@ -22,4 +22,12 @@
     <ProjectReference Include="..\Tgs.Promotion.Core\Tgs.Promotion.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="D:\Users\Phoenix\source\repos\tgs-promotion-service\Tgs.Promotion.UnitTest\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="D:\Users\Phoenix\source\repos\tgs-promotion-service\Tgs.Promotion.UnitTest\.editorconfig" />
+  </ItemGroup>
+
 </Project>

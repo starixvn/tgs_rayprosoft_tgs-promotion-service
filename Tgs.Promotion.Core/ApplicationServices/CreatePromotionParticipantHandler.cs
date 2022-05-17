@@ -42,7 +42,7 @@ public class CreatePromotionParticipantHandler : IGetService<CreatePromotionPart
 
 		if (promotion == null)
 		{
-			_logger.LogWarning($"Promotion({request.PromotionId}) is null");
+			_logger.LogWarning("Promotion({request.PromotionId}) is null", request.PromotionId);
 
 			return new MessageResponse { Valid = false, Message = "Can't find promotion" };
 		}
@@ -53,7 +53,7 @@ public class CreatePromotionParticipantHandler : IGetService<CreatePromotionPart
 			&& promotion.From <= currentDate
 			&& promotion.To > currentDate)
 		{
-			_logger.LogWarning($"Promotion({request.PromotionId}) invalid.");
+			_logger.LogWarning("Promotion({request.PromotionId}) invalid.", request.PromotionId);
 
 			return new MessageResponse { Valid = false, Message = "Promotion invalid" };
 		}
@@ -61,7 +61,8 @@ public class CreatePromotionParticipantHandler : IGetService<CreatePromotionPart
 		if (await _promotionType.IsDepositTypeAsync(promotion.PromotionType))
 		{
 			_logger.LogWarning(
-				$"Promotion({request.PromotionId}) Type(Deposit) invalid.");
+				"Promotion({request.PromotionId}) Type(Deposit) invalid.",
+				request.PromotionId);
 
 			return new MessageResponse { Valid = false, Message = "Deposit invalid" };
 		}

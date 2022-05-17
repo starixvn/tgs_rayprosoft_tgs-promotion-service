@@ -123,7 +123,7 @@ public static class QueryableExtensions
 		return source;
 	}
 
-	public static async Task<IEnumerable<T>> Where<T>(this IEnumerable<T> source, Func<T, Task<bool>> predicate)
+	public static async Task<IEnumerable<T>> WhereAsync<T>(this IEnumerable<T> source, Func<T, Task<bool>> predicate)
 	{
 		var results = new ConcurrentQueue<T>();
 		var tasks = source.Select(async x =>
@@ -138,7 +138,8 @@ public static class QueryableExtensions
 		return results;
 	}
 
-	public static async Task<IEnumerable<T>> Where<T>(this IEnumerable<T> source,
+	public static async Task<IEnumerable<T>> WhereAsync<T>(
+		this IEnumerable<T> source,
 		Func<T, ValueTask<bool>> predicate)
 	{
 		var results = new ConcurrentQueue<T>();

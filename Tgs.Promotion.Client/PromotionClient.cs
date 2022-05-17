@@ -24,7 +24,7 @@ public class PromotionClient : IPromotionClient
 		};
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -39,7 +39,7 @@ public class PromotionClient : IPromotionClient
 		};
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -53,7 +53,7 @@ public class PromotionClient : IPromotionClient
 			.GetAsync($"/api/promotion/{promotionId}/check/{brandId}/{playerCode}/{amount}")
 			.ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<bool>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -68,7 +68,7 @@ public class PromotionClient : IPromotionClient
 		};
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -83,7 +83,7 @@ public class PromotionClient : IPromotionClient
 		};
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -95,7 +95,7 @@ public class PromotionClient : IPromotionClient
 		var httpRequest = new HttpRequestMessage(HttpMethod.Get, $"/api/promotion/joined?playerCode={request.PlayerCode}&from={request.From.ToUniversalTime():u}&to={request.To.ToUniversalTime():u}");
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<PagedResponse<JoinedPromotionModel>>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -113,7 +113,7 @@ public class PromotionClient : IPromotionClient
 			var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 			var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-			response.EnsureSuccessStatusCode();
+			_ = response.EnsureSuccessStatusCode();
 
 			return JsonSerializer.Deserialize<PromotionBonusOfDepositModel[]>(await response.Content.ReadAsStringAsync(),
 				new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -132,7 +132,7 @@ public class PromotionClient : IPromotionClient
 		var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<PromotionNameModel[]>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -145,7 +145,7 @@ public class PromotionClient : IPromotionClient
 		var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<PagedResponse<PromotionModel>>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -158,7 +158,7 @@ public class PromotionClient : IPromotionClient
 		var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<PagedResponse<PromotionModel>>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -173,7 +173,7 @@ public class PromotionClient : IPromotionClient
 		};
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
@@ -185,18 +185,18 @@ public class PromotionClient : IPromotionClient
 			HttpMethod.Delete,
 			$"/api/promotion/{promotionId}/{amount}");
 
-		request.Headers.Remove("Accept");
+		_ = request.Headers.Remove("Accept");
 		request.Headers.Add("Accept", "application/json");
 
 		var content = new StringContent(string.Empty);
-		content.Headers.Remove("Content-Type");
+		_ = content.Headers.Remove("Content-Type");
 		content.Headers.Add("Content-Type", "application/json");
 
 		request.Content = content;
 
 		var response = await _client.SendAsync(request).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 	}
 
 	public async Task TagPlayerDepositAsync(string playerCode, Guid? promotionId)
@@ -209,18 +209,18 @@ public class PromotionClient : IPromotionClient
 			HttpMethod.Put,
 			path);
 
-		request.Headers.Remove("Accept");
+		_ = request.Headers.Remove("Accept");
 		request.Headers.Add("Accept", "application/json");
 
 		var content = new StringContent(string.Empty);
-		content.Headers.Remove("Content-Type");
+		_ = content.Headers.Remove("Content-Type");
 		content.Headers.Add("Content-Type", "application/json");
 
 		request.Content = content;
 
 		var response = await _client.SendAsync(request).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 	}
 
 	public async Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request)
@@ -232,7 +232,7 @@ public class PromotionClient : IPromotionClient
 		};
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
-		response.EnsureSuccessStatusCode();
+		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;

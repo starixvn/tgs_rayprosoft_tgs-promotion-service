@@ -13,9 +13,8 @@ public class PromotionCheckerFactory : IPromotionCheckerFactory
 
 	public IPromotionChecker GetPromotionChecker(string promotionType)
 	{
-		if (_checkerTypes.TryGetValue(promotionType, out var checkerType))
-			return (IPromotionChecker)_serviceProvider.GetService(checkerType!)!;
-		else
-			return new AlwaysFalseChecker();
+		return _checkerTypes.TryGetValue(promotionType, out var checkerType)
+			? (IPromotionChecker)_serviceProvider.GetService(checkerType!)!
+			: new AlwaysFalseChecker();
 	}
 }

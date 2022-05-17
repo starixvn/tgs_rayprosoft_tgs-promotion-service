@@ -79,19 +79,16 @@ builder.Services
 
 builder.Services
 	.AddMessageQueue()
-	.AddNatsMessageQueue(config =>
-	{
-		config
-			.ConfigQueueOptions((options, sp) =>
-			{
-				var configuration = sp.GetRequiredService<IConfiguration>();
+	.AddNatsMessageQueue(config => config
+		.ConfigQueueOptions((options, sp) =>
+		{
+			var configuration = sp.GetRequiredService<IConfiguration>();
 
-				options.Url = configuration.GetConnectionString("Nats");
-			})
-			.AddHandler<DepositStatusChangedMessageHandler>(
-				"tgs.payment.deposit.status",
-				"tgs.payment.deposit.status");
-	})
+			options.Url = configuration.GetConnectionString("Nats");
+		})
+		.AddHandler<DepositStatusChangedMessageHandler>(
+			"tgs.payment.deposit.status",
+			"tgs.payment.deposit.status"))
 	.AddNatsGlobPatternExchange("*");
 
 builder.Services.AddHealthChecks();
