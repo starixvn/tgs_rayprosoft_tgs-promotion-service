@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion.Core.Extensions;
+﻿namespace Tgs.Promotion.Extensions;
 
 public static class DateTimeOffsetExtensions
 {

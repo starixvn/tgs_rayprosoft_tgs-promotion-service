@@ -21,7 +21,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		nuget.config = nuget.config
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.Promotion.Repository.UnitTests", "Tgs.Promotion.Repository.UnitTests\Tgs.Promotion.Repository.UnitTests.csproj", "{E375AD48-581D-424E-8571-4403F4F70FAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Repository.UnitTests", "Tgs.Promotion.Repository.UnitTests\Tgs.Promotion.Repository.UnitTests.csproj", "{E375AD48-581D-424E-8571-4403F4F70FAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.Promotion.Core.UnitTests", "Tgs.Promotion.Core.UnitTests\Tgs.Promotion.Core.UnitTests.csproj", "{86C99FF4-BA3B-480A-A6BE-0EC54E1322FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,10 @@ Global
 		{E375AD48-581D-424E-8571-4403F4F70FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E375AD48-581D-424E-8571-4403F4F70FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E375AD48-581D-424E-8571-4403F4F70FAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86C99FF4-BA3B-480A-A6BE-0EC54E1322FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86C99FF4-BA3B-480A-A6BE-0EC54E1322FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86C99FF4-BA3B-480A-A6BE-0EC54E1322FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86C99FF4-BA3B-480A-A6BE-0EC54E1322FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,6 +1,6 @@
 ﻿using Tgs.Promotion.Domain.Entities;
 
-namespace Tgs.Promotion.Core;
+namespace Tgs.Promotion;
 
 public interface ITransactionRepository
 {

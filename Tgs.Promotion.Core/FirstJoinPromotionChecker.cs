@@ -1,4 +1,5 @@
-﻿namespace Tgs.Promotion.Core;
+﻿using Tgs.Promotion;
+namespace Tgs.Promotion;
 
 internal class FirstJoinPromotionChecker : IPromotionChecker
 {

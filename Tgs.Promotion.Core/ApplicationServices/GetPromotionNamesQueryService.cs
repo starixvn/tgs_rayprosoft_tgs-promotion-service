@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Tgs.Promotion.Core.Models.Promotion;
 using Tgs.ServiceUtility;
+using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Models.Promotion;
 
-namespace Tgs.Promotion.Core.ApplicationServices;
+namespace Tgs.Promotion.ApplicationServices;
 
 internal class GetPromotionNamesQueryService : IQueryService<GetPromotionNamesQuery, PromotionNameModel>
 {

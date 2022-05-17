@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion.Core.Models.PromotionBonus;
+﻿namespace Tgs.Promotion.Models.PromotionBonus;
 
 public class CreatePromotionBonusWeeklyRequest
 {

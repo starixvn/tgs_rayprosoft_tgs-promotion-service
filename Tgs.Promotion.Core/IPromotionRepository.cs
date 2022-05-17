@@ -1,14 +1,16 @@
 ﻿using System.Linq.Expressions;
-using Tgs.Promotion.Core.Models;
-using Tgs.Promotion.Core.Models.Promotion;
+using Tgs.Promotion.Models;
+using Tgs.Promotion.Models.Promotion;
 
-namespace Tgs.Promotion.Core;
+namespace Tgs.Promotion;
 
 public interface IPromotionRepository
 {
 	ValueTask ChangePromotionStatusAsync(Domain.Entities.Promotion promotion);
 
 	ValueTask<Guid> CreatePromotionAsync(CreatePromotionRequest request, PromotionType promotionTypeModel);
+
+	ValueTask<Guid> CreatePromotionAsync(CreatePromotionInfo createInfo, CancellationToken cancellationToken = default);
 
 	ValueTask<bool> ExistsAsync(Expression<Func<Domain.Entities.Promotion, bool>> predicate);
 

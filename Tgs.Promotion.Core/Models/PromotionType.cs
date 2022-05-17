@@ -1,4 +1,5 @@
-﻿namespace Tgs.Promotion.Core.Models;
+﻿using Tgs.Promotion.Models;
+namespace Tgs.Promotion.Models;
 
 public record PromotionType
 {

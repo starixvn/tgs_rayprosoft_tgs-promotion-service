@@ -1,14 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tgs.CashService.Client;
-using Tgs.Promotion.Core.Extensions;
-using Tgs.Promotion.Core.Models;
-using Tgs.Promotion.Core.Models.PromotionBonus;
-using Tgs.Promotion.Core.Models.PromotionBucket;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;
+using Tgs.Promotion.Extensions;
+using Tgs.Promotion.Models.PromotionBonus;
+using Tgs.Promotion.Models.PromotionBucket;
+using Tgs.Promotion.Models;
 
-namespace Tgs.Promotion.Core.ApplicationServices.Promotion;
+namespace Tgs.Promotion.ApplicationServices.Promotion;
 
 public class
 	CreatePromotionBonusDailyQueryHandler : IGetService<CreatePromotionBonusDailyRequest, MessageResponse>

@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion.Core.Models.PromotionDispatch;
+﻿namespace Tgs.Promotion.Models.PromotionDispatch;
 
 public class DispatchPromotionBonusRequest
 {

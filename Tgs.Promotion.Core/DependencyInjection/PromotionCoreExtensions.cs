@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
-using Tgs.Promotion.Core;
-using Tgs.Promotion.Core.Configuration;
+using Tgs.Promotion.Configuration;
+using Tgs.Promotion;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -26,6 +26,7 @@ public static class PromotionCoreExtensions
 			.RegisterPromotionChecker<RegisterChecker>("Register");
 
 		_ = services
+			.AddSerialNumberGenerator()
 			.AddScoped<IPromotionCheckerFactory>(sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(
 				sp,
 				configuration.GetAllRegisterCheckerTypes()));

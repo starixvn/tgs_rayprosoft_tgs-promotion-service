@@ -1,6 +1,6 @@
-﻿using Tgs.Promotion.Core.Models.Promotion;
+﻿using Tgs.Promotion.Models.Promotion;
 
-namespace Tgs.Promotion.Core.ApplicationServices;
+namespace Tgs.Promotion.ApplicationServices;
 
 public record ChangeOrderCommand
 {

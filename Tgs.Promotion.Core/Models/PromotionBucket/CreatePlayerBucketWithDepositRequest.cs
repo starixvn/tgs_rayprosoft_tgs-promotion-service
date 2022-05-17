@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion.Core.Models.PromotionBucket;
+﻿namespace Tgs.Promotion.Models.PromotionBucket;
 
 public record CreatePlayerBucketWithDepositRequest(
 	Guid BrandId,

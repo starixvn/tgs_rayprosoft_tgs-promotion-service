@@ -3,8 +3,9 @@ using Microsoft.Extensions.Logging;
 using Tgs.MessageQueue;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
+using Tgs.Promotion.MessageQueue;
 
-namespace Tgs.Promotion.Core.MessageQueue;
+namespace Tgs.Promotion.MessageQueue;
 
 public class DepositStatusChangedMessageHandler : IMessageHandler
 {

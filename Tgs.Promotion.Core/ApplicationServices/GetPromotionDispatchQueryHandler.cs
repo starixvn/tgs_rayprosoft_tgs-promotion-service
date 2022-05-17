@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
-using Tgs.Promotion.Core.Extensions;
-using Tgs.Promotion.Core.Models;
-using Tgs.Promotion.Core.Models.PromotionDispatch;
 using Tgs.ServiceUtility;
+using Tgs.Promotion.Models.PromotionDispatch;
+using Tgs.Promotion.Models;
+using Tgs.Promotion.Extensions;
 
-namespace Tgs.Promotion.Core.ApplicationServices;
+namespace Tgs.Promotion.ApplicationServices;
 
 internal class
 	GetPromotionDispatchQueryHandler : IGetService<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>>

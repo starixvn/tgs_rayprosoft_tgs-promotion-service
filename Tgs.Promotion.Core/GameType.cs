@@ -1,6 +1,6 @@
 ﻿// ReSharper disable IdentifierTypo
 
-namespace Tgs.Promotion.Core;
+namespace Tgs.Promotion;
 
 public enum GameType
 {

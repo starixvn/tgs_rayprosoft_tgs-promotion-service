@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion.Core.Models;
+﻿namespace Tgs.Promotion.Models;
 
 public record SortOption
 {
