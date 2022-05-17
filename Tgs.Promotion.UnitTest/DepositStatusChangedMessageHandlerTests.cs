@@ -8,8 +8,8 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
-using Tgs.Promotion.Core;
-using Tgs.Promotion.Core.MessageQueue;
+using Tgs.Promotion.MessageQueue;
+using Tgs.Promotion;
 
 namespace Tgs.Promotion.UnitTest;
 

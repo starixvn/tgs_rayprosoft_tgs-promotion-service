@@ -1,6 +1,7 @@
 ﻿using Tgs.ServiceUtility;
+using Tgs.Promotion.ApplicationServices;
 
-namespace Tgs.Promotion.Core.ApplicationServices;
+namespace Tgs.Promotion.ApplicationServices;
 
 internal class TagPlayerDepositCommandService : ICommandService<TagPlayerDepositCommand>
 {

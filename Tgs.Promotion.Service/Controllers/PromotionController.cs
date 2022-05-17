@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Promotion.Core;
-using Tgs.Promotion.Core.ApplicationServices;
-using Tgs.Promotion.Core.Models;
-using Tgs.Promotion.Core.Models.Promotion;
+using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Models;
+using Tgs.Promotion.Models.Promotion;
 using Tgs.Promotion.Service.ViewModels;
 using Tgs.ServiceUtility;
 using TGS.Paging;
@@ -78,6 +77,25 @@ public class PromotionController : ControllerBase
 		CreatePromotionRequest request) =>
 		getService.GetAsync(request);
 
+	[HttpPut("{brandId}", Name = "CreatePromotionInfo")]
+	public ValueTask CreatePromotionAsync(
+		[FromServices] ICommandService<CreatePromotionCommand> createService,
+		Guid brandId,
+		CreatePromotionViewModel createModel)
+	{
+		var command = new CreatePromotionCommand(
+			brandId,
+			createModel.Name,
+			(createModel.EventDuring.From, createModel.EventDuring.To),
+			createModel.PromotionType,
+			createModel.PromotionLimitAmount,
+			createModel.IsAutoSent,
+			createModel.CampaignDetail,
+			createModel.Modifier);
+
+		return createService.ExecuteAsync(command, HttpContext.RequestAborted);
+	}
+
 	[HttpPut("deposit/{playerCode}")]
 	[HttpPut("deposit/{playerCode}/{promotionId?}")]
 	[Description("Tag player deposit")]
@@ -117,7 +135,7 @@ public class PromotionController : ControllerBase
 	public async Task<PagedResponse<PromotionModel>> GetPromotionsForPlayerAsync(
 		[FromServices] IQueryService<GetValidPromotionsQuery, PromotionModel> queryAllService,
 		[FromServices] IQueryService<GetValidPromotionsByPlayerQuery, PromotionModel> queryByPlayerService,
-		[FromQuery] GetValidPromotionsRequest request)
+		[FromQuery] GetValidPromotionsViewModel request)
 	{
 		var promotions = string.IsNullOrWhiteSpace(request.PlayerCode)
 			? queryAllService.QueryAsync(new(request.BrandId))

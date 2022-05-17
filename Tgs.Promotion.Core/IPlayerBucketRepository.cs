@@ -1,6 +1,6 @@
-﻿using Tgs.Promotion.Core.Models.PromotionBucket;
+﻿using Tgs.Promotion.Models.PromotionBucket;
 
-namespace Tgs.Promotion.Core;
+namespace Tgs.Promotion;
 
 public interface IPlayerBucketRepository
 {

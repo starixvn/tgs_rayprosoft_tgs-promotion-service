@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Tgs.Promotion.Core.Models.Promotion;
+namespace Tgs.Promotion.Models.Promotion;
 
 public class UpdatePromotionRequest
 {

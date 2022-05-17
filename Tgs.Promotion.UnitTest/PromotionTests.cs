@@ -10,12 +10,12 @@ using MockQueryable.Moq;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.Promotion.Core;
-using Tgs.Promotion.Core.ApplicationServices;
-using Tgs.Promotion.Core.Models;
-using Tgs.Promotion.Core.Models.Promotion;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.ServiceUtility;
+using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Models.Promotion;
+using Tgs.Promotion.Models;
+using Tgs.Promotion;
 
 namespace Tgs.Promotion.UnitTest;
 

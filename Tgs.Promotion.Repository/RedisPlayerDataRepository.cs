@@ -1,5 +1,5 @@
 ﻿using StackExchange.Redis;
-using Tgs.Promotion.Core;
+using Tgs.Promotion;
 
 namespace Tgs.Promotion.Repository;
 

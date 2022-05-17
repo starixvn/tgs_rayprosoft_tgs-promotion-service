@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
-using Tgs.Promotion.Core.Models;
-using Tgs.Promotion.Core.Models.Promotion;
 using Tgs.ServiceUtility;
+using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Models.Promotion;
+using Tgs.Promotion.Models;
 
-namespace Tgs.Promotion.Core.ApplicationServices;
+namespace Tgs.Promotion.ApplicationServices;
 
 public class CreatePromotionParticipantHandler : IGetService<CreatePromotionParticipantRequest, MessageResponse>
 {

@@ -1,3 +1,3 @@
-﻿namespace Tgs.Promotion.Core.ApplicationServices;
+﻿namespace Tgs.Promotion.ApplicationServices;
 
 public record CreatePromotionDistributePlanCommand(Guid PromotionId, decimal Amount);

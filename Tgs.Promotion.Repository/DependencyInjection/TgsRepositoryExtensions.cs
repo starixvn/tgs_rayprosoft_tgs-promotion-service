@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Tgs.Promotion.Core;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Repository;
+using Tgs.Promotion;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

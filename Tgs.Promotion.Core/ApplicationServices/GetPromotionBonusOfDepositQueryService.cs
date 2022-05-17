@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Tgs.Promotion.Core.Models.PromotionBonus;
 using Tgs.ServiceUtility;
+using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Models.PromotionBonus;
 
-namespace Tgs.Promotion.Core.ApplicationServices;
+namespace Tgs.Promotion.ApplicationServices;
 
 internal class
 	GetPromotionBonusOfDepositQueryService : IQueryService<GetPromotionBonusOfDepositQuery,

@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion.Core;
+﻿namespace Tgs.Promotion;
 
 public interface IPromotionTypeRepository
 {

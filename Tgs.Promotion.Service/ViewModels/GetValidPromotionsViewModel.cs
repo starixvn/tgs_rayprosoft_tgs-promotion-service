@@ -1,8 +1,8 @@
-﻿using Tgs.Promotion.Core.Models;
+﻿using Tgs.Promotion.Models;
 
 namespace Tgs.Promotion.Service.ViewModels;
 
-public class GetValidPromotionsRequest : PageableRequest
+public class GetValidPromotionsViewModel : PageableRequest
 {
 	public Guid BrandId { get; set; }
 

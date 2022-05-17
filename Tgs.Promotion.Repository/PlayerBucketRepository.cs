@@ -1,10 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tgs.CashService.Client;
-using Tgs.Promotion.Core;
-using Tgs.Promotion.Core.Extensions;
-using Tgs.Promotion.Core.Models.PromotionBucket;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.SerialNumberGenerator;
+using Tgs.Promotion.Models.PromotionBucket;
+using Tgs.Promotion;
 
 namespace Tgs.Promotion.Repository;
 

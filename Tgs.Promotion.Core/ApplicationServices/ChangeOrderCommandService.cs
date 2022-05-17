@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.ServiceUtility;
+using Tgs.Promotion.ApplicationServices;
 
-namespace Tgs.Promotion.Core.ApplicationServices;
+namespace Tgs.Promotion.ApplicationServices;
 
 internal class ChangeOrderCommandService : ICommandService<ChangeOrderCommand>
 {

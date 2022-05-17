@@ -5,11 +5,9 @@ using System.Transactions;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Tgs.Promotion.Core;
-using Tgs.Promotion.Core.Extensions;
-using Tgs.Promotion.Core.Models;
-using Tgs.Promotion.Core.Models.Promotion;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.Promotion.Models;
+using Tgs.Promotion.Models.Promotion;
 using Tgs.SerialNumberGenerator;
 
 namespace Tgs.Promotion.Repository;
@@ -19,20 +17,20 @@ public class PromotionRepository : IPromotionRepository
 	private readonly ITgsService<Domain.Entities.Promotion> _promotionService;
 	private readonly ITgsService<VipLevel> _vipLevelService;
 	private readonly ITgsService<GameProvider> _gameProviderService;
-	private readonly TgsContext _repository;
+	private readonly TgsContext _dbContext;
 	private readonly ISerialNumberGenerator _serialNumberGenerator;
 
 	public PromotionRepository(
 		ITgsService<Domain.Entities.Promotion> promotionService,
 		ITgsService<VipLevel> vipLevelService,
 		ITgsService<GameProvider> gameProviderService,
-		TgsContext repository,
+		TgsContext dbContext,
 		ISerialNumberGenerator serialNumberGenerator)
 	{
 		_promotionService = promotionService ?? throw new ArgumentNullException(nameof(promotionService));
 		_vipLevelService = vipLevelService ?? throw new ArgumentNullException(nameof(vipLevelService));
 		_gameProviderService = gameProviderService ?? throw new ArgumentNullException(nameof(gameProviderService));
-		_repository = repository ?? throw new ArgumentNullException(nameof(repository));
+		_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 	}
 
@@ -99,8 +97,8 @@ public class PromotionRepository : IPromotionRepository
 	{
 		const string sql = "dbo.promotion_update_amount_used";
 
-		var conn = _repository.Database.GetDbConnection();
-		var transaction = _repository.Database.CurrentTransaction?.GetDbTransaction();
+		var conn = _dbContext.Database.GetDbConnection();
+		var transaction = _dbContext.Database.CurrentTransaction?.GetDbTransaction();
 
 		return await conn.QueryFirstOrDefaultAsync<bool>(
 				sql,
@@ -116,8 +114,8 @@ public class PromotionRepository : IPromotionRepository
 	{
 		const string sql = "dbo.promotion_revert_amount_used";
 
-		var conn = _repository.Database.GetDbConnection();
-		var transaction = _repository.Database.CurrentTransaction?.GetDbTransaction();
+		var conn = _dbContext.Database.GetDbConnection();
+		var transaction = _dbContext.Database.CurrentTransaction?.GetDbTransaction();
 
 		return await conn.QueryFirstOrDefaultAsync<bool>(
 				sql,
@@ -159,9 +157,9 @@ public class PromotionRepository : IPromotionRepository
 
 		using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-		_repository.PromotionGameProviders.RemoveRange(promotion.PromotionGameProviders);
-		_repository.PromotionVipLevels.RemoveRange(promotion.PromotionVipLevels);
-		_ = await _repository.SaveChangesAsync().ConfigureAwait(false);
+		_dbContext.PromotionGameProviders.RemoveRange(promotion.PromotionGameProviders);
+		_dbContext.PromotionVipLevels.RemoveRange(promotion.PromotionVipLevels);
+		_ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
 
 		promotion.Name = request.Name;
 		promotion.From = request.From.UtcDateTime;
@@ -209,8 +207,46 @@ public class PromotionRepository : IPromotionRepository
 	public ValueTask UpdatePromotionsAsync(Domain.Entities.Promotion[] promotions) =>
 		_promotionService.UpdateEntitiesAsync(promotions);
 
+	public async ValueTask<Guid> CreatePromotionAsync(CreatePromotionInfo createInfo, CancellationToken cancellationToken = default)
+	{
+		var promotionId = await _serialNumberGenerator.GenerateAsync().ConfigureAwait(false);
+
+		var now = DateTime.UtcNow;
+
+		var promotion = new Domain.Entities.Promotion
+		{
+			Id = promotionId,
+			BrandId = createInfo.BrandId,
+			Name = createInfo.Name,
+			From = createInfo.EventDuring.From.ToUniversalTime(),
+			To = createInfo.EventDuring.To.ToUniversalTime(),
+			Status = (short)PromotionStatus.Disabled,
+			AutoSentPlayerBonus = createInfo.IsAutoSent,
+			PromotionType = createInfo.PromotionType,
+			BonusAmountLimit = 0M,
+			AmountUsed = 0,
+			Unlimited = createInfo.PromotionLimitAmount is null ? (short)1 : (short)0,
+			Percentage = 0M,
+			TotalAmountLimit = createInfo.PromotionLimitAmount ?? 0M,
+			TurnoverMultiple = 0M,
+			CreatedByUsername = createInfo.Modifier,
+			UpdatedByUsername = createInfo.Modifier,
+			CreatedOn = now,
+			UpdatedOn = now
+		};
+
+		_ = await _dbContext.Promotions
+			.AddAsync(promotion, cancellationToken)
+			.ConfigureAwait(false);
+		_ = await _dbContext
+			.SaveChangesAsync(cancellationToken)
+			.ConfigureAwait(false);
+
+		return promotionId;
+	}
+
 	private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
-		Domain.Entities.Promotion promotion,
+			Domain.Entities.Promotion promotion,
 		CreatePromotionRequest request)
 	{
 		var promotionGameProviders = _gameProviderService.GetQueries()

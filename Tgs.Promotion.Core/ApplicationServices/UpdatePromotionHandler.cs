@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using Tgs.Promotion.Core.Models;
-using Tgs.Promotion.Core.Models.Promotion;
 using Tgs.ServiceUtility;
+using Tgs.Promotion.Models.Promotion;
+using Tgs.Promotion.Models;
 
-namespace Tgs.Promotion.Core.ApplicationServices;
+namespace Tgs.Promotion.ApplicationServices;
 
 public class UpdatePromotionHandler : IGetService<UpdatePromotionRequest, MessageResponse>
 {

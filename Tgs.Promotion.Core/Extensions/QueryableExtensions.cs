@@ -2,9 +2,10 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using Tgs.Promotion.Core.Models;
+using Tgs.Promotion.Extensions;
+using Tgs.Promotion.Models;
 
-namespace Tgs.Promotion.Core.Extensions;
+namespace Tgs.Promotion.Extensions;
 
 public static class QueryableExtensions
 {

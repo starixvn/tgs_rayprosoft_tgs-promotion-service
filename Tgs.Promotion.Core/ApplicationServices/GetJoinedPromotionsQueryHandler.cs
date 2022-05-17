@@ -1,9 +1,9 @@
-﻿using Tgs.Promotion.Core.Extensions;
-using Tgs.Promotion.Core.Models;
-using Tgs.Promotion.Core.Models.Promotion;
-using Tgs.ServiceUtility;
+﻿using Tgs.ServiceUtility;
+using Tgs.Promotion.Models.Promotion;
+using Tgs.Promotion.Models;
+using Tgs.Promotion.Extensions;
 
-namespace Tgs.Promotion.Core.ApplicationServices;
+namespace Tgs.Promotion.ApplicationServices;
 
 public class
 	GetPlayerOperationsQueryHandler : IGetService<GetJoinedPromotionsRequest, PagedResponse<JoinedPromotionModel>>

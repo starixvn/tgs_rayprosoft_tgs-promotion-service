@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tgs.CashService.Client;
-using Tgs.Promotion.Core.Models;
-using Tgs.Promotion.Core.Models.PromotionBucket;
-using Tgs.Promotion.Core.Models.PromotionDispatch;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.ServiceUtility;
+using Tgs.Promotion.Models.PromotionBucket;
+using Tgs.Promotion.Models.PromotionDispatch;
+using Tgs.Promotion.Models;
 
-namespace Tgs.Promotion.Core.ApplicationServices;
+namespace Tgs.Promotion.ApplicationServices;
 
 public class DispatchPromotionBonusHandler : IGetService<DispatchPromotionBonusRequest, MessageResponse>
 {

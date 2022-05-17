@@ -1,3 +1,3 @@
-﻿namespace Tgs.Promotion.Core.Models.PromotionBucket;
+﻿namespace Tgs.Promotion.Models.PromotionBucket;
 
 public record CreatePlayerBucketWithDepositResponse(decimal ActualAmount, int? PromotionPlayerId);
