@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-namespace Tgs.Promotion;
+﻿namespace Tgs.Promotion;
 
 public class CreatePromotionInfo
 {
@@ -16,7 +14,7 @@ public class CreatePromotionInfo
 
 	public bool IsAutoSent { get; init; }
 
-	public JsonDocument CampaignDetail { get; init; } = default!;
+	public string CampaignDetail { get; init; } = default!;
 
 	public string Modifier { get; init; } = default!;
 }

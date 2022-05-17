@@ -1,4 +1,5 @@
-﻿using Tgs.ServiceUtility;
+﻿using System.Text.Json;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
@@ -23,7 +24,7 @@ internal class CreatePromotionCommandService : ICommandService<CreatePromotionCo
 			PromotionLimitAmount = command.PromotionLimitAmount,
 			IsAutoSent = command.IsAutoSent,
 			PromotionType = command.PromotionType,
-			CampaignDetail = command.CampaignDetail
+			CampaignDetail = JsonSerializer.Serialize(command.CampaignDetail)
 		};
 
 		_ = await _promotionRepository

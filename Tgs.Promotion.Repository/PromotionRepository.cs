@@ -229,6 +229,7 @@ public class PromotionRepository : IPromotionRepository
 			Percentage = 0M,
 			TotalAmountLimit = createInfo.PromotionLimitAmount ?? 0M,
 			TurnoverMultiple = 0M,
+			CampaignDetail = createInfo.CampaignDetail,
 			CreatedByUsername = createInfo.Modifier,
 			UpdatedByUsername = createInfo.Modifier,
 			CreatedOn = now,
