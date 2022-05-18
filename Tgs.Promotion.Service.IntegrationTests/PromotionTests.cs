@@ -87,7 +87,7 @@ public class PromotionTests
 			}
 		);
 
-		await dbContext.SaveChangesAsync();
+		_ = await dbContext.SaveChangesAsync();
 
 		await sut.SetPromotionVipLevelsAsync(promotionId, new[] { 1, 2 }, "ModifyUser");
 

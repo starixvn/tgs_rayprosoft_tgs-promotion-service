@@ -207,7 +207,10 @@ public class PromotionRepository : IPromotionRepository
 	public ValueTask UpdatePromotionsAsync(PromotionRow[] promotions) =>
 		_promotionService.UpdateEntitiesAsync(promotions);
 
-	public async ValueTask<Guid> CreatePromotionAsync(CreatePromotionMainInfo createInfo, CancellationToken cancellationToken = default)
+	public async ValueTask<Guid> CreatePromotionAsync(
+		CreatePromotionMainInfo createInfo,
+		string modifier,
+		CancellationToken cancellationToken = default)
 	{
 		var promotionId = await _serialNumberGenerator.GenerateAsync().ConfigureAwait(false);
 
@@ -230,8 +233,8 @@ public class PromotionRepository : IPromotionRepository
 			TotalAmountLimit = createInfo.PromotionLimitAmount ?? 0M,
 			TurnoverMultiple = 0M,
 			CampaignDetail = "{}",
-			CreatedByUsername = createInfo.Modifier,
-			UpdatedByUsername = createInfo.Modifier,
+			CreatedByUsername = modifier,
+			UpdatedByUsername = modifier,
 			CreatedOn = now,
 			UpdatedOn = now
 		};
@@ -262,7 +265,7 @@ public class PromotionRepository : IPromotionRepository
 		var vipLevelRows = await _dbContext.VipLevels
 			.Where(row => row.BrandId == promotion.BrandId
 				&& vipLevels.Contains(row.Level))
-			.ToArrayAsync()
+			.ToArrayAsync(cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
 		await _dbContext.PromotionVipLevels.AddRangeAsync(
@@ -275,7 +278,7 @@ public class PromotionRepository : IPromotionRepository
 				}),
 				cancellationToken).ConfigureAwait(false);
 
-		await _dbContext
+		_ = await _dbContext
 			.SaveChangesAsync(cancellationToken)
 			.ConfigureAwait(false);
 	}

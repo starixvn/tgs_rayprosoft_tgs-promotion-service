@@ -26,7 +26,7 @@ public class PromotionTests
 		_ = await sut.GetAsync(command);
 
 		_ = fakePromotionRepository.Received(1)
-			.CreatePromotionAsync(Arg.Any<CreatePromotionMainInfo>());
+			.CreatePromotionAsync(Arg.Any<CreatePromotionMainInfo>(), Arg.Is(command.Modifier));
 	}
 
 	[TestMethod]

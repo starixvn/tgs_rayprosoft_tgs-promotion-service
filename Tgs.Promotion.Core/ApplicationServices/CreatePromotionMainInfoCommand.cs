@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-namespace Tgs.Promotion.ApplicationServices;
+﻿namespace Tgs.Promotion.ApplicationServices;
 
 public record CreatePromotionMainInfoCommand(
 	Guid BrandId,

@@ -14,17 +14,15 @@ internal class CreatePromotionMainInfoCommandService : IGetService<CreatePromoti
 
 	public ValueTask<Guid> GetAsync(CreatePromotionMainInfoCommand command, CancellationToken cancellationToken = default)
 	{
-		var createInfo = new CreatePromotionMainInfo
-		{
-			BrandId = command.BrandId,
-			Name = command.Name,
-			EventDuring = command.EventDuring,
-			PromotionLimitAmount = command.PromotionLimitAmount,
-			IsAutoSent = command.IsAutoSent,
-			PromotionType = command.PromotionType
-		};
+		var createInfo = new CreatePromotionMainInfo(
+			command.BrandId,
+			command.Name,
+			command.EventDuring,
+			command.PromotionType,
+			command.PromotionLimitAmount,
+			command.IsAutoSent);
 
 		return _promotionRepository
-			.CreatePromotionAsync(createInfo, cancellationToken);
+			.CreatePromotionAsync(createInfo, command.Modifier, cancellationToken);
 	}
 }
