@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace Tgs.Promotion.Domain.Entities
 {
-    public partial class Promotion
+    public partial class PromotionRow
     {
-        public Promotion()
+        public PromotionRow()
         {
             PromotionBonus = new HashSet<PromotionBonus>();
             PromotionGameProviders = new HashSet<PromotionGameProvider>();

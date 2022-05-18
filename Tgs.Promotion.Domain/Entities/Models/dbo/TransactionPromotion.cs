@@ -12,6 +12,6 @@ namespace Tgs.Promotion.Domain.Entities
         public Guid PromotionBonusId { get; set; }
         public string? PromotionType { get; set; }
 
-        public virtual Promotion Promotion { get; set; } = null!;
+        public virtual PromotionRow Promotion { get; set; } = null!;
     }
 }

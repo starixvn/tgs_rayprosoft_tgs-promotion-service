@@ -42,7 +42,7 @@ public class PromotionTests
 		};
 
 		var list = CreatePromotionFixture()
-			.CreateMany<Domain.Entities.Promotion>(20)
+			.CreateMany<PromotionRow>(20)
 			.AsQueryable()
 			.BuildMock();
 
@@ -53,16 +53,16 @@ public class PromotionTests
 
 		_ = promotionServiceMock.Setup(x =>
 				x.GetPromotionQueries(
-					It.IsAny<Func<IQueryable<Domain.Entities.Promotion>,
-						IQueryable<Domain.Entities.Promotion>>>(),
+					It.IsAny<Func<IQueryable<PromotionRow>,
+						IQueryable<PromotionRow>>>(),
 					false))
 			.Returns(list);
 
 		var result = await promotionsQueryHandlerMock.GetAsync(request, new());
 
 		promotionServiceMock.Verify(x => x.GetPromotionQueries(
-			It.IsAny<Func<IQueryable<Domain.Entities.Promotion>,
-				IQueryable<Domain.Entities.Promotion>>>(),
+			It.IsAny<Func<IQueryable<PromotionRow>,
+				IQueryable<PromotionRow>>>(),
 			false));
 
 		Assert.AreEqual(result.Items.Length, showAll ? 20 : 10);
@@ -87,7 +87,7 @@ public class PromotionTests
 		};
 
 		var list = CreatePromotionFixture()
-			.CreateMany<Domain.Entities.Promotion>(10)
+			.CreateMany<PromotionRow>(10)
 			.AsQueryable()
 			.BuildMock();
 
@@ -107,15 +107,15 @@ public class PromotionTests
 
 		_ = promotionServiceMock
 			.Setup(x => x.GetPromotionQueries(
-				It.IsAny<Func<IQueryable<Domain.Entities.Promotion>, IQueryable<Domain.Entities.Promotion>>>(),
+				It.IsAny<Func<IQueryable<PromotionRow>, IQueryable<PromotionRow>>>(),
 				false))
 			.Returns(list);
 
 		var result = await promotionsQueryHandlerMock.GetAsync(request, new());
 
 		promotionServiceMock.Verify(x => x.GetPromotionQueries(
-			It.IsAny<Func<IQueryable<Domain.Entities.Promotion>,
-				IQueryable<Domain.Entities.Promotion>>>(),
+			It.IsAny<Func<IQueryable<PromotionRow>,
+				IQueryable<PromotionRow>>>(),
 			false));
 
 		Assert.AreEqual(result.Items.Length, 9);
@@ -136,7 +136,7 @@ public class PromotionTests
 		var bonusAmountLimit = 500M;
 
 		_ = fakePromotionRepository.GetPromotionByIdAsync(command.PromotionId).Returns(
-			new Domain.Entities.Promotion
+			new PromotionRow
 			{
 				Percentage = percentage,
 				BonusAmountLimit = bonusAmountLimit
@@ -175,7 +175,7 @@ public class PromotionTests
 
 		_ = fakePromotionRepository
 			.GetPromotionByIdAsync(query.PromotionId)
-			.Returns(new Domain.Entities.Promotion
+			.Returns(new Domain.Entities.PromotionRow
 			{
 				BrandId = query.BrandId,
 				PromotionType = "TestPromotionType"
@@ -270,8 +270,8 @@ public class PromotionTests
 		var fakePromotionRepository = new Mock<IPromotionRepository>();
 
 		_ = fakePromotionRepository
-			.Setup(x => x.GetPromotionQueries(It.IsAny<Func<IQueryable<Domain.Entities.Promotion>, IQueryable<Domain.Entities.Promotion>>?>(), default))
-			.Returns(Array.Empty<Domain.Entities.Promotion>().AsQueryable().BuildMock());
+			.Setup(x => x.GetPromotionQueries(It.IsAny<Func<IQueryable<PromotionRow>, IQueryable<PromotionRow>>?>(), default))
+			.Returns(Array.Empty<PromotionRow>().AsQueryable().BuildMock());
 
 		var sut = new GetValidPromotionsQueryService(fakePromotionRepository.Object);
 
@@ -280,8 +280,8 @@ public class PromotionTests
 		_ = sut.QueryAsync(query);
 
 		fakePromotionRepository.Verify(x => x.GetPromotionQueries(It.IsAny<Func<
-				IQueryable<Domain.Entities.Promotion>,
-				IQueryable<Domain.Entities.Promotion>>>(),
+				IQueryable<PromotionRow>,
+				IQueryable<PromotionRow>>>(),
 			It.IsAny<bool>()), Times.Once());
 	}
 
@@ -289,7 +289,7 @@ public class PromotionTests
 	{
 		var fixture = new Fixture();
 
-		fixture.Customize<Domain.Entities.Promotion>(u => u
+		fixture.Customize<PromotionRow>(u => u
 			.With(s => s.PromotionGameProviders,
 				Array.Empty<PromotionGameProvider>())
 			.With(s => s.PromotionVipLevels,

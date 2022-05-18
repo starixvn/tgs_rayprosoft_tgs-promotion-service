@@ -6,31 +6,33 @@ namespace Tgs.Promotion;
 
 public interface IPromotionRepository
 {
-	ValueTask ChangePromotionStatusAsync(Domain.Entities.Promotion promotion);
+	ValueTask ChangePromotionStatusAsync(Domain.Entities.PromotionRow promotion);
 
 	ValueTask<Guid> CreatePromotionAsync(CreatePromotionRequest request, PromotionType promotionTypeModel);
 
 	ValueTask<Guid> CreatePromotionAsync(CreatePromotionInfo createInfo, CancellationToken cancellationToken = default);
 
-	ValueTask<bool> ExistsAsync(Expression<Func<Domain.Entities.Promotion, bool>> predicate);
+	ValueTask SetPromotionVipLevelsAsync(Guid promotionId, IEnumerable<int> vipLevels, string modifier, CancellationToken cancellationToken = default);
 
-	ValueTask UpdatePromotionAsync(Domain.Entities.Promotion promotion, UpdatePromotionRequest request);
+	ValueTask<bool> ExistsAsync(Expression<Func<Domain.Entities.PromotionRow, bool>> predicate);
+
+	ValueTask UpdatePromotionAsync(Domain.Entities.PromotionRow promotion, UpdatePromotionRequest request);
 
 	ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount);
 
 	ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount);
 
-	ValueTask UpdatePromotionsAsync(Domain.Entities.Promotion[] promotions);
+	ValueTask UpdatePromotionsAsync(Domain.Entities.PromotionRow[] promotions);
 
-	ValueTask<Domain.Entities.Promotion?> GetPromotionByIdAsync(Guid promotionId);
+	ValueTask<Domain.Entities.PromotionRow?> GetPromotionByIdAsync(Guid promotionId);
 
-	ValueTask<Domain.Entities.Promotion?> GetPromotionAsync(
-		Expression<Func<Domain.Entities.Promotion, bool>> predicate,
-		Func<IQueryable<Domain.Entities.Promotion>, IQueryable<Domain.Entities.Promotion>>
+	ValueTask<Domain.Entities.PromotionRow?> GetPromotionAsync(
+		Expression<Func<Domain.Entities.PromotionRow, bool>> predicate,
+		Func<IQueryable<Domain.Entities.PromotionRow>, IQueryable<Domain.Entities.PromotionRow>>
 			? preQuery = null);
 
-	IQueryable<Domain.Entities.Promotion> GetPromotionQueries(
-		Func<IQueryable<Domain.Entities.Promotion>,
-			IQueryable<Domain.Entities.Promotion>>? preQuery = null,
+	IQueryable<Domain.Entities.PromotionRow> GetPromotionQueries(
+		Func<IQueryable<Domain.Entities.PromotionRow>,
+			IQueryable<Domain.Entities.PromotionRow>>? preQuery = null,
 		bool tracking = false);
 }

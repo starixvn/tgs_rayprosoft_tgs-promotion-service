@@ -11,7 +11,7 @@ namespace Tgs.Promotion.Domain.Entities
         public Guid VipLevelId { get; set; }
         public int Level { get; set; }
 
-        public virtual Promotion Promotion { get; set; } = null!;
+        public virtual PromotionRow Promotion { get; set; } = null!;
         public virtual VipLevel VipLevel { get; set; } = null!;
     }
 }

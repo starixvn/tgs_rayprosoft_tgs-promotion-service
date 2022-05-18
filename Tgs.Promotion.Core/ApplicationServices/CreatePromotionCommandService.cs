@@ -3,7 +3,7 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class CreatePromotionCommandService : ICommandService<CreatePromotionCommand>
+internal class CreatePromotionCommandService : IGetService<CreatePromotionCommand, Guid>
 {
 	private readonly IPromotionRepository _promotionRepository;
 
@@ -12,9 +12,7 @@ internal class CreatePromotionCommandService : ICommandService<CreatePromotionCo
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 	}
 
-	public async ValueTask ExecuteAsync(
-		CreatePromotionCommand command,
-		CancellationToken cancellationToken = default)
+	public ValueTask<Guid> GetAsync(CreatePromotionCommand command, CancellationToken cancellationToken = default)
 	{
 		var createInfo = new CreatePromotionInfo
 		{
@@ -27,8 +25,7 @@ internal class CreatePromotionCommandService : ICommandService<CreatePromotionCo
 			CampaignDetail = JsonSerializer.Serialize(command.CampaignDetail)
 		};
 
-		_ = await _promotionRepository
-			.CreatePromotionAsync(createInfo, cancellationToken)
-			.ConfigureAwait(false);
+		return _promotionRepository
+			.CreatePromotionAsync(createInfo, cancellationToken);
 	}
 }

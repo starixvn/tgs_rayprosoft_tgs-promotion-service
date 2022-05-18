@@ -18,7 +18,7 @@ internal class ChangeOrderCommandService : ICommandService<ChangeOrderCommand>
 	{
 		var ids = command.Orders.Select(q => q.Id);
 
-		var promotions = await _tgsRepository.Promotions
+		var promotions = await _tgsRepository.PromotionRows
 			.AsQueryable()
 			.Where(q => ids.Contains(q.Id))
 			.ToListAsync(cancellationToken)
@@ -34,7 +34,7 @@ internal class ChangeOrderCommandService : ICommandService<ChangeOrderCommand>
 			}
 		});
 
-		_tgsRepository.Promotions.UpdateRange(promotions);
+		_tgsRepository.PromotionRows.UpdateRange(promotions);
 		_ = await _tgsRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
 }

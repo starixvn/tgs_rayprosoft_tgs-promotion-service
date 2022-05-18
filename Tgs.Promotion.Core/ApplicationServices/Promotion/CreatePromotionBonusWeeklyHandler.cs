@@ -227,8 +227,10 @@ public class CreatePromotionBonusWeeklyHandler
 
 	private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(
 		Guid id,
-		Domain.Entities.Promotion promotion, IEnumerable<PlayerGameRebateAggregate> aggregates,
-		DateTimeOffset from, DateTimeOffset to)
+		PromotionRow promotion,
+		IEnumerable<PlayerGameRebateAggregate> aggregates,
+		DateTimeOffset from,
+		DateTimeOffset to)
 	{
 		var amount = promotion.AmountUsed;
 

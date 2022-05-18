@@ -10,10 +10,10 @@ namespace Tgs.Promotion.Service.Controllers;
 public class PromotionManagementController : ControllerBase
 {
 	[HttpPut("{brandId}", Name = "CreatePromotionInfo")]
-	public ValueTask CreatePromotionAsync(
-		[FromServices] ICommandService<CreatePromotionCommand> createService,
-		Guid brandId,
-		CreatePromotionViewModel createModel)
+	public ValueTask<Guid> CreatePromotionAsync(
+			[FromServices] IGetService<CreatePromotionCommand, Guid> createService,
+			Guid brandId,
+			[FromBody] CreatePromotionViewModel createModel)
 	{
 		var command = new CreatePromotionCommand(
 			brandId,
@@ -25,6 +25,20 @@ public class PromotionManagementController : ControllerBase
 			createModel.CampaignDetail,
 			createModel.Modifier);
 
-		return createService.ExecuteAsync(command, HttpContext.RequestAborted);
+		return createService.GetAsync(command, HttpContext.RequestAborted);
+	}
+
+	[HttpPut("vip/{promotionId}", Name = "UpdatePromotionVipLevels")]
+	public ValueTask UpdatePromotionVipLevelsAsync(
+		[FromServices] ICommandService<UpdatePromotionVipLevelsCommand> updateService,
+		Guid promotionId,
+		[FromBody] VipLevelsViewModel vipLevelsModel)
+	{
+		var command = new UpdatePromotionVipLevelsCommand(
+			promotionId,
+			vipLevelsModel.VipLevels,
+			vipLevelsModel.Modifier);
+
+		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
 	}
 }

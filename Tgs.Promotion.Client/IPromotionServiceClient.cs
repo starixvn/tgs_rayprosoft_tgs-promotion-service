@@ -2,9 +2,15 @@
 
 public interface IPromotionServiceClient
 {
-	ValueTask CreatePromotionAsync<TCampaignDetail>(
+	ValueTask<Guid> CreatePromotionAsync<TCampaignDetail>(
 		Guid brandId,
 		CreatePromotionInfo<TCampaignDetail> createInfo,
+		string modifier,
+		CancellationToken cancellationToken = default);
+
+	ValueTask SetPromotionVipLevelsAsync(
+		Guid promotionId,
+		IEnumerable<int> vipLevels,
 		string modifier,
 		CancellationToken cancellationToken = default);
 }

@@ -22,7 +22,7 @@ public class
 	private readonly IPromotionBonusRepository _promotionBonusFactory;
 	private readonly ITgsService<PromotionBonus> _promotionBonusServices;
 	private readonly IPromotionRepository _promotionRepository;
-	private readonly ITgsService<Domain.Entities.Promotion> _promotionService;
+	private readonly ITgsService<PromotionRow> _promotionService;
 	private readonly ITransactionRepository _transactionRepository;
 
 	public CreatePromotionBonusDailyQueryHandler(
@@ -31,7 +31,7 @@ public class
 		ICashServiceClient cashServiceClient,
 		ITransactionRepository transactionRepository,
 		IPromotionRepository promotionRepository,
-		ITgsService<Domain.Entities.Promotion> promotionService,
+		ITgsService<PromotionRow> promotionService,
 		ITgsService<PromotionBonus> promotionBonusService,
 		ITgsService<PlayerGameRebateAggregate> playerGameRebateAggregateService,
 		ITgsService<BrandGame> brandGameService,
@@ -251,7 +251,8 @@ public class
 
 	private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(
 		Guid id,
-		Domain.Entities.Promotion promotion, IEnumerable<PlayerGameRebateAggregate> aggregates)
+		PromotionRow promotion,
+		IEnumerable<PlayerGameRebateAggregate> aggregates)
 	{
 		var amount = promotion.AmountUsed;
 

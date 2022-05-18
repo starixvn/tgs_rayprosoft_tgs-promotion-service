@@ -20,7 +20,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		_httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 	}
 
-	public async ValueTask CreatePromotionAsync<TCampaignDetail>(
+	public async ValueTask<Guid> CreatePromotionAsync<TCampaignDetail>(
 		Guid brandId,
 		CreatePromotionInfo<TCampaignDetail> createInfo,
 		string modifier,
@@ -44,6 +44,37 @@ internal class PromotionServiceClient : IPromotionServiceClient
 
 		var response = await _httpClient.PutAsync(
 			$"/api/promotion-mgr/{brandId}",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		var json = await response.Content
+			.ReadAsStringAsync(cancellationToken)
+			.ConfigureAwait(false);
+
+		return JsonSerializer.Deserialize<Guid>(json, _JsonSerializerOptions);
+	}
+
+	public async ValueTask SetPromotionVipLevelsAsync(
+		Guid promotionId,
+		IEnumerable<int> vipLevels,
+		string modifier,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new
+		{
+			VipLevels = vipLevels,
+			Modifier = modifier
+		};
+
+		var requestContent = new StringContent(
+			JsonSerializer.Serialize(request, _JsonSerializerOptions),
+			Encoding.UTF8,
+			"application/json");
+
+		var response = await _httpClient.PutAsync(
+			$"/api/promotion-mgr/vip/{promotionId}",
 			requestContent,
 			cancellationToken).ConfigureAwait(false);
 

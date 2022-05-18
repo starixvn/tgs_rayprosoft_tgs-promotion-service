@@ -24,7 +24,7 @@ public class
 	private readonly IPromotionBonusRepository _promotionBonusFactory;
 	private readonly ITgsService<PromotionBonus> _promotionBonusService;
 	private readonly IPromotionRepository _promotionFactory;
-	private readonly ITgsService<Domain.Entities.Promotion> _promotionService;
+	private readonly ITgsService<PromotionRow> _promotionService;
 	private readonly ITransactionRepository _transactionRepository;
 
 	public CreatePromotionBonusMonthlyHandler(
@@ -33,7 +33,7 @@ public class
 		ICashServiceClient cashServiceClient,
 		ITransactionRepository transactionRepository,
 		IPromotionRepository promotionRepository,
-		ITgsService<Domain.Entities.Promotion> promotionService,
+		ITgsService<PromotionRow> promotionService,
 		ITgsService<PromotionBonus> promotionBonusService,
 		ITgsService<PlayerGameRebateAggregate> playerGameRebateAggregateService,
 		ITgsService<BrandGame> brandGameService,
@@ -243,8 +243,10 @@ public class
 
 	private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(
 		Guid id,
-		Domain.Entities.Promotion promotion, IEnumerable<PlayerGameRebateAggregate> aggregates,
-		DateTimeOffset from, DateTimeOffset to)
+		PromotionRow promotion,
+		IEnumerable<PlayerGameRebateAggregate> aggregates,
+		DateTimeOffset from,
+		DateTimeOffset to)
 	{
 		var amount = promotion.AmountUsed;
 
