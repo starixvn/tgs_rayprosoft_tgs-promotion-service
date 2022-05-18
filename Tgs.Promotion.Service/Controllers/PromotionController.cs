@@ -165,7 +165,7 @@ public class PromotionController : ControllerBase
 		await revertService.ExecuteAsync(command).ConfigureAwait(false);
 	}
 
-	[HttpPut("{id}", Name = "UpdatePromotion")]
+	[HttpPut("update/{id}", Name = "UpdatePromotion")]
 	[Description("Update a promotion")]
 	public ValueTask<MessageResponse> UpdatePromotionAsync(
 		[FromServices] IGetService<UpdatePromotionRequest, MessageResponse> getService,
