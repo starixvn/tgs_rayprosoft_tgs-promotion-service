@@ -12,22 +12,21 @@ public class PromotionTests
 	public async Task Create_Promotion()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
-		var sut = new CreatePromotionCommandService(fakePromotionRepository);
+		var sut = new CreatePromotionMainInfoCommandService(fakePromotionRepository);
 
-		var command = new CreatePromotionCommand(
+		var command = new CreatePromotionMainInfoCommand(
 			Guid.NewGuid(),
 			"TestPromotion",
 			(DateTime.Now.AddDays(-10), DateTime.Now),
 			"TestType",
 			null,
 			true,
-			JsonDocument.Parse("{}"),
 			"ModifyUser");
 
 		_ = await sut.GetAsync(command);
 
 		_ = fakePromotionRepository.Received(1)
-			.CreatePromotionAsync(Arg.Any<CreatePromotionInfo>());
+			.CreatePromotionAsync(Arg.Any<CreatePromotionMainInfo>());
 	}
 
 	[TestMethod]

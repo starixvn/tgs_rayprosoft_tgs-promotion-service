@@ -18,13 +18,12 @@ public class PromotionTests
 		var sut = new PromotionServiceClient(httpClient);
 
 		var brandId = Guid.NewGuid();
-		var createInfo = new CreatePromotionInfo<object>
+		var createInfo = new CreatePromotionMainInfo<object>
 		{
 			Name = "Test Promotion",
 			EventDuring = new During(DateTime.Now.AddDays(-10), DateTime.Now),
 			PromotionType = "TestType",
-			IsAutoSent = true,
-			CampaignDetail = new object()
+			IsAutoSent = true
 		};
 
 		var resultId = await sut.CreatePromotionAsync(brandId, createInfo, "ModifyUser");

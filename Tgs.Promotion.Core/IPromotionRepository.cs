@@ -10,7 +10,7 @@ public interface IPromotionRepository
 
 	ValueTask<Guid> CreatePromotionAsync(CreatePromotionRequest request, PromotionType promotionTypeModel);
 
-	ValueTask<Guid> CreatePromotionAsync(CreatePromotionInfo createInfo, CancellationToken cancellationToken = default);
+	ValueTask<Guid> CreatePromotionAsync(CreatePromotionMainInfo createInfo, CancellationToken cancellationToken = default);
 
 	ValueTask SetPromotionVipLevelsAsync(Guid promotionId, IEnumerable<int> vipLevels, string modifier, CancellationToken cancellationToken = default);
 

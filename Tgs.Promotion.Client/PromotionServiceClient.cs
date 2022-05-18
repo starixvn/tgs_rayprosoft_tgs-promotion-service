@@ -22,7 +22,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 
 	public async ValueTask<Guid> CreatePromotionAsync<TCampaignDetail>(
 		Guid brandId,
-		CreatePromotionInfo<TCampaignDetail> createInfo,
+		CreatePromotionMainInfo<TCampaignDetail> createInfo,
 		string modifier,
 		CancellationToken cancellationToken = default)
 	{
@@ -33,7 +33,6 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			createInfo.EventDuring,
 			createInfo.PromotionLimitAmount,
 			createInfo.IsAutoSent,
-			createInfo.CampaignDetail,
 			Modifier = modifier
 		};
 

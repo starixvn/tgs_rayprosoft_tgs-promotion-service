@@ -207,7 +207,7 @@ public class PromotionRepository : IPromotionRepository
 	public ValueTask UpdatePromotionsAsync(PromotionRow[] promotions) =>
 		_promotionService.UpdateEntitiesAsync(promotions);
 
-	public async ValueTask<Guid> CreatePromotionAsync(CreatePromotionInfo createInfo, CancellationToken cancellationToken = default)
+	public async ValueTask<Guid> CreatePromotionAsync(CreatePromotionMainInfo createInfo, CancellationToken cancellationToken = default)
 	{
 		var promotionId = await _serialNumberGenerator.GenerateAsync().ConfigureAwait(false);
 
@@ -229,7 +229,7 @@ public class PromotionRepository : IPromotionRepository
 			Percentage = 0M,
 			TotalAmountLimit = createInfo.PromotionLimitAmount ?? 0M,
 			TurnoverMultiple = 0M,
-			CampaignDetail = createInfo.CampaignDetail,
+			CampaignDetail = "{}",
 			CreatedByUsername = createInfo.Modifier,
 			UpdatedByUsername = createInfo.Modifier,
 			CreatedOn = now,

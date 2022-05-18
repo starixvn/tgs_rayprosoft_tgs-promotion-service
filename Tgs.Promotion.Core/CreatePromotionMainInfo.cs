@@ -1,6 +1,6 @@
 ﻿namespace Tgs.Promotion;
 
-public class CreatePromotionInfo
+public class CreatePromotionMainInfo
 {
 	public Guid BrandId { get; init; }
 
@@ -13,8 +13,6 @@ public class CreatePromotionInfo
 	public decimal? PromotionLimitAmount { get; init; }
 
 	public bool IsAutoSent { get; init; }
-
-	public string CampaignDetail { get; init; } = default!;
 
 	public string Modifier { get; init; } = default!;
 }

@@ -1,8 +1,6 @@
-﻿using System.Text.Json;
+﻿namespace Tgs.Promotion.Client;
 
-namespace Tgs.Promotion.Client;
-
-public record CreatePromotionInfo<TCampaignDetail>
+public record CreatePromotionMainInfo<TCampaignDetail>
 {
 	public string Name { get; init; } = default!;
 
@@ -13,6 +11,4 @@ public record CreatePromotionInfo<TCampaignDetail>
 	public decimal? PromotionLimitAmount { get; init; }
 
 	public bool IsAutoSent { get; init; }
-
-	public TCampaignDetail CampaignDetail { get; init; } = default!;
 }

@@ -3,26 +3,25 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class CreatePromotionCommandService : IGetService<CreatePromotionCommand, Guid>
+internal class CreatePromotionMainInfoCommandService : IGetService<CreatePromotionMainInfoCommand, Guid>
 {
 	private readonly IPromotionRepository _promotionRepository;
 
-	public CreatePromotionCommandService(IPromotionRepository promotionRepository)
+	public CreatePromotionMainInfoCommandService(IPromotionRepository promotionRepository)
 	{
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 	}
 
-	public ValueTask<Guid> GetAsync(CreatePromotionCommand command, CancellationToken cancellationToken = default)
+	public ValueTask<Guid> GetAsync(CreatePromotionMainInfoCommand command, CancellationToken cancellationToken = default)
 	{
-		var createInfo = new CreatePromotionInfo
+		var createInfo = new CreatePromotionMainInfo
 		{
 			BrandId = command.BrandId,
 			Name = command.Name,
 			EventDuring = command.EventDuring,
 			PromotionLimitAmount = command.PromotionLimitAmount,
 			IsAutoSent = command.IsAutoSent,
-			PromotionType = command.PromotionType,
-			CampaignDetail = JsonSerializer.Serialize(command.CampaignDetail)
+			PromotionType = command.PromotionType
 		};
 
 		return _promotionRepository

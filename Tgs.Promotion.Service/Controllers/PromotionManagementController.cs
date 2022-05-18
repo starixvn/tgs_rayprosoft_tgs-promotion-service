@@ -9,20 +9,19 @@ namespace Tgs.Promotion.Service.Controllers;
 [ApiController]
 public class PromotionManagementController : ControllerBase
 {
-	[HttpPut("{brandId}", Name = "CreatePromotionInfo")]
+	[HttpPut("{brandId}", Name = "CreatePromotionMainInfo")]
 	public ValueTask<Guid> CreatePromotionAsync(
-			[FromServices] IGetService<CreatePromotionCommand, Guid> createService,
+			[FromServices] IGetService<CreatePromotionMainInfoCommand, Guid> createService,
 			Guid brandId,
 			[FromBody] CreatePromotionViewModel createModel)
 	{
-		var command = new CreatePromotionCommand(
+		var command = new CreatePromotionMainInfoCommand(
 			brandId,
 			createModel.Name,
 			(createModel.EventDuring.From, createModel.EventDuring.To),
 			createModel.PromotionType,
 			createModel.PromotionLimitAmount,
 			createModel.IsAutoSent,
-			createModel.CampaignDetail,
 			createModel.Modifier);
 
 		return createService.GetAsync(command, HttpContext.RequestAborted);
