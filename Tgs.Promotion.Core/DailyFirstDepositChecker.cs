@@ -1,5 +1,4 @@
-﻿using Tgs.Promotion;
-namespace Tgs.Promotion;
+﻿namespace Tgs.Promotion;
 
 internal class DailyFirstDepositChecker : IPromotionChecker
 {

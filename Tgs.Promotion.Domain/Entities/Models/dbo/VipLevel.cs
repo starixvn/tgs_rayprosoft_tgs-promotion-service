@@ -10,8 +10,8 @@ namespace Tgs.Promotion.Domain.Entities
         public VipLevel()
         {
             Players = new HashSet<Player>();
+            PromotionRows = new HashSet<PromotionRow>();
             PromotionVipLevels = new HashSet<PromotionVipLevel>();
-            Promotions = new HashSet<Promotion>();
         }
 
         public Guid Id { get; set; }
@@ -37,7 +37,7 @@ namespace Tgs.Promotion.Domain.Entities
         public string UpdatedByUsername { get; set; } = null!;
 
         public virtual ICollection<Player> Players { get; set; }
+        public virtual ICollection<PromotionRow> PromotionRows { get; set; }
         public virtual ICollection<PromotionVipLevel> PromotionVipLevels { get; set; }
-        public virtual ICollection<Promotion> Promotions { get; set; }
     }
 }

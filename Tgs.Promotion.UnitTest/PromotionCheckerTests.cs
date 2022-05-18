@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.ApplicationServices;
-using Tgs.Promotion;
+using Tgs.Promotion.Domain.Entities;
 
 namespace Tgs.Promotion.UnitTest;
 

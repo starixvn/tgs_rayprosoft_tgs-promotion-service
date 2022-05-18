@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Tgs.Promotion.Client.Models.Promotion;
+namespace Tgs.Promotion.Clients.Models.Promotion;
 
 public record CreatePromotionRequest
 {

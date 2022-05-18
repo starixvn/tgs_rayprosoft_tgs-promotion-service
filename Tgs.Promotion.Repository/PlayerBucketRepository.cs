@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tgs.CashService.Client;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.SerialNumberGenerator;
 using Tgs.Promotion.Models.PromotionBucket;
-using Tgs.Promotion;
+using Tgs.SerialNumberGenerator;
 
 namespace Tgs.Promotion.Repository;
 
@@ -13,12 +12,12 @@ internal class PlayerBucketRepository : IPlayerBucketRepository
 	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly ITgsService<PlayerBucket> _playerBucketService;
 	private readonly ITgsService<PromotionBonus> _promotionBonusService;
-	private readonly ITgsService<Domain.Entities.Promotion> _promotionService;
+	private readonly ITgsService<PromotionRow> _promotionService;
 	private readonly ITgsService<TransactionPromotion> _transactionPromotionService;
 
 	public PlayerBucketRepository(
 		ITgsService<PlayerBucket> playerBucketService,
-		ITgsService<Domain.Entities.Promotion> promotionService,
+		ITgsService<PromotionRow> promotionService,
 		ITgsService<PromotionBonus> promotionBonusService,
 		ITgsService<TransactionPromotion> transactionPromotionService,
 		ICashServiceClient cashServiceClient,

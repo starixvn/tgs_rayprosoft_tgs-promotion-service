@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.ServiceUtility;
 using Tgs.Promotion.ApplicationServices;
-using Tgs.Promotion.Models.PromotionBonus;
 using Tgs.Promotion.Models;
+using Tgs.Promotion.Models.PromotionBonus;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Service.Controllers;
 

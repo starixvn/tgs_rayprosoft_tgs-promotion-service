@@ -10,9 +10,9 @@ using Tgs.Promotion.Domain.Entities;
 
 namespace Tgs.Promotion.Domain.Entities.Configurations
 {
-    public partial class PromotionConfiguration : IEntityTypeConfiguration<Promotion>
+    public partial class PromotionRowConfiguration : IEntityTypeConfiguration<PromotionRow>
     {
-        public void Configure(EntityTypeBuilder<Promotion> entity)
+        public void Configure(EntityTypeBuilder<PromotionRow> entity)
         {
             entity.ToTable("promotions", "dbo");
 
@@ -106,7 +106,7 @@ namespace Tgs.Promotion.Domain.Entities.Configurations
             entity.Property(e => e.VipLevelId).HasColumnName("vip_level_id");
 
             entity.HasOne(d => d.VipLevel)
-                .WithMany(p => p.Promotions)
+                .WithMany(p => p.PromotionRows)
                 .HasForeignKey(d => d.VipLevelId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_promotions_vip_levels_vip_level_id");
@@ -114,6 +114,6 @@ namespace Tgs.Promotion.Domain.Entities.Configurations
             OnConfigurePartial(entity);
         }
 
-        partial void OnConfigurePartial(EntityTypeBuilder<Promotion> entity);
+        partial void OnConfigurePartial(EntityTypeBuilder<PromotionRow> entity);
     }
 }

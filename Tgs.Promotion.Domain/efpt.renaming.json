@@ -1,0 +1,13 @@
+﻿[
+	{
+		"SchemaName": "dbo",
+		"Tables": [
+			{
+				"Columns": [],
+				"Name": "promotions",
+				"NewName": "PromotionRow"
+			}
+		],
+		"UseSchemaName": false
+	}
+]

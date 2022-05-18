@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.ServiceUtility;
-using Tgs.Promotion.Models.PromotionDispatch;
 using Tgs.Promotion.Models;
+using Tgs.Promotion.Models.PromotionDispatch;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Service.Controllers;
 

@@ -77,25 +77,6 @@ public class PromotionController : ControllerBase
 		CreatePromotionRequest request) =>
 		getService.GetAsync(request);
 
-	[HttpPut("{brandId}", Name = "CreatePromotionInfo")]
-	public ValueTask CreatePromotionAsync(
-		[FromServices] ICommandService<CreatePromotionCommand> createService,
-		Guid brandId,
-		CreatePromotionViewModel createModel)
-	{
-		var command = new CreatePromotionCommand(
-			brandId,
-			createModel.Name,
-			(createModel.EventDuring.From, createModel.EventDuring.To),
-			createModel.PromotionType,
-			createModel.PromotionLimitAmount,
-			createModel.IsAutoSent,
-			createModel.CampaignDetail,
-			createModel.Modifier);
-
-		return createService.ExecuteAsync(command, HttpContext.RequestAborted);
-	}
-
 	[HttpPut("deposit/{playerCode}")]
 	[HttpPut("deposit/{playerCode}/{promotionId?}")]
 	[Description("Tag player deposit")]
