@@ -1,10 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Tgs.Promotion.Clients;
 
-namespace Tgs.Promotion.Client;
 public interface IPromotionServiceClient
 {
+	ValueTask<Guid> CreatePromotionAsync(
+		Guid brandId,
+		CreatePromotionMainInfo createInfo,
+		string modifier,
+		CancellationToken cancellationToken = default);
+
+	ValueTask SetPromotionVipLevelsAsync(
+		Guid promotionId,
+		IEnumerable<int> vipLevels,
+		string modifier,
+		CancellationToken cancellationToken = default);
+
+	ValueTask SetPromotionContentAsync(
+		Guid promotionId,
+		PromotionContent content,
+		string modifier,
+		CancellationToken cancellationToken = default);
 }

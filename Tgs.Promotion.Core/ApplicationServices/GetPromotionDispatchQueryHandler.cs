@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
-using Tgs.ServiceUtility;
-using Tgs.Promotion.Models.PromotionDispatch;
-using Tgs.Promotion.Models;
 using Tgs.Promotion.Extensions;
+using Tgs.Promotion.Models;
+using Tgs.Promotion.Models.PromotionDispatch;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 

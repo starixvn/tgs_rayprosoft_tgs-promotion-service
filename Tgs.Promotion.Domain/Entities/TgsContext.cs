@@ -26,11 +26,11 @@ namespace Tgs.Promotion.Domain.Entities
         public virtual DbSet<PlayerGameRebateAggregate> PlayerGameRebateAggregates { get; set; } = null!;
         public virtual DbSet<PlayerVipLevelSeasonPromotion> PlayerVipLevelSeasonPromotions { get; set; } = null!;
         public virtual DbSet<PlayerVipLevelUpgradePromotion> PlayerVipLevelUpgradePromotions { get; set; } = null!;
-        public virtual DbSet<Promotion> Promotions { get; set; } = null!;
         public virtual DbSet<PromotionBonus> PromotionBonuses { get; set; } = null!;
         public virtual DbSet<PromotionGameProvider> PromotionGameProviders { get; set; } = null!;
         public virtual DbSet<PromotionParticipant> PromotionParticipants { get; set; } = null!;
         public virtual DbSet<PromotionPlayer> PromotionPlayers { get; set; } = null!;
+        public virtual DbSet<PromotionRow> PromotionRows { get; set; } = null!;
         public virtual DbSet<PromotionVipLevel> PromotionVipLevels { get; set; } = null!;
         public virtual DbSet<Setting> Settings { get; set; } = null!;
         public virtual DbSet<TransactionPromotion> TransactionPromotions { get; set; } = null!;
@@ -39,8 +39,7 @@ namespace Tgs.Promotion.Domain.Entities
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasPostgresExtension("ltree")
-                .HasPostgresExtension("pg_trgm")
-                .HasPostgresExtension("uuid-ossp");
+                .HasPostgresExtension("pg_trgm");
 
             modelBuilder.ApplyConfiguration(new Configurations.BrandGameConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.GameProviderConfiguration());
@@ -49,11 +48,11 @@ namespace Tgs.Promotion.Domain.Entities
             modelBuilder.ApplyConfiguration(new Configurations.PlayerGameRebateAggregateConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerVipLevelSeasonPromotionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerVipLevelUpgradePromotionConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PromotionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionBonusConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionGameProviderConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionParticipantConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionPlayerConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PromotionRowConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionVipLevelConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.SettingConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.TransactionPromotionConfiguration());

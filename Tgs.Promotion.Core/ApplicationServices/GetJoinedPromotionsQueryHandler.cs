@@ -1,7 +1,7 @@
-﻿using Tgs.ServiceUtility;
-using Tgs.Promotion.Models.Promotion;
+﻿using Tgs.Promotion.Extensions;
 using Tgs.Promotion.Models;
-using Tgs.Promotion.Extensions;
+using Tgs.Promotion.Models.Promotion;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 

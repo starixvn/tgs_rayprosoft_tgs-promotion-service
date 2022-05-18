@@ -11,21 +11,67 @@ public class PromotionTests
 	public async Task Create_Promotion()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
-		var sut = new CreatePromotionCommandService(fakePromotionRepository);
+		var sut = new CreatePromotionMainInfoCommandService(fakePromotionRepository);
 
-		var command = new CreatePromotionCommand(
+		var command = new CreatePromotionMainInfoCommand(
 			Guid.NewGuid(),
 			"TestPromotion",
 			(DateTime.Now.AddDays(-10), DateTime.Now),
 			"TestType",
 			null,
 			true,
+			"ModifyUser");
+
+		_ = await sut.GetAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.CreatePromotionAsync(Arg.Any<CreatePromotionMainInfo>(), Arg.Is(command.Modifier));
+	}
+
+	[TestMethod]
+	public async Task Update_Promotion_VipLevels()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new UpdatePromotionVipLevelsCommandService(fakePromotionRepository);
+
+		var command = new UpdatePromotionVipLevelsCommand(
+			Guid.NewGuid(),
+			new[] { 1, 2 },
+			"ModifyUser");
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.SetPromotionVipLevelsAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Is<IEnumerable<int>>(levels => levels.Count() == 2 && levels.First() == 1 && levels.Last() == 2),
+				Arg.Is(command.Modifier));
+	}
+
+	[TestMethod]
+	public async Task Update_Promotion_Content()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new UpdatePromotionContentCommandService(fakePromotionRepository);
+
+		var command = new UpdatePromotionContentCommand(
+			Guid.NewGuid(),
+			null,
+			null,
+			null,
+			null,
+			null,
 			JsonDocument.Parse("{}"),
 			"ModifyUser");
 
 		await sut.ExecuteAsync(command);
 
 		_ = fakePromotionRepository.Received(1)
-			.CreatePromotionAsync(Arg.Any<CreatePromotionInfo>());
+			.SetPromotionContentAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<PromotionContentDetail>(),
+				Arg.Is(command.Modifier));
 	}
 }

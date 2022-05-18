@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 
-namespace TGS.Core.Infrastructures.Utility;
+namespace Tgs.Promotion.Clients;
 
-public static class ClientPath
+internal static class ClientPath
 {
 	public static string AppendWithProperties(string path, object obj) => Append(path, obj);
 

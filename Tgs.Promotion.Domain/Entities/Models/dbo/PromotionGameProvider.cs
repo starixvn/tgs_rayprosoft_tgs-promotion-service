@@ -11,6 +11,6 @@ namespace Tgs.Promotion.Domain.Entities
         public Guid GameProviderId { get; set; }
 
         public virtual GameProvider GameProvider { get; set; } = null!;
-        public virtual Promotion Promotion { get; set; } = null!;
+        public virtual PromotionRow Promotion { get; set; } = null!;
     }
 }

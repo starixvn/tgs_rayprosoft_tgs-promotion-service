@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-namespace Tgs.Promotion.Service.ViewModels;
+﻿namespace Tgs.Promotion.Service.ViewModels;
 
 public class CreatePromotionViewModel
 {
@@ -13,8 +11,6 @@ public class CreatePromotionViewModel
 	public decimal? PromotionLimitAmount { get; init; }
 
 	public bool IsAutoSent { get; init; }
-
-	public JsonDocument CampaignDetail { get; init; } = default!;
 
 	public string Modifier { get; init; } = default!;
 }

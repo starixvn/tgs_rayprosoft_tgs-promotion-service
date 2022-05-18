@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tgs.CashService.Client;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.SerialNumberGenerator;
-using Tgs.ServiceUtility;
 using Tgs.Promotion.Extensions;
+using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.PromotionBonus;
 using Tgs.Promotion.Models.PromotionBucket;
-using Tgs.Promotion.Models;
+using Tgs.SerialNumberGenerator;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices.Promotion;
 
@@ -227,8 +227,10 @@ public class CreatePromotionBonusWeeklyHandler
 
 	private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(
 		Guid id,
-		Domain.Entities.Promotion promotion, IEnumerable<PlayerGameRebateAggregate> aggregates,
-		DateTimeOffset from, DateTimeOffset to)
+		PromotionRow promotion,
+		IEnumerable<PlayerGameRebateAggregate> aggregates,
+		DateTimeOffset from,
+		DateTimeOffset to)
 	{
 		var amount = promotion.AmountUsed;
 

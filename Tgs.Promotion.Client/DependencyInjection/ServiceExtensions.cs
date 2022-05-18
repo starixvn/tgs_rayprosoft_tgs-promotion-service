@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
-using Tgs.Promotion.Client;
+using Tgs.Promotion.Clients;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
