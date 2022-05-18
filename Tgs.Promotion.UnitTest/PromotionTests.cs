@@ -10,12 +10,11 @@ using MockQueryable.Moq;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.Promotion.Domain.Entities;
-using Tgs.ServiceUtility;
 using Tgs.Promotion.ApplicationServices;
-using Tgs.Promotion.Models.Promotion;
+using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
-using Tgs.Promotion;
+using Tgs.Promotion.Models.Promotion;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.UnitTest;
 
@@ -175,7 +174,7 @@ public class PromotionTests
 
 		_ = fakePromotionRepository
 			.GetPromotionByIdAsync(query.PromotionId)
-			.Returns(new Domain.Entities.PromotionRow
+			.Returns(new PromotionRow
 			{
 				BrandId = query.BrandId,
 				PromotionType = "TestPromotionType"

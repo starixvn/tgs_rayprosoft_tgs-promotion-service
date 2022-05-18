@@ -1,7 +1,5 @@
-﻿using MediatR;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Tgs.ServiceUtility;
-using Tgs.Promotion.ApplicationServices;
 
 namespace Tgs.Promotion.ApplicationServices;
 

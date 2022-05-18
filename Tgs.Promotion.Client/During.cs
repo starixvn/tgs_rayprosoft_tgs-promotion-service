@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion.Client;
+﻿namespace Tgs.Promotion.Clients;
 public record struct During(DateTime From, DateTime To)
 {
 	public void Deconstruct(out DateTime from, out DateTime to)

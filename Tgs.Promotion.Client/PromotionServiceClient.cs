@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Tgs.Promotion.Client;
+namespace Tgs.Promotion.Clients;
 
 internal class PromotionServiceClient : IPromotionServiceClient
 {
@@ -20,9 +20,9 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		_httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 	}
 
-	public async ValueTask<Guid> CreatePromotionAsync<TCampaignDetail>(
+	public async ValueTask<Guid> CreatePromotionAsync(
 		Guid brandId,
-		CreatePromotionMainInfo<TCampaignDetail> createInfo,
+		CreatePromotionMainInfo createInfo,
 		string modifier,
 		CancellationToken cancellationToken = default)
 	{
@@ -74,6 +74,36 @@ internal class PromotionServiceClient : IPromotionServiceClient
 
 		var response = await _httpClient.PutAsync(
 			$"/api/promotion-mgr/vip/{promotionId}",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+	}
+
+	public async ValueTask SetPromotionContentAsync(
+		Guid promotionId,
+		PromotionContent content,
+		string modifier,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new
+		{
+			content.SubSubject,
+			content.PersonalComputerBanner,
+			content.MobileBanner,
+			content.Content,
+			content.Convention,
+			content.Localization,
+			Modifier = modifier
+		};
+
+		var requestContent = new StringContent(
+			JsonSerializer.Serialize(request, _JsonSerializerOptions),
+			Encoding.UTF8,
+			"application/json");
+
+		var response = await _httpClient.PutAsync(
+			$"/api/promotion-mgr/content/{promotionId}",
 			requestContent,
 			cancellationToken).ConfigureAwait(false);
 

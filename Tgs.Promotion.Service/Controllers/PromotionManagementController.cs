@@ -40,4 +40,23 @@ public class PromotionManagementController : ControllerBase
 
 		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
 	}
+
+	[HttpPut("content/{promotionId}", Name = "UpdatePromotionContent")]
+	public ValueTask UpdatePromotionContentAsync(
+		[FromServices] ICommandService<UpdatePromotionContentCommand> updateService,
+		Guid promotionId,
+		[FromBody] PromotionContentViewModel contentModel)
+	{
+		var command = new UpdatePromotionContentCommand(
+			promotionId,
+			contentModel.SubSubject,
+			contentModel.PersonalComputerBanner,
+			contentModel.MobileBanner,
+			contentModel.Content,
+			contentModel.Convention,
+			contentModel.Localization,
+			contentModel.Modifier);
+
+		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
+	}
 }

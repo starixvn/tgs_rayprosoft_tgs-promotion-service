@@ -1,5 +1,4 @@
-﻿using Tgs.Promotion.Models.PromotionBonus;
-namespace Tgs.Promotion.Models.PromotionBonus;
+﻿namespace Tgs.Promotion.Models.PromotionBonus;
 
 public class PromotionBonusModel
 {

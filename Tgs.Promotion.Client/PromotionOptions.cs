@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion.Client;
+﻿namespace Tgs.Promotion.Clients;
 
 public class PromotionOptions
 {

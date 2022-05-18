@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
-using Tgs.ServiceUtility;
-using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Models.Promotion;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 

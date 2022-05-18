@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 
 namespace Tgs.Promotion;
-public class PromotionContentDetail
-{
-}
+public record PromotionContentDetail(
+	string? SubSubject,
+	string? PersonalComputerBanner,
+	string? MobileBanner,
+	string? Content,
+	string? Convention,
+	JsonDocument Localization);

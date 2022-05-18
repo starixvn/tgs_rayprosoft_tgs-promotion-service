@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
-using Tgs.Promotion;
 
 namespace Tgs.Promotion.Repository;
 

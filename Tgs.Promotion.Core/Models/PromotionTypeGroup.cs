@@ -1,5 +1,4 @@
-﻿using Tgs.Promotion.Models;
-namespace Tgs.Promotion.Models;
+﻿namespace Tgs.Promotion.Models;
 
 public record PromotionTypeGroup
 {

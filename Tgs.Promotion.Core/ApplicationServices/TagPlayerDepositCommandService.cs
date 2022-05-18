@@ -1,5 +1,4 @@
 ﻿using Tgs.ServiceUtility;
-using Tgs.Promotion.ApplicationServices;
 
 namespace Tgs.Promotion.ApplicationServices;
 

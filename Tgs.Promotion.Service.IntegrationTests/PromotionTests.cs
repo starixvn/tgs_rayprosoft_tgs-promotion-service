@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Tgs.Promotion.Client;
+﻿using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Tgs.Promotion.Clients;
 using Tgs.Promotion.Domain.Entities;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
@@ -11,14 +11,14 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Create_Promotion()
 	{
-		await using var web = new TestPromotionApplication();
+		var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
 		var sut = new PromotionServiceClient(httpClient);
 
 		var brandId = Guid.NewGuid();
-		var createInfo = new CreatePromotionMainInfo<object>
+		var createInfo = new Clients.CreatePromotionMainInfo
 		{
 			Name = "Test Promotion",
 			EventDuring = new During(DateTime.Now.AddDays(-10), DateTime.Now),
@@ -45,7 +45,7 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Set_Promotion_VipLevels()
 	{
-		await using var web = new TestPromotionApplication();
+		var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
@@ -94,5 +94,54 @@ public class PromotionTests
 		var vipRecords = dbContext.PromotionVipLevels.ToArray();
 
 		Assert.AreEqual(2, vipRecords.Length);
+	}
+
+	[TestMethod]
+	public async Task Set_Promotion_Content()
+	{
+		var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+		var brandId = Guid.NewGuid();
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		var promotionRow = new PromotionRow
+		{
+			Id = promotionId,
+			BrandId = brandId,
+			From = DateTime.Now.AddDays(-10),
+			To = DateTime.Now,
+			Name = "Test Promotion",
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			Status = 1,
+			CampaignDetail = "{}"
+		};
+
+		_ = await dbContext.PromotionRows.AddAsync(promotionRow);
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var promotionContent = new PromotionContent
+		{
+			SubSubject = "Test SubSubject",
+			PersonalComputerBanner = "https://localhost/banner1.png",
+			MobileBanner = "https://localhost/banner2.png",
+			Content = "Test Content",
+			Convention = "Test Convention",
+			Localization = JsonDocument.Parse("{}")
+		};
+
+		await sut.SetPromotionContentAsync(promotionId, promotionContent, "ModifyUser");
+
+		Assert.AreEqual(promotionContent.SubSubject, promotionRow.SubSubject);
+		Assert.AreEqual(promotionContent.PersonalComputerBanner, promotionRow.DesktopBanner);
+		Assert.AreEqual(promotionContent.MobileBanner, promotionRow.MobileBanner);
+		Assert.AreEqual(promotionContent.Content, promotionRow.Content);
+		Assert.AreEqual(promotionContent.Convention, promotionRow.Terms);
 	}
 }

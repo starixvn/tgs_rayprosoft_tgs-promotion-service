@@ -74,8 +74,7 @@ builder.Services
 		var config = sp.GetRequiredService<IConfiguration>();
 
 		options.BaseUrl = config.GetValue<Uri>("Promotion:CashBaseUrl");
-	})
-	.AddTgsLog();
+	});
 
 builder.Services
 	.AddMessageQueue()
@@ -94,7 +93,6 @@ builder.Services
 builder.Services.AddHealthChecks();
 
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();

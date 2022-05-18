@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion.Client.Models;
+﻿namespace Tgs.Promotion.Clients.Models;
 
 public record MessageResponse
 {

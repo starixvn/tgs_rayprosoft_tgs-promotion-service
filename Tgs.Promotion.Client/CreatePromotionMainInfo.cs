@@ -1,6 +1,6 @@
-﻿namespace Tgs.Promotion.Client;
+﻿namespace Tgs.Promotion.Clients;
 
-public record CreatePromotionMainInfo<TCampaignDetail>
+public record CreatePromotionMainInfo
 {
 	public string Name { get; init; } = default!;
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -9,7 +8,6 @@ using NUnit.Framework;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
 using Tgs.Promotion.MessageQueue;
-using Tgs.Promotion;
 
 namespace Tgs.Promotion.UnitTest;
 

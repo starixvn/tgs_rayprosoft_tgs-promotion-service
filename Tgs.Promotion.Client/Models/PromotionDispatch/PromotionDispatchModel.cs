@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion.Client.Models.PromotionDispatch;
+﻿namespace Tgs.Promotion.Clients.Models.PromotionDispatch;
 
 public class PromotionDispatchModel
 {

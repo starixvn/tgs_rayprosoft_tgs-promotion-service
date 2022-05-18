@@ -14,6 +14,8 @@ public interface IPromotionRepository
 
 	ValueTask SetPromotionVipLevelsAsync(Guid promotionId, IEnumerable<int> vipLevels, string modifier, CancellationToken cancellationToken = default);
 
+	ValueTask SetPromotionContentAsync(Guid promotionId, PromotionContentDetail content, string modifier, CancellationToken cancellationToken = default);
+
 	ValueTask<bool> ExistsAsync(Expression<Func<Domain.Entities.PromotionRow, bool>> predicate);
 
 	ValueTask UpdatePromotionAsync(Domain.Entities.PromotionRow promotion, UpdatePromotionRequest request);

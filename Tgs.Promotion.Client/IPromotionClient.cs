@@ -1,7 +1,7 @@
-﻿using Tgs.Promotion.Client.Models;
-using Tgs.Promotion.Client.Models.Promotion;
+﻿using Tgs.Promotion.Clients.Models;
+using Tgs.Promotion.Clients.Models.Promotion;
 
-namespace Tgs.Promotion.Client;
+namespace Tgs.Promotion.Clients;
 
 public interface IPromotionClient
 {

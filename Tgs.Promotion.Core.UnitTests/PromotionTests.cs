@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.Promotion.ApplicationServices;
 
@@ -47,6 +46,32 @@ public class PromotionTests
 			.SetPromotionVipLevelsAsync(
 				Arg.Is(command.PromotionId),
 				Arg.Is<IEnumerable<int>>(levels => levels.Count() == 2 && levels.First() == 1 && levels.Last() == 2),
+				Arg.Is(command.Modifier));
+	}
+
+	[TestMethod]
+	public async Task Update_Promotion_Content()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new UpdatePromotionContentCommandService(fakePromotionRepository);
+
+		var command = new UpdatePromotionContentCommand(
+			Guid.NewGuid(),
+			null,
+			null,
+			null,
+			null,
+			null,
+			JsonDocument.Parse("{}"),
+			"ModifyUser");
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.SetPromotionContentAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<PromotionContentDetail>(),
 				Arg.Is(command.Modifier));
 	}
 }

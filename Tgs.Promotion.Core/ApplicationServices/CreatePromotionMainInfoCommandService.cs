@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Tgs.ServiceUtility;
+﻿using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 

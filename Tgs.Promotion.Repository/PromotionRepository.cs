@@ -14,6 +14,11 @@ namespace Tgs.Promotion.Repository;
 
 public class PromotionRepository : IPromotionRepository
 {
+	private static readonly JsonSerializerOptions _SerializerOptions = new()
+	{
+		WriteIndented = false
+	};
+
 	private readonly ITgsService<PromotionRow> _promotionService;
 	private readonly ITgsService<VipLevel> _vipLevelService;
 	private readonly ITgsService<GameProvider> _gameProviderService;
@@ -21,11 +26,11 @@ public class PromotionRepository : IPromotionRepository
 	private readonly ISerialNumberGenerator _serialNumberGenerator;
 
 	public PromotionRepository(
-		ITgsService<PromotionRow> promotionService,
-		ITgsService<VipLevel> vipLevelService,
-		ITgsService<GameProvider> gameProviderService,
-		TgsContext dbContext,
-		ISerialNumberGenerator serialNumberGenerator)
+			ITgsService<PromotionRow> promotionService,
+			ITgsService<VipLevel> vipLevelService,
+			ITgsService<GameProvider> gameProviderService,
+			TgsContext dbContext,
+			ISerialNumberGenerator serialNumberGenerator)
 	{
 		_promotionService = promotionService ?? throw new ArgumentNullException(nameof(promotionService));
 		_vipLevelService = vipLevelService ?? throw new ArgumentNullException(nameof(vipLevelService));
@@ -43,8 +48,8 @@ public class PromotionRepository : IPromotionRepository
 		return await preQuery(_promotionService.GetQueries()).FirstOrDefaultAsync(predicate);
 	}
 
-	public ValueTask ChangePromotionStatusAsync(PromotionRow promotion) =>
-			_promotionService.UpdateEntityAsync(promotion);
+	public ValueTask ChangePromotionStatusAsync(PromotionRow promotion)
+		=> _promotionService.UpdateEntityAsync(promotion);
 
 	public async ValueTask<Guid> CreatePromotionAsync(
 		CreatePromotionRequest request,
@@ -283,19 +288,44 @@ public class PromotionRepository : IPromotionRepository
 			.ConfigureAwait(false);
 	}
 
+	public async ValueTask SetPromotionContentAsync(
+		Guid promotionId,
+		PromotionContentDetail content,
+		string modifier,
+		CancellationToken cancellationToken = default)
+	{
+		var promotion = await _dbContext.PromotionRows
+			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
+		if (promotion is null)
+			return;
+
+		promotion.SubSubject = content.SubSubject;
+		promotion.DesktopBanner = content.PersonalComputerBanner;
+		promotion.MobileBanner = content.MobileBanner;
+		promotion.Content = content.Content;
+		promotion.Terms = content.Convention;
+		promotion.Localization = JsonSerializer.Serialize(content.Localization, _SerializerOptions);
+		promotion.UpdatedByUsername = modifier;
+		promotion.UpdatedOn = DateTime.UtcNow;
+
+		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+	}
+
 	private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
-				PromotionRow promotion,
+		PromotionRow promotion,
 		CreatePromotionRequest request)
 	{
 		var promotionGameProviders = _gameProviderService.GetQueries()
-			.Where(x => request.GameProviderIds.Contains(x.Id)).Select(x =>
-				new PromotionGameProvider
-				{
-					PromotionId = promotion.Id,
-					GameProviderId = x.Id
-				});
+			.Where(x => request.GameProviderIds.Contains(x.Id))
+			.Select(x => new PromotionGameProvider
+			{
+				PromotionId = promotion.Id,
+				GameProviderId = x.Id
+			});
 
-		return new(promotionGameProviders);
+		return new HashSet<PromotionGameProvider>(promotionGameProviders);
 	}
 
 	private HashSet<PromotionVipLevel> GeneratePromotionVipLevels(
@@ -311,6 +341,6 @@ public class PromotionRepository : IPromotionRepository
 					Level = x.Level
 				});
 
-		return new(promotionVipLevels);
+		return new HashSet<PromotionVipLevel>(promotionVipLevels);
 	}
 }

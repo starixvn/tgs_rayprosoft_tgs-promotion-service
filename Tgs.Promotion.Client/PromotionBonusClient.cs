@@ -1,9 +1,9 @@
 ﻿using System.Text;
 using System.Text.Json;
-using Tgs.Promotion.Client.Models;
-using Tgs.Promotion.Client.Models.PromotionBonus;
+using Tgs.Promotion.Clients.Models;
+using Tgs.Promotion.Clients.Models.PromotionBonus;
 
-namespace Tgs.Promotion.Client;
+namespace Tgs.Promotion.Clients;
 
 public interface IPromotionBonusClient
 {
