@@ -224,7 +224,7 @@ public class PromotionClient : IPromotionClient
 
 	public async Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request)
 	{
-		var httpRequest = new HttpRequestMessage(HttpMethod.Put, $"/api/promotion/{request.Id}")
+		var httpRequest = new HttpRequestMessage(HttpMethod.Put, $"/api/promotion/update/{request.Id}")
 		{
 			Content =
 				new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
