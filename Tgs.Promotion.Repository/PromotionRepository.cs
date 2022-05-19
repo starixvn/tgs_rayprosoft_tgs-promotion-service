@@ -354,8 +354,28 @@ public class PromotionRepository : IPromotionRepository
 		await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
 
+	public async ValueTask SetPromotionStatusAsync(
+		Guid promotionId,
+		PromotionStatus status,
+		string modifier,
+		CancellationToken cancellationToken = default)
+	{
+		var promotion = await _dbContext.PromotionRows
+			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
+		if (promotion is null)
+			return;
+
+		promotion.Status = (short)status;
+		promotion.UpdatedByUsername = modifier;
+		promotion.UpdatedOn = DateTime.UtcNow;
+
+		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+	}
+
 	private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
-				PromotionRow promotion,
+					PromotionRow promotion,
 		CreatePromotionRequest request)
 	{
 		var promotionGameProviders = _gameProviderService.GetQueries()

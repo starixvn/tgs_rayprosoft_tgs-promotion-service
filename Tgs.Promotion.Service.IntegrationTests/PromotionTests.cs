@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Google.Protobuf;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.MessageQueue;
 using Tgs.Promotion.Clients;
@@ -203,5 +204,40 @@ public class PromotionTests
 		await sut.SetPromotionRuleAsync(promotionId, rule, "ModifyUser");
 
 		Assert.AreEqual(expected, promotionRow.CampaignDetail);
+	}
+
+	[TestMethod]
+	public async Task Set_Promotion_Status()
+	{
+		var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+		var brandId = Guid.NewGuid();
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		var promotionRow = new PromotionRow
+		{
+			Id = promotionId,
+			BrandId = brandId,
+			From = DateTime.Now.AddDays(-10),
+			To = DateTime.Now,
+			Name = "Test Promotion",
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			Status = 1,
+			CampaignDetail = "{}"
+		};
+
+		_ = await dbContext.PromotionRows.AddAsync(promotionRow);
+
+		_ = await dbContext.SaveChangesAsync();
+
+		await sut.SetPromotionStatusAsync(promotionId, Clients.PromotionStatus.Enabled, "ModifyUser");
+
+		Assert.AreEqual(0, promotionRow.Status);
 	}
 }

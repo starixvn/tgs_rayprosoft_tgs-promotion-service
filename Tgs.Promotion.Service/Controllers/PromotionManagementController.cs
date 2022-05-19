@@ -105,4 +105,19 @@ public class PromotionManagementController : ControllerBase
 			.ExecuteAsync(command, HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 	}
+
+	[HttpPut("status/{promotionId}/{status}", Name = "UpdatePromotionStatus")]
+	public ValueTask SetPromotionStatusAsync(
+		[FromServices] ICommandService<SetPromotionStatusCommand> updateService,
+		Guid promotionId,
+		PromotionStatus status,
+		[FromHeader(Name = "Modifier")] string modifier)
+	{
+		var command = new SetPromotionStatusCommand(
+			promotionId,
+			status,
+			modifier);
+
+		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
+	}
 }

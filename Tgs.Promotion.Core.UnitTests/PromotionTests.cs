@@ -114,4 +114,25 @@ public class PromotionTests
 				Arg.Any<PromotionRule>(),
 				Arg.Is(command.Modifier));
 	}
+
+	[TestMethod]
+	public async Task Set_Promotion_Status()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new SetPromotionStatusCommandService(fakePromotionRepository);
+
+		var command = new SetPromotionStatusCommand(
+			Guid.NewGuid(),
+			PromotionStatus.Enabled,
+			"ModifyUser");
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.SetPromotionStatusAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Is(command.Status),
+				Arg.Is(command.Modifier));
+	}
 }

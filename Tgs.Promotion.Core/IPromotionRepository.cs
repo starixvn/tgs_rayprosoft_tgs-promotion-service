@@ -17,6 +17,8 @@ public interface IPromotionRepository
 
 	ValueTask SetPromotionContentAsync(Guid promotionId, PromotionContentDetail content, string modifier, CancellationToken cancellationToken = default);
 
+	ValueTask SetPromotionStatusAsync(Guid promotionId, PromotionStatus status, string modifier, CancellationToken cancellationToken = default);
+
 	ValueTask SetPromotionRuleAsync(Guid promotionId, PromotionRule rule, string modifier, CancellationToken cancellationToken = default);
 
 	ValueTask<bool> ExistsAsync(Expression<Func<PromotionRow, bool>> predicate);
