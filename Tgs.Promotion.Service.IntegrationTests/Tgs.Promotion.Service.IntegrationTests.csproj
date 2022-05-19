@@ -19,8 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tgs.Promotion.Client\Tgs.Promotion.Client.csproj" />
-    <ProjectReference Include="..\Tgs.Promotion.Service\Tgs.Promotion.Service.csproj" />
+    <ProjectReference Include="..\Tgs.Promotion.Client\Tgs.Promotion.Client.csproj">
+      <Aliases></Aliases>
+    </ProjectReference>
+    <ProjectReference Include="..\Tgs.Promotion.Service\Tgs.Promotion.Service.csproj">
+      <Aliases>promotion</Aliases>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>

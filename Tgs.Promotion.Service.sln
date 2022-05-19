@@ -25,7 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Repository.Un
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Core.UnitTests", "Tgs.Promotion.Core.UnitTests\Tgs.Promotion.Core.UnitTests.csproj", "{86C99FF4-BA3B-480A-A6BE-0EC54E1322FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.Promotion.Service.IntegrationTests", "Tgs.Promotion.Service.IntegrationTests\Tgs.Promotion.Service.IntegrationTests.csproj", "{A5FF41A3-FA0B-432D-964F-5EE098F69363}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Service.IntegrationTests", "Tgs.Promotion.Service.IntegrationTests\Tgs.Promotion.Service.IntegrationTests.csproj", "{A5FF41A3-FA0B-432D-964F-5EE098F69363}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

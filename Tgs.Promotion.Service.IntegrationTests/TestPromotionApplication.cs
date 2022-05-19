@@ -15,7 +15,9 @@ using Tgs.Promotion.Repository;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
 
-internal class TestPromotionApplication : WebApplicationFactory<Program>
+extern alias promotion;
+
+internal class TestPromotionApplication : WebApplicationFactory<promotion.Program>
 {
 	private readonly Action<IWebHostBuilder>? _webHostConfigure;
 

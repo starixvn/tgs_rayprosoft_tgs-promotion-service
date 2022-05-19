@@ -109,4 +109,29 @@ internal class PromotionServiceClient : IPromotionServiceClient
 
 		_ = response.EnsureSuccessStatusCode();
 	}
+
+	public async ValueTask SetPromotionRuleAsync<TRule>(
+		Guid promotionId,
+		TRule rule,
+		string modifier,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new
+		{
+			CampaignDetail = rule,
+			Modifier = modifier
+		};
+
+		var requestContent = new StringContent(
+			JsonSerializer.Serialize(request, _JsonSerializerOptions),
+			Encoding.UTF8,
+			"application/json");
+
+		var response = await _httpClient.PutAsync(
+			$"/api/promotion-mgr/rule/{promotionId}",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+	}
 }

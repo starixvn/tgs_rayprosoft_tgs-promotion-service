@@ -1,5 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text.Json;
+using Google.Protobuf;
+using Microsoft.AspNetCore.Mvc;
+using Tgs.MessageQueue;
 using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Clients.Protos;
 using Tgs.Promotion.Service.ViewModels;
 using Tgs.ServiceUtility;
 
@@ -58,5 +62,42 @@ public class PromotionManagementController : ControllerBase
 			contentModel.Modifier);
 
 		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
+	}
+
+	[HttpPut("rule/{promotionId}", Name = "UpdatePromotionRule")]
+	public async Task UpdatePromotionRuleAsync(
+		[FromServices] IGetService<GetPromotionMainInfoQuery, PromotionMainInfo?> getPromotionService,
+		[FromServices] IMessageSender messageSender,
+		[FromServices] ICommandService<UpdatePromotionRuleCommand> updateService,
+		Guid promotionId,
+		[FromBody] PromotionRuleViewModel ruleModel)
+	{
+		var promotionInfo = await getPromotionService
+			.GetAsync(new GetPromotionMainInfoQuery(promotionId), HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		if (promotionInfo is null)
+			return;
+
+		var subject = $"tgs.promotion.{promotionInfo.PromotionType.ToLower()}.setting";
+
+		var request = new CampaignDetailRequest
+		{
+			PromotionId = promotionId,
+			Settings = JsonSerializer.Serialize(ruleModel.CampaignDetail)
+		};
+
+		var response = await messageSender
+			.RequestAsync(subject, request.ToByteArray(), HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		var processedResult = CampaignDetailResponse.Parser.ParseFrom(response.Span);
+
+		var command = new UpdatePromotionRuleCommand(
+			promotionId,
+			JsonDocument.Parse(processedResult.CampaignDetail),
+			ruleModel.Modifier);
+
+		await updateService.ExecuteAsync(command, HttpContext.RequestAborted);
 	}
 }

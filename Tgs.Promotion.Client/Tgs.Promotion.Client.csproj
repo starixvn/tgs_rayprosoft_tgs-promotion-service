@@ -9,12 +9,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Protos\promotion.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.20.1" />
+    <PackageReference Include="Grpc.Tools" Version="2.46.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.2.32">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\promotion.proto" GrpcServices="None" />
   </ItemGroup>
 
 </Project>
