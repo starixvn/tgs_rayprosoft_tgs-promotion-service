@@ -3,8 +3,10 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.MessageQueue.Configuration;
 using Tgs.Promotion.MessageQueue;
 using Tgs.Promotion.Models;
+using Tgs.Promotion.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,6 +90,8 @@ builder.Services
 		.AddHandler<DepositStatusChangedMessageHandler>(
 			"tgs.payment.deposit.status",
 			"tgs.payment.deposit.status"))
+	.AddNatsGlobPatternExchange("tgs.promotion.roulette.setting")
+	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.*.setting")
 	.AddNatsGlobPatternExchange("*");
 
 builder.Services.AddHealthChecks();
