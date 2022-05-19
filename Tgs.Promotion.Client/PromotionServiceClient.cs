@@ -134,4 +134,21 @@ internal class PromotionServiceClient : IPromotionServiceClient
 
 		_ = response.EnsureSuccessStatusCode();
 	}
+
+	public async ValueTask SetPromotionStatusAsync(
+		Guid promotionId,
+		PromotionStatus status,
+		string modifier,
+		CancellationToken cancellationToken = default)
+	{
+		var requestContent = new StringContent(string.Empty);
+		requestContent.Headers.Add("Modifier", modifier);
+
+		var response = await _httpClient.PutAsync(
+			$"/api/promotion-mgr/status/{promotionId}/{status}",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+	}
 }
