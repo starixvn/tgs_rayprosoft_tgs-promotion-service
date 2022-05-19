@@ -1,6 +1,10 @@
 ﻿using System.Text.Json;
+using Google.Protobuf;
 using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
+using Tgs.MessageQueue;
 using Tgs.Promotion.Clients;
+using Tgs.Promotion.Clients.Protos;
 using Tgs.Promotion.Domain.Entities;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
@@ -143,5 +147,61 @@ public class PromotionTests
 		Assert.AreEqual(promotionContent.MobileBanner, promotionRow.MobileBanner);
 		Assert.AreEqual(promotionContent.Content, promotionRow.Content);
 		Assert.AreEqual(promotionContent.Convention, promotionRow.Terms);
+	}
+
+	[TestMethod]
+	public async Task Set_Promotion_Rule()
+	{
+		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var web = new TestPromotionApplication(builder => builder
+			.ConfigureServices(services => services
+				.AddSingleton(fakeMessageSender)));
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+		var brandId = Guid.NewGuid();
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		var promotionRow = new PromotionRow
+		{
+			Id = promotionId,
+			BrandId = brandId,
+			From = DateTime.Now.AddDays(-10),
+			To = DateTime.Now,
+			Name = "Test Promotion",
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			Status = 1,
+			CampaignDetail = "{}"
+		};
+
+		_ = await dbContext.PromotionRows.AddAsync(promotionRow);
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var rule = new
+		{
+			Test = 111
+		};
+
+		var expected = JsonSerializer.Serialize(rule, new JsonSerializerOptions { WriteIndented = false });
+
+		fakeMessageSender
+			.RequestAsync(
+				Arg.Is("tgs.promotion.testtype.setting"),
+				Arg.Any<ReadOnlyMemory<byte>>(),
+				Arg.Any<IEnumerable<MessageHeaderValue>>(),
+				Arg.Any<CancellationToken>())
+			.Returns(new CampaignDetailResponse
+			{
+				CampaignDetail = expected
+			}.ToByteArray());
+
+		await sut.SetPromotionRuleAsync(promotionId, rule, "ModifyUser");
+
+		Assert.AreEqual(expected, promotionRow.CampaignDetail);
 	}
 }

@@ -1,0 +1,15 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Tgs.Promotion.Clients.Protos";
+package tgs.promotion;
+
+import "phoenix/protobuf/guid.proto";
+
+message CampaignDetailRequest {
+	phoenix.protobuf.GuidValue promotion_id = 1;
+	string settings = 2;
+}
+
+message CampaignDetailResponse {
+	string campaign_detail = 1;
+}

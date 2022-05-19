@@ -19,4 +19,10 @@ public interface IPromotionServiceClient
 		PromotionContent content,
 		string modifier,
 		CancellationToken cancellationToken = default);
+
+	ValueTask SetPromotionRuleAsync<TRule>(
+		Guid promotionId,
+		TRule rule,
+		string modifier,
+		CancellationToken cancellationToken = default);
 }

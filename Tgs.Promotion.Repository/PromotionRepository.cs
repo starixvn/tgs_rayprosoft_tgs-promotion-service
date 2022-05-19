@@ -313,8 +313,46 @@ public class PromotionRepository : IPromotionRepository
 		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
 
+	public async ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(Guid promotionId, CancellationToken cancellationToken = default)
+	{
+		var promotion = await _dbContext.PromotionRows
+			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
+		return promotion is null
+			? null
+			: new PromotionMainInfo(
+				promotion.Id,
+				promotion.BrandId,
+				promotion.Name,
+				(promotion.From, promotion.To),
+				promotion.PromotionType,
+				promotion.Unlimited == 1 ? null : promotion.TotalAmountLimit,
+				promotion.AutoSentPlayerBonus);
+	}
+
+	public async ValueTask SetPromotionRuleAsync(
+		Guid promotionId,
+		PromotionRule rule,
+		string modifier,
+		CancellationToken cancellationToken = default)
+	{
+		var promotion = await _dbContext.PromotionRows
+			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
+		if (promotion is null)
+			return;
+
+		promotion.CampaignDetail = JsonSerializer.Serialize(rule.CampaignDetail, _SerializerOptions);
+		promotion.UpdatedByUsername = modifier;
+		promotion.UpdatedOn = DateTime.UtcNow;
+
+		await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+	}
+
 	private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
-		PromotionRow promotion,
+				PromotionRow promotion,
 		CreatePromotionRequest request)
 	{
 		var promotionGameProviders = _gameProviderService.GetQueries()

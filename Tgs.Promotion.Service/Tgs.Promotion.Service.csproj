@@ -12,11 +12,17 @@
 
   <ItemGroup>
     <PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.1.3" />
+    <PackageReference Include="Google.Protobuf" Version="3.20.1" />
+    <PackageReference Include="Grpc.Tools" Version="2.46.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.2.32">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
     <PackageReference Include="OpenTelemetry" Version="1.2.0" />
     <PackageReference Include="OpenTelemetry.Contrib.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta2" />
@@ -32,6 +38,16 @@
   <ItemGroup>
     <ProjectReference Include="..\Tgs.Promotion.Core\Tgs.Promotion.Core.csproj" />
     <ProjectReference Include="..\Tgs.Promotion.Repository\Tgs.Promotion.Repository.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Protos\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\Tgs.Promotion.Client\Protos\promotion.proto" GrpcServices="None" Access="Internal">
+      <Link>Protos\promotion.proto</Link>
+    </Protobuf>
   </ItemGroup>
 
 </Project>
