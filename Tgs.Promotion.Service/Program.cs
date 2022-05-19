@@ -62,6 +62,7 @@ builder.Services
 builder.Services.AddProfileViewer();
 
 builder.Services
+	.AddSingleton<NoopCampaingDetailProcessor>()
 	.AddTgsRepository(builder.Configuration.GetConnectionString("Tgs"))
 	.AddRedis((redisOptions, _) => redisOptions.ConnectionString = builder.Configuration.GetConnectionString("Redis"))
 	.AddPromotionCore()
