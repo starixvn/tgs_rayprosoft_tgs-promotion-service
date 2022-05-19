@@ -345,6 +345,9 @@ public class PromotionRepository : IPromotionRepository
 			return;
 
 		promotion.CampaignDetail = JsonSerializer.Serialize(rule.CampaignDetail, _SerializerOptions);
+		promotion.BonusAmountLimit = rule.BonusAmountLimit;
+		promotion.Percentage = rule.Percentage;
+		promotion.TurnoverMultiple = rule.TurnoverMultiple;
 		promotion.UpdatedByUsername = modifier;
 		promotion.UpdatedOn = DateTime.UtcNow;
 
