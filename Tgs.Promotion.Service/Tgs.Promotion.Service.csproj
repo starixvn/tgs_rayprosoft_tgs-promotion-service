@@ -41,10 +41,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Protos\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Protobuf Include="..\Tgs.Promotion.Client\Protos\promotion.proto" GrpcServices="None" Access="Internal">
       <Link>Protos\promotion.proto</Link>
     </Protobuf>
