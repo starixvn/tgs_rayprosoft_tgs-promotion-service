@@ -14,7 +14,11 @@ internal class UpdatePromotionRuleCommandService : ICommandService<UpdatePromoti
 	public ValueTask ExecuteAsync(UpdatePromotionRuleCommand command, CancellationToken cancellationToken = default)
 		=> _promotionRepository.SetPromotionRuleAsync(
 			command.PromotionId,
-			new PromotionRule(command.CampaignDetail),
+			new PromotionRule(
+				command.CampaignDetail,
+				command.BonusAmountLimit,
+				command.Percentage,
+				command.TurnoverMultiple),
 			command.Modifier,
 			cancellationToken);
 }

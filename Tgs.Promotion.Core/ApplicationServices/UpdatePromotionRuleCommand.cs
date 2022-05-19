@@ -4,4 +4,7 @@ namespace Tgs.Promotion.ApplicationServices;
 public record UpdatePromotionRuleCommand(
 	Guid PromotionId,
 	JsonDocument CampaignDetail,
+	decimal BonusAmountLimit,
+	decimal Percentage,
+	decimal TurnoverMultiple,
 	string Modifier);

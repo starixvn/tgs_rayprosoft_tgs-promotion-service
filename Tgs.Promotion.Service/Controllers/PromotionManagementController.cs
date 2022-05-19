@@ -96,8 +96,13 @@ public class PromotionManagementController : ControllerBase
 		var command = new UpdatePromotionRuleCommand(
 			promotionId,
 			JsonDocument.Parse(processedResult.CampaignDetail),
+			processedResult.BonusAmountLimit,
+			processedResult.Percentage,
+			processedResult.TurnoverMultiple,
 			ruleModel.Modifier);
 
-		await updateService.ExecuteAsync(command, HttpContext.RequestAborted);
+		await updateService
+			.ExecuteAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
 	}
 }

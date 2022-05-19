@@ -101,6 +101,9 @@ public class PromotionTests
 		var command = new UpdatePromotionRuleCommand(
 			Guid.NewGuid(),
 			JsonDocument.Parse("{}"),
+			0M,
+			0M,
+			2M,
 			"ModifyUser");
 
 		await sut.ExecuteAsync(command);

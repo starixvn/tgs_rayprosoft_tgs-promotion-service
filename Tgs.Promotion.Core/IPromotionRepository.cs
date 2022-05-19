@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.Promotion;
