@@ -207,6 +207,52 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task Set_Old_Promotion_RuleAsync()
+	{
+		var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+		var brandId = Guid.NewGuid();
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		var promotionRow = new PromotionRow
+		{
+			Id = promotionId,
+			BrandId = brandId,
+			From = DateTime.Now.AddDays(-10),
+			To = DateTime.Now,
+			Name = "Test Promotion",
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			Status = 1,
+			CampaignDetail = "{}"
+		};
+
+		_ = await dbContext.PromotionRows.AddAsync(promotionRow);
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var rule = new
+		{
+			BonusAmountLimit = 10M,
+			Percentage = 20M,
+			TurnoverMultiple = 30M,
+			Test = 111
+		};
+
+		await sut.SetPromotionRuleAsync(promotionId, rule, "ModifyUser");
+
+		Assert.AreEqual("{}", promotionRow.CampaignDetail);
+		Assert.AreEqual(rule.BonusAmountLimit, promotionRow.BonusAmountLimit);
+		Assert.AreEqual(rule.Percentage, promotionRow.Percentage);
+		Assert.AreEqual(rule.TurnoverMultiple, promotionRow.TurnoverMultiple);
+	}
+
+	[TestMethod]
 	public async Task Set_Promotion_Status()
 	{
 		var web = new TestPromotionApplication();
