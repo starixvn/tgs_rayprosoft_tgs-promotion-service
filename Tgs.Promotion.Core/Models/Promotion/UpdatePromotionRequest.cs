@@ -12,7 +12,7 @@ public class UpdatePromotionRequest
 
 	public DateTimeOffset From { get; set; }
 
-	public Guid[] GameProviderIds { get; set; } = default!;
+	public Guid[]? GameProviderIds { get; set; }
 
 	public GameType? GameType { get; set; }
 
