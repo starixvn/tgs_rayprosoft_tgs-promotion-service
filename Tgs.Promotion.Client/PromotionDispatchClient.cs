@@ -42,7 +42,7 @@ public class PromotionDispatchClient : IPromotionDispatchClient
 	{
 		var path = ClientPath.AppendWithProperties("/api/promotionDispatch?", request);
 
-		var httpRequest = new HttpRequestMessage(HttpMethod.Post, path);
+		var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
 		_ = response.EnsureSuccessStatusCode();
