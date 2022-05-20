@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Google.Protobuf;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.MessageQueue;
 using Tgs.Promotion.Clients;
@@ -234,22 +234,51 @@ public class PromotionTests
 
 		_ = await dbContext.PromotionRows.AddAsync(promotionRow);
 
+		var gameProviders = new[]
+		{
+			new GameProvider
+			{
+				Id = Guid.NewGuid(),
+				Code = "GP1",
+				Name = "GP1",
+				CreatedByUsername = "ModifyUser",
+				UpdatedByUsername = "ModifyUser"
+			},
+			new GameProvider
+			{
+				Id = Guid.NewGuid(),
+				Code = "GP2",
+				Name = "GP2",
+				CreatedByUsername = "ModifyUser",
+				UpdatedByUsername = "ModifyUser"
+			}
+		};
+
+		await dbContext.GameProviders.AddRangeAsync(gameProviders);
+
 		_ = await dbContext.SaveChangesAsync();
 
 		var rule = new
 		{
+			GameType = (short)GameType.Lottery,
 			BonusAmountLimit = 10M,
 			Percentage = 20M,
 			TurnoverMultiple = 30M,
-			Test = 111
+			Test = 111,
+			GameProviderIds = gameProviders.Select(x => x.Id).ToArray()
 		};
 
 		await sut.SetPromotionRuleAsync(promotionId, rule, "ModifyUser");
 
-		Assert.AreEqual("{}", promotionRow.CampaignDetail);
+		var actualGpIds = await dbContext.PromotionGameProviders
+			.Select(row => row.GameProviderId)
+			.ToArrayAsync()
+			.ConfigureAwait(false);
+
 		Assert.AreEqual(rule.BonusAmountLimit, promotionRow.BonusAmountLimit);
 		Assert.AreEqual(rule.Percentage, promotionRow.Percentage);
 		Assert.AreEqual(rule.TurnoverMultiple, promotionRow.TurnoverMultiple);
+		CollectionAssert.AreEquivalent(rule.GameProviderIds, actualGpIds);
 	}
 
 	[TestMethod]

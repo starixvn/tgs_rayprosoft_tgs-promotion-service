@@ -16,4 +16,5 @@ message CampaignDetailResponse {
 	phoenix.protobuf.DecimalValue percentage = 2;
 	phoenix.protobuf.DecimalValue bonus_amount_limit = 3;
 	phoenix.protobuf.DecimalValue turnover_multiple = 4;
+	string game_type = 5;
 }

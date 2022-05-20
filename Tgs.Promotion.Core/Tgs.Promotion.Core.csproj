@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Tgs.Promotion.Common\Tgs.Promotion.Common.csproj" />
     <ProjectReference Include="..\Tgs.Promotion.Domain\Tgs.Promotion.Domain.csproj" />
   </ItemGroup>
 

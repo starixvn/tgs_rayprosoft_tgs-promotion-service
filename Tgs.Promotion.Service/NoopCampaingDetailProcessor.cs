@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using Google.Protobuf;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
+﻿using Google.Protobuf;
 using Tgs.MessageQueue;
 using Tgs.Promotion.Clients.Protos;
 
@@ -9,11 +6,11 @@ namespace Tgs.Promotion.Service;
 
 public class NoopCampaingDetailProcessor : IMessageSender
 {
-	private JsonSerializerOptions _serializerOptions;
+	private readonly PromotionSerializer _promotionSerializer;
 
-	public NoopCampaingDetailProcessor(IOptions<JsonOptions> optionsAccessor)
+	public NoopCampaingDetailProcessor(PromotionSerializer promotionSerializer)
 	{
-		_serializerOptions = optionsAccessor.Value.JsonSerializerOptions;
+		_promotionSerializer = promotionSerializer ?? throw new ArgumentNullException(nameof(promotionSerializer));
 	}
 
 	public ValueTask<Answer> AskAsync(string subject, ReadOnlyMemory<byte> data, IEnumerable<MessageHeaderValue> header, CancellationToken cancellationToken = default) => throw new NotImplementedException();
@@ -24,14 +21,15 @@ public class NoopCampaingDetailProcessor : IMessageSender
 	{
 		var request = CampaignDetailRequest.Parser.ParseFrom(data.Span);
 
-		var settings = JsonSerializer.Deserialize<OldPromotionSettings>(request.Settings, _serializerOptions)!;
+		var settings = _promotionSerializer.Deserialize<GameProviderSettings>(request.Settings)!;
 
 		var response = new CampaignDetailResponse
 		{
-			CampaignDetail = "{}",
+			CampaignDetail = _promotionSerializer.Serialize(settings),
 			BonusAmountLimit = settings.BonusAmountLimit,
 			Percentage = settings.Percentage,
-			TurnoverMultiple = settings.TurnoverMultiple
+			TurnoverMultiple = settings.TurnoverMultiple,
+			GameType = settings.GameType.ToString(),
 		};
 
 		return ValueTask.FromResult<ReadOnlyMemory<byte>>(response.ToByteArray());

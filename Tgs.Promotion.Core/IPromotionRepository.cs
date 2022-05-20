@@ -21,6 +21,8 @@ public interface IPromotionRepository
 
 	ValueTask SetPromotionRuleAsync(Guid promotionId, PromotionRule rule, string modifier, CancellationToken cancellationToken = default);
 
+	ValueTask SetPromotionGameProvidersAsync(Guid promotionId, IEnumerable<Guid> gameProviderIds, CancellationToken cancellationToken = default);
+
 	ValueTask<bool> ExistsAsync(Expression<Func<PromotionRow, bool>> predicate);
 
 	ValueTask UpdatePromotionAsync(PromotionRow promotion, UpdatePromotionRequest request);
