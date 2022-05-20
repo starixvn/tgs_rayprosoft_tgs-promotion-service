@@ -179,7 +179,7 @@ public class PromotionRepository : IPromotionRepository
 		promotion.TurnoverMultiple = request.TurnoverMultiple;
 
 		promotion.PromotionGameProviders =
-			request.GameProviderIds
+			request.GameProviderIds!
 				.Select(id => new PromotionGameProvider
 				{
 					GameProviderId = id,
@@ -409,7 +409,7 @@ public class PromotionRepository : IPromotionRepository
 		CreatePromotionRequest request)
 	{
 		var promotionGameProviders = _gameProviderService.GetQueries()
-			.Where(x => request.GameProviderIds.Contains(x.Id))
+			.Where(x => request.GameProviderIds!.Contains(x.Id))
 			.Select(x => new PromotionGameProvider
 			{
 				PromotionId = promotion.Id,
