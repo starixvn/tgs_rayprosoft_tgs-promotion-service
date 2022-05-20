@@ -13,6 +13,8 @@ public interface IPromotionRepository
 
 	ValueTask<Guid> CreatePromotionAsync(CreatePromotionMainInfo createInfo, string modifier, CancellationToken cancellationToken = default);
 
+	ValueTask UpdatePromotionMainInfoAsync(Guid promotionId, UpdatePromotionMainInfo updateInfo, string modifier, CancellationToken cancellationToken = default);
+
 	ValueTask SetPromotionVipLevelsAsync(Guid promotionId, IEnumerable<int> vipLevels, string modifier, CancellationToken cancellationToken = default);
 
 	ValueTask SetPromotionContentAsync(Guid promotionId, PromotionContentDetail content, string modifier, CancellationToken cancellationToken = default);

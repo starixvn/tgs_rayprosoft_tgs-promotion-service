@@ -22,7 +22,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 
 	public async ValueTask<Guid> CreatePromotionAsync(
 		Guid brandId,
-		CreatePromotionMainInfo createInfo,
+		PromotionMainInfo createInfo,
 		string modifier,
 		CancellationToken cancellationToken = default)
 	{
@@ -146,6 +146,35 @@ internal class PromotionServiceClient : IPromotionServiceClient
 
 		var response = await _httpClient.PutAsync(
 			$"/api/promotion-mgr/status/{promotionId}/{status}",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+	}
+
+	public async ValueTask UpdatePromotionMainInfoAsync(
+		Guid promotionId,
+		PromotionMainInfo updateInfo,
+		string modifier,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new
+		{
+			updateInfo.Name,
+			updateInfo.PromotionType,
+			updateInfo.EventDuring,
+			updateInfo.PromotionLimitAmount,
+			updateInfo.IsAutoSent,
+			Modifier = modifier
+		};
+
+		var requestContent = new StringContent(
+			JsonSerializer.Serialize(request, _JsonSerializerOptions),
+			Encoding.UTF8,
+			"application/json");
+
+		var response = await _httpClient.PatchAsync(
+			$"/api/promotion-mgr/{promotionId}",
 			requestContent,
 			cancellationToken).ConfigureAwait(false);
 
