@@ -7,4 +7,5 @@ public record UpdatePromotionRuleCommand(
 	decimal BonusAmountLimit,
 	decimal Percentage,
 	decimal TurnoverMultiple,
+	GameType? GameType,
 	string Modifier);

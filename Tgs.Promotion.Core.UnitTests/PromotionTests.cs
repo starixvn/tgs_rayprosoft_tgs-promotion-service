@@ -96,7 +96,9 @@ public class PromotionTests
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 
-		var sut = new UpdatePromotionRuleCommandService(fakePromotionRepository);
+		var sut = new UpdatePromotionRuleCommandService(
+			fakePromotionRepository,
+			new PromotionSerializer());
 
 		var command = new UpdatePromotionRuleCommand(
 			Guid.NewGuid(),
@@ -104,6 +106,7 @@ public class PromotionTests
 			0M,
 			0M,
 			2M,
+			null,
 			"ModifyUser");
 
 		await sut.ExecuteAsync(command);
@@ -113,6 +116,38 @@ public class PromotionTests
 				Arg.Is(command.PromotionId),
 				Arg.Any<PromotionRule>(),
 				Arg.Is(command.Modifier));
+	}
+
+	[TestMethod]
+	public async Task Set_Promotion_Rule_Has_GameTypeAsync()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new UpdatePromotionRuleCommandService(
+			fakePromotionRepository,
+			new PromotionSerializer());
+
+		var command = new UpdatePromotionRuleCommand(
+			Guid.NewGuid(),
+			JsonDocument.Parse("{}"),
+			0M,
+			0M,
+			2M,
+			GameType.TableGame,
+			"ModifyUser");
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.SetPromotionRuleAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<PromotionRule>(),
+				Arg.Is(command.Modifier));
+
+		_ = fakePromotionRepository.Received(1)
+			.SetPromotionGameProvidersAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<IEnumerable<Guid>>());
 	}
 
 	[TestMethod]

@@ -99,6 +99,9 @@ public class PromotionManagementController : ControllerBase
 			processedResult.BonusAmountLimit,
 			processedResult.Percentage,
 			processedResult.TurnoverMultiple,
+			string.IsNullOrWhiteSpace(processedResult.GameType)
+				? null
+				: Enum.Parse<GameType>(processedResult.GameType),
 			ruleModel.Modifier);
 
 		await updateService

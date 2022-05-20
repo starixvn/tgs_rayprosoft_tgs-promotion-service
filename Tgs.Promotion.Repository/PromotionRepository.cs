@@ -348,6 +348,7 @@ public class PromotionRepository : IPromotionRepository
 		promotion.BonusAmountLimit = rule.BonusAmountLimit;
 		promotion.Percentage = rule.Percentage;
 		promotion.TurnoverMultiple = rule.TurnoverMultiple;
+		promotion.GameType = (short?)rule.GameType;
 		promotion.UpdatedByUsername = modifier;
 		promotion.UpdatedOn = DateTime.UtcNow;
 
@@ -374,8 +375,37 @@ public class PromotionRepository : IPromotionRepository
 		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
 
+	public async ValueTask SetPromotionGameProvidersAsync(Guid promotionId, IEnumerable<Guid> gameProviderIds, CancellationToken cancellationToken = default)
+	{
+		var gpArray = gameProviderIds.ToArray();
+
+		var promotionGameProviders = await _dbContext.GameProviders
+			.Where(x => gpArray.Contains(x.Id))
+			.Select(row => row.Id)
+			.Distinct()
+			.Select(id => new PromotionGameProvider
+			{
+				PromotionId = promotionId,
+				GameProviderId = id
+			})
+			.ToArrayAsync()
+			.ConfigureAwait(false);
+
+		var oldSettings = await _dbContext.PromotionGameProviders
+			.Where(row => row.PromotionId == promotionId)
+			.ToArrayAsync(cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
+		_dbContext.PromotionGameProviders.RemoveRange(oldSettings);
+		await _dbContext.PromotionGameProviders
+			.AddRangeAsync(promotionGameProviders)
+			.ConfigureAwait(false);
+
+		await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+	}
+
 	private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
-					PromotionRow promotion,
+						PromotionRow promotion,
 		CreatePromotionRequest request)
 	{
 		var promotionGameProviders = _gameProviderService.GetQueries()

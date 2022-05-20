@@ -27,6 +27,7 @@ public static class PromotionCoreExtensions
 
 		_ = services
 			.AddSerialNumberGenerator()
+			.AddSingleton<PromotionSerializer>()
 			.AddScoped<IPromotionCheckerFactory>(sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(
 				sp,
 				configuration.GetAllRegisterCheckerTypes()));

@@ -1,5 +1,4 @@
-﻿using Tgs.Promotion;
-namespace Tgs.Promotion.Clients;
+﻿namespace Tgs.Promotion.Clients;
 
 public enum PromotionStatus : short
 {

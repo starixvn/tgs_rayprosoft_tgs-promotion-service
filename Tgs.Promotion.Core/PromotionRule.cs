@@ -5,4 +5,5 @@ public record PromotionRule(
 	JsonDocument CampaignDetail,
 	decimal BonusAmountLimit,
 	decimal Percentage,
-	decimal TurnoverMultiple);
+	decimal TurnoverMultiple,
+	GameType? GameType);
