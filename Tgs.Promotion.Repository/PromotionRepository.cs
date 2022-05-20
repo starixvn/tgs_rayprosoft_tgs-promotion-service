@@ -273,6 +273,13 @@ public class PromotionRepository : IPromotionRepository
 			.ToArrayAsync(cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
+		var originVipLevels = await _dbContext.PromotionVipLevels
+			.Where(row => row.PromotionId == promotionId)
+			.ToArrayAsync(cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
+		_dbContext.PromotionVipLevels.RemoveRange(originVipLevels);
+
 		await _dbContext.PromotionVipLevels.AddRangeAsync(
 			vipLevelRows.Select(
 				x => new PromotionVipLevel

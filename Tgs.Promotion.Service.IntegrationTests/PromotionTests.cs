@@ -1,15 +1,12 @@
 ﻿using System.Text.Json;
 using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.MessageQueue;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Clients.Protos;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Models;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
 
@@ -92,8 +89,24 @@ public class PromotionTests
 				Level = 2,
 				CreatedByUsername = "ModifyUser",
 				UpdatedByUsername = "ModifyUser"
+			},
+			new VipLevel
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Level = 3,
+				CreatedByUsername = "ModifyUser",
+				UpdatedByUsername = "ModifyUser"
 			}
 		);
+
+		await dbContext.PromotionVipLevels.AddAsync(
+			new PromotionVipLevel
+			{
+				PromotionId = promotionId,
+				Level = 3,
+				VipLevelId = Guid.NewGuid()
+			}).ConfigureAwait(false);
 
 		_ = await dbContext.SaveChangesAsync();
 
