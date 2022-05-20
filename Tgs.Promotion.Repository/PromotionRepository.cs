@@ -73,7 +73,7 @@ public class PromotionRepository : IPromotionRepository
 			Unlimited = (short)(request.Unlimited ? 1 : 0),
 			GameType = (short?)request.GameType,
 			Percentage = request.Percentage,
-			TotalAmountLimit = request.TotalAmountLimit,
+			TotalAmountLimit = request.TotalAmountLimit ?? 0M,
 			TurnoverMultiple = request.TurnoverMultiple,
 			CreatedByUsername = request.EditorUsername,
 			UpdatedByUsername = request.EditorUsername,
