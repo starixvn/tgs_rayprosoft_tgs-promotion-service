@@ -170,4 +170,29 @@ public class PromotionTests
 				Arg.Is(command.Status),
 				Arg.Is(command.Modifier));
 	}
+
+	[TestMethod]
+	public async Task Update_Promotion_MainInfo()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new UpdatePromotionMainInfoCommandService(fakePromotionRepository);
+
+		var command = new UpdatePromotionMainInfoCommand(
+			Guid.NewGuid(),
+			"TestPromotion",
+			(DateTime.Now.AddDays(-10), DateTime.Now),
+			"TestType",
+			null,
+			true,
+			"ModifyUser");
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.UpdatePromotionMainInfoAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<UpdatePromotionMainInfo>(),
+				Arg.Is(command.Modifier));
+	}
 }

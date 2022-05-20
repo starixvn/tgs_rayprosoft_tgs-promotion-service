@@ -1,12 +1,15 @@
 ﻿using System.Text.Json;
 using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.MessageQueue;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Clients.Protos;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.Promotion.Models;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
 
@@ -23,7 +26,7 @@ public class PromotionTests
 		var sut = new PromotionServiceClient(httpClient);
 
 		var brandId = Guid.NewGuid();
-		var createInfo = new Clients.CreatePromotionMainInfo
+		var createInfo = new Clients.PromotionMainInfo
 		{
 			Name = "Test Promotion",
 			EventDuring = new During(DateTime.Now.AddDays(-10), DateTime.Now),
@@ -207,7 +210,7 @@ public class PromotionTests
 	}
 
 	[TestMethod]
-	public async Task Set_Old_Promotion_RuleAsync()
+	public async Task Set_Old_Promotion_Rule()
 	{
 		var web = new TestPromotionApplication();
 
@@ -314,5 +317,55 @@ public class PromotionTests
 		await sut.SetPromotionStatusAsync(promotionId, Clients.PromotionStatus.Enabled, "ModifyUser");
 
 		Assert.AreEqual(0, promotionRow.Status);
+	}
+
+	[TestMethod]
+	public async Task Update_Promotion_MainInfo()
+	{
+		var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+		var brandId = Guid.NewGuid();
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		var promotionRow = new PromotionRow
+		{
+			Id = promotionId,
+			BrandId = brandId,
+			From = DateTime.Now.AddDays(-10),
+			To = DateTime.Now,
+			Name = "Test Promotion",
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			Status = 1,
+			CampaignDetail = "{}"
+		};
+
+		_ = await dbContext.PromotionRows.AddAsync(promotionRow);
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var newInfo = new Clients.PromotionMainInfo
+		{
+			Name = "New Name",
+			EventDuring = (DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1)),
+			PromotionType = "NewType",
+			IsAutoSent = false,
+			PromotionLimitAmount = 100M
+		};
+
+		await sut.UpdatePromotionMainInfoAsync(promotionId, newInfo, "ModifyUser");
+
+		Assert.AreEqual(newInfo.Name, promotionRow.Name);
+		Assert.AreEqual(newInfo.PromotionType, promotionRow.PromotionType);
+		Assert.AreEqual(newInfo.IsAutoSent, promotionRow.AutoSentPlayerBonus);
+		Assert.AreEqual(newInfo.PromotionLimitAmount, promotionRow.TotalAmountLimit);
+		Assert.AreEqual(0, promotionRow.Unlimited);
+		Assert.AreEqual(newInfo.EventDuring.From, promotionRow.From);
+		Assert.AreEqual(newInfo.EventDuring.To, promotionRow.To);
 	}
 }

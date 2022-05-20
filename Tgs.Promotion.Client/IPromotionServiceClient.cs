@@ -4,7 +4,13 @@ public interface IPromotionServiceClient
 {
 	ValueTask<Guid> CreatePromotionAsync(
 		Guid brandId,
-		CreatePromotionMainInfo createInfo,
+		PromotionMainInfo createInfo,
+		string modifier,
+		CancellationToken cancellationToken = default);
+
+	ValueTask UpdatePromotionMainInfoAsync(
+		Guid promotionId,
+		PromotionMainInfo updateInfo,
 		string modifier,
 		CancellationToken cancellationToken = default);
 

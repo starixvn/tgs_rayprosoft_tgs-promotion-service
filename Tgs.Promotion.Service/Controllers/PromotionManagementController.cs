@@ -31,6 +31,24 @@ public class PromotionManagementController : ControllerBase
 		return createService.GetAsync(command, HttpContext.RequestAborted);
 	}
 
+	[HttpPatch("{promotionId}", Name = "UpdatePromotionMainInfo")]
+	public ValueTask UpdatePromotionMainInfoAsync(
+		[FromServices] ICommandService<UpdatePromotionMainInfoCommand> updateService,
+		Guid promotionId,
+		[FromBody] UpdatePromotionViewModel updateModel)
+	{
+		var command = new UpdatePromotionMainInfoCommand(
+			promotionId,
+			updateModel.Name,
+			(updateModel.EventDuring.From, updateModel.EventDuring.To),
+			updateModel.PromotionType,
+			updateModel.PromotionLimitAmount,
+			updateModel.IsAutoSent,
+			updateModel.Modifier);
+
+		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
+	}
+
 	[HttpPut("vip/{promotionId}", Name = "UpdatePromotionVipLevels")]
 	public ValueTask UpdatePromotionVipLevelsAsync(
 		[FromServices] ICommandService<UpdatePromotionVipLevelsCommand> updateService,
