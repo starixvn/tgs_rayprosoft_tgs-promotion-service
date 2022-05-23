@@ -32,7 +32,9 @@ public class PromotionDispatchTests
 					.GetSettingAsync(Arg.Any<Expression<Func<Setting, bool>>>(),
 						Arg.Any<Func<IQueryable<Setting>, IQueryable<Setting>>?>())
 					.Returns(new Setting { Key = "Key", Value = @"[{""Name"": ""Turnover""}]" });
+
 				var players = new Player[] { new Player { PlayerCode = "playercode" } };
+
 				_ = fakePlayerRepository
 					.GetPlayerQueries(Arg.Any<Func<IQueryable<Player>, IQueryable<Player>>?>())
 					.Returns(players.AsQueryable());
