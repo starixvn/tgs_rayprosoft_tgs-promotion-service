@@ -1,7 +1,7 @@
 ﻿namespace Tgs.Promotion.Clients;
-
 public record PromotionMainInfo
 {
+	public Guid Id { get; init; }
 	public string Name { get; init; } = default!;
 
 	public During EventDuring { get; init; }

@@ -4,21 +4,11 @@ public interface IPromotionServiceClient
 {
 	ValueTask<Guid> CreatePromotionAsync(
 		Guid brandId,
-		PromotionMainInfo createInfo,
+		CreatePromotionMainInfo createInfo,
 		string modifier,
 		CancellationToken cancellationToken = default);
 
-	ValueTask UpdatePromotionMainInfoAsync(
-		Guid promotionId,
-		PromotionMainInfo updateInfo,
-		string modifier,
-		CancellationToken cancellationToken = default);
-
-	ValueTask SetPromotionVipLevelsAsync(
-		Guid promotionId,
-		IEnumerable<int> vipLevels,
-		string modifier,
-		CancellationToken cancellationToken = default);
+	ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(Guid promotionId, CancellationToken cancellationToken = default);
 
 	ValueTask SetPromotionContentAsync(
 		Guid promotionId,
@@ -35,6 +25,18 @@ public interface IPromotionServiceClient
 	ValueTask SetPromotionStatusAsync(
 		Guid promotionId,
 		PromotionStatus status,
+		string modifier,
+		CancellationToken cancellationToken = default);
+
+	ValueTask SetPromotionVipLevelsAsync(
+		Guid promotionId,
+		IEnumerable<int> vipLevels,
+		string modifier,
+		CancellationToken cancellationToken = default);
+
+	ValueTask UpdatePromotionMainInfoAsync(
+						Guid promotionId,
+		CreatePromotionMainInfo updateInfo,
 		string modifier,
 		CancellationToken cancellationToken = default);
 }

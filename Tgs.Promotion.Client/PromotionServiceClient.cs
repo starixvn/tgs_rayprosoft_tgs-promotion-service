@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -22,7 +23,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 
 	public async ValueTask<Guid> CreatePromotionAsync(
 		Guid brandId,
-		PromotionMainInfo createInfo,
+		CreatePromotionMainInfo createInfo,
 		string modifier,
 		CancellationToken cancellationToken = default)
 	{
@@ -55,29 +56,19 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		return JsonSerializer.Deserialize<Guid>(json, _JsonSerializerOptions);
 	}
 
-	public async ValueTask SetPromotionVipLevelsAsync(
-		Guid promotionId,
-		IEnumerable<int> vipLevels,
-		string modifier,
-		CancellationToken cancellationToken = default)
+	public async ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(Guid promotionId, CancellationToken cancellationToken = default)
 	{
-		var request = new
-		{
-			VipLevels = vipLevels,
-			Modifier = modifier
-		};
-
-		var requestContent = new StringContent(
-			JsonSerializer.Serialize(request, _JsonSerializerOptions),
-			Encoding.UTF8,
-			"application/json");
-
-		var response = await _httpClient.PutAsync(
-			$"/api/promotion-mgr/vip/{promotionId}",
-			requestContent,
+		var response = await _httpClient.GetAsync(
+			$"/api/promotion-mgr/{promotionId}",
 			cancellationToken).ConfigureAwait(false);
 
 		_ = response.EnsureSuccessStatusCode();
+
+		return await response.Content
+			.ReadFromJsonAsync<PromotionMainInfo>(
+				_JsonSerializerOptions,
+				cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
 	}
 
 	public async ValueTask SetPromotionContentAsync(
@@ -152,9 +143,34 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		_ = response.EnsureSuccessStatusCode();
 	}
 
+	public async ValueTask SetPromotionVipLevelsAsync(
+						Guid promotionId,
+		IEnumerable<int> vipLevels,
+		string modifier,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new
+		{
+			VipLevels = vipLevels,
+			Modifier = modifier
+		};
+
+		var requestContent = new StringContent(
+			JsonSerializer.Serialize(request, _JsonSerializerOptions),
+			Encoding.UTF8,
+			"application/json");
+
+		var response = await _httpClient.PutAsync(
+			$"/api/promotion-mgr/vip/{promotionId}",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+	}
+
 	public async ValueTask UpdatePromotionMainInfoAsync(
 		Guid promotionId,
-		PromotionMainInfo updateInfo,
+		CreatePromotionMainInfo updateInfo,
 		string modifier,
 		CancellationToken cancellationToken = default)
 	{

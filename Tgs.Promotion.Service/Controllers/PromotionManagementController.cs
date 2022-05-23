@@ -31,6 +31,16 @@ public class PromotionManagementController : ControllerBase
 		return createService.GetAsync(command, HttpContext.RequestAborted);
 	}
 
+	[HttpGet("{promotionId}", Name = "GetPromotionMainInfo")]
+	public ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(
+		[FromServices] IGetService<GetPromotionMainInfoQuery, PromotionMainInfo?> getService,
+		Guid promotionId)
+	{
+		var query = new GetPromotionMainInfoQuery(promotionId);
+
+		return getService.GetAsync(query, HttpContext.RequestAborted);
+	}
+
 	[HttpPatch("{promotionId}", Name = "UpdatePromotionMainInfo")]
 	public ValueTask UpdatePromotionMainInfoAsync(
 		[FromServices] ICommandService<UpdatePromotionMainInfoCommand> updateService,
