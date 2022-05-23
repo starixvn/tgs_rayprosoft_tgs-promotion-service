@@ -23,7 +23,7 @@ public class PromotionTests
 		var sut = new PromotionServiceClient(httpClient);
 
 		var brandId = Guid.NewGuid();
-		var createInfo = new Clients.PromotionMainInfo
+		var createInfo = new Clients.CreatePromotionMainInfo
 		{
 			Name = "Test Promotion",
 			EventDuring = new During(DateTime.Now.AddDays(-10), DateTime.Now),
@@ -48,7 +48,87 @@ public class PromotionTests
 	}
 
 	[TestMethod]
-	public async Task Set_Promotion_VipLevels()
+	public async Task Get_Promotion_MainInfo()
+	{
+		var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = promotionId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now,
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}"
+		});
+
+		await dbContext.SaveChangesAsync();
+
+		var actual = await sut.GetPromotionMainInfoAsync(promotionId);
+
+		Assert.IsNotNull(actual);
+		Assert.AreEqual(promotionId, actual.Id);
+	}
+
+	[TestMethod]
+	public async Task Get_Promotion_Rule()
+	{
+		var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = promotionId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now,
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{\"test\": 111}",
+			BonusAmountLimit = 10M,
+			GameType = (short)GameType.Lottery,
+			Percentage = 20M,
+			TurnoverMultiple = 30M
+		});
+
+		await dbContext.SaveChangesAsync();
+
+		var expected = new StubPromotionRule
+		{
+			CompaignDetail = new StubPromotionRuleDetail
+			{
+				Test = 111
+			},
+			BonusAmountLimit = 10M,
+			GameType = GameType.Lottery,
+			Percentage = 20M,
+			TurnoverMultiple = 30M
+		};
+
+		var actual = await sut.GetPromotionRuleAsync<StubPromotionRule>(promotionId);
+
+		Assert.IsNotNull(actual);
+		Assert.AreEqual(expected, actual);
+	}
+
+	[TestMethod]
+	public async Task Set_Old_Promotion_Rule()
 	{
 		var web = new TestPromotionApplication();
 
@@ -60,7 +140,7 @@ public class PromotionTests
 		var brandId = Guid.NewGuid();
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		var promotionRow = new PromotionRow
 		{
 			Id = promotionId,
 			BrandId = brandId,
@@ -71,50 +151,55 @@ public class PromotionTests
 			AutoSentPlayerBonus = true,
 			Status = 1,
 			CampaignDetail = "{}"
-		});
+		};
 
-		await dbContext.VipLevels.AddRangeAsync(
-			new VipLevel
+		_ = await dbContext.PromotionRows.AddAsync(promotionRow);
+
+		var gameProviders = new[]
+		{
+			new GameProvider
 			{
 				Id = Guid.NewGuid(),
-				BrandId = brandId,
-				Level = 1,
+				Code = "GP1",
+				Name = "GP1",
 				CreatedByUsername = "ModifyUser",
 				UpdatedByUsername = "ModifyUser"
 			},
-			new VipLevel
+			new GameProvider
 			{
 				Id = Guid.NewGuid(),
-				BrandId = brandId,
-				Level = 2,
-				CreatedByUsername = "ModifyUser",
-				UpdatedByUsername = "ModifyUser"
-			},
-			new VipLevel
-			{
-				Id = Guid.NewGuid(),
-				BrandId = brandId,
-				Level = 3,
+				Code = "GP2",
+				Name = "GP2",
 				CreatedByUsername = "ModifyUser",
 				UpdatedByUsername = "ModifyUser"
 			}
-		);
+		};
 
-		await dbContext.PromotionVipLevels.AddAsync(
-			new PromotionVipLevel
-			{
-				PromotionId = promotionId,
-				Level = 3,
-				VipLevelId = Guid.NewGuid()
-			}).ConfigureAwait(false);
+		await dbContext.GameProviders.AddRangeAsync(gameProviders);
 
 		_ = await dbContext.SaveChangesAsync();
 
-		await sut.SetPromotionVipLevelsAsync(promotionId, new[] { 1, 2 }, "ModifyUser");
+		var rule = new
+		{
+			GameType = (short)GameType.Lottery,
+			BonusAmountLimit = 10M,
+			Percentage = 20M,
+			TurnoverMultiple = 30M,
+			Test = 111,
+			GameProviderIds = gameProviders.Select(x => x.Id).ToArray()
+		};
 
-		var vipRecords = dbContext.PromotionVipLevels.ToArray();
+		await sut.SetPromotionRuleAsync(promotionId, rule, "ModifyUser");
 
-		Assert.AreEqual(2, vipRecords.Length);
+		var actualGpIds = await dbContext.PromotionGameProviders
+			.Select(row => row.GameProviderId)
+			.ToArrayAsync()
+			.ConfigureAwait(false);
+
+		Assert.AreEqual(rule.BonusAmountLimit, promotionRow.BonusAmountLimit);
+		Assert.AreEqual(rule.Percentage, promotionRow.Percentage);
+		Assert.AreEqual(rule.TurnoverMultiple, promotionRow.TurnoverMultiple);
+		CollectionAssert.AreEquivalent(rule.GameProviderIds, actualGpIds);
 	}
 
 	[TestMethod]
@@ -223,81 +308,6 @@ public class PromotionTests
 	}
 
 	[TestMethod]
-	public async Task Set_Old_Promotion_Rule()
-	{
-		var web = new TestPromotionApplication();
-
-		var httpClient = web.CreateClient();
-
-		var sut = new PromotionServiceClient(httpClient);
-
-		var promotionId = Guid.NewGuid();
-		var brandId = Guid.NewGuid();
-		var dbContext = web.Services.GetRequiredService<TgsContext>();
-
-		var promotionRow = new PromotionRow
-		{
-			Id = promotionId,
-			BrandId = brandId,
-			From = DateTime.Now.AddDays(-10),
-			To = DateTime.Now,
-			Name = "Test Promotion",
-			PromotionType = "TestType",
-			AutoSentPlayerBonus = true,
-			Status = 1,
-			CampaignDetail = "{}"
-		};
-
-		_ = await dbContext.PromotionRows.AddAsync(promotionRow);
-
-		var gameProviders = new[]
-		{
-			new GameProvider
-			{
-				Id = Guid.NewGuid(),
-				Code = "GP1",
-				Name = "GP1",
-				CreatedByUsername = "ModifyUser",
-				UpdatedByUsername = "ModifyUser"
-			},
-			new GameProvider
-			{
-				Id = Guid.NewGuid(),
-				Code = "GP2",
-				Name = "GP2",
-				CreatedByUsername = "ModifyUser",
-				UpdatedByUsername = "ModifyUser"
-			}
-		};
-
-		await dbContext.GameProviders.AddRangeAsync(gameProviders);
-
-		_ = await dbContext.SaveChangesAsync();
-
-		var rule = new
-		{
-			GameType = (short)GameType.Lottery,
-			BonusAmountLimit = 10M,
-			Percentage = 20M,
-			TurnoverMultiple = 30M,
-			Test = 111,
-			GameProviderIds = gameProviders.Select(x => x.Id).ToArray()
-		};
-
-		await sut.SetPromotionRuleAsync(promotionId, rule, "ModifyUser");
-
-		var actualGpIds = await dbContext.PromotionGameProviders
-			.Select(row => row.GameProviderId)
-			.ToArrayAsync()
-			.ConfigureAwait(false);
-
-		Assert.AreEqual(rule.BonusAmountLimit, promotionRow.BonusAmountLimit);
-		Assert.AreEqual(rule.Percentage, promotionRow.Percentage);
-		Assert.AreEqual(rule.TurnoverMultiple, promotionRow.TurnoverMultiple);
-		CollectionAssert.AreEquivalent(rule.GameProviderIds, actualGpIds);
-	}
-
-	[TestMethod]
 	public async Task Set_Promotion_Status()
 	{
 		var web = new TestPromotionApplication();
@@ -333,6 +343,76 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task Set_Promotion_VipLevels()
+	{
+		var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+		var brandId = Guid.NewGuid();
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = promotionId,
+			BrandId = brandId,
+			From = DateTime.Now.AddDays(-10),
+			To = DateTime.Now,
+			Name = "Test Promotion",
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			Status = 1,
+			CampaignDetail = "{}"
+		});
+
+		await dbContext.VipLevels.AddRangeAsync(
+			new VipLevel
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Level = 1,
+				CreatedByUsername = "ModifyUser",
+				UpdatedByUsername = "ModifyUser"
+			},
+			new VipLevel
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Level = 2,
+				CreatedByUsername = "ModifyUser",
+				UpdatedByUsername = "ModifyUser"
+			},
+			new VipLevel
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Level = 3,
+				CreatedByUsername = "ModifyUser",
+				UpdatedByUsername = "ModifyUser"
+			}
+		);
+
+		await dbContext.PromotionVipLevels.AddAsync(
+			new PromotionVipLevel
+			{
+				PromotionId = promotionId,
+				Level = 3,
+				VipLevelId = Guid.NewGuid()
+			}).ConfigureAwait(false);
+
+		_ = await dbContext.SaveChangesAsync();
+
+		await sut.SetPromotionVipLevelsAsync(promotionId, new[] { 1, 2 }, "ModifyUser");
+
+		var vipRecords = dbContext.PromotionVipLevels.ToArray();
+
+		Assert.AreEqual(2, vipRecords.Length);
+	}
+
+	[TestMethod]
 	public async Task Update_Promotion_MainInfo()
 	{
 		var web = new TestPromotionApplication();
@@ -362,7 +442,7 @@ public class PromotionTests
 
 		_ = await dbContext.SaveChangesAsync();
 
-		var newInfo = new Clients.PromotionMainInfo
+		var newInfo = new Clients.CreatePromotionMainInfo
 		{
 			Name = "New Name",
 			EventDuring = (DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1)),

@@ -31,34 +31,50 @@ public class PromotionManagementController : ControllerBase
 		return createService.GetAsync(command, HttpContext.RequestAborted);
 	}
 
-	[HttpPatch("{promotionId}", Name = "UpdatePromotionMainInfo")]
-	public ValueTask UpdatePromotionMainInfoAsync(
-		[FromServices] ICommandService<UpdatePromotionMainInfoCommand> updateService,
-		Guid promotionId,
-		[FromBody] UpdatePromotionViewModel updateModel)
+	[HttpGet("{promotionId}", Name = "GetPromotionMainInfo")]
+	public ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(
+		[FromServices] IGetService<GetPromotionMainInfoQuery, PromotionMainInfo?> getService,
+		Guid promotionId)
 	{
-		var command = new UpdatePromotionMainInfoCommand(
-			promotionId,
-			updateModel.Name,
-			(updateModel.EventDuring.From, updateModel.EventDuring.To),
-			updateModel.PromotionType,
-			updateModel.PromotionLimitAmount,
-			updateModel.IsAutoSent,
-			updateModel.Modifier);
+		var query = new GetPromotionMainInfoQuery(promotionId);
 
-		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
+		return getService.GetAsync(query, HttpContext.RequestAborted);
 	}
 
-	[HttpPut("vip/{promotionId}", Name = "UpdatePromotionVipLevels")]
-	public ValueTask UpdatePromotionVipLevelsAsync(
-		[FromServices] ICommandService<UpdatePromotionVipLevelsCommand> updateService,
-		Guid promotionId,
-		[FromBody] VipLevelsViewModel vipLevelsModel)
+	[HttpGet("rule/{promotionId}", Name = "GetPromotionRule")]
+	public async ValueTask<PromotionRuleViewModel?> GetPromotionRuleAsync(
+		[FromServices] IGetService<GetPromotionRuleQuery, PromotionRule?> getService,
+		Guid promotionId)
 	{
-		var command = new UpdatePromotionVipLevelsCommand(
+		var query = new GetPromotionRuleQuery(promotionId);
+
+		var rule = await getService
+			.GetAsync(query, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		return rule is null
+			? null
+			: new PromotionRuleViewModel
+			{
+				CompaignDetail = rule.CampaignDetail,
+				BonusAmountLimit = rule.BonusAmountLimit,
+				GameType = rule.GameType,
+				Percentage = rule.Percentage,
+				TurnoverMultiple = rule.TurnoverMultiple
+			};
+	}
+
+	[HttpPut("status/{promotionId}/{status}", Name = "UpdatePromotionStatus")]
+	public ValueTask SetPromotionStatusAsync(
+		[FromServices] ICommandService<SetPromotionStatusCommand> updateService,
+		Guid promotionId,
+		PromotionStatus status,
+		[FromHeader(Name = "Modifier")] string modifier)
+	{
+		var command = new SetPromotionStatusCommand(
 			promotionId,
-			vipLevelsModel.VipLevels,
-			vipLevelsModel.Modifier);
+			status,
+			modifier);
 
 		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
 	}
@@ -82,13 +98,31 @@ public class PromotionManagementController : ControllerBase
 		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
 	}
 
+	[HttpPatch("{promotionId}", Name = "UpdatePromotionMainInfo")]
+	public ValueTask UpdatePromotionMainInfoAsync(
+		[FromServices] ICommandService<UpdatePromotionMainInfoCommand> updateService,
+		Guid promotionId,
+		[FromBody] UpdatePromotionViewModel updateModel)
+	{
+		var command = new UpdatePromotionMainInfoCommand(
+			promotionId,
+			updateModel.Name,
+			(updateModel.EventDuring.From, updateModel.EventDuring.To),
+			updateModel.PromotionType,
+			updateModel.PromotionLimitAmount,
+			updateModel.IsAutoSent,
+			updateModel.Modifier);
+
+		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
+	}
+
 	[HttpPut("rule/{promotionId}", Name = "UpdatePromotionRule")]
 	public async Task UpdatePromotionRuleAsync(
 		[FromServices] IGetService<GetPromotionMainInfoQuery, PromotionMainInfo?> getPromotionService,
 		[FromServices] IMessageSender messageSender,
 		[FromServices] ICommandService<UpdatePromotionRuleCommand> updateService,
 		Guid promotionId,
-		[FromBody] PromotionRuleViewModel ruleModel)
+		[FromBody] UpdatePromotionRuleViewModel ruleModel)
 	{
 		var promotionInfo = await getPromotionService
 			.GetAsync(new GetPromotionMainInfoQuery(promotionId), HttpContext.RequestAborted)
@@ -127,17 +161,16 @@ public class PromotionManagementController : ControllerBase
 			.ConfigureAwait(false);
 	}
 
-	[HttpPut("status/{promotionId}/{status}", Name = "UpdatePromotionStatus")]
-	public ValueTask SetPromotionStatusAsync(
-		[FromServices] ICommandService<SetPromotionStatusCommand> updateService,
+	[HttpPut("vip/{promotionId}", Name = "UpdatePromotionVipLevels")]
+	public ValueTask UpdatePromotionVipLevelsAsync(
+		[FromServices] ICommandService<UpdatePromotionVipLevelsCommand> updateService,
 		Guid promotionId,
-		PromotionStatus status,
-		[FromHeader(Name = "Modifier")] string modifier)
+		[FromBody] VipLevelsViewModel vipLevelsModel)
 	{
-		var command = new SetPromotionStatusCommand(
+		var command = new UpdatePromotionVipLevelsCommand(
 			promotionId,
-			status,
-			modifier);
+			vipLevelsModel.VipLevels,
+			vipLevelsModel.Modifier);
 
 		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
 	}
