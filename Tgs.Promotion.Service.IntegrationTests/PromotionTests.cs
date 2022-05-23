@@ -80,6 +80,54 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task Get_Promotion_Rule()
+	{
+		var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = promotionId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now,
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{\"test\": 111}",
+			BonusAmountLimit = 10M,
+			GameType = (short)GameType.Lottery,
+			Percentage = 20M,
+			TurnoverMultiple = 30M
+		});
+
+		await dbContext.SaveChangesAsync();
+
+		var expected = new StubPromotionRule
+		{
+			CompaignDetail = new StubPromotionRuleDetail
+			{
+				Test = 111
+			},
+			BonusAmountLimit = 10M,
+			GameType = GameType.Lottery,
+			Percentage = 20M,
+			TurnoverMultiple = 30M
+		};
+
+		var actual = await sut.GetPromotionRuleAsync<StubPromotionRule>(promotionId);
+
+		Assert.IsNotNull(actual);
+		Assert.AreEqual(expected, actual);
+	}
+
+	[TestMethod]
 	public async Task Set_Old_Promotion_Rule()
 	{
 		var web = new TestPromotionApplication();

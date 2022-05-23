@@ -16,6 +16,11 @@ public interface IPromotionServiceClient
 		string modifier,
 		CancellationToken cancellationToken = default);
 
+	ValueTask<TRule?> GetPromotionRuleAsync<TRule>(
+		Guid promotionId,
+		CancellationToken cancellationToken = default)
+		where TRule : class;
+
 	ValueTask SetPromotionRuleAsync<TRule>(
 		Guid promotionId,
 		TRule rule,

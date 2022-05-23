@@ -71,8 +71,22 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			.ConfigureAwait(false);
 	}
 
+	public async ValueTask<TRule?> GetPromotionRuleAsync<TRule>(Guid promotionId, CancellationToken cancellationToken = default)
+		where TRule : class
+	{
+		var response = await _httpClient.GetAsync(
+			$"/api/promotion-mgr/rule/{promotionId}",
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		return await response.Content
+			.ReadFromJsonAsync<TRule>(_JsonSerializerOptions, cancellationToken)
+			.ConfigureAwait(false);
+	}
+
 	public async ValueTask SetPromotionContentAsync(
-		Guid promotionId,
+			Guid promotionId,
 		PromotionContent content,
 		string modifier,
 		CancellationToken cancellationToken = default)

@@ -4,7 +4,13 @@ namespace Tgs.Promotion.Service.ViewModels;
 
 public class PromotionRuleViewModel
 {
-	public JsonDocument CampaignDetail { get; init; } = default!;
+	public decimal BonusAmountLimit { get; init; }
 
-	public string Modifier { get; init; } = default!;
+	public JsonDocument CompaignDetail { get; init; } = default!;
+
+	public GameType? GameType { get; init; }
+
+	public decimal Percentage { get; init; }
+
+	public decimal TurnoverMultiple { get; init; }
 }
