@@ -119,6 +119,21 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task Get_Promotion_Rule()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new GetPromotionRuleQueryService(fakePromotionRepository);
+
+		var query = new GetPromotionRuleQuery(Guid.NewGuid());
+
+		await sut.GetAsync(query);
+
+		_ = fakePromotionRepository.Received(1)
+			.GetPromotionRuleAsync(Arg.Is(query.PromotionId));
+	}
+
+	[TestMethod]
 	public async Task Set_Promotion_Rule_Has_GameTypeAsync()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
@@ -168,6 +183,31 @@ public class PromotionTests
 			.SetPromotionStatusAsync(
 				Arg.Is(command.PromotionId),
 				Arg.Is(command.Status),
+				Arg.Is(command.Modifier));
+	}
+
+	[TestMethod]
+	public async Task Update_Promotion_MainInfo()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new UpdatePromotionMainInfoCommandService(fakePromotionRepository);
+
+		var command = new UpdatePromotionMainInfoCommand(
+			Guid.NewGuid(),
+			"TestPromotion",
+			(DateTime.Now.AddDays(-10), DateTime.Now),
+			"TestType",
+			null,
+			true,
+			"ModifyUser");
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.UpdatePromotionMainInfoAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<UpdatePromotionMainInfo>(),
 				Arg.Is(command.Modifier));
 	}
 }
