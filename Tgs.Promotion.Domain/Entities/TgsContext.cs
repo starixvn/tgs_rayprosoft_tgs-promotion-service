@@ -27,6 +27,8 @@ namespace Tgs.Promotion.Domain.Entities
         public virtual DbSet<PlayerVipLevelSeasonPromotion> PlayerVipLevelSeasonPromotions { get; set; } = null!;
         public virtual DbSet<PlayerVipLevelUpgradePromotion> PlayerVipLevelUpgradePromotions { get; set; } = null!;
         public virtual DbSet<PromotionBonus> PromotionBonuses { get; set; } = null!;
+        public virtual DbSet<PromotionDistribute> PromotionDistributes { get; set; } = null!;
+        public virtual DbSet<PromotionDistributePlan> PromotionDistributePlans { get; set; } = null!;
         public virtual DbSet<PromotionGameProvider> PromotionGameProviders { get; set; } = null!;
         public virtual DbSet<PromotionParticipant> PromotionParticipants { get; set; } = null!;
         public virtual DbSet<PromotionPlayer> PromotionPlayers { get; set; } = null!;
@@ -39,7 +41,8 @@ namespace Tgs.Promotion.Domain.Entities
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasPostgresExtension("ltree")
-                .HasPostgresExtension("pg_trgm");
+                .HasPostgresExtension("pg_trgm")
+                .HasPostgresExtension("uuid-ossp");
 
             modelBuilder.ApplyConfiguration(new Configurations.BrandGameConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.GameProviderConfiguration());
@@ -49,6 +52,8 @@ namespace Tgs.Promotion.Domain.Entities
             modelBuilder.ApplyConfiguration(new Configurations.PlayerVipLevelSeasonPromotionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerVipLevelUpgradePromotionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionBonusConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PromotionDistributeConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PromotionDistributePlanConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionGameProviderConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionParticipantConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionPlayerConfiguration());
