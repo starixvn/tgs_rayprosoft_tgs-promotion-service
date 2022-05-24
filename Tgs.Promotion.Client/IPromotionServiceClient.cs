@@ -44,4 +44,18 @@ public interface IPromotionServiceClient
 		CreatePromotionMainInfo updateInfo,
 		string modifier,
 		CancellationToken cancellationToken = default);
+
+	ValueTask<PromotionDistributePlanInfo?> GetPromotionDistributePlanAsync(
+		Guid promotionId,
+		long conditionHash,
+		CancellationToken cancellationToken = default);
+
+	ValueTask<Guid?> CreatePromotionDistributeAsync(
+		Guid brandId, 
+		Guid promotionId, 
+		int conditionHash, 
+		string playerCode,
+		decimal amount, 
+		string? distributor,
+		CancellationToken cancellationToken = default);
 }

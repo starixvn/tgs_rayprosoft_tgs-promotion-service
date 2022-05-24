@@ -92,6 +92,7 @@ builder.Services
 			"tgs.payment.deposit.status",
 			"tgs.payment.deposit.status"))
 	.AddNatsGlobPatternExchange("tgs.promotion.roulette.setting")
+	.AddNatsGlobPatternExchange("tgs.promotion.register.setting")
 	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.*.setting")
 	.AddNatsGlobPatternExchange("*");
 
