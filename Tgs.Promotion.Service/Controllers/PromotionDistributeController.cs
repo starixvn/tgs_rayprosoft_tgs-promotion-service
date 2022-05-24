@@ -21,4 +21,16 @@ public class PromotionDistributeController : ControllerBase
 
 		return getService.GetAsync(command);
 	}
+
+	[HttpGet("{promotionId}/{conditionHash}")]
+	[Description("Get distribute plan info")]
+	public ValueTask<PromotionDistributePlanInfo?> GetDistributePlanInfoAsync(
+		[FromServices] IGetService<GetPromotionDistributePlanQuery, PromotionDistributePlanInfo?> getService,
+		Guid promotionId,
+		long conditionHash)
+	{
+		var command = new GetPromotionDistributePlanQuery(promotionId, conditionHash);
+
+		return getService.GetAsync(command);
+	}
 }
