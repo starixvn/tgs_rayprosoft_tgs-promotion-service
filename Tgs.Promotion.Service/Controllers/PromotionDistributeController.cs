@@ -16,7 +16,7 @@ public class PromotionDistributeController : ControllerBase
 		[FromServices] IGetService<CreatePromotionDistributeQuery,Guid?> getService,
 		[FromBody] DistributePromotionBonusViewModel request)
 	{
-		var command = new CreatePromotionDistributeQuery(request.BrandId, request.PromotionId, request.ConditionHash,
+		var command = new CreatePromotionDistributeQuery(request.PlanId, request.PromotionId, request.ConditionHash,
 			request.PlayerCode, request.Amount, request.Distributor);
 
 		return getService.GetAsync(command);
