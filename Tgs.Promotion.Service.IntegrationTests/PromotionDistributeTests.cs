@@ -60,13 +60,12 @@ public class PromotionDistributeTests
 
 		var sut = new PromotionServiceClient(httpClient);
 
-		var brandId = Guid.NewGuid();
 		var promotionId = Guid.NewGuid();
 		var conditionHash = 0;
 		var playerCode = "playerCode";
 
 		var actual =
-			await sut.CreatePromotionDistributeAsync(brandId, promotionId, conditionHash, playerCode, 10, null);
+			await sut.CreatePromotionDistributeAsync(planId, promotionId, conditionHash, playerCode, 10, null);
 
 		Assert.IsNotNull(actual);
 		Assert.IsTrue(actual == distributeId);

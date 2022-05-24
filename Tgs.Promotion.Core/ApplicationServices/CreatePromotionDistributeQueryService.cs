@@ -43,20 +43,14 @@ internal class CreatePromotionDistributeQueryService : IGetService<CreatePromoti
 			return null;
 		}
 
-		var planId = await _promotionDistributePlanRepository.GetPromotionDistributePlanIdAsync(command.BrandId,
-			command.PromotionId,
-			command.ConditionHash).ConfigureAwait(false);
-
-		planId ??= await _promotionDistributePlanRepository.CreatePromotionDistributePlanAsync(
-			command.BrandId,
-			command.PromotionId,
-			command.ConditionHash,
-			JsonSerializer.Serialize(promotion));
-
 		var distributeId = await _promotionDistributeRepository.CreatePromotionDistributeAsync(
-			command.BrandId,
-			command.PromotionId, planId,
-			command.Amount, promotion.PromotionType, command.PlayerCode, command.Distributor);
+			promotion.BrandId,
+			promotion.Id, 
+			command.PlanId,
+			command.Amount, 
+			promotion.PromotionType, 
+			command.PlayerCode, 
+			command.Distributor);
 
 		_ = _cashServiceClient.PromotionAsync(player.DefaultWalletId, command.Amount, null, distributeId.ToString(),
 			null, cancellationToken);

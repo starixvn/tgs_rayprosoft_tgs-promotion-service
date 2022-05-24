@@ -2,7 +2,7 @@
 
 public record DistributePromotionBonusViewModel
 {
-	public Guid BrandId { get; init; }
+	public Guid PlanId { get; init; }
 	public Guid PromotionId { get; init; }
 	public int ConditionHash { get; init; }
 	public string PlayerCode { get; init; } = default!;

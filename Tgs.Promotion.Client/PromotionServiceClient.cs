@@ -227,7 +227,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			.ConfigureAwait(false);
 	}
 
-	public async ValueTask<Guid?> CreatePromotionDistributeAsync(Guid brandId, Guid promotionId, int conditionHash,
+	public async ValueTask<Guid?> CreatePromotionDistributeAsync(Guid planId, Guid promotionId, int conditionHash,
 		string playerCode,
 		decimal amount, string? distributor, CancellationToken cancellationToken = default)
 	{
@@ -236,7 +236,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			Content =
 				new StringContent(JsonSerializer.Serialize(new
 				{
-					brandId,
+					planId,
 					promotionId,
 					conditionHash,
 					playerCode,

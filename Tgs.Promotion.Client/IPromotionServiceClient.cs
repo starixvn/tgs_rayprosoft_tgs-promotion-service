@@ -51,7 +51,7 @@ public interface IPromotionServiceClient
 		CancellationToken cancellationToken = default);
 
 	ValueTask<Guid?> CreatePromotionDistributeAsync(
-		Guid brandId, 
+		Guid planId, 
 		Guid promotionId, 
 		int conditionHash, 
 		string playerCode,
