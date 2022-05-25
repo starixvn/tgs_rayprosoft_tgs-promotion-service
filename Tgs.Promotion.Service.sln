@@ -1,0 +1,79 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Service", "Tgs.Promotion.Service\Tgs.Promotion.Service.csproj", "{C52BFB9D-B05E-441E-BD12-B82C5E0909B4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Core", "Tgs.Promotion.Core\Tgs.Promotion.Core.csproj", "{9A571551-F7FA-4F3E-B652-7ED78C0F00E4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Repository", "Tgs.Promotion.Repository\Tgs.Promotion.Repository.csproj", "{0E6B9468-D74E-4955-B833-018D584C7115}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Domain", "Tgs.Promotion.Domain\Tgs.Promotion.Domain.csproj", "{7F4481D7-8940-4AF0-B3E8-ABB3A20C3F75}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.UnitTest", "Tgs.Promotion.UnitTest\Tgs.Promotion.UnitTest.csproj", "{C30AB184-D4E4-472D-A4CE-2CDF215EB814}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Client", "Tgs.Promotion.Client\Tgs.Promotion.Client.csproj", "{7D813827-BC18-4F3B-ABC1-55607E30D068}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{54AADB21-0C41-4099-A8D1-0B9E3404C71D}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		nuget.config = nuget.config
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Repository.UnitTests", "Tgs.Promotion.Repository.UnitTests\Tgs.Promotion.Repository.UnitTests.csproj", "{E375AD48-581D-424E-8571-4403F4F70FAC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Core.UnitTests", "Tgs.Promotion.Core.UnitTests\Tgs.Promotion.Core.UnitTests.csproj", "{86C99FF4-BA3B-480A-A6BE-0EC54E1322FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.Promotion.Service.IntegrationTests", "Tgs.Promotion.Service.IntegrationTests\Tgs.Promotion.Service.IntegrationTests.csproj", "{A5FF41A3-FA0B-432D-964F-5EE098F69363}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C52BFB9D-B05E-441E-BD12-B82C5E0909B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C52BFB9D-B05E-441E-BD12-B82C5E0909B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C52BFB9D-B05E-441E-BD12-B82C5E0909B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C52BFB9D-B05E-441E-BD12-B82C5E0909B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A571551-F7FA-4F3E-B652-7ED78C0F00E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A571551-F7FA-4F3E-B652-7ED78C0F00E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A571551-F7FA-4F3E-B652-7ED78C0F00E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A571551-F7FA-4F3E-B652-7ED78C0F00E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E6B9468-D74E-4955-B833-018D584C7115}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E6B9468-D74E-4955-B833-018D584C7115}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E6B9468-D74E-4955-B833-018D584C7115}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E6B9468-D74E-4955-B833-018D584C7115}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F4481D7-8940-4AF0-B3E8-ABB3A20C3F75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F4481D7-8940-4AF0-B3E8-ABB3A20C3F75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F4481D7-8940-4AF0-B3E8-ABB3A20C3F75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F4481D7-8940-4AF0-B3E8-ABB3A20C3F75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C30AB184-D4E4-472D-A4CE-2CDF215EB814}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C30AB184-D4E4-472D-A4CE-2CDF215EB814}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C30AB184-D4E4-472D-A4CE-2CDF215EB814}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C30AB184-D4E4-472D-A4CE-2CDF215EB814}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D813827-BC18-4F3B-ABC1-55607E30D068}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D813827-BC18-4F3B-ABC1-55607E30D068}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D813827-BC18-4F3B-ABC1-55607E30D068}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D813827-BC18-4F3B-ABC1-55607E30D068}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E375AD48-581D-424E-8571-4403F4F70FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E375AD48-581D-424E-8571-4403F4F70FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E375AD48-581D-424E-8571-4403F4F70FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E375AD48-581D-424E-8571-4403F4F70FAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86C99FF4-BA3B-480A-A6BE-0EC54E1322FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86C99FF4-BA3B-480A-A6BE-0EC54E1322FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86C99FF4-BA3B-480A-A6BE-0EC54E1322FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86C99FF4-BA3B-480A-A6BE-0EC54E1322FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5FF41A3-FA0B-432D-964F-5EE098F69363}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5FF41A3-FA0B-432D-964F-5EE098F69363}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5FF41A3-FA0B-432D-964F-5EE098F69363}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5FF41A3-FA0B-432D-964F-5EE098F69363}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C2C4B7B6-2CB7-43A9-9194-CA5975086F46}
+	EndGlobalSection
+EndGlobal
