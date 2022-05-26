@@ -53,6 +53,7 @@ public class PromotionDistributePlanRepository : IPromotionDistributePlanReposit
 
 		var newPlan = new PromotionDistributePlan
 		{
+			Id = Guid.NewGuid(),
 			BrandId = brandId,
 			PromotionId = promotionId,
 			ConditionHash = conditionHash,

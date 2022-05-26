@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Tgs.MessageQueue;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.Promotion;
 using Tgs.ServiceUtility;
@@ -12,12 +15,14 @@ public class CreatePromotionParticipantHandler : IGetService<CreatePromotionPart
 	private readonly IPromotionRepository _promotionRepository;
 	private readonly IPromotionTypeRepository _promotionType;
 	private readonly IPromotionJoinLockRepository _promotionJoinLockRepository;
+	private readonly IMessageSender _messageSender;
 
 	public CreatePromotionParticipantHandler(
 		IPromotionRepository promotionRepository,
 		IPromotionParticipantRepository promotionParticipantRepository,
 		IPromotionTypeRepository promotionType,
 		IPromotionJoinLockRepository promotionJoinLockRepository,
+		IMessageSender messageSender,
 		ILogger<CreatePromotionParticipantHandler> logger)
 	{
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
@@ -29,6 +34,8 @@ public class CreatePromotionParticipantHandler : IGetService<CreatePromotionPart
 			throw new ArgumentNullException(nameof(promotionType));
 		_promotionJoinLockRepository = promotionJoinLockRepository ??
 			throw new ArgumentNullException(nameof(promotionJoinLockRepository));
+		_messageSender = messageSender ??
+			throw new ArgumentNullException(nameof(messageSender));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
@@ -67,15 +74,24 @@ public class CreatePromotionParticipantHandler : IGetService<CreatePromotionPart
 			return new MessageResponse { Valid = false, Message = "Deposit invalid" };
 		}
 
-		if (!await _promotionJoinLockRepository.SetWhenNotExistsAsync(request.PlayerCode, request.PromotionId)
-				.ConfigureAwait(false) || await _promotionParticipantRepository.ExistsAsync(x
-				=> x.PlayerCode == request.PlayerCode && x.PromotionId == request.PromotionId))
+		var alreadyJoined = !await _promotionJoinLockRepository
+			.SetWhenNotExistsAsync(request.PlayerCode, request.PromotionId)
+			.ConfigureAwait(false) || await _promotionParticipantRepository.ExistsAsync(x
+			=> x.PlayerCode == request.PlayerCode && x.PromotionId == request.PromotionId);
+
+		if (!alreadyJoined)
 		{
-			return new MessageResponse { Valid = false, Message = "Promotion already joined." };
+			await _promotionParticipantRepository.CreatePromotionParticipantAsync(request.PromotionId,
+				request.PlayerCode);
 		}
 
-		await _promotionParticipantRepository.CreatePromotionParticipantAsync(request.PromotionId,
-			request.PlayerCode);
+		var messageData = new
+		{
+			PromotionId = request.PromotionId,
+			PlayerCode = request.PlayerCode
+		};
+		await _messageSender.PublishAsync(
+			$"tgs.promotion.{promotion.PromotionType.ToLower()}.distribute",Encoding.UTF8.GetBytes(JsonSerializer.Serialize(messageData)), cancellationToken: cancellationToken).ConfigureAwait(false);
 
 		return new MessageResponse { Valid = true };
 	}

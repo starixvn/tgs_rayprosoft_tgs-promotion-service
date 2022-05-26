@@ -50,4 +50,7 @@ public interface IPromotionRepository
 	ValueTask UpdatePromotionMainInfoAsync(Guid promotionId, UpdatePromotionMainInfo updateInfo, string modifier, CancellationToken cancellationToken = default);
 
 	ValueTask UpdatePromotionsAsync(PromotionRow[] promotions);
+
+	ValueTask UpdatePromotionUsedAmountAsync(Guid promotionId,Guid snapshotId,decimal amount, CancellationToken cancellationToken);
+
 }

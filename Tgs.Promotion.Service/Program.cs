@@ -90,7 +90,10 @@ builder.Services
 		})
 		.AddHandler<DepositStatusChangedMessageHandler>(
 			"tgs.payment.deposit.status",
-			"tgs.payment.deposit.status"))
+			"tgs.payment.deposit.status")
+		.AddHandler<TotalUsedAmountMessageHandler>(
+			"tgs.promotion.totalusedamount",
+			"tgs.promotion.totalusedamount"))
 	.AddNatsGlobPatternExchange("tgs.promotion.roulette.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.register.setting")
 	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.*.setting")
