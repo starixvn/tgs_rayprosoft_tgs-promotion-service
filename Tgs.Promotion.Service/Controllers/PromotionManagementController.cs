@@ -140,7 +140,7 @@ public class PromotionManagementController : ControllerBase
 		};
 
 		var response = await messageSender
-			.RequestAsync(subject, request.ToByteArray(), HttpContext.RequestAborted)
+			.RequestAsync(subject, request.ToByteArray())
 			.ConfigureAwait(false);
 
 		var processedResult = CampaignDetailResponse.Parser.ParseFrom(response.Span);
