@@ -2,7 +2,8 @@
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class GetOrCreatePromotionDistributePlanCommandService : IGetService<GetOrCreatePromotionDistributePlanCommand, PromotionDistributePlanInfo>
+internal class GetOrCreatePromotionDistributePlanCommandService
+	: IGetService<GetOrCreatePromotionDistributePlanCommand, PromotionDistributePlanInfo>
 {
 	private readonly IPromotionRepository _promotionRepository;
 

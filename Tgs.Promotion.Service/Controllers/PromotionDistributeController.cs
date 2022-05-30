@@ -40,8 +40,8 @@ public class PromotionDistributeController : ControllerBase
 	/// <param name="conditionHash">The condition hash.</param>
 	/// <returns></returns>
 	[HttpPut("plan/{promotionId}/{conditionHash}")]
-	public ValueTask<PromotionDistributePlanInfo?> GetDistributePlanInfoAsync(
-		[FromServices] IGetService<GetOrCreatePromotionDistributePlanCommand, PromotionDistributePlanInfo?> getService,
+	public ValueTask<PromotionDistributePlanInfo> GetDistributePlanInfoAsync(
+		[FromServices] IGetService<GetOrCreatePromotionDistributePlanCommand, PromotionDistributePlanInfo> getService,
 		Guid promotionId,
 		long conditionHash)
 	{

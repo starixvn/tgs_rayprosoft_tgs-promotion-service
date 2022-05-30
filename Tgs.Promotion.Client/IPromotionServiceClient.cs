@@ -16,7 +16,7 @@ public interface IPromotionServiceClient
 		string? distributor,
 		CancellationToken cancellationToken = default);
 
-	ValueTask<PromotionDistributePlanInfo?> GetPromotionDistributePlanAsync(
+	ValueTask<PromotionDistributePlanInfo> GetPromotionDistributePlanAsync(
 		Guid promotionId,
 		long conditionHash,
 		CancellationToken cancellationToken = default);
