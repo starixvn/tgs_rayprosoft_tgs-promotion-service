@@ -86,7 +86,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			.ConfigureAwait(false);
 	}
 
-	public async ValueTask<PromotionDistributePlanInfo?> GetPromotionDistributePlanAsync(
+	public async ValueTask<PromotionDistributePlanInfo> GetPromotionDistributePlanAsync(
 		Guid promotionId,
 		long conditionHash,
 		CancellationToken cancellationToken = default)
@@ -98,11 +98,13 @@ internal class PromotionServiceClient : IPromotionServiceClient
 
 		_ = response.EnsureSuccessStatusCode();
 
-		return await response.Content
+		var result = await response.Content
 			.ReadFromJsonAsync<PromotionDistributePlanInfo>(
 				_JsonSerializerOptions,
 				cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
+
+		return result!;
 	}
 
 	public async ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(Guid promotionId, CancellationToken cancellationToken = default)
