@@ -21,7 +21,7 @@ internal class UpdatePromotionRuleCommandService : ICommandService<UpdatePromoti
 
 			if (settings is not null)
 				await _promotionRepository
-					.SetPromotionGameProvidersAsync(command.PromotionId, settings.GameProviderIds)
+					.SetPromotionGameProvidersAsync(command.PromotionId, settings.GameProviderIds, cancellationToken)
 					.ConfigureAwait(false);
 		}
 

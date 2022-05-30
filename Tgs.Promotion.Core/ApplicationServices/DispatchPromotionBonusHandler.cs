@@ -86,7 +86,8 @@ public class DispatchPromotionBonusHandler : IGetService<DispatchPromotionBonusR
 					promotionPlayer.BonusAmount,
 					null,
 					null,
-					request.OperatorUserId)
+					request.OperatorUserId,
+					cancellationToken)
 				.ConfigureAwait(false);
 
 			transactionPromotions.Add(new()

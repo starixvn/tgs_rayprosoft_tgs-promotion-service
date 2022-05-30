@@ -12,63 +12,57 @@ public class PromotionDistributeTests
 	[TestMethod]
 	public async Task Can_Create_Promotion_Distribute()
 	{
-		var distributeId = Guid.NewGuid();
 		var planId = Guid.NewGuid();
 
-		await using var web = new TestPromotionApplication(builder => builder
-			.ConfigureServices(services =>
-			{
-				var fakPromotionDistributeRepository = Substitute.For<IPromotionDistributeRepository>();
-				var fakePromotionDistributePlanRepository = Substitute.For<IPromotionDistributePlanRepository>();
-				var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-				var fakePromotionRepository = Substitute.For<IPromotionRepository>();
-
-				_ = fakPromotionDistributeRepository.CreatePromotionDistributeAsync(
-						Arg.Any<Guid>(), 
-						Arg.Any<Guid>(),
-						Arg.Any<Guid?>(), 
-						Arg.Any<decimal>(), 
-						Arg.Any<string>(), 
-						Arg.Any<string>(), 
-						Arg.Any<string?>())
-					.Returns(distributeId);
-
-				_ = fakePromotionDistributePlanRepository
-					.CreatePromotionDistributePlanAsync(
-						Arg.Any<Guid>(),
-						Arg.Any<Guid>(), 
-						Arg.Any<int>(), 
-						Arg.Any<string>())
-					.Returns(planId);
-
-				_ = fakePlayerRepository
-					.GetPlayerAsync(Arg.Any<Expression<Func<Player, bool>>>())
-					.Returns(new Player { PlayerCode = "playercode" });
-
-				var promotion = new PromotionRow();
-				_ = fakePromotionRepository
-					.GetPromotionByIdAsync(Arg.Any<Guid>())
-					.Returns(promotion);
-
-				_ = services.AddSingleton(fakPromotionDistributeRepository);
-				_ = services.AddSingleton(fakePromotionDistributePlanRepository);
-				_ = services.AddSingleton(fakePlayerRepository);
-				_ = services.AddSingleton(fakePromotionRepository);
-			}));
+		await using var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
 		var sut = new PromotionServiceClient(httpClient);
 
 		var promotionId = Guid.NewGuid();
-		var conditionHash = 0;
 		var playerCode = "playerCode";
 
-		var actual =
-			await sut.CreatePromotionDistributeAsync(planId, promotionId, conditionHash, playerCode, 10, null);
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		Assert.IsNotNull(actual);
-		Assert.IsTrue(actual == distributeId);
+		_ = await dbContext.Players.AddAsync(new Player
+		{
+			PlayerCode = playerCode,
+			DefaultWalletCurrencyCode = "CNY",
+			Password = Array.Empty<byte>(),
+			Salt = Array.Empty<byte>(),
+			Username = "player",
+			WithdrawPassword = Array.Empty<byte>(),
+			WithdrawSalt = Array.Empty<byte>()
+		});
+
+		_ = await dbContext.PromotionDistributePlans.AddAsync(new PromotionDistributePlan
+		{
+			Id = planId,
+			PromotionId = promotionId,
+			BrandId = Guid.NewGuid(),
+			ConditionHash = 0L
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.DistributePromotionBonusAsync(
+			planId,
+			playerCode,
+			10M,
+			100M,
+			null);
+
+		var record = dbContext.PromotionDistributes.First();
+		var bucketRecord = dbContext.PlayerBuckets.First();
+
+		Assert.AreNotEqual(Guid.Empty, actual);
+		Assert.AreEqual(promotionId, record.PromotionId);
+		Assert.AreEqual(10M, record.BonusAmount);
+		Assert.AreEqual(100M, record.Bucket);
+		Assert.AreEqual(playerCode, record.PlayerCode);
+		Assert.AreEqual(planId, record.PlanId);
+		Assert.AreEqual(100M, bucketRecord.BucketAmount);
 	}
 
 	[TestMethod]
@@ -78,40 +72,33 @@ public class PromotionDistributeTests
 		var promotionId = Guid.NewGuid();
 		var conditionHash = (long)-111;
 
-		await using var web = new TestPromotionApplication(builder => builder
-			.ConfigureServices(services =>
-			{
-				var fakePromotionDistributePlanRepository = Substitute.For<IPromotionDistributePlanRepository>();
-				var fakePromotionRepository = Substitute.For<IPromotionRepository>();
-
-				var planInfo = new PromotionDistributePlanInfo(Guid.NewGuid(), brandId, promotionId, conditionHash);
-
-				_ = fakePromotionDistributePlanRepository
-					.GetPromotionDistributePlanInfoAsync(
-						Arg.Any<Guid>(),
-						Arg.Any<Guid>(), 
-						Arg.Any<long>())
-					.Returns(planInfo);
-
-				var promotion = new PromotionRow{Id= promotionId , BrandId = brandId};
-				_ = fakePromotionRepository
-					.GetPromotionByIdAsync(Arg.Any<Guid>())
-					.Returns(promotion);
-
-				_ = services.AddSingleton(fakePromotionDistributePlanRepository);
-				_ = services.AddSingleton(fakePromotionRepository);
-			}));
+		await using var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
 		var sut = new PromotionServiceClient(httpClient);
 
-		var actual =
-			await sut.GetPromotionDistributePlanAsync(promotionId, conditionHash);
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = dbContext.PromotionRows.Add(new PromotionRow
+		{
+			Id = promotionId,
+			BrandId = brandId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now,
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}"
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.GetPromotionDistributePlanAsync(promotionId, conditionHash);
 
 		Assert.IsNotNull(actual);
-		Assert.IsTrue(actual.PromotionId == promotionId);
-		Assert.IsTrue(actual.BrandId == brandId);
-		Assert.IsTrue(actual.ConditionHash == conditionHash);
+		Assert.AreEqual(promotionId, actual.PromotionId);
+		Assert.AreEqual(brandId, actual.BrandId);
+		Assert.AreEqual(conditionHash, actual.ConditionHash);
 	}
 }

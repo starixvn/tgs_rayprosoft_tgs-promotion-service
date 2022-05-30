@@ -87,11 +87,11 @@ public class CreatePromotionParticipantHandler : IGetService<CreatePromotionPart
 
 		var messageData = new
 		{
-			PromotionId = request.PromotionId,
-			PlayerCode = request.PlayerCode
+			request.PromotionId,
+			request.PlayerCode
 		};
 		await _messageSender.PublishAsync(
-			$"tgs.promotion.{promotion.PromotionType.ToLower()}.distribute",Encoding.UTF8.GetBytes(JsonSerializer.Serialize(messageData)), cancellationToken: cancellationToken).ConfigureAwait(false);
+			$"tgs.promotion.{promotion.PromotionType.ToLower()}.distribute", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(messageData)), cancellationToken: cancellationToken).ConfigureAwait(false);
 
 		return new MessageResponse { Valid = true };
 	}

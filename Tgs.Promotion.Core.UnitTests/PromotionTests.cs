@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.Promotion.ApplicationServices;
 
@@ -30,53 +29,6 @@ public class PromotionTests
 	}
 
 	[TestMethod]
-	public async Task Update_Promotion_VipLevels()
-	{
-		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
-
-		var sut = new UpdatePromotionVipLevelsCommandService(fakePromotionRepository);
-
-		var command = new UpdatePromotionVipLevelsCommand(
-			Guid.NewGuid(),
-			new[] { 1, 2 },
-			"ModifyUser");
-
-		await sut.ExecuteAsync(command);
-
-		_ = fakePromotionRepository.Received(1)
-			.SetPromotionVipLevelsAsync(
-				Arg.Is(command.PromotionId),
-				Arg.Is<IEnumerable<int>>(levels => levels.Count() == 2 && levels.First() == 1 && levels.Last() == 2),
-				Arg.Is(command.Modifier));
-	}
-
-	[TestMethod]
-	public async Task Update_Promotion_Content()
-	{
-		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
-
-		var sut = new UpdatePromotionContentCommandService(fakePromotionRepository);
-
-		var command = new UpdatePromotionContentCommand(
-			Guid.NewGuid(),
-			null,
-			null,
-			null,
-			null,
-			null,
-			JsonDocument.Parse("{}"),
-			"ModifyUser");
-
-		await sut.ExecuteAsync(command);
-
-		_ = fakePromotionRepository.Received(1)
-			.SetPromotionContentAsync(
-				Arg.Is(command.PromotionId),
-				Arg.Any<PromotionContentDetail>(),
-				Arg.Is(command.Modifier));
-	}
-
-	[TestMethod]
 	public async Task Get_Promotion_MainInfo()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
@@ -85,10 +37,25 @@ public class PromotionTests
 
 		var query = new GetPromotionMainInfoQuery(Guid.NewGuid());
 
-		await sut.GetAsync(query);
+		_ = await sut.GetAsync(query);
 
 		_ = fakePromotionRepository.Received(1)
 			.GetPromotionMainInfoAsync(Arg.Is(query.PromotionId));
+	}
+
+	[TestMethod]
+	public async Task Get_Promotion_Rule()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new GetPromotionRuleQueryService(fakePromotionRepository);
+
+		var query = new GetPromotionRuleQuery(Guid.NewGuid());
+
+		_ = await sut.GetAsync(query);
+
+		_ = fakePromotionRepository.Received(1)
+			.GetPromotionRuleAsync(Arg.Is(query.PromotionId));
 	}
 
 	[TestMethod]
@@ -116,21 +83,6 @@ public class PromotionTests
 				Arg.Is(command.PromotionId),
 				Arg.Any<PromotionRule>(),
 				Arg.Is(command.Modifier));
-	}
-
-	[TestMethod]
-	public async Task Get_Promotion_Rule()
-	{
-		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
-
-		var sut = new GetPromotionRuleQueryService(fakePromotionRepository);
-
-		var query = new GetPromotionRuleQuery(Guid.NewGuid());
-
-		await sut.GetAsync(query);
-
-		_ = fakePromotionRepository.Received(1)
-			.GetPromotionRuleAsync(Arg.Is(query.PromotionId));
 	}
 
 	[TestMethod]
@@ -187,6 +139,32 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task Update_Promotion_Content()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new UpdatePromotionContentCommandService(fakePromotionRepository);
+
+		var command = new UpdatePromotionContentCommand(
+			Guid.NewGuid(),
+			null,
+			null,
+			null,
+			null,
+			null,
+			JsonDocument.Parse("{}"),
+			"ModifyUser");
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.SetPromotionContentAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<PromotionContentDetail>(),
+				Arg.Is(command.Modifier));
+	}
+
+	[TestMethod]
 	public async Task Update_Promotion_MainInfo()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
@@ -208,6 +186,27 @@ public class PromotionTests
 			.UpdatePromotionMainInfoAsync(
 				Arg.Is(command.PromotionId),
 				Arg.Any<UpdatePromotionMainInfo>(),
+				Arg.Is(command.Modifier));
+	}
+
+	[TestMethod]
+	public async Task Update_Promotion_VipLevels()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new UpdatePromotionVipLevelsCommandService(fakePromotionRepository);
+
+		var command = new UpdatePromotionVipLevelsCommand(
+			Guid.NewGuid(),
+			new[] { 1, 2 },
+			"ModifyUser");
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.SetPromotionVipLevelsAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Is<IEnumerable<int>>(levels => levels.Count() == 2 && levels.First() == 1 && levels.Last() == 2),
 				Arg.Is(command.Modifier));
 	}
 }

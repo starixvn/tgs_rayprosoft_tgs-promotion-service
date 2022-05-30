@@ -60,7 +60,7 @@ public class PromotionTests
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		await dbContext.PromotionRows.AddAsync(new PromotionRow
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
 		{
 			Id = promotionId,
 			Name = "Test Promotion",
@@ -71,7 +71,7 @@ public class PromotionTests
 			CampaignDetail = "{}"
 		});
 
-		await dbContext.SaveChangesAsync();
+		_ = await dbContext.SaveChangesAsync();
 
 		var actual = await sut.GetPromotionMainInfoAsync(promotionId);
 
@@ -92,7 +92,7 @@ public class PromotionTests
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		await dbContext.PromotionRows.AddAsync(new PromotionRow
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
 		{
 			Id = promotionId,
 			Name = "Test Promotion",
@@ -107,7 +107,7 @@ public class PromotionTests
 			TurnoverMultiple = 30M
 		});
 
-		await dbContext.SaveChangesAsync();
+		_ = await dbContext.SaveChangesAsync();
 
 		var expected = new StubPromotionRule
 		{
@@ -291,7 +291,7 @@ public class PromotionTests
 
 		var expected = JsonSerializer.Serialize(rule, new JsonSerializerOptions { WriteIndented = false });
 
-		fakeMessageSender
+		_ = fakeMessageSender
 			.RequestAsync(
 				Arg.Is("tgs.promotion.testtype.setting"),
 				Arg.Any<ReadOnlyMemory<byte>>(),
@@ -395,7 +395,7 @@ public class PromotionTests
 			}
 		);
 
-		await dbContext.PromotionVipLevels.AddAsync(
+		_ = await dbContext.PromotionVipLevels.AddAsync(
 			new PromotionVipLevel
 			{
 				PromotionId = promotionId,
