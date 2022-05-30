@@ -15,11 +15,13 @@ public class PromotionDistributeTests
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+		var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
 
 		var sut = new DistributePromotionBonusCommandService(
 			fakePromotionRepository,
 			fakeCashServiceClient,
-			fakePlayerRepository);
+			fakePlayerRepository,
+			fakePlayerBucketRepository);
 
 		var command = new DistributePromotionBonusCommand(
 			 Guid.NewGuid(),
@@ -48,6 +50,12 @@ public class PromotionDistributeTests
 		var actual = await sut.GetAsync(command);
 
 		Assert.AreNotEqual(Guid.Empty, actual);
+
+		_ = fakePlayerBucketRepository.Received(1)
+			.CreatePlayerBucketAsync(
+				Arg.Is(command.PlayerCode),
+				Arg.Is(BucketType.Promotion),
+				  Arg.Is(command.NeedTurnover));
 		_ = fakeCashServiceClient.Received(1)
 			.PromotionAsync(
 				Arg.Is(walletId),
@@ -63,11 +71,13 @@ public class PromotionDistributeTests
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+		var fakePlayerBucketRepostory = Substitute.For<IPlayerBucketRepository>();
 
 		var sut = new DistributePromotionBonusCommandService(
 			fakePromotionRepository,
 			fakeCashServiceClient,
-			fakePlayerRepository);
+			fakePlayerRepository,
+			fakePlayerBucketRepostory);
 
 		var command = new DistributePromotionBonusCommand(
 			 Guid.NewGuid(),

@@ -54,6 +54,7 @@ public class PromotionDistributeTests
 			null);
 
 		var record = dbContext.PromotionDistributes.First();
+		var bucketRecord = dbContext.PlayerBuckets.First();
 
 		Assert.AreNotEqual(Guid.Empty, actual);
 		Assert.AreEqual(promotionId, record.PromotionId);
@@ -61,6 +62,7 @@ public class PromotionDistributeTests
 		Assert.AreEqual(100M, record.Bucket);
 		Assert.AreEqual(playerCode, record.PlayerCode);
 		Assert.AreEqual(planId, record.PlanId);
+		Assert.AreEqual(100M, bucketRecord.BucketAmount);
 	}
 
 	[TestMethod]

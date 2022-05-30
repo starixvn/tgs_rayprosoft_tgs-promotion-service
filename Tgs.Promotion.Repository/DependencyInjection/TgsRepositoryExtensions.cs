@@ -24,9 +24,7 @@ public static class TgsRepositoryExtensions
 			.AddTransient<ISettingsRepository, SettingsRepository>()
 			.AddTransient<IPromotionPlayerRepository, PromotionPlayerRepository>()
 			.AddTransient<IPlayerBucketRepository, PlayerBucketRepository>()
-			.AddTransient<IPlayerDataRepository, RedisPlayerDataRepository>()
-			.AddTransient<IPromotionDistributePlanRepository, PromotionDistributePlanRepository>()
-			.AddTransient<IPromotionDistributeRepository, PromotionDistributeRepository>();
+			.AddTransient<IPlayerDataRepository, RedisPlayerDataRepository>();
 
 	public static IServiceCollection AddRedis(
 		this IServiceCollection service,
