@@ -21,7 +21,6 @@ public class PromotionDistributeRepository : IPromotionDistributeRepository
 			PromotionId = promotionId,
 			PlanId = planId,
 			PlayerCode = playerCode,
-			PromotionType = promotionType,
 			BonusAmount = bonusAmount,
 			Distributor = distributor,
 			CreatedOn = DateTime.UtcNow,

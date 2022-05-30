@@ -13,6 +13,19 @@ public interface IPromotionRepository
 
 	ValueTask<Guid> CreatePromotionAsync(CreatePromotionMainInfo createInfo, string modifier, CancellationToken cancellationToken = default);
 
+	ValueTask<Guid> CreatePromotionDistributeAsync(
+		Guid planId,
+		string playerCode,
+		decimal bonusAmount,
+		decimal needTurnover,
+		string? distributor,
+		CancellationToken cancellationToken = default);
+
+	ValueTask<PromotionDistributePlanInfo> CreatePromotionDistributePlanAsync(
+			Guid promotionId,
+		long conditionHash,
+		CancellationToken cancellationToken = default);
+
 	ValueTask<bool> ExistsAsync(Expression<Func<PromotionRow, bool>> predicate);
 
 	ValueTask<PromotionRow?> GetPromotionAsync(
@@ -51,6 +64,5 @@ public interface IPromotionRepository
 
 	ValueTask UpdatePromotionsAsync(PromotionRow[] promotions);
 
-	ValueTask UpdatePromotionUsedAmountAsync(Guid promotionId,Guid snapshotId,decimal amount, CancellationToken cancellationToken);
-
+	ValueTask UpdatePromotionUsedAmountAsync(Guid promotionId, Guid snapshotId, decimal amount, CancellationToken cancellationToken = default);
 }

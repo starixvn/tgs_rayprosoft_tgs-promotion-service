@@ -8,18 +8,31 @@ public interface IPromotionServiceClient
 		string modifier,
 		CancellationToken cancellationToken = default);
 
-	ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(Guid promotionId, CancellationToken cancellationToken = default);
-
-	ValueTask SetPromotionContentAsync(
-		Guid promotionId,
-		PromotionContent content,
-		string modifier,
+	ValueTask<Guid> DistributePromotionBonusAsync(
+		Guid planId,
+		string playerCode,
+		decimal amount,
+		decimal needTurnover,
+		string? distributor,
 		CancellationToken cancellationToken = default);
+
+	ValueTask<PromotionDistributePlanInfo?> GetPromotionDistributePlanAsync(
+		Guid promotionId,
+		long conditionHash,
+		CancellationToken cancellationToken = default);
+
+	ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(Guid promotionId, CancellationToken cancellationToken = default);
 
 	ValueTask<TRule?> GetPromotionRuleAsync<TRule>(
 		Guid promotionId,
 		CancellationToken cancellationToken = default)
 		where TRule : class;
+
+	ValueTask SetPromotionContentAsync(
+			Guid promotionId,
+		PromotionContent content,
+		string modifier,
+		CancellationToken cancellationToken = default);
 
 	ValueTask SetPromotionRuleAsync<TRule>(
 		Guid promotionId,
@@ -43,19 +56,5 @@ public interface IPromotionServiceClient
 						Guid promotionId,
 		CreatePromotionMainInfo updateInfo,
 		string modifier,
-		CancellationToken cancellationToken = default);
-
-	ValueTask<PromotionDistributePlanInfo?> GetPromotionDistributePlanAsync(
-		Guid promotionId,
-		long conditionHash,
-		CancellationToken cancellationToken = default);
-
-	ValueTask<Guid?> CreatePromotionDistributeAsync(
-		Guid planId, 
-		Guid promotionId, 
-		int conditionHash, 
-		string playerCode,
-		decimal amount, 
-		string? distributor,
 		CancellationToken cancellationToken = default);
 }

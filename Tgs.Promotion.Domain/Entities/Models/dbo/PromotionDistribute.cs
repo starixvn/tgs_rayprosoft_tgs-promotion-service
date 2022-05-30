@@ -14,9 +14,9 @@ namespace Tgs.Promotion.Domain.Entities
         public Guid? PlanId { get; set; }
         public string PlayerCode { get; set; } = null!;
         public Guid PromotionId { get; set; }
-        public string PromotionType { get; set; } = null!;
         public string? Distributor { get; set; }
         public DateTime? SentOn { get; set; }
+        public decimal Bucket { get; set; }
 
         public virtual PromotionRow Promotion { get; set; } = null!;
     }

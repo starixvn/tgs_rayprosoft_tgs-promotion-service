@@ -131,8 +131,97 @@ public class PromotionRepository : IPromotionRepository
 		return promotionId;
 	}
 
+	public async ValueTask<Guid> CreatePromotionDistributeAsync(
+		Guid planId,
+		string playerCode,
+		decimal bonusAmount,
+		decimal needTurnover,
+		string? distributor,
+		CancellationToken cancellationToken = default)
+	{
+		var plan = await _dbContext.PromotionDistributePlans
+			.FindAsync(new object?[] { planId }, cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
+		if (plan is null)
+			throw new InvalidOperationException($"Promotion distribute plan with id {planId} not found");
+
+		var distributeId = await _serialNumberGenerator
+			.GenerateAsync(cancellationToken)
+			.ConfigureAwait(false);
+
+		await _dbContext.PromotionDistributes.AddAsync(new PromotionDistribute
+		{
+			Id = distributeId,
+			BrandId = plan.BrandId,
+			PromotionId = plan.PromotionId,
+			PlanId = planId,
+			PlayerCode = playerCode,
+			BonusAmount = bonusAmount,
+			Bucket = needTurnover,
+			Distributor = distributor,
+			CreatedOn = DateTime.UtcNow,
+			SentOn = DateTime.UtcNow
+		}, cancellationToken).ConfigureAwait(false);
+
+		_ = await _dbContext
+			.SaveChangesAsync(cancellationToken)
+			.ConfigureAwait(false);
+
+		return distributeId;
+	}
+
+	public async ValueTask<PromotionDistributePlanInfo> CreatePromotionDistributePlanAsync(
+		Guid promotionId,
+		long conditionHash,
+		CancellationToken cancellationToken = default)
+	{
+		var promotion = await _dbContext.PromotionRows
+			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
+		if (promotion is null)
+			throw new InvalidOperationException($"Promotion with id {promotionId} not found");
+
+		var plan = await _dbContext.PromotionDistributePlans
+			.SingleOrDefaultAsync(
+				row => row.PromotionId == promotionId && row.ConditionHash == conditionHash,
+				cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
+		if (plan is null)
+		{
+			var createId = await _serialNumberGenerator
+				.GenerateAsync(cancellationToken)
+				.ConfigureAwait(false);
+
+			await _dbContext.PromotionDistributePlans.AddAsync(new PromotionDistributePlan
+			{
+				Id = createId,
+				BrandId = promotion.BrandId,
+				PromotionId = promotionId,
+				ConditionHash = conditionHash,
+				Detail = JsonSerializer.Serialize(promotion, _SerializerOptions)
+			}, cancellationToken).ConfigureAwait(false);
+
+			_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+			return new PromotionDistributePlanInfo(
+				createId,
+				promotion.BrandId,
+				promotion.Id,
+				conditionHash);
+		}
+
+		return new PromotionDistributePlanInfo(
+			plan.Id,
+			plan.BrandId,
+			plan.Id,
+			plan.ConditionHash);
+	}
+
 	public async ValueTask<bool> ExistsAsync(
-		Expression<Func<PromotionRow, bool>> predicate)
+				Expression<Func<PromotionRow, bool>> predicate)
 		=> await _promotionService.GetQueries().AnyAsync(predicate).ConfigureAwait(false);
 
 	public async ValueTask<PromotionRow?> GetPromotionAsync(

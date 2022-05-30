@@ -56,6 +56,55 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		return JsonSerializer.Deserialize<Guid>(json, _JsonSerializerOptions);
 	}
 
+	public async ValueTask<Guid> DistributePromotionBonusAsync(
+		Guid planId,
+		string playerCode,
+		decimal amount,
+		decimal needTurnover,
+		string? distributor,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new
+		{
+			Amount = amount,
+			needTurnover = needTurnover,
+			dDistributor = distributor
+		};
+		var requestContent = new StringContent(
+			JsonSerializer.Serialize(request, _JsonSerializerOptions),
+			Encoding.UTF8,
+			"application/json");
+		var response = await _httpClient.PutAsync(
+			$"/api/distribute/{planId}/{playerCode}",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		return await response.Content
+			.ReadFromJsonAsync<Guid>(_JsonSerializerOptions, cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+	}
+
+	public async ValueTask<PromotionDistributePlanInfo?> GetPromotionDistributePlanAsync(
+		Guid promotionId,
+		long conditionHash,
+		CancellationToken cancellationToken = default)
+	{
+		var response = await _httpClient.PutAsync(
+			$"/api/distribute/plan/{promotionId}/{conditionHash}",
+			null,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		return await response.Content
+			.ReadFromJsonAsync<PromotionDistributePlanInfo>(
+				_JsonSerializerOptions,
+				cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+	}
+
 	public async ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(Guid promotionId, CancellationToken cancellationToken = default)
 	{
 		var response = await _httpClient.GetAsync(
@@ -209,51 +258,5 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			cancellationToken).ConfigureAwait(false);
 
 		_ = response.EnsureSuccessStatusCode();
-	}
-
-	public async ValueTask<PromotionDistributePlanInfo?> GetPromotionDistributePlanAsync(Guid promotionId, long conditionHash,
-		CancellationToken cancellationToken = default)
-	{
-		var response = await _httpClient.GetAsync(
-			$"/api/promotionDistribute/{promotionId}/{conditionHash}",
-			cancellationToken).ConfigureAwait(false);
-
-		_ = response.EnsureSuccessStatusCode();
-
-		return await response.Content
-			.ReadFromJsonAsync<PromotionDistributePlanInfo>(
-				_JsonSerializerOptions,
-				cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
-	}
-
-	public async ValueTask<Guid?> CreatePromotionDistributeAsync(Guid planId, Guid promotionId, int conditionHash,
-		string playerCode,
-		decimal amount, string? distributor, CancellationToken cancellationToken = default)
-	{
-		var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionDistribute")
-		{
-			Content =
-				new StringContent(JsonSerializer.Serialize(new
-				{
-					planId,
-					promotionId,
-					conditionHash,
-					playerCode,
-					amount,
-					distributor
-				}), Encoding.UTF8, "application/json")
-		};
-		var response = await _httpClient.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
-
-		_ = response.EnsureSuccessStatusCode();
-
-		var json = await response.Content
-			.ReadAsStringAsync(cancellationToken)
-			.ConfigureAwait(false);
-
-		return string.IsNullOrEmpty(json)
-			? null
-			: JsonSerializer.Deserialize<Guid?>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 	}
 }

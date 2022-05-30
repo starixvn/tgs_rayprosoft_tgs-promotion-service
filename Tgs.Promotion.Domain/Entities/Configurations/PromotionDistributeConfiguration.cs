@@ -30,6 +30,8 @@ namespace Tgs.Promotion.Domain.Entities.Configurations
 
             entity.Property(e => e.BrandId).HasColumnName("brand_id");
 
+            entity.Property(e => e.Bucket).HasColumnName("bucket");
+
             entity.Property(e => e.CreatedOn).HasColumnName("created_on");
 
             entity.Property(e => e.Distributor).HasColumnName("distributor");
@@ -39,8 +41,6 @@ namespace Tgs.Promotion.Domain.Entities.Configurations
             entity.Property(e => e.PlayerCode).HasColumnName("player_code");
 
             entity.Property(e => e.PromotionId).HasColumnName("promotion_id");
-
-            entity.Property(e => e.PromotionType).HasColumnName("promotion_type");
 
             entity.Property(e => e.SentOn).HasColumnName("sent_on");
 
