@@ -29,7 +29,7 @@ public interface IPromotionServiceClient
 		where TRule : class;
 
 	ValueTask SetPromotionContentAsync(
-			Guid promotionId,
+		Guid promotionId,
 		PromotionContent content,
 		string modifier,
 		CancellationToken cancellationToken = default);
