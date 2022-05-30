@@ -22,7 +22,7 @@ public interface IPromotionRepository
 		CancellationToken cancellationToken = default);
 
 	ValueTask<PromotionDistributePlanInfo> CreatePromotionDistributePlanAsync(
-			Guid promotionId,
+		Guid promotionId,
 		long conditionHash,
 		CancellationToken cancellationToken = default);
 
@@ -30,16 +30,14 @@ public interface IPromotionRepository
 
 	ValueTask<PromotionRow?> GetPromotionAsync(
 		Expression<Func<PromotionRow, bool>> predicate,
-		Func<IQueryable<PromotionRow>, IQueryable<PromotionRow>>
-			? preQuery = null);
+		Func<IQueryable<PromotionRow>, IQueryable<PromotionRow>>? preQuery = null);
 
 	ValueTask<PromotionRow?> GetPromotionByIdAsync(Guid promotionId);
 
 	ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(Guid promotionId, CancellationToken cancellationToken = default);
 
 	IQueryable<PromotionRow> GetPromotionQueries(
-		Func<IQueryable<PromotionRow>,
-			IQueryable<PromotionRow>>? preQuery = null,
+		Func<IQueryable<PromotionRow>, IQueryable<PromotionRow>>? preQuery = null,
 		bool tracking = false);
 
 	ValueTask<PromotionRule?> GetPromotionRuleAsync(Guid promotionId, CancellationToken cancellationToken = default);
