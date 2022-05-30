@@ -8,5 +8,5 @@ public record struct During(DateTime From, DateTime To)
 	}
 
 	public static implicit operator During((DateTime From, DateTime To) during)
-		=> new During(during.From, during.To);
+		=> new(during.From, during.To);
 }

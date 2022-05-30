@@ -80,7 +80,7 @@ public class PromotionDistributeTests
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		dbContext.PromotionRows.Add(new PromotionRow
+		_ = dbContext.PromotionRows.Add(new PromotionRow
 		{
 			Id = promotionId,
 			BrandId = brandId,
@@ -92,7 +92,7 @@ public class PromotionDistributeTests
 			CampaignDetail = "{}"
 		});
 
-		await dbContext.SaveChangesAsync();
+		_ = await dbContext.SaveChangesAsync();
 
 		var actual = await sut.GetPromotionDistributePlanAsync(promotionId, conditionHash);
 

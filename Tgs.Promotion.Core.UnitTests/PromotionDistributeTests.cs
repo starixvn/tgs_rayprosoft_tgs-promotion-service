@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
+﻿using NSubstitute;
 using Tgs.CashService.Client;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
@@ -31,7 +30,7 @@ public class PromotionDistributeTests
 			 "manager");
 
 		var walletId = Guid.NewGuid();
-		fakePlayerRepository.GetPlayerByPlayerCodeAsync(Arg.Is(command.PlayerCode))
+		_ = fakePlayerRepository.GetPlayerByPlayerCodeAsync(Arg.Is(command.PlayerCode))
 			.Returns(new Player
 			{
 				PlayerCode = command.PlayerCode,
@@ -39,7 +38,7 @@ public class PromotionDistributeTests
 			});
 
 		var newDistributeId = Guid.NewGuid();
-		fakePromotionRepository.CreatePromotionDistributeAsync(
+		_ = fakePromotionRepository.CreatePromotionDistributeAsync(
 			Arg.Is(command.PlanId),
 			Arg.Is(command.PlayerCode),
 			Arg.Is(command.Amount),
@@ -86,7 +85,7 @@ public class PromotionDistributeTests
 			 1000M,
 			 "manager");
 
-		await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+		_ = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
 			async () => await sut.GetAsync(command));
 	}
 
@@ -126,6 +125,6 @@ public class PromotionDistributeTests
 			 Guid.NewGuid(),
 			 0L);
 
-		await Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.GetAsync(command));
+		_ = await Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.GetAsync(command));
 	}
 }

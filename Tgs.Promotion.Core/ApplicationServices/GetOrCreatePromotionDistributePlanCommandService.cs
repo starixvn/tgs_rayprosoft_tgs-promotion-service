@@ -20,10 +20,9 @@ internal class GetOrCreatePromotionDistributePlanCommandService : IGetService<Ge
 			.GetPromotionByIdAsync(command.PromotionId)
 			.ConfigureAwait(false);
 
-		if (promotion is null)
-			throw new InvalidOperationException($"Can't find promotion ({command.PromotionId})");
-
-		return await _promotionRepository
+		return promotion is null
+			? throw new InvalidOperationException($"Can't find promotion ({command.PromotionId})")
+			: await _promotionRepository
 			.CreatePromotionDistributePlanAsync(
 				promotion.Id,
 				command.ConditionHash,

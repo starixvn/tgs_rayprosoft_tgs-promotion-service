@@ -28,4 +28,12 @@
     </ProjectReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="D:\Users\Phoenix\source\repos\tgs-promotion-service\Tgs.Promotion.Service.IntegrationTests\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="D:\Users\Phoenix\source\repos\tgs-promotion-service\Tgs.Promotion.Service.IntegrationTests\.editorconfig" />
+  </ItemGroup>
+
 </Project>

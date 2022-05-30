@@ -48,7 +48,7 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 			command.NeedTurnover,
 			cancellationToken).ConfigureAwait(false);
 
-		await _cashServiceClient.PromotionAsync(
+		_ = await _cashServiceClient.PromotionAsync(
 			player.DefaultWalletId,
 			command.Amount,
 				null,

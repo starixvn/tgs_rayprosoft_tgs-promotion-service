@@ -94,7 +94,9 @@ public class PromotionRepository : IPromotionRepository
 		string modifier,
 		CancellationToken cancellationToken = default)
 	{
-		var promotionId = await _serialNumberGenerator.GenerateAsync().ConfigureAwait(false);
+		var promotionId = await _serialNumberGenerator
+			.GenerateAsync(cancellationToken)
+			.ConfigureAwait(false);
 
 		var now = DateTime.UtcNow;
 
@@ -150,7 +152,7 @@ public class PromotionRepository : IPromotionRepository
 			.GenerateAsync(cancellationToken)
 			.ConfigureAwait(false);
 
-		await _dbContext.PromotionDistributes.AddAsync(new PromotionDistribute
+		_ = await _dbContext.PromotionDistributes.AddAsync(new PromotionDistribute
 		{
 			Id = distributeId,
 			BrandId = plan.BrandId,
@@ -195,7 +197,7 @@ public class PromotionRepository : IPromotionRepository
 				.GenerateAsync(cancellationToken)
 				.ConfigureAwait(false);
 
-			await _dbContext.PromotionDistributePlans.AddAsync(new PromotionDistributePlan
+			_ = await _dbContext.PromotionDistributePlans.AddAsync(new PromotionDistributePlan
 			{
 				Id = createId,
 				BrandId = promotion.BrandId,
@@ -339,7 +341,7 @@ public class PromotionRepository : IPromotionRepository
 				PromotionId = promotionId,
 				GameProviderId = id
 			})
-			.ToArrayAsync()
+			.ToArrayAsync(cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
 		var oldSettings = await _dbContext.PromotionGameProviders
@@ -352,7 +354,7 @@ public class PromotionRepository : IPromotionRepository
 			.AddRangeAsync(promotionGameProviders)
 			.ConfigureAwait(false);
 
-		await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
 
 	public async ValueTask SetPromotionRuleAsync(
@@ -376,7 +378,7 @@ public class PromotionRepository : IPromotionRepository
 		promotion.UpdatedByUsername = modifier;
 		promotion.UpdatedOn = DateTime.UtcNow;
 
-		await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
 
 	public async ValueTask SetPromotionStatusAsync(

@@ -24,7 +24,7 @@ public class PromotionDispatchTests
 				var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 				var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 
-				var promotionPlayers = new PromotionPlayer[] { };
+				var promotionPlayers = Array.Empty<PromotionPlayer>();
 				_ = fakPromotionBonusRepository.GetPromotionBonusPlayersQueries(Arg.Any<Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>?>(), Arg.Any<bool>())
 					.Returns(promotionPlayers.AsQueryable().BuildMock());
 

@@ -231,7 +231,8 @@ public class
 					createPlayerBucketRequest.BonusAmount,
 					null,
 					createPlayerBucketRequest.Id.ToString(),
-					null)
+					null,
+					cancellationToken)
 				.ConfigureAwait(false);
 
 			transactionPromotions.Add(new()

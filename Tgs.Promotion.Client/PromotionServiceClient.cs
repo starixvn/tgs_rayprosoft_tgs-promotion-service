@@ -67,8 +67,8 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		var request = new
 		{
 			Amount = amount,
-			needTurnover = needTurnover,
-			dDistributor = distributor
+			NeedTurnover = needTurnover,
+			Distributor = distributor
 		};
 		var requestContent = new StringContent(
 			JsonSerializer.Serialize(request, _JsonSerializerOptions),
