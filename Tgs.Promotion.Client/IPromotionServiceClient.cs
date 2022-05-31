@@ -53,8 +53,14 @@ public interface IPromotionServiceClient
 		CancellationToken cancellationToken = default);
 
 	ValueTask UpdatePromotionMainInfoAsync(
-						Guid promotionId,
+		Guid promotionId,
 		CreatePromotionMainInfo updateInfo,
 		string modifier,
+		CancellationToken cancellationToken = default);
+
+	ValueTask UpdatePromotionUsedAmountAsync(
+		Guid promotionId,
+		decimal totalAmount,
+		Guid snapshotId,
 		CancellationToken cancellationToken = default);
 }

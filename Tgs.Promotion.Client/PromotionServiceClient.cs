@@ -261,4 +261,29 @@ internal class PromotionServiceClient : IPromotionServiceClient
 
 		_ = response.EnsureSuccessStatusCode();
 	}
+
+	public async ValueTask UpdatePromotionUsedAmountAsync(
+		Guid promotionId,
+		decimal totalAmount,
+		Guid snapshotId,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new
+		{
+			TotalAmount = totalAmount,
+			SnapshotId = snapshotId
+		};
+
+		var requestContent = new StringContent(
+			JsonSerializer.Serialize(request, _JsonSerializerOptions),
+			Encoding.UTF8,
+			"application/json");
+
+		var response = await _httpClient.PutAsync(
+			$"/api/promotion-mgr/used/{promotionId}",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+	}
 }

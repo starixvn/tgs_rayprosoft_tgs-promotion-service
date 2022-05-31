@@ -561,8 +561,30 @@ public class PromotionRepository : IPromotionRepository
 		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
 
+	public async ValueTask UpdatePromotionUsedAmountAsync(
+		Guid promotionId,
+		decimal totalAmount,
+		Guid snapshotId,
+		CancellationToken cancellationToken = default)
+	{
+		var promotion = await _dbContext.PromotionRows
+			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
+		if (promotion is null)
+			return;
+
+		if (promotion.AmountUsedSnapshotId is null
+			|| promotion.AmountUsedSnapshotId.Value.CompareTo(snapshotId) < 0)
+		{
+			promotion.AmountUsed = totalAmount;
+
+			await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+		}
+	}
+
 	private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
-			PromotionRow promotion,
+				PromotionRow promotion,
 		CreatePromotionRequest request)
 	{
 		var promotionGameProviders = _gameProviderService.GetQueries()

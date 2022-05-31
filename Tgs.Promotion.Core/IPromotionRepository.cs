@@ -62,5 +62,7 @@ public interface IPromotionRepository
 
 	ValueTask UpdatePromotionsAsync(PromotionRow[] promotions);
 
+	ValueTask UpdatePromotionUsedAmountAsync(Guid promotionId, decimal totalAmount, Guid snapshotId, CancellationToken cancellationToken = default);
+
 	ValueTask UpdatePromotionUsedAmountAsync(Guid promotionId, Guid snapshotId, decimal amount, CancellationToken cancellationToken = default);
 }
