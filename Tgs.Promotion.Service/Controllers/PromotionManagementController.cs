@@ -161,6 +161,20 @@ public class PromotionManagementController : ControllerBase
 			.ConfigureAwait(false);
 	}
 
+	[HttpPut("used/{promotionId}", Name = "UpdatePromotionUsedAmount")]
+	public ValueTask UpdatePromotionUsedAmountAsync(
+		[FromServices] ICommandService<UpdatePromotionUsedAmountCommand> updateService,
+		Guid promotionId,
+		[FromBody] UsedAmountViewModel model)
+	{
+		var command = new UpdatePromotionUsedAmountCommand(
+			promotionId,
+			model.TotalAmount,
+			model.SnapshotId);
+
+		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
+	}
+
 	[HttpPut("vip/{promotionId}", Name = "UpdatePromotionVipLevels")]
 	public ValueTask UpdatePromotionVipLevelsAsync(
 		[FromServices] ICommandService<UpdatePromotionVipLevelsCommand> updateService,

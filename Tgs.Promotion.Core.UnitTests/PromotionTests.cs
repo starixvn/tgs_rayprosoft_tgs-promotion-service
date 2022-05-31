@@ -190,6 +190,27 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task Update_Promotion_Used_AmountAsync()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new UpdatePromotionUsedAmountCommandService(fakePromotionRepository);
+
+		var command = new UpdatePromotionUsedAmountCommand(
+			Guid.NewGuid(),
+			10000M,
+			Guid.NewGuid());
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.UpdatePromotionUsedAmountAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Is(command.TotalAmount),
+				Arg.Is(command.SnapshotId));
+	}
+
+	[TestMethod]
 	public async Task Update_Promotion_VipLevels()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();

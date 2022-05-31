@@ -2,11 +2,13 @@
 using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.MessageQueue;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Clients.Protos;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.SerialNumberGenerator;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
 
@@ -415,7 +417,7 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Update_Promotion_MainInfo()
 	{
-		var web = new TestPromotionApplication();
+		using var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
@@ -460,5 +462,83 @@ public class PromotionTests
 		Assert.AreEqual(0, promotionRow.Unlimited);
 		Assert.AreEqual(newInfo.EventDuring.From, promotionRow.From);
 		Assert.AreEqual(newInfo.EventDuring.To, promotionRow.To);
+	}
+
+	[TestMethod]
+	public async Task Update_Promotion_Used_Amount()
+	{
+		using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+		var brandId = Guid.NewGuid();
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		var promotionRow = new PromotionRow
+		{
+			Id = promotionId,
+			BrandId = brandId,
+			From = DateTime.Now.AddDays(-10),
+			To = DateTime.Now,
+			Name = "Test Promotion",
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			Status = 1,
+			CampaignDetail = "{}"
+		};
+
+		_ = await dbContext.PromotionRows.AddAsync(promotionRow);
+
+		_ = await dbContext.SaveChangesAsync();
+
+		await sut.UpdatePromotionUsedAmountAsync(promotionId, 100M, Guid.NewGuid());
+
+		Assert.AreEqual(100M, promotionRow.AmountUsed);
+	}
+
+	[TestMethod]
+	public async Task Update_Promotion_Used_Amount_But_SnapshotId_Less_Then_Origin_Will_Not_Update()
+	{
+		using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var serialNumberGenerator = web.Services.GetRequiredService<ISerialNumberGenerator>();
+
+		var promotionId = Guid.NewGuid();
+		var brandId = Guid.NewGuid();
+		var firstSnapshotId = await serialNumberGenerator.GenerateAsync();
+		var secondSnapshotId = await serialNumberGenerator.GenerateAsync();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		var promotionRow = new PromotionRow
+		{
+			Id = promotionId,
+			BrandId = brandId,
+			From = DateTime.Now.AddDays(-10),
+			To = DateTime.Now,
+			Name = "Test Promotion",
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			Status = 1,
+			CampaignDetail = "{}",
+			AmountUsed = 999M,
+			AmountUsedSnapshotId = secondSnapshotId
+		};
+
+		_ = await dbContext.PromotionRows.AddAsync(promotionRow);
+
+		_ = await dbContext.SaveChangesAsync();
+
+
+		await sut.UpdatePromotionUsedAmountAsync(promotionId, 1000M, firstSnapshotId);
+
+		Assert.AreEqual(999M, promotionRow.AmountUsed);
 	}
 }
