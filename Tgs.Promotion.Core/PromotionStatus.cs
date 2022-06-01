@@ -1,6 +1,6 @@
 ﻿namespace Tgs.Promotion;
 
-public enum PromotionStatus
+public enum PromotionStatus : short
 {
 	Enabled = 0,
 	Disabled = 1,

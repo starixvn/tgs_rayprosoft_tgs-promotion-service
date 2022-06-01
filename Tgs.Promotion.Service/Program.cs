@@ -3,8 +3,10 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.MessageQueue.Configuration;
 using Tgs.Promotion.MessageQueue;
 using Tgs.Promotion.Models;
+using Tgs.Promotion.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +62,7 @@ builder.Services
 builder.Services.AddProfileViewer();
 
 builder.Services
+	.AddSingleton<NoopCampaingDetailProcessor>()
 	.AddTgsRepository(builder.Configuration.GetConnectionString("Tgs"))
 	.AddRedis((redisOptions, _) => redisOptions.ConnectionString = builder.Configuration.GetConnectionString("Redis"))
 	.AddPromotionCore()
@@ -87,7 +90,13 @@ builder.Services
 		})
 		.AddHandler<DepositStatusChangedMessageHandler>(
 			"tgs.payment.deposit.status",
-			"tgs.payment.deposit.status"))
+			"tgs.payment.deposit.status")
+		.AddHandler<TotalUsedAmountMessageHandler>(
+			"tgs.promotion.totalusedamount",
+			"tgs.promotion.totalusedamount"))
+	.AddNatsGlobPatternExchange("tgs.promotion.roulette.setting")
+	.AddNatsGlobPatternExchange("tgs.promotion.register.setting")
+	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.*.setting")
 	.AddNatsGlobPatternExchange("*");
 
 builder.Services.AddHealthChecks();

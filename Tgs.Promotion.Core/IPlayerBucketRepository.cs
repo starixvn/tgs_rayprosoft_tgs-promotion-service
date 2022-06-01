@@ -4,12 +4,11 @@ namespace Tgs.Promotion;
 
 public interface IPlayerBucketRepository
 {
-	ValueTask<CreatePlayerBucketWithDepositResponse> CreatePlayerBucketWithDepositAsync(
-		CreatePlayerBucketWithDepositRequest request);
+	ValueTask CreatePlayerBucketAsync(
+		string playerCode,
+		BucketType bucketType,
+		decimal bucketAmount,
+		CancellationToken cancellationToken = default);
 
 	ValueTask CreatePlayerBucketsAsync(CreatePlayerBucketRequest[] request);
-
-	ValueTask<bool> IsBucketFullAsync(string playerCode);
-
-	ValueTask<decimal> ClearPlayerBucketsAsync(string playerCode);
 }

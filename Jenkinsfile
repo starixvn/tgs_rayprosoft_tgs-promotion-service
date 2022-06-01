@@ -63,7 +63,7 @@ pipeline {
 		
 		stage('Push packages') {
 			steps {
-				sh 'dotnet pack -c $BuildConfiguration "Tgs.Promotion.Client/Tgs.Promotion.Client.csproj" --no-build'
+				sh 'dotnet pack -c $BuildConfiguration "Tgs.Promotion.Client/Tgs.Promotion.Client.csproj" --no-restore'
 				sh 'dotnet nuget push "Tgs.Promotion.Client/bin/$BuildConfiguration/*.nupkg" -s "raypro-baget" -k admin --skip-duplicate'
 			}
 		}

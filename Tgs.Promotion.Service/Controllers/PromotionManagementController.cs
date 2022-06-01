@@ -1,5 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text.Json;
+using Google.Protobuf;
+using Microsoft.AspNetCore.Mvc;
+using Tgs.MessageQueue;
 using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Clients.Protos;
 using Tgs.Promotion.Service.ViewModels;
 using Tgs.ServiceUtility;
 
@@ -27,16 +31,50 @@ public class PromotionManagementController : ControllerBase
 		return createService.GetAsync(command, HttpContext.RequestAborted);
 	}
 
-	[HttpPut("vip/{promotionId}", Name = "UpdatePromotionVipLevels")]
-	public ValueTask UpdatePromotionVipLevelsAsync(
-		[FromServices] ICommandService<UpdatePromotionVipLevelsCommand> updateService,
-		Guid promotionId,
-		[FromBody] VipLevelsViewModel vipLevelsModel)
+	[HttpGet("{promotionId}", Name = "GetPromotionMainInfo")]
+	public ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(
+		[FromServices] IGetService<GetPromotionMainInfoQuery, PromotionMainInfo?> getService,
+		Guid promotionId)
 	{
-		var command = new UpdatePromotionVipLevelsCommand(
+		var query = new GetPromotionMainInfoQuery(promotionId);
+
+		return getService.GetAsync(query, HttpContext.RequestAborted);
+	}
+
+	[HttpGet("rule/{promotionId}", Name = "GetPromotionRule")]
+	public async ValueTask<PromotionRuleViewModel?> GetPromotionRuleAsync(
+		[FromServices] IGetService<GetPromotionRuleQuery, PromotionRule?> getService,
+		Guid promotionId)
+	{
+		var query = new GetPromotionRuleQuery(promotionId);
+
+		var rule = await getService
+			.GetAsync(query, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		return rule is null
+			? null
+			: new PromotionRuleViewModel
+			{
+				CompaignDetail = rule.CampaignDetail,
+				BonusAmountLimit = rule.BonusAmountLimit,
+				GameType = rule.GameType,
+				Percentage = rule.Percentage,
+				TurnoverMultiple = rule.TurnoverMultiple
+			};
+	}
+
+	[HttpPut("status/{promotionId}/{status}", Name = "UpdatePromotionStatus")]
+	public ValueTask SetPromotionStatusAsync(
+		[FromServices] ICommandService<SetPromotionStatusCommand> updateService,
+		Guid promotionId,
+		PromotionStatus status,
+		[FromHeader(Name = "Modifier")] string modifier)
+	{
+		var command = new SetPromotionStatusCommand(
 			promotionId,
-			vipLevelsModel.VipLevels,
-			vipLevelsModel.Modifier);
+			status,
+			modifier);
 
 		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
 	}
@@ -56,6 +94,97 @@ public class PromotionManagementController : ControllerBase
 			contentModel.Convention,
 			contentModel.Localization,
 			contentModel.Modifier);
+
+		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
+	}
+
+	[HttpPatch("{promotionId}", Name = "UpdatePromotionMainInfo")]
+	public ValueTask UpdatePromotionMainInfoAsync(
+		[FromServices] ICommandService<UpdatePromotionMainInfoCommand> updateService,
+		Guid promotionId,
+		[FromBody] UpdatePromotionViewModel updateModel)
+	{
+		var command = new UpdatePromotionMainInfoCommand(
+			promotionId,
+			updateModel.Name,
+			(updateModel.EventDuring.From, updateModel.EventDuring.To),
+			updateModel.PromotionType,
+			updateModel.PromotionLimitAmount,
+			updateModel.IsAutoSent,
+			updateModel.Modifier);
+
+		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
+	}
+
+	[HttpPut("rule/{promotionId}", Name = "UpdatePromotionRule")]
+	public async Task UpdatePromotionRuleAsync(
+		[FromServices] IGetService<GetPromotionMainInfoQuery, PromotionMainInfo?> getPromotionService,
+		[FromServices] IMessageSender messageSender,
+		[FromServices] ICommandService<UpdatePromotionRuleCommand> updateService,
+		Guid promotionId,
+		[FromBody] UpdatePromotionRuleViewModel ruleModel)
+	{
+		var promotionInfo = await getPromotionService
+			.GetAsync(new GetPromotionMainInfoQuery(promotionId), HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		if (promotionInfo is null)
+			return;
+
+		var subject = $"tgs.promotion.{promotionInfo.PromotionType.ToLower()}.setting";
+
+		var request = new CampaignDetailRequest
+		{
+			PromotionId = promotionId,
+			Settings = JsonSerializer.Serialize(ruleModel.CampaignDetail)
+		};
+
+		var response = await messageSender
+			.RequestAsync(subject, request.ToByteArray())
+			.ConfigureAwait(false);
+
+		var processedResult = CampaignDetailResponse.Parser.ParseFrom(response.Span);
+
+		var command = new UpdatePromotionRuleCommand(
+			promotionId,
+			JsonDocument.Parse(processedResult.CampaignDetail),
+			processedResult.BonusAmountLimit,
+			processedResult.Percentage,
+			processedResult.TurnoverMultiple,
+			string.IsNullOrWhiteSpace(processedResult.GameType)
+				? null
+				: Enum.Parse<GameType>(processedResult.GameType),
+			ruleModel.Modifier);
+
+		await updateService
+			.ExecuteAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+	}
+
+	[HttpPut("used/{promotionId}", Name = "UpdatePromotionUsedAmount")]
+	public ValueTask UpdatePromotionUsedAmountAsync(
+		[FromServices] ICommandService<UpdatePromotionUsedAmountCommand> updateService,
+		Guid promotionId,
+		[FromBody] UsedAmountViewModel model)
+	{
+		var command = new UpdatePromotionUsedAmountCommand(
+			promotionId,
+			model.TotalAmount,
+			model.SnapshotId);
+
+		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
+	}
+
+	[HttpPut("vip/{promotionId}", Name = "UpdatePromotionVipLevels")]
+	public ValueTask UpdatePromotionVipLevelsAsync(
+		[FromServices] ICommandService<UpdatePromotionVipLevelsCommand> updateService,
+		Guid promotionId,
+		[FromBody] VipLevelsViewModel vipLevelsModel)
+	{
+		var command = new UpdatePromotionVipLevelsCommand(
+			promotionId,
+			vipLevelsModel.VipLevels,
+			vipLevelsModel.Modifier);
 
 		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
 	}

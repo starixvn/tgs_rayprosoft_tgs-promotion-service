@@ -10,6 +10,8 @@ namespace Tgs.Promotion.Domain.Entities
         public PromotionRow()
         {
             PromotionBonus = new HashSet<PromotionBonus>();
+            PromotionDistributePlans = new HashSet<PromotionDistributePlan>();
+            PromotionDistributes = new HashSet<PromotionDistribute>();
             PromotionGameProviders = new HashSet<PromotionGameProvider>();
             PromotionParticipants = new HashSet<PromotionParticipant>();
             PromotionVipLevels = new HashSet<PromotionVipLevel>();
@@ -45,9 +47,12 @@ namespace Tgs.Promotion.Domain.Entities
         public string? Terms { get; set; }
         public string CampaignDetail { get; set; } = null!;
         public int DisplayOrder { get; set; }
+        public Guid? AmountUsedSnapshotId { get; set; }
 
         public virtual VipLevel? VipLevel { get; set; }
         public virtual ICollection<PromotionBonus> PromotionBonus { get; set; }
+        public virtual ICollection<PromotionDistributePlan> PromotionDistributePlans { get; set; }
+        public virtual ICollection<PromotionDistribute> PromotionDistributes { get; set; }
         public virtual ICollection<PromotionGameProvider> PromotionGameProviders { get; set; }
         public virtual ICollection<PromotionParticipant> PromotionParticipants { get; set; }
         public virtual ICollection<PromotionVipLevel> PromotionVipLevels { get; set; }

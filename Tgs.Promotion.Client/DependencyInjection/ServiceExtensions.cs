@@ -33,6 +33,13 @@ public static class ServiceExtensions
 				c.BaseAddress = options.Url;
 			})
 			.Services
+			.AddHttpClient<IPromotionServiceClient, PromotionServiceClient>((sp, c) =>
+			{
+				var options = sp.GetRequiredService<IOptions<PromotionOptions>>().Value;
+
+				c.BaseAddress = options.Url;
+			})
+			.Services
 			.AddTransient<IPromotionClient>(sp => sp.GetRequiredService<PromotionClient>())
 			.AddTransient<IPromotionBonusClient>(sp => sp.GetRequiredService<PromotionBonusClient>())
 			.AddTransient<IPromotionDispatchClient>(sp => sp.GetRequiredService<PromotionDispatchClient>());
