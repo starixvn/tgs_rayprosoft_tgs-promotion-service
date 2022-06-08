@@ -201,13 +201,46 @@ public class PromotionRepository : IPromotionRepository
 				.GenerateAsync(cancellationToken)
 				.ConfigureAwait(false);
 
+			var promotionData = new
+			{
+				Id = promotion.Id,
+				BrandId = promotion.BrandId,
+				From = promotion.From,
+				To = promotion.To,
+				Status = (PromotionStatus)promotion.Status,
+				Name = promotion.Name,
+				AutoSentPlayerBonus = promotion.AutoSentPlayerBonus,
+				PromotionType = promotion.PromotionType,
+				BonusAmountLimit = promotion.BonusAmountLimit,
+				AmountUsed = promotion.AmountUsed,
+				Unlimited = promotion.Unlimited == 1,
+				GameType = (GameType?)promotion.GameType,
+				Percentage = promotion.Percentage,
+				TotalAmountLimit = promotion.TotalAmountLimit,
+				TurnoverMultiple = promotion.TurnoverMultiple,
+				GameProviderIds = promotion.PromotionGameProviders.Select(g => g.GameProviderId).ToArray(),
+				VipLevels = promotion.PromotionVipLevels.Select(v => v.Level).OrderBy(level => level).ToArray(),
+				CreatedOn = promotion.CreatedOn,
+				UpdatedOn = promotion.UpdatedOn,
+				CreatedByUsername = promotion.CreatedByUsername,
+				UpdatedByUsername = promotion.UpdatedByUsername,
+				SubSubject = promotion.SubSubject,
+				Content = promotion.Content,
+				Terms = promotion.Terms,
+				DesktopBanner = promotion.DesktopBanner,
+				MobileBanner = promotion.MobileBanner,
+				Localization = promotion.Localization,
+				Number = promotion.DisplayOrder,
+				promotion.CampaignDetail
+			};
+			
 			_ = await _dbContext.PromotionDistributePlans.AddAsync(new PromotionDistributePlan
 			{
 				Id = createId,
 				BrandId = promotion.BrandId,
 				PromotionId = promotionId,
 				ConditionHash = conditionHash,
-				Detail = JsonSerializer.Serialize(promotion, _SerializerOptions)
+				Detail = JsonSerializer.Serialize(promotionData, _SerializerOptions)
 			}, cancellationToken).ConfigureAwait(false);
 
 			_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
