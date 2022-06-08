@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Linq.Expressions;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Transactions;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,10 @@ public class PromotionRepository : IPromotionRepository
 {
 	private static readonly JsonSerializerOptions _SerializerOptions = new()
 	{
-		WriteIndented = false
+		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+		WriteIndented = false,
+		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+		ReferenceHandler = ReferenceHandler.IgnoreCycles
 	};
 
 	private readonly TgsContext _dbContext;
