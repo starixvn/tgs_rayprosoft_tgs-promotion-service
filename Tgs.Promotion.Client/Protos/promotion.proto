@@ -1,0 +1,20 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Tgs.Promotion.Clients.Protos";
+package tgs.promotion;
+
+import "phoenix/protobuf/guid.proto";
+import "phoenix/protobuf/decimal.proto";
+
+message CampaignDetailRequest {
+	phoenix.protobuf.GuidValue promotion_id = 1;
+	string settings = 2;
+}
+
+message CampaignDetailResponse {
+	string campaign_detail = 1;
+	phoenix.protobuf.DecimalValue percentage = 2;
+	phoenix.protobuf.DecimalValue bonus_amount_limit = 3;
+	phoenix.protobuf.DecimalValue turnover_multiple = 4;
+	string game_type = 5;
+}

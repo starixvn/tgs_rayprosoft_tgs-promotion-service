@@ -6,4 +6,7 @@ public record struct During(DateTime From, DateTime To)
 		from = From;
 		to = To;
 	}
+
+	public static implicit operator During((DateTime From, DateTime To) during)
+		=> new(during.From, during.To);
 }

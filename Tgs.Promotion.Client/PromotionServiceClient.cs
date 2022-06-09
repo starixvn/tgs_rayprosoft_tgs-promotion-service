@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -55,8 +56,160 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		return JsonSerializer.Deserialize<Guid>(json, _JsonSerializerOptions);
 	}
 
-	public async ValueTask SetPromotionVipLevelsAsync(
+	public async ValueTask<Guid> DistributePromotionBonusAsync(
+		Guid planId,
+		string playerCode,
+		decimal amount,
+		decimal needTurnover,
+		string? distributor,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new
+		{
+			Amount = amount,
+			NeedTurnover = needTurnover,
+			Distributor = distributor
+		};
+		var requestContent = new StringContent(
+			JsonSerializer.Serialize(request, _JsonSerializerOptions),
+			Encoding.UTF8,
+			"application/json");
+		var response = await _httpClient.PutAsync(
+			$"/api/distribute/{planId}/{playerCode}",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		return await response.Content
+			.ReadFromJsonAsync<Guid>(_JsonSerializerOptions, cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+	}
+
+	public async ValueTask<PromotionDistributePlanInfo> GetPromotionDistributePlanAsync(
 		Guid promotionId,
+		long conditionHash,
+		CancellationToken cancellationToken = default)
+	{
+		var response = await _httpClient.PutAsync(
+			$"/api/distribute/plan/{promotionId}/{conditionHash}",
+			null,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		var result = await response.Content
+			.ReadFromJsonAsync<PromotionDistributePlanInfo>(
+				_JsonSerializerOptions,
+				cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
+		return result!;
+	}
+
+	public async ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(Guid promotionId, CancellationToken cancellationToken = default)
+	{
+		var response = await _httpClient.GetAsync(
+			$"/api/promotion-mgr/{promotionId}",
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		return await response.Content
+			.ReadFromJsonAsync<PromotionMainInfo>(
+				_JsonSerializerOptions,
+				cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+	}
+
+	public async ValueTask<TRule?> GetPromotionRuleAsync<TRule>(Guid promotionId, CancellationToken cancellationToken = default)
+		where TRule : class
+	{
+		var response = await _httpClient.GetAsync(
+			$"/api/promotion-mgr/rule/{promotionId}",
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		return await response.Content
+			.ReadFromJsonAsync<TRule>(_JsonSerializerOptions, cancellationToken)
+			.ConfigureAwait(false);
+	}
+
+	public async ValueTask SetPromotionContentAsync(
+			Guid promotionId,
+		PromotionContent content,
+		string modifier,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new
+		{
+			content.SubSubject,
+			content.PersonalComputerBanner,
+			content.MobileBanner,
+			content.Content,
+			content.Convention,
+			content.Localization,
+			Modifier = modifier
+		};
+
+		var requestContent = new StringContent(
+			JsonSerializer.Serialize(request, _JsonSerializerOptions),
+			Encoding.UTF8,
+			"application/json");
+
+		var response = await _httpClient.PutAsync(
+			$"/api/promotion-mgr/content/{promotionId}",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+	}
+
+	public async ValueTask SetPromotionRuleAsync<TRule>(
+		Guid promotionId,
+		TRule rule,
+		string modifier,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new
+		{
+			CampaignDetail = rule,
+			Modifier = modifier
+		};
+
+		var requestContent = new StringContent(
+			JsonSerializer.Serialize(request, _JsonSerializerOptions),
+			Encoding.UTF8,
+			"application/json");
+
+		var response = await _httpClient.PutAsync(
+			$"/api/promotion-mgr/rule/{promotionId}",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+	}
+
+	public async ValueTask SetPromotionStatusAsync(
+		Guid promotionId,
+		PromotionStatus status,
+		string modifier,
+		CancellationToken cancellationToken = default)
+	{
+		var requestContent = new StringContent(string.Empty);
+		requestContent.Headers.Add("Modifier", modifier);
+
+		var response = await _httpClient.PutAsync(
+			$"/api/promotion-mgr/status/{promotionId}/{status}",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+	}
+
+	public async ValueTask SetPromotionVipLevelsAsync(
+						Guid promotionId,
 		IEnumerable<int> vipLevels,
 		string modifier,
 		CancellationToken cancellationToken = default)
@@ -80,20 +233,19 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		_ = response.EnsureSuccessStatusCode();
 	}
 
-	public async ValueTask SetPromotionContentAsync(
+	public async ValueTask UpdatePromotionMainInfoAsync(
 		Guid promotionId,
-		PromotionContent content,
+		CreatePromotionMainInfo updateInfo,
 		string modifier,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new
 		{
-			content.SubSubject,
-			content.PersonalComputerBanner,
-			content.MobileBanner,
-			content.Content,
-			content.Convention,
-			content.Localization,
+			updateInfo.Name,
+			updateInfo.PromotionType,
+			updateInfo.EventDuring,
+			updateInfo.PromotionLimitAmount,
+			updateInfo.IsAutoSent,
 			Modifier = modifier
 		};
 
@@ -102,8 +254,33 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			Encoding.UTF8,
 			"application/json");
 
+		var response = await _httpClient.PatchAsync(
+			$"/api/promotion-mgr/{promotionId}",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+	}
+
+	public async ValueTask UpdatePromotionUsedAmountAsync(
+		Guid promotionId,
+		decimal totalAmount,
+		Guid snapshotId,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new
+		{
+			TotalAmount = totalAmount,
+			SnapshotId = snapshotId
+		};
+
+		var requestContent = new StringContent(
+			JsonSerializer.Serialize(request, _JsonSerializerOptions),
+			Encoding.UTF8,
+			"application/json");
+
 		var response = await _httpClient.PutAsync(
-			$"/api/promotion-mgr/content/{promotionId}",
+			$"/api/promotion-mgr/used/{promotionId}",
 			requestContent,
 			cancellationToken).ConfigureAwait(false);
 

@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.Promotion;
 
@@ -6,35 +7,62 @@ namespace Tgs.Promotion;
 
 public interface IPromotionRepository
 {
-	ValueTask ChangePromotionStatusAsync(Domain.Entities.PromotionRow promotion);
+	ValueTask ChangePromotionStatusAsync(PromotionRow promotion);
 
 	ValueTask<Guid> CreatePromotionAsync(CreatePromotionRequest request, PromotionType promotionTypeModel);
 
 	ValueTask<Guid> CreatePromotionAsync(CreatePromotionMainInfo createInfo, string modifier, CancellationToken cancellationToken = default);
 
-	ValueTask SetPromotionVipLevelsAsync(Guid promotionId, IEnumerable<int> vipLevels, string modifier, CancellationToken cancellationToken = default);
+	ValueTask<Guid> CreatePromotionDistributeAsync(
+		Guid planId,
+		string playerCode,
+		decimal bonusAmount,
+		decimal needTurnover,
+		string? distributor,
+		CancellationToken cancellationToken = default);
 
-	ValueTask SetPromotionContentAsync(Guid promotionId, PromotionContentDetail content, string modifier, CancellationToken cancellationToken = default);
+	ValueTask<PromotionDistributePlanInfo> CreatePromotionDistributePlanAsync(
+		Guid promotionId,
+		long conditionHash,
+		CancellationToken cancellationToken = default);
 
-	ValueTask<bool> ExistsAsync(Expression<Func<Domain.Entities.PromotionRow, bool>> predicate);
+	ValueTask<bool> ExistsAsync(Expression<Func<PromotionRow, bool>> predicate);
 
-	ValueTask UpdatePromotionAsync(Domain.Entities.PromotionRow promotion, UpdatePromotionRequest request);
+	ValueTask<PromotionRow?> GetPromotionAsync(
+		Expression<Func<PromotionRow, bool>> predicate,
+		Func<IQueryable<PromotionRow>, IQueryable<PromotionRow>>? preQuery = null);
 
-	ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount);
+	ValueTask<PromotionRow?> GetPromotionByIdAsync(Guid promotionId);
+
+	ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(Guid promotionId, CancellationToken cancellationToken = default);
+
+	IQueryable<PromotionRow> GetPromotionQueries(
+		Func<IQueryable<PromotionRow>, IQueryable<PromotionRow>>? preQuery = null,
+		bool tracking = false);
+
+	ValueTask<PromotionRule?> GetPromotionRuleAsync(Guid promotionId, CancellationToken cancellationToken = default);
 
 	ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount);
 
-	ValueTask UpdatePromotionsAsync(Domain.Entities.PromotionRow[] promotions);
+	ValueTask SetPromotionContentAsync(Guid promotionId, PromotionContentDetail content, string modifier, CancellationToken cancellationToken = default);
 
-	ValueTask<Domain.Entities.PromotionRow?> GetPromotionByIdAsync(Guid promotionId);
+	ValueTask SetPromotionGameProvidersAsync(Guid promotionId, IEnumerable<Guid> gameProviderIds, CancellationToken cancellationToken = default);
 
-	ValueTask<Domain.Entities.PromotionRow?> GetPromotionAsync(
-		Expression<Func<Domain.Entities.PromotionRow, bool>> predicate,
-		Func<IQueryable<Domain.Entities.PromotionRow>, IQueryable<Domain.Entities.PromotionRow>>
-			? preQuery = null);
+	ValueTask SetPromotionRuleAsync(Guid promotionId, PromotionRule rule, string modifier, CancellationToken cancellationToken = default);
 
-	IQueryable<Domain.Entities.PromotionRow> GetPromotionQueries(
-		Func<IQueryable<Domain.Entities.PromotionRow>,
-			IQueryable<Domain.Entities.PromotionRow>>? preQuery = null,
-		bool tracking = false);
+	ValueTask SetPromotionStatusAsync(Guid promotionId, PromotionStatus status, string modifier, CancellationToken cancellationToken = default);
+
+	ValueTask SetPromotionVipLevelsAsync(Guid promotionId, IEnumerable<int> vipLevels, string modifier, CancellationToken cancellationToken = default);
+
+	ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount);
+
+	ValueTask UpdatePromotionAsync(PromotionRow promotion, UpdatePromotionRequest request);
+
+	ValueTask UpdatePromotionMainInfoAsync(Guid promotionId, UpdatePromotionMainInfo updateInfo, string modifier, CancellationToken cancellationToken = default);
+
+	ValueTask UpdatePromotionsAsync(PromotionRow[] promotions);
+
+	ValueTask UpdatePromotionUsedAmountAsync(Guid promotionId, decimal totalAmount, Guid snapshotId, CancellationToken cancellationToken = default);
+
+	ValueTask UpdatePromotionUsedAmountAsync(Guid promotionId, Guid snapshotId, decimal amount, CancellationToken cancellationToken = default);
 }
