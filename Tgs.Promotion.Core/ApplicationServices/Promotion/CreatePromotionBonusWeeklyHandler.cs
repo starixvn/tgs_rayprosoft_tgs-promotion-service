@@ -254,7 +254,8 @@ public class CreatePromotionBonusWeeklyHandler
 
 		return promotion.PromotionType switch
 		{
-			"ReliefMoneyWeekly" => (promotion.PromotionParticipants.Select(p =>
+			"ReliefMoneyWeekly" => (promotion.PromotionParticipants.Where(x =>
+					x.CreatedOn >= promotion.From && x.CreatedOn <= promotion.To).Select(p =>
 			{
 				if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
 				{

@@ -268,7 +268,8 @@ public class
 
 		return promotion.PromotionType switch
 		{
-			"ReliefMoneyMonthly" => (promotion.PromotionParticipants.Select(p =>
+			"ReliefMoneyMonthly" => (promotion.PromotionParticipants.Where(x =>
+					x.CreatedOn >= promotion.From && x.CreatedOn <= promotion.To).Select(p =>
 				{
 					if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
 					{
