@@ -78,6 +78,9 @@ public class
 		var currentFirstDayOfMonth = now.GetFirstDayOfMonth();
 
 		var promotions = await _promotionService.GetQueries()
+			.Include(x => x.PromotionGameProviders)
+			.Include(x => x.PromotionVipLevels)
+			.Include(x => x.PromotionParticipants)
 			.Where(x => x.Status == (short)PromotionStatus.Enabled)
 			.Where(x => x.SettlementIntervalType == "Monthly")
 			.Where(x => x.From >= previousFirstDayOfMonth.UtcDateTime && x.From <= currentFirstDayOfMonth.UtcDateTime ||
