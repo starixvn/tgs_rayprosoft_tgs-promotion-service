@@ -78,6 +78,9 @@ public class
 		var currentFirstDayOfMonth = now.GetFirstDayOfMonth();
 
 		var promotions = await _promotionService.GetQueries()
+			.Include(x => x.PromotionGameProviders)
+			.Include(x => x.PromotionVipLevels)
+			.Include(x => x.PromotionParticipants)
 			.Where(x => x.Status == (short)PromotionStatus.Enabled)
 			.Where(x => x.SettlementIntervalType == "Monthly")
 			.Where(x => x.From >= previousFirstDayOfMonth.UtcDateTime && x.From <= currentFirstDayOfMonth.UtcDateTime ||
@@ -265,7 +268,8 @@ public class
 
 		return promotion.PromotionType switch
 		{
-			"ReliefMoneyMonthly" => (promotion.PromotionParticipants.Select(p =>
+			"ReliefMoneyMonthly" => (promotion.PromotionParticipants.Where(x =>
+					x.CreatedOn >= promotion.From && x.CreatedOn <= promotion.To).Select(p =>
 				{
 					if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
 					{

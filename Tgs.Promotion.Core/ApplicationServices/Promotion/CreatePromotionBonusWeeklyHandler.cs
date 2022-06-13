@@ -61,6 +61,9 @@ public class CreatePromotionBonusWeeklyHandler
 		var previousMonday = now.AddDays(-7).GetMonday();
 
 		var promotions = await _promotionRepository.GetPromotionQueries()
+			.Include(x => x.PromotionGameProviders)
+			.Include(x => x.PromotionVipLevels)
+			.Include(x => x.PromotionParticipants)
 			.Where(x => x.Status == (short)PromotionStatus.Enabled)
 			.Where(x => x.SettlementIntervalType == "Weekly")
 			.Where(x => x.From >= previousMonday.UtcDateTime && x.From <= previousSunday.UtcDateTime ||
@@ -251,7 +254,8 @@ public class CreatePromotionBonusWeeklyHandler
 
 		return promotion.PromotionType switch
 		{
-			"ReliefMoneyWeekly" => (promotion.PromotionParticipants.Select(p =>
+			"ReliefMoneyWeekly" => (promotion.PromotionParticipants.Where(x =>
+					x.CreatedOn >= promotion.From && x.CreatedOn <= promotion.To).Select(p =>
 			{
 				if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
 				{

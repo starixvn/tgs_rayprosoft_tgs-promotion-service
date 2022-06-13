@@ -269,7 +269,8 @@ public class
 
 		return promotion.PromotionType switch
 		{
-			"TurnoverRebate" => (promotion.PromotionParticipants.Select(p =>
+			"TurnoverRebate" => (promotion.PromotionParticipants.Where(x => 
+					x.CreatedOn >= promotion.From && x.CreatedOn <= promotion.To).Select(p =>
 				{
 					if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
 					{
@@ -301,7 +302,8 @@ public class
 					};
 				})
 				.ToArray(), amount),
-			"ReliefMoneyDaily" => (promotion.PromotionParticipants.Select(p =>
+			"ReliefMoneyDaily" => (promotion.PromotionParticipants.Where(x =>
+					x.CreatedOn >= promotion.From && x.CreatedOn <= promotion.To).Select(p =>
 				{
 					if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
 					{

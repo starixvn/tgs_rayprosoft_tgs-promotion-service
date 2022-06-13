@@ -56,9 +56,9 @@ public class CreatePromotionParticipantHandler : IGetService<CreatePromotionPart
 
 		var currentDate = DateTimeOffset.Now;
 
-		if (promotion.Status != (short)PromotionStatus.Enabled
-			&& promotion.From <= currentDate
-			&& promotion.To > currentDate)
+		if (promotion.Status != (short)PromotionStatus.Enabled ||
+		    promotion.From > currentDate ||
+			promotion.To < currentDate)
 		{
 			_logger.LogWarning("Promotion({request.PromotionId}) invalid.", request.PromotionId);
 
