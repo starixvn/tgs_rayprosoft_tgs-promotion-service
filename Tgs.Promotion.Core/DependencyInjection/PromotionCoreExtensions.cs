@@ -23,7 +23,8 @@ public static class PromotionCoreExtensions
 			.RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyDaily")
 			.RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyWeekly")
 			.RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyMonthly")
-			.RegisterPromotionChecker<RegisterChecker>("Register");
+			.RegisterPromotionChecker<RegisterChecker>("Register")
+			.RegisterPromotionChecker<AlwaysTrueChecker>("Roulette");
 
 		_ = services
 			.AddSerialNumberGenerator()
