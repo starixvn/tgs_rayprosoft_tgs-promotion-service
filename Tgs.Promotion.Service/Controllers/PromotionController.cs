@@ -111,18 +111,24 @@ public class PromotionController : ControllerBase
 		[FromQuery] GetJoinedPromotionsRequest request)
 		=> getService.GetAsync(request);
 
+	/// <summary>
+	/// Get promotions for player
+	/// </summary>
+	/// <param name="queryByPlayerService">The query by player service.</param>
+	/// <param name="request">The request.</param>
+	/// <returns></returns>
+	/// <exception cref="System.InvalidOperationException">Player code is required</exception>
 	[HttpGet("valid", Name = "GetPromotionsForPlayer")]
-	[Description("Get promotions fro player")]
 	public async Task<PagedResponse<PromotionModel>> GetPromotionsForPlayerAsync(
-		[FromServices] IQueryService<GetValidPromotionsQuery, PromotionModel> queryAllService,
 		[FromServices] IQueryService<GetValidPromotionsByPlayerQuery, PromotionModel> queryByPlayerService,
 		[FromQuery] GetValidPromotionsViewModel request)
 	{
-		var promotions = string.IsNullOrWhiteSpace(request.PlayerCode)
-			? queryAllService.QueryAsync(new(request.BrandId))
-			: queryByPlayerService.QueryAsync(new(
-				request.BrandId,
-				request.PlayerCode));
+		if (string.IsNullOrWhiteSpace(request.PlayerCode))
+			throw new InvalidOperationException("Player code is required");
+
+		var promotions = queryByPlayerService.QueryAsync(new(
+			request.BrandId,
+			request.PlayerCode));
 
 		var paging = new Paging<PromotionModel>();
 
@@ -133,7 +139,7 @@ public class PromotionController : ControllerBase
 
 		if (!request.ShowAll)
 		{
-			return new(await promotions.CountAsync().ConfigureAwait(false), await promotions
+			return new PagedResponse<PromotionModel>(await promotions.CountAsync().ConfigureAwait(false), await promotions
 				.ApplyOrderBy(paging)
 				.ToArrayAsync()
 				.ConfigureAwait(false));
@@ -143,10 +149,10 @@ public class PromotionController : ControllerBase
 		paging.RowCount = request.Rows;
 
 		return new(await promotions.CountAsync().ConfigureAwait(false), await promotions
-				.ApplyOrderBy(paging)
-				.ApplyPaging(paging)
-				.ToArrayAsync()
-				.ConfigureAwait(false));
+			.ApplyOrderBy(paging)
+			.ApplyPaging(paging)
+			.ToArrayAsync()
+			.ConfigureAwait(false));
 	}
 
 	[HttpDelete("{promotionId}/{amount}", Name = "RevertPromotion")]
