@@ -10,7 +10,7 @@ data:
         "PaymentServiceBaseUrl": "http://payment-api",
         "CashBaseUrl": "http://cashservice-api",
         "BrandServiceBaseUrl": "http://brand-cert-api",
-		    "PlayerServiceBaseUrl": "http://player-api"
+        "PlayerServiceBaseUrl": "http://player-api"
       }
     }
   monitor.settings.json: |
