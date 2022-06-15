@@ -2,28 +2,35 @@
 
 internal class RegisterChecker : IPromotionChecker
 {
-	private readonly IPromotionParticipantRepository _promotionParticipantRepository;
-	private readonly IPlayerRepository _playerService;
+	private readonly IPlayerRepository _playerRepository;
+	private readonly IPromotionRepository _promotionRepository;
 
-	public RegisterChecker(IPlayerRepository playerService, IPromotionParticipantRepository promotionParticipantRepository)
+	public RegisterChecker(IPlayerRepository playerRepository, IPromotionRepository promotionRepository)
 	{
-		_playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
-		_promotionParticipantRepository = promotionParticipantRepository ?? throw new ArgumentNullException(nameof(promotionParticipantRepository));
+		_playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 	}
 
 	public async ValueTask<bool> CheckAsync(string playerCode, Guid? promotionId)
 	{
-		var player = await _playerService
+		var player = await _playerRepository
 			.GetPlayerByPlayerCodeAsync(playerCode)
 			.ConfigureAwait(false);
 
 		if (player is null)
+		{
 			return false;
+		}
 
-		var isExists = await _promotionParticipantRepository.ExistsAsync(x
-			=> x.PlayerCode == playerCode && x.PromotionId == promotionId);
+		var promotion = await _promotionRepository.GetPromotionByIdAsync(promotionId!.Value).ConfigureAwait(false);
 
-		return player.Status == (short)PlayerStatus.Enabled && !isExists;
+		if (promotion is null)
+		{
+			return false;
+		}
+
+		return player.Status == (short)PlayerStatus.Enabled && promotion.From <= player.RegisteredOn!.Value.Date &&
+			promotion.To >= player.RegisteredOn!.Value.Date;
 	}
 
 	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;

@@ -58,7 +58,7 @@ internal class GetValidPromotionsByPlayerQueryService : IQueryService<GetValidPr
 		{
 			var checker = _promotionCheckerFactory.GetPromotionChecker(promotion.PromotionType);
 
-			if (await checker.CheckAsync(playerCode)
+			if (await checker.CheckAsync(playerCode, promotion.Id)
 					.ConfigureAwait(false))
 			{
 				yield return promotion;
