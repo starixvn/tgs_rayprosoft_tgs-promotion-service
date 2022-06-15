@@ -90,6 +90,13 @@ public class PromotionController : ControllerBase
 		await tagService.ExecuteAsync(command).ConfigureAwait(false);
 	}
 
+	[HttpGet("joined")]
+	[Description("Get joined promotions")]
+	public ValueTask<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
+		[FromServices] IGetService<GetJoinedPromotionsRequest, PagedResponse<JoinedPromotionModel>> getService,
+		[FromQuery] GetJoinedPromotionsRequest request)
+		=> getService.GetAsync(request);
+
 	[HttpGet("names", Name = "GetPromotionNamesByIds")]
 	[Description("Get promotion names by ids")]
 	public ValueTask<PromotionNameModel[]> GetPromotionNamesByIdsAsync(
@@ -104,13 +111,6 @@ public class PromotionController : ControllerBase
 		[FromQuery] GetPromotionsRequest request)
 		=> getService.GetAsync(request);
 
-	[HttpGet("joined")]
-	[Description("Get joined promotions")]
-	public ValueTask<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
-		[FromServices] IGetService<GetJoinedPromotionsRequest, PagedResponse<JoinedPromotionModel>> getService,
-		[FromQuery] GetJoinedPromotionsRequest request)
-		=> getService.GetAsync(request);
-
 	/// <summary>
 	/// Get promotions for player
 	/// </summary>
@@ -120,30 +120,26 @@ public class PromotionController : ControllerBase
 	/// <exception cref="System.InvalidOperationException">Player code is required</exception>
 	[HttpGet("valid", Name = "GetPromotionsForPlayer")]
 	public async Task<PagedResponse<PromotionModel>> GetPromotionsForPlayerAsync(
+		[FromServices] IQueryService<GetValidPromotionsQuery, PromotionModel> queryAllService,
 		[FromServices] IQueryService<GetValidPromotionsByPlayerQuery, PromotionModel> queryByPlayerService,
 		[FromQuery] GetValidPromotionsViewModel request)
 	{
-		if (string.IsNullOrWhiteSpace(request.PlayerCode))
-			throw new InvalidOperationException("Player code is required");
-
-		var promotions = queryByPlayerService.QueryAsync(new(
-			request.BrandId,
-			request.PlayerCode));
+		var promotions = string.IsNullOrWhiteSpace(request.PlayerCode)
+			? queryAllService.QueryAsync(new(request.BrandId))
+			: queryByPlayerService.QueryAsync(new(
+				request.BrandId,
+				request.PlayerCode));
 
 		var paging = new Paging<PromotionModel>();
 
 		if (!string.IsNullOrWhiteSpace(request.SortBy))
-		{
 			paging.SortByPropertyName(request.SortBy, request.IsDesc);
-		}
 
 		if (!request.ShowAll)
-		{
-			return new PagedResponse<PromotionModel>(await promotions.CountAsync().ConfigureAwait(false), await promotions
+			return new(await promotions.CountAsync().ConfigureAwait(false), await promotions
 				.ApplyOrderBy(paging)
 				.ToArrayAsync()
 				.ConfigureAwait(false));
-		}
 
 		paging.Page = request.Page;
 		paging.RowCount = request.Rows;

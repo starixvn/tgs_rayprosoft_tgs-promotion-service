@@ -15,12 +15,12 @@ public class CreatePromotionBonusWeeklyHandler
 {
 	private readonly ICashServiceClient _cashServiceClient;
 	private readonly IPlayerBucketRepository _playerBucketService;
+	private readonly IPromotionBonusRepository _promotionBonusFactory;
 	private readonly ITgsService<PromotionBonus> _promotionBonusService;
 	private readonly IPromotionRepository _promotionRepository;
 	private readonly TgsContext _repository;
-	private readonly IPromotionBonusRepository _promotionBonusFactory;
-	private readonly ITransactionRepository _transactionRepository;
 	private readonly ISerialNumberGenerator _serialNumberGenerator;
+	private readonly ITransactionRepository _transactionRepository;
 
 	public CreatePromotionBonusWeeklyHandler(
 		ITgsService<PromotionBonus> promotionBonusService,

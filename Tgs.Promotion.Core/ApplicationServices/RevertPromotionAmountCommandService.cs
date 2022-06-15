@@ -5,8 +5,8 @@ namespace Tgs.Promotion.ApplicationServices;
 
 internal class RevertPromotionAmountCommandService : ICommandService<RevertPromotionAmountCommand>
 {
-	private readonly IPromotionRepository _promotionRepository;
 	private readonly ILogger<RevertPromotionAmountCommandService> _logger;
+	private readonly IPromotionRepository _promotionRepository;
 
 	public RevertPromotionAmountCommandService(
 		IPromotionRepository promotionRepository,

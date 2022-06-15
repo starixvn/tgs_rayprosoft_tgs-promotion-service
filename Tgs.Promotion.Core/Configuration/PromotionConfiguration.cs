@@ -15,8 +15,24 @@ public class PromotionConfiguration
 		Services = services ?? throw new ArgumentNullException(nameof(services));
 	}
 
+	public PromotionConfiguration AddCashServiceClient(
+		Action<CashServiceClientOptions, IServiceProvider> configure)
+	{
+		_ = Services.AddCashServiceClient(configure);
+
+		return this;
+	}
+
+	public PromotionConfiguration AddPaymentServiceClient(
+		Action<PaymentServiceClientOptions, IServiceProvider> configure)
+	{
+		_ = Services.AddPaymentServiceClient(configure);
+
+		return this;
+	}
+
 	public PromotionConfiguration AddPlayerDataRepository<TPlayerDataRepository>()
-		where TPlayerDataRepository : class, IPlayerDataRepository
+				where TPlayerDataRepository : class, IPlayerDataRepository
 	{
 		_ = Services.AddTransient<IPlayerDataRepository, TPlayerDataRepository>();
 
@@ -39,18 +55,18 @@ public class PromotionConfiguration
 		return this;
 	}
 
-	public PromotionConfiguration AddPromotionRepository<TPromotionRepository>()
-		where TPromotionRepository : class, IPromotionRepository
-	{
-		_ = Services.AddTransient<IPromotionRepository, TPromotionRepository>();
-
-		return this;
-	}
-
 	public PromotionConfiguration AddPromotionPlayerRepository<TPromotionPlayerRepository>()
 		where TPromotionPlayerRepository : class, IPromotionPlayerRepository
 	{
 		_ = Services.AddTransient<IPromotionPlayerRepository, TPromotionPlayerRepository>();
+
+		return this;
+	}
+
+	public PromotionConfiguration AddPromotionRepository<TPromotionRepository>()
+			where TPromotionRepository : class, IPromotionRepository
+	{
+		_ = Services.AddTransient<IPromotionRepository, TPromotionRepository>();
 
 		return this;
 	}
@@ -69,22 +85,6 @@ public class PromotionConfiguration
 		_ = Services.AddTransient<TChecker>();
 
 		_checkerTypes[typeName] = typeof(TChecker);
-
-		return this;
-	}
-
-	public PromotionConfiguration AddPaymentServiceClient(
-		Action<PaymentServiceClientOptions, IServiceProvider> configure)
-	{
-		_ = Services.AddPaymentServiceClient(configure);
-
-		return this;
-	}
-
-	public PromotionConfiguration AddCashServiceClient(
-		Action<CashServiceClientOptions, IServiceProvider> configure)
-	{
-		_ = Services.AddCashServiceClient(configure);
 
 		return this;
 	}

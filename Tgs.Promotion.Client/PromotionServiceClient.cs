@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -136,8 +137,51 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			.ConfigureAwait(false);
 	}
 
+	public async IAsyncEnumerable<PromotionView> ListPromotionsAsync(
+		Guid brandId,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		var response = await _httpClient.GetAsync(
+			$"/api/promotionview/{brandId}",
+			cancellationToken)
+			.ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		var json = await response.Content
+			.ReadAsStringAsync(cancellationToken)
+			.ConfigureAwait(false);
+
+		var promotions = JsonSerializer.Deserialize<PromotionView[]>(json, _JsonSerializerOptions);
+
+		foreach (var promotion in promotions ?? Array.Empty<PromotionView>())
+			yield return promotion;
+	}
+
+	public async IAsyncEnumerable<PromotionView> ListPromotionsAsync(
+		Guid brandId,
+		string playerCode,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		var response = await _httpClient.GetAsync(
+			$"/api/promotionview/{brandId}/{playerCode}",
+			cancellationToken)
+			.ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		var json = await response.Content
+			.ReadAsStringAsync(cancellationToken)
+			.ConfigureAwait(false);
+
+		var promotions = JsonSerializer.Deserialize<PromotionView[]>(json, _JsonSerializerOptions);
+
+		foreach (var promotion in promotions ?? Array.Empty<PromotionView>())
+			yield return promotion;
+	}
+
 	public async ValueTask SetPromotionContentAsync(
-			Guid promotionId,
+					Guid promotionId,
 		PromotionContent content,
 		string modifier,
 		CancellationToken cancellationToken = default)
