@@ -380,11 +380,6 @@ public class PromotionRepository : IPromotionRepository
 			.ToAsyncEnumerable();
 	}
 
-	public IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, string playerCode, CancellationToken cancellationToken = default)
-	{
-		throw new NotImplementedException();
-	}
-
 	public async ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount)
 	{
 		const string sql = "dbo.promotion_revert_amount_used";
