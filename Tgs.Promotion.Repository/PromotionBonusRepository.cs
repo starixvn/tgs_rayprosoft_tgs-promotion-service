@@ -16,15 +16,6 @@ public class PromotionBonusRepository : IPromotionBonusRepository
 		_promotionPlayerService = promotionPlayerService;
 	}
 
-	public IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
-		Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery, bool tracking)
-	{
-		preQuery ??= c => c;
-		return tracking
-			? preQuery(_promotionPlayerService.GetQueries())
-			: preQuery(_promotionPlayerService.GetQueries()).AsNoTracking();
-	}
-
 	public async ValueTask<PromotionBonus[]> CreatePromotionBonusAsync(PromotionBonusModel[] models)
 	{
 		var bonus = models.Select(model => new PromotionBonus
@@ -53,6 +44,15 @@ public class PromotionBonusRepository : IPromotionBonusRepository
 		await _promotionBonusService.CreateEntitiesAsync(bonus);
 
 		return bonus;
+	}
+
+	public IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
+			Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery, bool tracking)
+	{
+		preQuery ??= c => c;
+		return tracking
+			? preQuery(_promotionPlayerService.GetQueries())
+			: preQuery(_promotionPlayerService.GetQueries()).AsNoTracking();
 	}
 
 	public ValueTask UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players) =>

@@ -2,7 +2,6 @@
 using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.MessageQueue;
 using Tgs.Promotion.Clients;
@@ -535,7 +534,6 @@ public class PromotionTests
 		_ = await dbContext.PromotionRows.AddAsync(promotionRow);
 
 		_ = await dbContext.SaveChangesAsync();
-
 
 		await sut.UpdatePromotionUsedAmountAsync(promotionId, 1000M, firstSnapshotId);
 

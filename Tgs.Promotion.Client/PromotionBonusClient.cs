@@ -9,9 +9,9 @@ public interface IPromotionBonusClient
 {
 	Task<MessageResponse> CreatePromotionSettleDataDailyAsync(CreatePromotionBonusDailyRequest request);
 
-	Task<MessageResponse> CreatePromotionSettleDataWeeklyAsync(CreatePromotionBonusWeeklyRequest request);
-
 	Task<MessageResponse> CreatePromotionSettleDataMonthlyAsync(CreatePromotionBonusMonthlyRequest request);
+
+	Task<MessageResponse> CreatePromotionSettleDataWeeklyAsync(CreatePromotionBonusWeeklyRequest request);
 }
 
 public class PromotionBonusClient : IPromotionBonusClient
@@ -39,10 +39,10 @@ public class PromotionBonusClient : IPromotionBonusClient
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 	}
 
-	public async Task<MessageResponse> CreatePromotionSettleDataWeeklyAsync(
-		CreatePromotionBonusWeeklyRequest request)
+	public async Task<MessageResponse> CreatePromotionSettleDataMonthlyAsync(
+		CreatePromotionBonusMonthlyRequest request)
 	{
-		var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionBonus/settleDataWeekly")
+		var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionBonus/settleDataMonthly")
 		{
 			Content =
 				new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
@@ -55,10 +55,10 @@ public class PromotionBonusClient : IPromotionBonusClient
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 	}
 
-	public async Task<MessageResponse> CreatePromotionSettleDataMonthlyAsync(
-		CreatePromotionBonusMonthlyRequest request)
+	public async Task<MessageResponse> CreatePromotionSettleDataWeeklyAsync(
+			CreatePromotionBonusWeeklyRequest request)
 	{
-		var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionBonus/settleDataMonthly")
+		var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionBonus/settleDataWeekly")
 		{
 			Content =
 				new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")

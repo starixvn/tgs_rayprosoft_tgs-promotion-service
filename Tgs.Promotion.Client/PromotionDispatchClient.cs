@@ -7,9 +7,9 @@ namespace Tgs.Promotion.Clients;
 
 public interface IPromotionDispatchClient
 {
-	Task<PagedResponse<PromotionDispatchModel>> GetPromotionDispatchesAsync(GetPromotionDispatchesRequest request);
-
 	Task<MessageResponse> DispatchPromotionAsync(DispatchPromotionBonusRequest request);
+
+	Task<PagedResponse<PromotionDispatchModel>> GetPromotionDispatchesAsync(GetPromotionDispatchesRequest request);
 }
 
 public class PromotionDispatchClient : IPromotionDispatchClient

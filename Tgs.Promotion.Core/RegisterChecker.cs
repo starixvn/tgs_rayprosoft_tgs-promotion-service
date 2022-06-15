@@ -2,8 +2,8 @@
 
 internal class RegisterChecker : IPromotionChecker
 {
-	private readonly IPromotionParticipantRepository _promotionParticipantRepository;
 	private readonly IPlayerRepository _playerService;
+	private readonly IPromotionParticipantRepository _promotionParticipantRepository;
 
 	public RegisterChecker(IPlayerRepository playerService, IPromotionParticipantRepository promotionParticipantRepository)
 	{

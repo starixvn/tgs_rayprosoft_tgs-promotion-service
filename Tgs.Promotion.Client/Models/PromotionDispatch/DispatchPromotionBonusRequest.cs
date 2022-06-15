@@ -9,7 +9,7 @@ public class DispatchPromotionBonusRequest
 
 public class DispatchPlayer
 {
-	public Guid PromotionBonusId { get; set; }
-
 	public string PlayerCode { get; set; } = default!;
+
+	public Guid PromotionBonusId { get; set; }
 }

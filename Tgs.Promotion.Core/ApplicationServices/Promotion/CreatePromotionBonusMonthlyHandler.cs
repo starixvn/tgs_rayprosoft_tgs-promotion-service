@@ -20,11 +20,11 @@ public class
 	private readonly IPlayerBucketRepository _playerBucketService;
 	private readonly ITgsService<PlayerGameRebateAggregate> _playerGameRebateAggregateService;
 	private readonly ITgsService<Player> _playerService;
-	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly IPromotionBonusRepository _promotionBonusFactory;
 	private readonly ITgsService<PromotionBonus> _promotionBonusService;
 	private readonly IPromotionRepository _promotionFactory;
 	private readonly ITgsService<PromotionRow> _promotionService;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly ITransactionRepository _transactionRepository;
 
 	public CreatePromotionBonusMonthlyHandler(

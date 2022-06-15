@@ -5,11 +5,11 @@ namespace Tgs.Promotion;
 
 public interface IPromotionBonusRepository
 {
-	IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
-		Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery = null,
-		bool tracking = false);
-
 	ValueTask<PromotionBonus[]> CreatePromotionBonusAsync(PromotionBonusModel[] model);
+
+	IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
+			Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery = null,
+		bool tracking = false);
 
 	ValueTask UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players);
 }

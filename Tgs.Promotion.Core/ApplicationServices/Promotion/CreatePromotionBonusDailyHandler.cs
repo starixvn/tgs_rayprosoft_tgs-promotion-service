@@ -18,11 +18,11 @@ public class
 	private readonly IPlayerBucketRepository _playerBucketService;
 	private readonly ITgsService<PlayerGameRebateAggregate> _playerGameRebateAggregateService;
 	private readonly ITgsService<Player> _playerService;
-	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly IPromotionBonusRepository _promotionBonusFactory;
 	private readonly ITgsService<PromotionBonus> _promotionBonusServices;
 	private readonly IPromotionRepository _promotionRepository;
 	private readonly ITgsService<PromotionRow> _promotionService;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly ITransactionRepository _transactionRepository;
 
 	public CreatePromotionBonusDailyQueryHandler(
@@ -269,7 +269,7 @@ public class
 
 		return promotion.PromotionType switch
 		{
-			"TurnoverRebate" => (promotion.PromotionParticipants.Where(x => 
+			"TurnoverRebate" => (promotion.PromotionParticipants.Where(x =>
 					x.CreatedOn >= promotion.From && x.CreatedOn <= promotion.To).Select(p =>
 				{
 					if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
