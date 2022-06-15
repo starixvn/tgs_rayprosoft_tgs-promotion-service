@@ -8,8 +8,6 @@ public class PromotionViewModel
 
 	public bool IsAutoSent { get; init; }
 
-	public string Modifier { get; init; } = default!;
-
 	public string Name { get; init; } = default!;
 
 	public decimal? PromotionLimitAmount { get; init; }

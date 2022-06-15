@@ -9,7 +9,8 @@ public class PromotionBonusRepository : IPromotionBonusRepository
 	private readonly ITgsService<PromotionBonus> _promotionBonusService;
 	private readonly ITgsService<PromotionPlayer> _promotionPlayerService;
 
-	public PromotionBonusRepository(ITgsService<PromotionBonus> promotionBonusService,
+	public PromotionBonusRepository(
+		ITgsService<PromotionBonus> promotionBonusService,
 		ITgsService<PromotionPlayer> promotionPlayerService)
 	{
 		_promotionBonusService = promotionBonusService;

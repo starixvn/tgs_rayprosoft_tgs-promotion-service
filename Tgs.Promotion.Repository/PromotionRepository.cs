@@ -323,6 +323,68 @@ public class PromotionRepository : IPromotionRepository
 			(GameType?)promotion.GameType);
 	}
 
+	public IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, CancellationToken cancellationToken = default)
+	{
+		var current = DateTime.UtcNow;
+
+		var promotions = (from p in _dbContext.PromotionRows
+						  where p.BrandId == brandId
+							  && p.Status != (short)PromotionStatus.Archived
+							  && p.From <= current
+							  && p.To > current
+						  select new
+						  {
+							  p.Id,
+							  p.Name,
+							  p.From,
+							  p.To,
+							  p.PromotionType,
+							  p.TotalAmountLimit,
+							  p.AmountUsed,
+							  p.SubSubject,
+							  p.Content,
+							  p.DesktopBanner,
+							  p.MobileBanner,
+							  p.Terms,
+							  p.Localization,
+							  p.CampaignDetail
+						  }).ToArray();
+
+		var promotionVipLevels = _dbContext.PromotionVipLevels
+			.Where(vip => promotions
+				.Select(p => p.Id)
+				.ToArray()
+				.Contains(vip.PromotionId))
+			.ToLookup(
+				vip => vip.PromotionId,
+				vip => vip.Level);
+
+		return promotions
+			.Select(p => new PromotionView(
+				p.Id,
+				p.Name,
+				(p.From, p.To),
+				p.PromotionType,
+				p.TotalAmountLimit,
+				p.AmountUsed,
+				promotionVipLevels[p.Id],
+				p.SubSubject,
+				p.DesktopBanner,
+				p.MobileBanner,
+				p.Content,
+				p.Terms,
+				JsonDocument.Parse(string.IsNullOrWhiteSpace(p.Localization)
+					? "{}"
+					: p.Localization),
+				JsonDocument.Parse(p.CampaignDetail)))
+			.ToAsyncEnumerable();
+	}
+
+	public IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, string playerCode, CancellationToken cancellationToken = default)
+	{
+		throw new NotImplementedException();
+	}
+
 	public async ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount)
 	{
 		const string sql = "dbo.promotion_revert_amount_used";

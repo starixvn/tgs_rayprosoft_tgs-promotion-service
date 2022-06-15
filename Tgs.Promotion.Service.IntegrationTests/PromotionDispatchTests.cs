@@ -17,7 +17,7 @@ public class PromotionDispatchTests
 		await using var web = new TestPromotionApplication(builder => builder
 			.ConfigureServices(services =>
 			{
-				var fakPromotionBonusRepository = Substitute.For<PromotionBonusRepository>();
+				var fakPromotionBonusRepository = Substitute.For<IPromotionBonusRepository>();
 				var fakeSettingsRepository = Substitute.For<ISettingsRepository>();
 				var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 				var fakePromotionRepository = Substitute.For<IPromotionRepository>();
