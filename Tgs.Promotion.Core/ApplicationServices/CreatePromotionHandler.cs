@@ -16,7 +16,8 @@ public class CreatePromotionHandler : IGetService<CreatePromotionRequest, Messag
 		_settingsService = settingsService;
 	}
 
-	public async ValueTask<MessageResponse> GetAsync(CreatePromotionRequest request,
+	public async ValueTask<MessageResponse> GetAsync(
+		CreatePromotionRequest request,
 		CancellationToken cancellationToken)
 	{
 		if (await _service.ExistsAsync(x =>

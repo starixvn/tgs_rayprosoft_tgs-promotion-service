@@ -2,7 +2,6 @@
 using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
 using Tgs.MessageQueue;
@@ -49,91 +48,6 @@ public class PromotionTests
 		Assert.AreEqual(createInfo.IsAutoSent, actual.AutoSentPlayerBonus);
 		Assert.AreEqual(1, actual.Status);
 		Assert.AreEqual(resultId, actual.Id);
-	}
-
-	[TestMethod]
-	public async Task List_Promotions_By_Brand_Id()
-	{
-		await using var web = new TestPromotionApplication();
-
-		var httpClient = web.CreateClient();
-
-		var sut = new PromotionServiceClient(httpClient);
-
-		var brandId = Guid.NewGuid();
-
-		var dbContext = web.Services.GetRequiredService<TgsContext>();
-
-		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
-		{
-			Id = Guid.NewGuid(),
-			BrandId = brandId,
-			Name = "Test Promotion",
-			From = DateTime.Now.AddDays(-10D),
-			To = DateTime.Now,
-			PromotionType = "TestType",
-			AutoSentPlayerBonus = true,
-			CampaignDetail = "{}"
-		});
-
-		_ = await dbContext.SaveChangesAsync();
-
-		var actual = await sut.ListPromotionsAsync(brandId).ToArrayAsync();
-
-		Assert.AreEqual(1, actual.Length);
-	}
-
-	[TestMethod]
-	public async Task List_Promotions_By_PlayerCode()
-	{
-		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
-		var fakeBrandService = Substitute.For<IBrandServiceClient>();
-
-		await using var web = new TestPromotionApplication(builder => builder
-			.ConfigureServices(services => services
-				.AddSingleton(fakePlayerService)
-				.AddSingleton(fakeBrandService)));
-
-		var httpClient = web.CreateClient();
-
-		var sut = new PromotionServiceClient(httpClient);
-
-		var brandId = Guid.NewGuid();
-		var playerCode = "test";
-		var playerVipLevelId = Guid.NewGuid();
-
-		var dbContext = web.Services.GetRequiredService<TgsContext>();
-
-		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
-		{
-			Id = Guid.NewGuid(),
-			BrandId = brandId,
-			Name = "Test Promotion",
-			From = DateTime.Now.AddDays(-10D),
-			To = DateTime.Now.AddDays(1D),
-			PromotionType = "Roulette",
-			AutoSentPlayerBonus = true,
-			CampaignDetail = "{}"
-		});
-
-		_ = await dbContext.SaveChangesAsync();
-
-		_ = fakePlayerService.GetPlayerInfoAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
-			.Returns(new PlayerInfo
-			{
-				PlayerCode = playerCode,
-				VipLevelId = playerVipLevelId,
-				BrandId = brandId
-			});
-
-		_ = fakeBrandService.GetVipLevelInfosAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
-			.Returns(new[] {
-				new VipLevelInfo(playerVipLevelId, 1)
-			}.ToAsyncEnumerable());
-
-		var actual = await sut.ListPromotionsAsync(brandId, playerCode).ToArrayAsync();
-
-		Assert.AreEqual(1, actual.Length);
 	}
 
 	[TestMethod]
@@ -214,6 +128,91 @@ public class PromotionTests
 
 		Assert.IsNotNull(actual);
 		Assert.AreEqual(expected, actual);
+	}
+
+	[TestMethod]
+	public async Task List_Promotions_By_Brand_Id()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var brandId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = Guid.NewGuid(),
+			BrandId = brandId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now.AddDays(1D),
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}"
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.ListPromotionsAsync(brandId).ToArrayAsync();
+
+		Assert.AreEqual(1, actual.Length);
+	}
+
+	[TestMethod]
+	public async Task List_Promotions_By_PlayerCode()
+	{
+		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
+		var fakeBrandService = Substitute.For<IBrandServiceClient>();
+
+		await using var web = new TestPromotionApplication(builder => builder
+			.ConfigureServices(services => services
+				.AddSingleton(fakePlayerService)
+				.AddSingleton(fakeBrandService)));
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var brandId = Guid.NewGuid();
+		var playerCode = "test";
+		var playerVipLevelId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = Guid.NewGuid(),
+			BrandId = brandId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now.AddDays(1D),
+			PromotionType = "Roulette",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}"
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		_ = fakePlayerService.GetPlayerInfoAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = playerCode,
+				VipLevelId = playerVipLevelId,
+				BrandId = brandId
+			});
+
+		_ = fakeBrandService.GetVipLevelInfosAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
+			.Returns(new[] {
+				new VipLevelInfo(playerVipLevelId, 1)
+			}.ToAsyncEnumerable());
+
+		var actual = await sut.ListPromotionsAsync(brandId, playerCode).ToArrayAsync();
+
+		Assert.AreEqual(1, actual.Length);
 	}
 
 	[TestMethod]
