@@ -36,6 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Tgs.Promotion.Cache\Tgs.Promotion.Cache.csproj" />
     <ProjectReference Include="..\Tgs.Promotion.Core\Tgs.Promotion.Core.csproj" />
     <ProjectReference Include="..\Tgs.Promotion.Repository\Tgs.Promotion.Repository.csproj" />
   </ItemGroup>
