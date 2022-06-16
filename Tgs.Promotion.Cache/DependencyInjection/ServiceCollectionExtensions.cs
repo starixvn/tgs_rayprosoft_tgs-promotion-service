@@ -1,4 +1,6 @@
-﻿using Tgs.Promotion.ApplicationServices;
+﻿using Tgs.Promotion;
+using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Cache;
 using Tgs.ServiceUtility;
 
 namespace Microsoft.Extensions.DependencyInjection;
