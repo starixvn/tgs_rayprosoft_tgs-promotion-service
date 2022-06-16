@@ -203,37 +203,37 @@ public class PromotionRepository : IPromotionRepository
 
 			var promotionData = new
 			{
-				Id = promotion.Id,
-				BrandId = promotion.BrandId,
-				From = promotion.From,
-				To = promotion.To,
+				promotion.Id,
+				promotion.BrandId,
+				promotion.From,
+				promotion.To,
 				Status = (PromotionStatus)promotion.Status,
-				Name = promotion.Name,
-				AutoSentPlayerBonus = promotion.AutoSentPlayerBonus,
-				PromotionType = promotion.PromotionType,
-				BonusAmountLimit = promotion.BonusAmountLimit,
-				AmountUsed = promotion.AmountUsed,
+				promotion.Name,
+				promotion.AutoSentPlayerBonus,
+				promotion.PromotionType,
+				promotion.BonusAmountLimit,
+				promotion.AmountUsed,
 				Unlimited = promotion.Unlimited == 1,
 				GameType = (GameType?)promotion.GameType,
-				Percentage = promotion.Percentage,
-				TotalAmountLimit = promotion.TotalAmountLimit,
-				TurnoverMultiple = promotion.TurnoverMultiple,
+				promotion.Percentage,
+				promotion.TotalAmountLimit,
+				promotion.TurnoverMultiple,
 				GameProviderIds = promotion.PromotionGameProviders.Select(g => g.GameProviderId).ToArray(),
 				VipLevels = promotion.PromotionVipLevels.Select(v => v.Level).OrderBy(level => level).ToArray(),
-				CreatedOn = promotion.CreatedOn,
-				UpdatedOn = promotion.UpdatedOn,
-				CreatedByUsername = promotion.CreatedByUsername,
-				UpdatedByUsername = promotion.UpdatedByUsername,
-				SubSubject = promotion.SubSubject,
-				Content = promotion.Content,
-				Terms = promotion.Terms,
-				DesktopBanner = promotion.DesktopBanner,
-				MobileBanner = promotion.MobileBanner,
-				Localization = promotion.Localization,
+				promotion.CreatedOn,
+				promotion.UpdatedOn,
+				promotion.CreatedByUsername,
+				promotion.UpdatedByUsername,
+				promotion.SubSubject,
+				promotion.Content,
+				promotion.Terms,
+				promotion.DesktopBanner,
+				promotion.MobileBanner,
+				promotion.Localization,
 				Number = promotion.DisplayOrder,
 				promotion.CampaignDetail
 			};
-			
+
 			_ = await _dbContext.PromotionDistributePlans.AddAsync(new PromotionDistributePlan
 			{
 				Id = createId,
@@ -321,6 +321,63 @@ public class PromotionRepository : IPromotionRepository
 			promotion.Percentage,
 			promotion.TurnoverMultiple,
 			(GameType?)promotion.GameType);
+	}
+
+	public IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, CancellationToken cancellationToken = default)
+	{
+		var current = DateTime.UtcNow;
+
+		var promotions = (from p in _dbContext.PromotionRows
+						  where p.BrandId == brandId
+							  && p.Status != (short)PromotionStatus.Archived
+							  && p.From <= current
+							  && p.To > current
+						  select new
+						  {
+							  p.Id,
+							  p.Name,
+							  p.From,
+							  p.To,
+							  p.PromotionType,
+							  p.TotalAmountLimit,
+							  p.AmountUsed,
+							  p.SubSubject,
+							  p.Content,
+							  p.DesktopBanner,
+							  p.MobileBanner,
+							  p.Terms,
+							  p.Localization,
+							  p.CampaignDetail
+						  }).ToArray();
+
+		var promotionVipLevels = _dbContext.PromotionVipLevels
+			.Where(vip => promotions
+				.Select(p => p.Id)
+				.ToArray()
+				.Contains(vip.PromotionId))
+			.ToLookup(
+				vip => vip.PromotionId,
+				vip => vip.Level);
+
+		return promotions
+			.Select(p => new PromotionView(
+				p.Id,
+				p.Name,
+				(p.From, p.To),
+				p.PromotionType,
+				p.TotalAmountLimit,
+				p.AmountUsed,
+				promotionVipLevels[p.Id],
+				p.SubSubject,
+				p.DesktopBanner,
+				p.MobileBanner,
+				p.Content,
+				p.Terms,
+				JsonDocument.Parse(string.IsNullOrWhiteSpace(p.Localization)
+					? "{}"
+					: p.Localization),
+				JsonDocument.Parse(p.CampaignDetail)))
+			.ToAsyncEnumerable();
 	}
 
 	public async ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount)
@@ -616,7 +673,7 @@ public class PromotionRepository : IPromotionRepository
 		{
 			promotion.AmountUsed = totalAmount;
 
-			await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+			_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 		}
 	}
 

@@ -7,8 +7,8 @@ namespace Tgs.Promotion.ApplicationServices;
 
 public class ChangePromotionStatusHandler : IGetService<ChangePromotionStatusRequest, MessageResponse>
 {
-	private readonly ITgsService<Domain.Entities.PromotionRow> _promotionService;
 	private readonly IPromotionRepository _promotionFactory;
+	private readonly ITgsService<Domain.Entities.PromotionRow> _promotionService;
 
 	public ChangePromotionStatusHandler(
 		ITgsService<Domain.Entities.PromotionRow> promotionService,

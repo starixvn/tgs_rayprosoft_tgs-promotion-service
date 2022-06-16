@@ -1,11 +1,10 @@
 ﻿using System.Linq.Expressions;
-using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using MockQueryable.Moq;
 using NSubstitute;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Models;
+using Tgs.Promotion.Repository;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
 
@@ -18,7 +17,6 @@ public class PromotionDispatchTests
 		await using var web = new TestPromotionApplication(builder => builder
 			.ConfigureServices(services =>
 			{
-
 				var fakPromotionBonusRepository = Substitute.For<IPromotionBonusRepository>();
 				var fakeSettingsRepository = Substitute.For<ISettingsRepository>();
 				var fakePlayerRepository = Substitute.For<IPlayerRepository>();
@@ -43,7 +41,6 @@ public class PromotionDispatchTests
 				_ = services.AddSingleton(fakPromotionBonusRepository);
 				_ = services.AddSingleton(fakePlayerRepository);
 				_ = services.AddSingleton(fakePromotionRepository);
-
 			}));
 
 		var httpClient = web.CreateClient();

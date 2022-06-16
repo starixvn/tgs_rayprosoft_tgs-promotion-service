@@ -2,19 +2,19 @@
 
 public interface ITgsService<T>
 {
-	IQueryable<T> GetQueries(
-		Func<IQueryable<T>, IQueryable<T>>? preQuery = null,
-		bool tracking = false);
+	ValueTask CreateEntitiesAsync(T[] entities);
 
 	ValueTask CreateEntityAsync(T entity);
 
-	ValueTask UpdateEntityAsync(T entity);
+	ValueTask DeleteEntitiesAsync(IEnumerable<T> entities);
 
-	ValueTask CreateEntitiesAsync(T[] entities);
+	IQueryable<T> GetQueries(
+					Func<IQueryable<T>, IQueryable<T>>? preQuery = null,
+		bool tracking = false);
+
+	Task<int> SaveChangesAsync();
 
 	ValueTask UpdateEntitiesAsync(T[] entities);
 
-	ValueTask DeleteEntitiesAsync(IEnumerable<T> entities);
-
-	Task<int> SaveChangesAsync();
+	ValueTask UpdateEntityAsync(T entity);
 }

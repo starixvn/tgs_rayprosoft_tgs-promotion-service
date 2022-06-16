@@ -9,20 +9,12 @@ public class PromotionBonusRepository : IPromotionBonusRepository
 	private readonly ITgsService<PromotionBonus> _promotionBonusService;
 	private readonly ITgsService<PromotionPlayer> _promotionPlayerService;
 
-	public PromotionBonusRepository(ITgsService<PromotionBonus> promotionBonusService,
+	public PromotionBonusRepository(
+		ITgsService<PromotionBonus> promotionBonusService,
 		ITgsService<PromotionPlayer> promotionPlayerService)
 	{
 		_promotionBonusService = promotionBonusService;
 		_promotionPlayerService = promotionPlayerService;
-	}
-
-	public IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
-		Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery, bool tracking)
-	{
-		preQuery ??= c => c;
-		return tracking
-			? preQuery(_promotionPlayerService.GetQueries())
-			: preQuery(_promotionPlayerService.GetQueries()).AsNoTracking();
 	}
 
 	public async ValueTask<PromotionBonus[]> CreatePromotionBonusAsync(PromotionBonusModel[] models)
@@ -53,6 +45,15 @@ public class PromotionBonusRepository : IPromotionBonusRepository
 		await _promotionBonusService.CreateEntitiesAsync(bonus);
 
 		return bonus;
+	}
+
+	public IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
+			Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery, bool tracking)
+	{
+		preQuery ??= c => c;
+		return tracking
+			? preQuery(_promotionPlayerService.GetQueries())
+			: preQuery(_promotionPlayerService.GetQueries()).AsNoTracking();
 	}
 
 	public ValueTask UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players) =>

@@ -11,11 +11,11 @@ namespace Tgs.Promotion.ApplicationServices;
 public class CreatePromotionParticipantHandler : IGetService<CreatePromotionParticipantRequest, MessageResponse>
 {
 	private readonly ILogger<CreatePromotionParticipantHandler> _logger;
+	private readonly IMessageSender _messageSender;
+	private readonly IPromotionJoinLockRepository _promotionJoinLockRepository;
 	private readonly IPromotionParticipantRepository _promotionParticipantRepository;
 	private readonly IPromotionRepository _promotionRepository;
 	private readonly IPromotionTypeRepository _promotionType;
-	private readonly IPromotionJoinLockRepository _promotionJoinLockRepository;
-	private readonly IMessageSender _messageSender;
 
 	public CreatePromotionParticipantHandler(
 		IPromotionRepository promotionRepository,
@@ -57,7 +57,7 @@ public class CreatePromotionParticipantHandler : IGetService<CreatePromotionPart
 		var currentDate = DateTimeOffset.Now;
 
 		if (promotion.Status != (short)PromotionStatus.Enabled ||
-		    promotion.From > currentDate ||
+			promotion.From > currentDate ||
 			promotion.To < currentDate)
 		{
 			_logger.LogWarning("Promotion({request.PromotionId}) invalid.", request.PromotionId);

@@ -14,14 +14,17 @@ public class PromotionParticipantRepository : IPromotionParticipantRepository
 		_promotionParticipantService = promotionParticipantService ?? throw new ArgumentNullException(nameof(promotionParticipantService));
 	}
 
-	public IQueryable<PromotionParticipant> GetPromotionParticipantQueries(
-		Func<IQueryable<PromotionParticipant>, IQueryable<PromotionParticipant>>? preQuery,
-		bool tracking)
+	public async ValueTask CreatePromotionParticipantAsync(Guid promotionId, string playerCode)
 	{
-		preQuery ??= c => c;
-		return tracking
-			? preQuery(_promotionParticipantService.GetQueries())
-			: preQuery(_promotionParticipantService.GetQueries()).AsNoTracking();
+		var promotionParticipant =
+			new PromotionParticipant
+			{
+				PlayerCode = playerCode,
+				PromotionId = promotionId,
+				CreatedOn = DateTime.UtcNow
+			};
+
+		await _promotionParticipantService.CreateEntityAsync(promotionParticipant);
 	}
 
 	public async ValueTask<bool> ExistsAsync(
@@ -37,16 +40,13 @@ public class PromotionParticipantRepository : IPromotionParticipantRepository
 		return await preQuery(_promotionParticipantService.GetQueries()).FirstOrDefaultAsync(predicate);
 	}
 
-	public async ValueTask CreatePromotionParticipantAsync(Guid promotionId, string playerCode)
+	public IQueryable<PromotionParticipant> GetPromotionParticipantQueries(
+					Func<IQueryable<PromotionParticipant>, IQueryable<PromotionParticipant>>? preQuery,
+		bool tracking)
 	{
-		var promotionParticipant =
-			new PromotionParticipant
-			{
-				PlayerCode = playerCode,
-				PromotionId = promotionId,
-				CreatedOn = DateTime.UtcNow
-			};
-
-		await _promotionParticipantService.CreateEntityAsync(promotionParticipant);
+		preQuery ??= c => c;
+		return tracking
+			? preQuery(_promotionParticipantService.GetQueries())
+			: preQuery(_promotionParticipantService.GetQueries()).AsNoTracking();
 	}
 }

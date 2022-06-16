@@ -89,16 +89,16 @@ public class PromotionCheckerTests
 	}
 
 	[Test]
-	public async Task Player_DailyFirstDeposit_Without_PromotionId_Not_Rollback_Tag()
+	public async Task Player_DailyFirstDeposit_With_PromotionId_Be_Tag()
 	{
 		var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
 
 		var sut = new DailyFirstDepositChecker(fakePlayerDataService);
 
-		await sut.RollbackTagAsync("ThisIsPlayerCode", null);
+		await sut.TagPromotionTypeAsync("ThisIsPlayerCode", Guid.NewGuid());
 
-		_ = fakePlayerDataService.Received(0)
-			.RemovePlayerDailyDepositFlagAsync(Arg.Is("ThisIsPlayerCode"));
+		_ = fakePlayerDataService.Received(1)
+			.SetPlayerDailyDepositFlagAsync(Arg.Is("ThisIsPlayerCode"));
 	}
 
 	[Test]
@@ -115,16 +115,16 @@ public class PromotionCheckerTests
 	}
 
 	[Test]
-	public async Task Player_DailyFirstDeposit_With_PromotionId_Be_Tag()
+	public async Task Player_DailyFirstDeposit_Without_PromotionId_Not_Rollback_Tag()
 	{
 		var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
 
 		var sut = new DailyFirstDepositChecker(fakePlayerDataService);
 
-		await sut.TagPromotionTypeAsync("ThisIsPlayerCode", Guid.NewGuid());
+		await sut.RollbackTagAsync("ThisIsPlayerCode", null);
 
-		_ = fakePlayerDataService.Received(1)
-			.SetPlayerDailyDepositFlagAsync(Arg.Is("ThisIsPlayerCode"));
+		_ = fakePlayerDataService.Received(0)
+			.RemovePlayerDailyDepositFlagAsync(Arg.Is("ThisIsPlayerCode"));
 	}
 
 	[Test]
