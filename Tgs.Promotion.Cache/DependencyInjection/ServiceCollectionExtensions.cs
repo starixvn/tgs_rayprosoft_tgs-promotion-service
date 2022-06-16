@@ -1,8 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Tgs.Promotion.ApplicationServices;
+﻿using Tgs.Promotion.ApplicationServices;
 using Tgs.ServiceUtility;
 
-namespace Tgs.Promotion.Cache.DependencyInjection;
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
