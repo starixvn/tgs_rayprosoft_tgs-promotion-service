@@ -4,6 +4,7 @@ using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.MessageQueue.Configuration;
+using Tgs.Promotion.Cache.DependencyInjection;
 using Tgs.Promotion.MessageQueue;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Service;
@@ -65,6 +66,7 @@ builder.Services
 	.AddTgsRepository(builder.Configuration.GetConnectionString("Tgs"))
 	.AddRedis((redisOptions, _) => redisOptions.ConnectionString = builder.Configuration.GetConnectionString("Redis"))
 	.AddPromotionCore()
+	.AddPromotionServiceCache()
 	.AddPaymentServiceClient((options, sp) =>
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
