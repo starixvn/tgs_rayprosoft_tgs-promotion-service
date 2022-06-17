@@ -1,4 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Tgs.Promotion.Models.Promotion;
 using Tgs.ServiceUtility;
 
@@ -58,8 +60,17 @@ internal class GetValidPromotionsByPlayerQueryService : IQueryService<GetValidPr
 		{
 			var checker = _promotionCheckerFactory.GetPromotionChecker(promotion.PromotionType);
 
-			if (await checker.CheckAsync(playerCode, promotion.Id)
-					.ConfigureAwait(false))
+			if (await checker.CheckAsync(
+				playerCode,
+				new PromotionMainInfo(
+					promotion.Id,
+					promotion.BrandId,
+					promotion.Name,
+					(promotion.From.UtcDateTime, promotion.To.UtcDateTime),
+					promotion.PromotionType,
+					promotion.TotalAmountLimit,
+					promotion.AutoSentPlayerBonus))
+				.ConfigureAwait(false))
 			{
 				yield return promotion;
 			}

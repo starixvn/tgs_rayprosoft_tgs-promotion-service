@@ -9,7 +9,7 @@ internal class DailyFirstDepositChecker : IPromotionChecker
 		_playerDataRepository = playerDataRepository ?? throw new ArgumentNullException(nameof(playerDataRepository));
 	}
 
-	public ValueTask<bool> CheckAsync(string playerCode, Guid? promotionId)
+	public ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
 		=> _playerDataRepository.CheckPlayerIsDailyFirstDepositAsync(playerCode);
 
 	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId)

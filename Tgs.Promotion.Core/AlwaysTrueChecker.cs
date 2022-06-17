@@ -2,7 +2,7 @@
 
 internal class AlwaysTrueChecker : IPromotionChecker
 {
-	public ValueTask<bool> CheckAsync(string playerCode, Guid? promotionId)
+	public ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
 		=> ValueTask.FromResult(true);
 
 	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;

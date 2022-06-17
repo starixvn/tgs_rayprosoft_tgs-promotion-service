@@ -183,7 +183,7 @@ public class PromotionTests
 		var fakeChecker = Substitute.For<IPromotionChecker>();
 
 		_ = fakeChecker
-			.CheckAsync(Arg.Any<string>())
+			.CheckAsync(Arg.Any<string>(), Arg.Any<PromotionMainInfo>())
 			.Returns(true);
 
 		_ = fakeServiceProvider
@@ -216,7 +216,7 @@ public class PromotionTests
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Any<string>())
 			.Returns(fakePromotionChecker);
 
-		_ = fakePromotionChecker.CheckAsync(Arg.Any<string>(), Arg.Any<Guid?>())
+		_ = fakePromotionChecker.CheckAsync(Arg.Any<string>(), Arg.Any<PromotionMainInfo>())
 			.Returns(true);
 
 		var testData = new[]
