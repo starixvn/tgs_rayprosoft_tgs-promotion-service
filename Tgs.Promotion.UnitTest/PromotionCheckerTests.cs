@@ -26,7 +26,16 @@ public class PromotionCheckerTests
 				FirstDepositOn = null
 			});
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsTrue(actual);
 	}
@@ -46,7 +55,16 @@ public class PromotionCheckerTests
 				FirstDepositOn = DateTime.UtcNow
 			});
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsFalse(actual);
 	}
@@ -67,7 +85,16 @@ public class PromotionCheckerTests
 				FirstPromotionOn = DateTime.UtcNow
 			});
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsFalse(actual);
 	}
@@ -83,7 +110,16 @@ public class PromotionCheckerTests
 			.CheckPlayerIsDailyFirstDepositAsync(Arg.Any<string>())
 			.Returns(true);
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsTrue(actual);
 	}
@@ -151,7 +187,16 @@ public class PromotionCheckerTests
 			.CheckPlayerIsDailyFirstDepositAsync(Arg.Any<string>())
 			.Returns(false);
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsTrue(actual);
 	}
@@ -182,7 +227,16 @@ public class PromotionCheckerTests
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
 			.Returns(new Player { FirstDepositOn = null });
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsTrue(actual);
 	}
@@ -257,7 +311,16 @@ public class PromotionCheckerTests
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
 			.Returns(new Player { FirstPromotionOn = null });
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsTrue(actual);
 	}

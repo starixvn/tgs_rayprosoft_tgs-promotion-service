@@ -1,36 +1,26 @@
-﻿namespace Tgs.Promotion;
+﻿using Tgs.PlayerService.Client;
+
+namespace Tgs.Promotion;
 
 internal class RegisterChecker : IPromotionChecker
 {
-	private readonly IPlayerRepository _playerRepository;
-	private readonly IPromotionRepository _promotionRepository;
+	private readonly IPlayerServiceClient _playerServiceClient;
 
-	public RegisterChecker(IPlayerRepository playerRepository, IPromotionRepository promotionRepository)
+	public RegisterChecker(IPlayerServiceClient playerServiceClient)
 	{
-		_playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 	}
 
-	public async ValueTask<bool> CheckAsync(string playerCode, Guid? promotionId)
+	public async ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
 	{
-		var player = await _playerRepository
-			.GetPlayerByPlayerCodeAsync(playerCode)
+		var player = await _playerServiceClient
+			.GetPlayerInfoAsync(playerCode)
 			.ConfigureAwait(false);
 
-		if (player is null)
-		{
-			return false;
-		}
-
-		var promotion = await _promotionRepository.GetPromotionByIdAsync(promotionId!.Value).ConfigureAwait(false);
-
-		if (promotion is null)
-		{
-			return false;
-		}
-
-		return player.Status == (short)PlayerStatus.Enabled && promotion.From <= player.RegisteredOn!.Value.Date &&
-			promotion.To >= player.RegisteredOn!.Value.Date;
+		return player is not null
+			&& player.Status == (short)PlayerStatus.Enabled
+			&& promotion.EventDuring.From <= player.RegisteredOn!.Value.Date
+			&& promotion.EventDuring.To >= player.RegisteredOn!.Value.Date;
 	}
 
 	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
