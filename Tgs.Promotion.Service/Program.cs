@@ -65,6 +65,7 @@ builder.Services
 	.AddTgsRepository(builder.Configuration.GetConnectionString("Tgs"))
 	.AddRedis((redisOptions, _) => redisOptions.ConnectionString = builder.Configuration.GetConnectionString("Redis"))
 	.AddPromotionCore()
+	.AddMemoryCache()
 	.AddPromotionServiceCache()
 	.AddPaymentServiceClient((options, sp) =>
 	{
