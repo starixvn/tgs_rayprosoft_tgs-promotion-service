@@ -11,7 +11,7 @@ internal class FirstJoinPromotionChecker : IPromotionChecker
 		_playerDataRepository = playerDataRepository ?? throw new ArgumentNullException(nameof(playerDataRepository));
 	}
 
-	public async ValueTask<bool> CheckAsync(string playerCode, Guid? promotionId)
+	public async ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
 	{
 		var isFirstDepositing = await _playerDataRepository
 			.CheckPlayerFirstJoinPromotionAsync(playerCode)

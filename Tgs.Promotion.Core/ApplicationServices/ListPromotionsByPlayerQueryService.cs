@@ -51,7 +51,16 @@ internal class ListPromotionsByPlayerQueryService : IQueryService<ListPromotions
 		{
 			var checker = _promotionCheckerFactory.GetPromotionChecker(promotion.PromotionType);
 
-			if (await checker.CheckAsync(query.PlayerCode)
+			if (await checker.CheckAsync(
+				query.PlayerCode,
+				new PromotionMainInfo(
+					promotion.Id,
+					query.BrandId,
+					promotion.Name,
+					promotion.EventDuring,
+					promotion.PromotionType,
+					promotion.PromotionLimitAmount,
+					true))
 				.ConfigureAwait(false))
 				yield return promotion;
 		}

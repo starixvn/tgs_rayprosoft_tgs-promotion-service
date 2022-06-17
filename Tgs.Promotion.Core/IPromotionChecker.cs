@@ -2,7 +2,7 @@
 
 public interface IPromotionChecker
 {
-	ValueTask<bool> CheckAsync(string playerCode, Guid? promotionId = null);
+	ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion);
 
 	ValueTask CommitTagAsync(string playerCode, Guid? promotionId);
 
