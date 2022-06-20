@@ -5,10 +5,12 @@ namespace Tgs.Promotion;
 internal class RegisterChecker : IPromotionChecker
 {
 	private readonly IPlayerServiceClient _playerServiceClient;
+	private readonly IPromotionParticipantRepository _promotionParticipantRepository;
 
-	public RegisterChecker(IPlayerServiceClient playerServiceClient)
+	public RegisterChecker(IPlayerServiceClient playerServiceClient, IPromotionParticipantRepository promotionParticipantRepository)
 	{
 		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+		_promotionParticipantRepository = promotionParticipantRepository ?? throw new ArgumentNullException(nameof(promotionParticipantRepository));
 	}
 
 	public async ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
@@ -17,10 +19,15 @@ internal class RegisterChecker : IPromotionChecker
 			.GetPlayerInfoAsync(playerCode)
 			.ConfigureAwait(false);
 
+		var isExists = await _promotionParticipantRepository.ExistsAsync(x
+			=> x.PlayerCode == playerCode && x.PromotionId == promotion.Id)
+			.ConfigureAwait(false);
+
 		return player is not null
+			&& !isExists
 			&& player.Status == (short)PlayerStatus.Enabled
-			&& promotion.EventDuring.From <= player.RegisteredOn!.Value.Date
-			&& promotion.EventDuring.To >= player.RegisteredOn!.Value.Date;
+			&& promotion.EventDuring.From <= player.RegisteredOn!.Value
+			&& promotion.EventDuring.To >= player.RegisteredOn!.Value;
 	}
 
 	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
