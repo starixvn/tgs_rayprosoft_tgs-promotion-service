@@ -206,7 +206,7 @@ public class CreatePromotionBonusWeeklyHandler
 			})
 			.ToArrayAsync(cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
-		var d = JsonSerializer.Serialize(promotionBonus);
+
 		var autoSentPlayerBonuses = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray();
 		var playerCodes = autoSentPlayerBonuses.SelectMany(p => p.Players).Select(p => p.PlayerCode);
 
