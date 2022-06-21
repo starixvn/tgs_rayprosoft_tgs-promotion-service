@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Polly;
 using Tgs.CashService.Client;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Extensions;
@@ -13,6 +16,7 @@ namespace Tgs.Promotion.ApplicationServices.Promotion;
 public class CreatePromotionBonusWeeklyHandler
 	: IGetService<CreatePromotionBonusWeeklyRequest, MessageResponse>
 {
+	private readonly ITgsService<BrandGame> _brandGameService;
 	private readonly ICashServiceClient _cashServiceClient;
 	private readonly IPlayerBucketRepository _playerBucketService;
 	private readonly IPromotionBonusRepository _promotionBonusFactory;
@@ -21,6 +25,8 @@ public class CreatePromotionBonusWeeklyHandler
 	private readonly TgsContext _repository;
 	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly ITransactionRepository _transactionRepository;
+	private readonly ITgsService<Transaction> _transactionService;
+	private readonly ILogger<CreatePromotionBonusWeeklyHandler> _logger;
 
 	public CreatePromotionBonusWeeklyHandler(
 		ITgsService<PromotionBonus> promotionBonusService,
@@ -30,7 +36,10 @@ public class CreatePromotionBonusWeeklyHandler
 		IPromotionRepository promotionRepository,
 		IPromotionBonusRepository promotionBonusFactory,
 		ITransactionRepository transactionRepository,
-		ISerialNumberGenerator serialNumberGenerator)
+		ISerialNumberGenerator serialNumberGenerator,
+		ITgsService<Transaction> transactionService,
+		ITgsService<BrandGame> brandGameService,
+		ILogger<CreatePromotionBonusWeeklyHandler> logger)
 	{
 		_promotionBonusFactory =
 			promotionBonusFactory ?? throw new ArgumentNullException(nameof(promotionBonusFactory));
@@ -43,6 +52,9 @@ public class CreatePromotionBonusWeeklyHandler
 		_transactionRepository =
 			transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
 		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+		_brandGameService = brandGameService ?? throw new ArgumentNullException(nameof(brandGameService));
+		_transactionService = transactionService ?? throw new ArgumentNullException(nameof(transactionService));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async ValueTask<MessageResponse> GetAsync(
@@ -57,8 +69,32 @@ public class CreatePromotionBonusWeeklyHandler
 			0,
 			new(8, 0, 0));
 
-		var previousSunday = now.AddDays(-7).GetSunday();
 		var previousMonday = now.AddDays(-7).GetMonday();
+		var previousSunday = now.AddDays(-7).GetSunday();
+
+		if (!string.IsNullOrEmpty(request.From) &&
+		    DateTimeOffset.TryParse($"{request.From} 00:00 +08:00", out var resultFrom))
+		{
+			previousMonday = new(resultFrom.Year,
+				resultFrom.Month,
+				resultFrom.Day,
+				0,
+				0,
+				0,
+				resultFrom.Offset);
+		}
+
+		if (!string.IsNullOrEmpty(request.To) &&
+		    DateTimeOffset.TryParse($"{request.From} 00:00 +08:00", out var resultTo))
+		{
+			previousSunday = new(resultTo.Year,
+				resultTo.Month,
+				resultTo.Day,
+				0,
+				0,
+				0,
+				resultTo.Offset);
+		}
 
 		var promotions = await _promotionRepository.GetPromotionQueries()
 			.Include(x => x.PromotionGameProviders)
@@ -92,7 +128,7 @@ public class CreatePromotionBonusWeeklyHandler
 		var playerGameRoundAggregate = await _repository.PlayerGameRebateAggregates
 			.Where(x => x.ReportDate >= previousMonday.UtcDateTime && x.ReportDate <= previousSunday.UtcDateTime)
 			.Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
-			.GroupJoin(_repository.BrandGames,
+			.GroupJoin(_brandGameService.GetQueries(),
 				aggregate => new
 				{
 					aggregate.BrandId,
@@ -114,19 +150,38 @@ public class CreatePromotionBonusWeeklyHandler
 					x.aggregate,
 					brandGame
 				})
-			.Where(x => x.brandGame == null || x.brandGame.Rebate).ToArrayAsync(cancellationToken);
+			.Where(x => x.brandGame == null || x.brandGame.Rebate)
+			.GroupBy(x => new
+			{
+				x.aggregate.BrandId,
+				x.aggregate.PlayerCode,
+				x.aggregate.GameType,
+				x.aggregate.GameProviderId,
+				x.aggregate.VipLevel,
+				x.aggregate.ReportDate
+			}, (player, list) => new PlayerWinLossWeekly
+			{
+				BrandId = player.BrandId,
+				PlayerCode = player.PlayerCode,
+				GameType = player.GameType,
+				VipLevel = player.VipLevel,
+				GameProviderId = player.GameProviderId,
+				ReportDate = player.ReportDate,
+				WinLoss = list.Sum(l => l.aggregate.WinLoss)
+			})
+			.ToArrayAsync(cancellationToken);
 
 		var promotionBonus = await promotions.ToAsyncEnumerable()
 			.SelectAwait(async x =>
 			{
-				var id = await _serialNumberGenerator.GenerateAsync().ConfigureAwait(false);
+				var id = await _serialNumberGenerator.GenerateAsync(cancellationToken).ConfigureAwait(false);
 				var from = x.From > previousMonday ? x.From : previousMonday;
 				var to = x.To < previousSunday ? x.To : previousSunday;
 
 				var (players, amountUsed) = GetPromotionBonusPlayers(
 					id,
 					x,
-					playerGameRoundAggregate.Select(p => p.aggregate),
+					playerGameRoundAggregate,
 					from,
 					to);
 				x.AmountUsed = amountUsed;
@@ -151,7 +206,7 @@ public class CreatePromotionBonusWeeklyHandler
 			})
 			.ToArrayAsync(cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
-
+		var d = JsonSerializer.Serialize(promotionBonus);
 		var autoSentPlayerBonuses = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray();
 		var playerCodes = autoSentPlayerBonuses.SelectMany(p => p.Players).Select(p => p.PlayerCode);
 
@@ -168,7 +223,7 @@ public class CreatePromotionBonusWeeklyHandler
 		await _promotionRepository.UpdatePromotionsAsync(promotions);
 		var bonus = await _promotionBonusFactory.CreatePromotionBonusAsync(promotionBonus);
 
-		var playerBuckets = bonus
+		var playerBonuses = bonus
 			.SelectMany(x => x.PromotionPlayers
 				.Join(
 					players,
@@ -194,7 +249,7 @@ public class CreatePromotionBonusWeeklyHandler
 				}))
 			.ToArray();
 
-		await _playerBucketService.CreatePlayerBucketsAsync(playerBuckets.Select(x =>
+		await _playerBucketService.CreatePlayerBucketsAsync(playerBonuses.Select(x =>
 			new CreatePlayerBucketRequest(x.BrandId,
 				x.PlayerCode,
 				x.DefaultWalletId,
@@ -203,25 +258,43 @@ public class CreatePromotionBonusWeeklyHandler
 
 		var transactionPromotions = new List<TransactionPromotion>();
 
-		foreach (var createPlayerBucketRequest in playerBuckets)
+		foreach (var playerBonus in playerBonuses)
 		{
-			var response = await _cashServiceClient
-				.PromotionAsync(
-					createPlayerBucketRequest.DefaultWalletId,
-					createPlayerBucketRequest.BonusAmount,
-					null,
-					createPlayerBucketRequest.Id.ToString(),
-					null,
-					cancellationToken)
-				.ConfigureAwait(false);
+			await Policy.Handle<HttpRequestException>()
+				.WaitAndRetryAsync(3, retryAttempt =>
+					TimeSpan.FromSeconds(1), (exception, time, retryCount, context) =>
+				{
+					_logger.LogError("promotion weekly externalId:{externalId} retryCount:{retryCount} Exception:{exception}",
+						playerBonus.Id.ToString(), retryCount, exception);
+				})
+				.ExecuteAsync(
+					async () =>
+					{
+						if (!await _transactionService.GetQueries()
+								.AnyAsync(
+									x => x.PlayerCode == playerBonus.PlayerCode &&
+										x.ExternalTransactionId == playerBonus.Id.ToString(),
+									cancellationToken))
+						{
+							var response = await _cashServiceClient
+								.PromotionAsync(
+									playerBonus.DefaultWalletId,
+									playerBonus.BonusAmount,
+									"promotion weekly",
+									playerBonus.Id.ToString(),
+									null,
+									cancellationToken)
+								.ConfigureAwait(false);
 
-			transactionPromotions.Add(new()
-			{
-				TransactionId = response.TransactionId,
-				PromotionId = createPlayerBucketRequest.PromotionId,
-				PromotionBonusId = createPlayerBucketRequest.PromotionBonusId,
-				PromotionType = createPlayerBucketRequest.PromotionType
-			});
+							transactionPromotions.Add(new()
+							{
+								TransactionId = response.TransactionId,
+								PromotionId = playerBonus.PromotionId,
+								PromotionBonusId = playerBonus.PromotionBonusId,
+								PromotionType = playerBonus.PromotionType
+							});
+						}
+					});
 		}
 
 		await _transactionRepository.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());
@@ -232,7 +305,7 @@ public class CreatePromotionBonusWeeklyHandler
 	private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(
 		Guid id,
 		PromotionRow promotion,
-		IEnumerable<PlayerGameRebateAggregate> aggregates,
+		IEnumerable<PlayerWinLossWeekly> aggregates,
 		DateTimeOffset from,
 		DateTimeOffset to)
 	{
@@ -250,7 +323,7 @@ public class CreatePromotionBonusWeeklyHandler
 				pa =>
 					promotionGameProviderIds.Contains(pa.GameProviderId))
 			.Where(pa => pa.ReportDate >= from)
-			.Where(pa => pa.ReportDate >= to);
+			.Where(pa => pa.ReportDate <= to);
 
 		return promotion.PromotionType switch
 		{
