@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
 
@@ -420,5 +422,95 @@ public class PromotionCheckerTests
 
 		_ = fakePromotionChecker.Received(3)
 			.TagPromotionTypeAsync(Arg.Any<string>(), Arg.Any<Guid?>());
+	}
+
+	[Test]
+	public async Task Register_Checker_Return_True_When_Player_RegisterOn_During_The_Promotion()
+	{
+		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerDataRepository = Substitute.For<IPromotionParticipantRepository>();
+
+		var sut = new RegisterChecker(fakePlayerService, fakePlayerDataRepository);
+
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Parse("2022/06/01 17:00:00+00"), DateTime.Parse("2022/06/05 17:00:00+00")),
+			"Register",
+			null,
+			false);
+
+		fakePlayerService.GetPlayerInfoAsync(Arg.Any<string>()).Returns(new PlayerInfo
+		{
+			Status = (short)PlayerStatus.Enabled,
+			RegisteredOn = DateTime.Parse("2022/06/01 17:01:00+00")
+		});
+
+		fakePlayerDataRepository.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>()).Returns(false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
+
+		Assert.IsTrue(actual);
+	}
+
+	[Test]
+	public async Task Register_Checker_Return_False_When_Player_RegisterOn_Is_Not_During_The_Promotion()
+	{
+		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerDataRepository = Substitute.For<IPromotionParticipantRepository>();
+
+		var sut = new RegisterChecker(fakePlayerService, fakePlayerDataRepository);
+
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Parse("2022/06/01 17:00:00+00"), DateTime.Parse("2022/06/05 17:00:00+00")),
+			"Register",
+			null,
+			false);
+
+		fakePlayerService.GetPlayerInfoAsync(Arg.Any<string>()).Returns(new PlayerInfo
+		{
+			Status = (short)PlayerStatus.Enabled,
+			RegisteredOn = DateTime.Parse("2022/06/01 16:01:00")
+		});
+
+		fakePlayerDataRepository.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>()).Returns(false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
+
+		Assert.IsFalse(actual);
+	}
+
+	[Test]
+	public async Task Register_Checker_Return_False_When_Joined_The_Promotion()
+	{
+		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerDataRepository = Substitute.For<IPromotionParticipantRepository>();
+
+		var sut = new RegisterChecker(fakePlayerService, fakePlayerDataRepository);
+
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Parse("2022/06/01 17:00:00+00"), DateTime.Parse("2022/06/05 17:00:00+00")),
+			"Register",
+			null,
+			false);
+
+		fakePlayerService.GetPlayerInfoAsync(Arg.Any<string>()).Returns(new PlayerInfo
+		{
+			Status = (short)PlayerStatus.Enabled,
+			RegisteredOn = DateTime.Parse("2022/06/03 16:01:00")
+		});
+
+		fakePlayerDataRepository.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>()).Returns(true);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
+
+		Assert.IsFalse(actual);
 	}
 }
