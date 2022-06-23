@@ -42,6 +42,8 @@ public interface IPromotionRepository
 
 	ValueTask<PromotionRule?> GetPromotionRuleAsync(Guid promotionId, CancellationToken cancellationToken = default);
 
+	IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, CancellationToken cancellationToken = default);
+
 	ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount);
 
 	ValueTask SetPromotionContentAsync(Guid promotionId, PromotionContentDetail content, string modifier, CancellationToken cancellationToken = default);

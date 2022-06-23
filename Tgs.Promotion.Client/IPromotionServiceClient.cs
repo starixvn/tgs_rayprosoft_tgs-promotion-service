@@ -28,6 +28,10 @@ public interface IPromotionServiceClient
 		CancellationToken cancellationToken = default)
 		where TRule : class;
 
+	IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, CancellationToken cancellationToken = default);
+
+	IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, string playerCode, CancellationToken cancellationToken = default);
+
 	ValueTask SetPromotionContentAsync(
 		Guid promotionId,
 		PromotionContent content,

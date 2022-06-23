@@ -1,29 +1,33 @@
-﻿namespace Tgs.Promotion;
+﻿using Tgs.PlayerService.Client;
+
+namespace Tgs.Promotion;
 
 internal class RegisterChecker : IPromotionChecker
 {
+	private readonly IPlayerServiceClient _playerServiceClient;
 	private readonly IPromotionParticipantRepository _promotionParticipantRepository;
-	private readonly IPlayerRepository _playerService;
 
-	public RegisterChecker(IPlayerRepository playerService, IPromotionParticipantRepository promotionParticipantRepository)
+	public RegisterChecker(IPlayerServiceClient playerServiceClient, IPromotionParticipantRepository promotionParticipantRepository)
 	{
-		_playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
+		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 		_promotionParticipantRepository = promotionParticipantRepository ?? throw new ArgumentNullException(nameof(promotionParticipantRepository));
 	}
 
-	public async ValueTask<bool> CheckAsync(string playerCode, Guid? promotionId)
+	public async ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
 	{
-		var player = await _playerService
-			.GetPlayerByPlayerCodeAsync(playerCode)
+		var player = await _playerServiceClient
+			.GetPlayerInfoAsync(playerCode)
 			.ConfigureAwait(false);
 
-		if (player is null)
-			return false;
-
 		var isExists = await _promotionParticipantRepository.ExistsAsync(x
-			=> x.PlayerCode == playerCode && x.PromotionId == promotionId);
+			=> x.PlayerCode == playerCode && x.PromotionId == promotion.Id)
+			.ConfigureAwait(false);
 
-		return player.Status == (short)PlayerStatus.Enabled && !isExists;
+		return player is not null
+			&& !isExists
+			&& player.Status == (short)PlayerStatus.Enabled
+			&& promotion.EventDuring.From <= player.RegisteredOn!.Value
+			&& promotion.EventDuring.To >= player.RegisteredOn!.Value;
 	}
 
 	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;

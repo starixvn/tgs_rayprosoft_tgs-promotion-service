@@ -14,35 +14,15 @@
    "SelectedToBeGenerated": 0,
    "Tables": [
       {
-         "Name": "dbo.settings",
-         "ObjectType": 0
-      },
-      {
-         "Name": "dbo.game_providers",
-         "ObjectType": 0
-      },
-      {
          "Name": "dbo.brand_games",
          "ObjectType": 0
       },
       {
-         "Name": "dbo.vip_levels",
+         "Name": "dbo.transaction_promotions",
          "ObjectType": 0
       },
       {
-         "Name": "dbo.players",
-         "ObjectType": 0
-      },
-      {
-         "Name": "dbo.promotions",
-         "ObjectType": 0
-      },
-      {
-         "Name": "dbo.player_buckets",
-         "ObjectType": 0
-      },
-      {
-         "Name": "dbo.promotion_players",
+         "Name": "dbo.settings",
          "ObjectType": 0
       },
       {
@@ -54,15 +34,47 @@
          "ObjectType": 0
       },
       {
-         "Name": "dbo.promotion_vip_levels",
+         "Name": "dbo.transactions",
          "ObjectType": 0
       },
       {
-         "Name": "dbo.transaction_promotions",
+         "Name": "dbo.player_buckets",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.promotion_distribute_plans",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.promotion_players",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.promotions",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.promotion_distributes",
          "ObjectType": 0
       },
       {
          "Name": "dbo.promotion_participants",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.promotion_vip_levels",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.players",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.vip_levels",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.game_providers",
          "ObjectType": 0
       },
       {
@@ -74,19 +86,11 @@
          "ObjectType": 0
       },
       {
-         "Name": "dbo.promotion_distributes",
-         "ObjectType": 0
-      },
-      {
-         "Name": "dbo.promotion_distribute_plans",
-         "ObjectType": 0
-      },
-      {
          "Name": "report.player_game_rebate_aggregates",
          "ObjectType": 0
       }
    ],
-   "UiHint": "tgs-local",
+   "UiHint": "tgs",
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": false,
    "UseDbContextSplitting": true,

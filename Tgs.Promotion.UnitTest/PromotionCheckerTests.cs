@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
 
@@ -26,7 +28,16 @@ public class PromotionCheckerTests
 				FirstDepositOn = null
 			});
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsTrue(actual);
 	}
@@ -46,7 +57,16 @@ public class PromotionCheckerTests
 				FirstDepositOn = DateTime.UtcNow
 			});
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsFalse(actual);
 	}
@@ -67,7 +87,16 @@ public class PromotionCheckerTests
 				FirstPromotionOn = DateTime.UtcNow
 			});
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsFalse(actual);
 	}
@@ -83,22 +112,31 @@ public class PromotionCheckerTests
 			.CheckPlayerIsDailyFirstDepositAsync(Arg.Any<string>())
 			.Returns(true);
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsTrue(actual);
 	}
 
 	[Test]
-	public async Task Player_DailyFirstDeposit_Without_PromotionId_Not_Rollback_Tag()
+	public async Task Player_DailyFirstDeposit_With_PromotionId_Be_Tag()
 	{
 		var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
 
 		var sut = new DailyFirstDepositChecker(fakePlayerDataService);
 
-		await sut.RollbackTagAsync("ThisIsPlayerCode", null);
+		await sut.TagPromotionTypeAsync("ThisIsPlayerCode", Guid.NewGuid());
 
-		_ = fakePlayerDataService.Received(0)
-			.RemovePlayerDailyDepositFlagAsync(Arg.Is("ThisIsPlayerCode"));
+		_ = fakePlayerDataService.Received(1)
+			.SetPlayerDailyDepositFlagAsync(Arg.Is("ThisIsPlayerCode"));
 	}
 
 	[Test]
@@ -115,16 +153,16 @@ public class PromotionCheckerTests
 	}
 
 	[Test]
-	public async Task Player_DailyFirstDeposit_With_PromotionId_Be_Tag()
+	public async Task Player_DailyFirstDeposit_Without_PromotionId_Not_Rollback_Tag()
 	{
 		var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
 
 		var sut = new DailyFirstDepositChecker(fakePlayerDataService);
 
-		await sut.TagPromotionTypeAsync("ThisIsPlayerCode", Guid.NewGuid());
+		await sut.RollbackTagAsync("ThisIsPlayerCode", null);
 
-		_ = fakePlayerDataService.Received(1)
-			.SetPlayerDailyDepositFlagAsync(Arg.Is("ThisIsPlayerCode"));
+		_ = fakePlayerDataService.Received(0)
+			.RemovePlayerDailyDepositFlagAsync(Arg.Is("ThisIsPlayerCode"));
 	}
 
 	[Test]
@@ -151,7 +189,16 @@ public class PromotionCheckerTests
 			.CheckPlayerIsDailyFirstDepositAsync(Arg.Any<string>())
 			.Returns(false);
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsTrue(actual);
 	}
@@ -182,7 +229,16 @@ public class PromotionCheckerTests
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
 			.Returns(new Player { FirstDepositOn = null });
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsTrue(actual);
 	}
@@ -257,7 +313,16 @@ public class PromotionCheckerTests
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
 			.Returns(new Player { FirstPromotionOn = null });
 
-		var actual = await sut.CheckAsync("ThisIsPlayerCode", null);
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Now, DateTime.Now.AddDays(1)),
+			"FirstDeposit",
+			null,
+			false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsTrue(actual);
 	}
@@ -357,5 +422,95 @@ public class PromotionCheckerTests
 
 		_ = fakePromotionChecker.Received(3)
 			.TagPromotionTypeAsync(Arg.Any<string>(), Arg.Any<Guid?>());
+	}
+
+	[Test]
+	public async Task Register_Checker_Return_True_When_Player_RegisterOn_During_The_Promotion()
+	{
+		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerDataRepository = Substitute.For<IPromotionParticipantRepository>();
+
+		var sut = new RegisterChecker(fakePlayerService, fakePlayerDataRepository);
+
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Parse("2022/06/01 17:00:00+00"), DateTime.Parse("2022/06/05 17:00:00+00")),
+			"Register",
+			null,
+			false);
+
+		fakePlayerService.GetPlayerInfoAsync(Arg.Any<string>()).Returns(new PlayerInfo
+		{
+			Status = (short)PlayerStatus.Enabled,
+			RegisteredOn = DateTime.Parse("2022/06/01 17:01:00+00")
+		});
+
+		fakePlayerDataRepository.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>()).Returns(false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
+
+		Assert.IsTrue(actual);
+	}
+
+	[Test]
+	public async Task Register_Checker_Return_False_When_Player_RegisterOn_Is_Not_During_The_Promotion()
+	{
+		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerDataRepository = Substitute.For<IPromotionParticipantRepository>();
+
+		var sut = new RegisterChecker(fakePlayerService, fakePlayerDataRepository);
+
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Parse("2022/06/01 17:00:00+00"), DateTime.Parse("2022/06/05 17:00:00+00")),
+			"Register",
+			null,
+			false);
+
+		fakePlayerService.GetPlayerInfoAsync(Arg.Any<string>()).Returns(new PlayerInfo
+		{
+			Status = (short)PlayerStatus.Enabled,
+			RegisteredOn = DateTime.Parse("2022/06/01 16:01:00")
+		});
+
+		fakePlayerDataRepository.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>()).Returns(false);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
+
+		Assert.IsFalse(actual);
+	}
+
+	[Test]
+	public async Task Register_Checker_Return_False_When_Joined_The_Promotion()
+	{
+		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
+		var fakePlayerDataRepository = Substitute.For<IPromotionParticipantRepository>();
+
+		var sut = new RegisterChecker(fakePlayerService, fakePlayerDataRepository);
+
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Parse("2022/06/01 17:00:00+00"), DateTime.Parse("2022/06/05 17:00:00+00")),
+			"Register",
+			null,
+			false);
+
+		fakePlayerService.GetPlayerInfoAsync(Arg.Any<string>()).Returns(new PlayerInfo
+		{
+			Status = (short)PlayerStatus.Enabled,
+			RegisteredOn = DateTime.Parse("2022/06/03 16:01:00")
+		});
+
+		fakePlayerDataRepository.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>()).Returns(true);
+
+		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
+
+		Assert.IsFalse(actual);
 	}
 }

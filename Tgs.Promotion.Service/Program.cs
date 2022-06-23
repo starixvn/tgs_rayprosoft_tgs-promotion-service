@@ -41,6 +41,7 @@ builder.Services
 	});
 
 builder.Services
+	.AddProfileViewer()
 	.AddOpenTelemetryTracing(builder => builder
 		.SetResourceBuilder(ResourceBuilder.CreateDefault()
 			.AddEnvironmentVariableDetector())
@@ -59,13 +60,13 @@ builder.Services
 			&& !new[] { "html", "ico", "png", "jpg" }.Any(
 				ext => httpContext.Request.Path.Value.EndsWith($".{ext}")));
 
-builder.Services.AddProfileViewer();
-
 builder.Services
 	.AddSingleton<NoopCampaingDetailProcessor>()
 	.AddTgsRepository(builder.Configuration.GetConnectionString("Tgs"))
 	.AddRedis((redisOptions, _) => redisOptions.ConnectionString = builder.Configuration.GetConnectionString("Redis"))
 	.AddPromotionCore()
+	.AddMemoryCache()
+	.AddPromotionServiceCache()
 	.AddPaymentServiceClient((options, sp) =>
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
@@ -77,7 +78,11 @@ builder.Services
 		var config = sp.GetRequiredService<IConfiguration>();
 
 		options.BaseUrl = config.GetValue<Uri>("Promotion:CashBaseUrl");
-	});
+	})
+	.AddBrandServiceClient((options, _) =>
+		options.BrandCertificateBaseUrl = builder.Configuration.GetValue<Uri>("Promotion:BrandServiceBaseUrl"))
+	.AddPlayerServiceClient((options, _) =>
+		options.BaseUrl = builder.Configuration.GetValue<Uri>("Promotion:PlayerServiceBaseUrl"));
 
 builder.Services
 	.AddMessageQueue()

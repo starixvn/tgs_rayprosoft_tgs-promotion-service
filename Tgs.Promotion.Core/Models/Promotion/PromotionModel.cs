@@ -36,6 +36,8 @@ public class PromotionModel
 
 	public string Name { get; set; } = default!;
 
+	public int Number { get; set; }
+
 	public decimal Percentage { get; set; }
 
 	public string PromotionType { get; set; } = default!;
@@ -59,6 +61,4 @@ public class PromotionModel
 	public DateTimeOffset UpdatedOn { get; set; }
 
 	public int[] VipLevels { get; set; } = default!;
-
-	public int Number { get; set; }
 }

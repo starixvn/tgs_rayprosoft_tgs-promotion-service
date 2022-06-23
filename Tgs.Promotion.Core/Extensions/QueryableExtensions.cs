@@ -9,22 +9,6 @@ namespace Tgs.Promotion.Extensions;
 
 public static class QueryableExtensions
 {
-	public static async Task<PagedResponse<TModel>> CreatePagedResponseAsync<TModel>(this IQueryable<TModel> query,
-		PageableRequest request)
-	{
-		var result = request.SortBy == null ? query : query.OrderBy(request.GetSortOption());
-
-		if (request.ShowAll || request.Rows == 0)
-		{
-			var allResult = await result.ToArrayAsync();
-			return new(allResult.Length, allResult) { Valid = true };
-		}
-
-		var pagedResult = await result.ToPagedArrayAsync(request.Page, request.Rows);
-
-		return new(pagedResult.TotalCount, pagedResult.Items) { Valid = true };
-	}
-
 	public static PagedResponse<TModel> CreatePagedResponse<TModel>(this IQueryable<TModel> query,
 		PageableRequest request)
 	{
@@ -37,6 +21,22 @@ public static class QueryableExtensions
 		}
 
 		var pagedResult = result.ToPagedArray(request.Page, request.Rows);
+
+		return new(pagedResult.TotalCount, pagedResult.Items) { Valid = true };
+	}
+
+	public static async Task<PagedResponse<TModel>> CreatePagedResponseAsync<TModel>(this IQueryable<TModel> query,
+			PageableRequest request)
+	{
+		var result = request.SortBy == null ? query : query.OrderBy(request.GetSortOption());
+
+		if (request.ShowAll || request.Rows == 0)
+		{
+			var allResult = await result.ToArrayAsync();
+			return new(allResult.Length, allResult) { Valid = true };
+		}
+
+		var pagedResult = await result.ToPagedArrayAsync(request.Page, request.Rows);
 
 		return new(pagedResult.TotalCount, pagedResult.Items) { Valid = true };
 	}

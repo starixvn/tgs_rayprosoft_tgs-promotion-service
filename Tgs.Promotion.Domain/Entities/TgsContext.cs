@@ -35,6 +35,7 @@ namespace Tgs.Promotion.Domain.Entities
         public virtual DbSet<PromotionRow> PromotionRows { get; set; } = null!;
         public virtual DbSet<PromotionVipLevel> PromotionVipLevels { get; set; } = null!;
         public virtual DbSet<Setting> Settings { get; set; } = null!;
+        public virtual DbSet<Transaction> Transactions { get; set; } = null!;
         public virtual DbSet<TransactionPromotion> TransactionPromotions { get; set; } = null!;
         public virtual DbSet<VipLevel> VipLevels { get; set; } = null!;
 
@@ -59,6 +60,7 @@ namespace Tgs.Promotion.Domain.Entities
             modelBuilder.ApplyConfiguration(new Configurations.PromotionRowConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionVipLevelConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.SettingConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.TransactionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.TransactionPromotionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.VipLevelConfiguration());
             OnModelCreatingPartial(modelBuilder);

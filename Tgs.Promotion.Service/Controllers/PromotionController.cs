@@ -90,6 +90,13 @@ public class PromotionController : ControllerBase
 		await tagService.ExecuteAsync(command).ConfigureAwait(false);
 	}
 
+	[HttpGet("joined")]
+	[Description("Get joined promotions")]
+	public ValueTask<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
+		[FromServices] IGetService<GetJoinedPromotionsRequest, PagedResponse<JoinedPromotionModel>> getService,
+		[FromQuery] GetJoinedPromotionsRequest request)
+		=> getService.GetAsync(request);
+
 	[HttpGet("names", Name = "GetPromotionNamesByIds")]
 	[Description("Get promotion names by ids")]
 	public ValueTask<PromotionNameModel[]> GetPromotionNamesByIdsAsync(
@@ -104,15 +111,14 @@ public class PromotionController : ControllerBase
 		[FromQuery] GetPromotionsRequest request)
 		=> getService.GetAsync(request);
 
-	[HttpGet("joined")]
-	[Description("Get joined promotions")]
-	public ValueTask<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
-		[FromServices] IGetService<GetJoinedPromotionsRequest, PagedResponse<JoinedPromotionModel>> getService,
-		[FromQuery] GetJoinedPromotionsRequest request)
-		=> getService.GetAsync(request);
-
+	/// <summary>
+	/// Get promotions for player
+	/// </summary>
+	/// <param name="queryByPlayerService">The query by player service.</param>
+	/// <param name="request">The request.</param>
+	/// <returns></returns>
+	/// <exception cref="System.InvalidOperationException">Player code is required</exception>
 	[HttpGet("valid", Name = "GetPromotionsForPlayer")]
-	[Description("Get promotions fro player")]
 	public async Task<PagedResponse<PromotionModel>> GetPromotionsForPlayerAsync(
 		[FromServices] IQueryService<GetValidPromotionsQuery, PromotionModel> queryAllService,
 		[FromServices] IQueryService<GetValidPromotionsByPlayerQuery, PromotionModel> queryByPlayerService,
@@ -127,26 +133,22 @@ public class PromotionController : ControllerBase
 		var paging = new Paging<PromotionModel>();
 
 		if (!string.IsNullOrWhiteSpace(request.SortBy))
-		{
 			paging.SortByPropertyName(request.SortBy, request.IsDesc);
-		}
 
 		if (!request.ShowAll)
-		{
 			return new(await promotions.CountAsync().ConfigureAwait(false), await promotions
 				.ApplyOrderBy(paging)
 				.ToArrayAsync()
 				.ConfigureAwait(false));
-		}
 
 		paging.Page = request.Page;
 		paging.RowCount = request.Rows;
 
 		return new(await promotions.CountAsync().ConfigureAwait(false), await promotions
-				.ApplyOrderBy(paging)
-				.ApplyPaging(paging)
-				.ToArrayAsync()
-				.ConfigureAwait(false));
+			.ApplyOrderBy(paging)
+			.ApplyPaging(paging)
+			.ToArrayAsync()
+			.ConfigureAwait(false));
 	}
 
 	[HttpDelete("{promotionId}/{amount}", Name = "RevertPromotion")]

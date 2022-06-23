@@ -1,4 +1,5 @@
-﻿using Tgs.ServiceUtility;
+﻿using System.Text.Json;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
@@ -30,7 +31,16 @@ internal class CheckCanJoinPromotionQueryService : IGetService<CheckCanJoinPromo
 		var checker = _promotionCheckerFactory.GetPromotionChecker(promotionData.PromotionType);
 
 		var isAllowed = await checker
-			.CheckAsync(query.PlayerCode)
+			.CheckAsync(
+				query.PlayerCode,
+				new PromotionMainInfo(
+					promotionData.Id,
+					promotionData.BrandId,
+					promotionData.Name,
+					(promotionData.From, promotionData.To),
+					promotionData.PromotionType,
+					promotionData.TotalAmountLimit,
+					promotionData.AutoSentPlayerBonus))
 			.ConfigureAwait(false);
 		if (!isAllowed)
 		{

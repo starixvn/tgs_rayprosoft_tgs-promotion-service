@@ -7,8 +7,17 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class TgsRepositoryExtensions
 {
+	public static IServiceCollection AddRedis(
+		this IServiceCollection service,
+		Action<RedisOptions, IServiceProvider> configure)
+		=> service
+			.AddOptions<RedisOptions>()
+			.Configure(configure)
+			.Services
+			.AddSingleton<IRedisConnectionFactory, RedisConnectionFactory>();
+
 	public static IServiceCollection AddTgsRepository(this IServiceCollection services, string connectionString)
-		=> services
+			=> services
 			.AddDbContext<TgsContext>(options => options
 				.UseNpgsql(connectionString)
 				.UseLazyLoadingProxies())
@@ -25,13 +34,4 @@ public static class TgsRepositoryExtensions
 			.AddTransient<IPromotionPlayerRepository, PromotionPlayerRepository>()
 			.AddTransient<IPlayerBucketRepository, PlayerBucketRepository>()
 			.AddTransient<IPlayerDataRepository, RedisPlayerDataRepository>();
-
-	public static IServiceCollection AddRedis(
-		this IServiceCollection service,
-		Action<RedisOptions, IServiceProvider> configure)
-		=> service
-			.AddOptions<RedisOptions>()
-			.Configure(configure)
-			.Services
-			.AddSingleton<IRedisConnectionFactory, RedisConnectionFactory>();
 }

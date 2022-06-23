@@ -10,17 +10,17 @@ namespace Tgs.Promotion.Service.Controllers;
 [ApiController]
 public class PromotionDispatchController : ControllerBase
 {
-	[HttpGet]
-	[Description("Get promotion dispatches")]
-	public ValueTask<PagedResponse<PromotionDispatchModel>> GetPromotionsAsync(
-		[FromServices] IGetService<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>> getService,
-		[FromQuery] GetPromotionDispatchesRequest request) =>
-		getService.GetAsync(request);
-
 	[HttpPost]
 	[Description("Dispatch promotion")]
 	public ValueTask<MessageResponse> DispatchPromotionsAsync(
 		[FromServices] IGetService<DispatchPromotionBonusRequest, MessageResponse> getService,
 		[FromBody] DispatchPromotionBonusRequest request) =>
+		getService.GetAsync(request);
+
+	[HttpGet]
+	[Description("Get promotion dispatches")]
+	public ValueTask<PagedResponse<PromotionDispatchModel>> GetPromotionsAsync(
+		[FromServices] IGetService<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>> getService,
+		[FromQuery] GetPromotionDispatchesRequest request) =>
 		getService.GetAsync(request);
 }

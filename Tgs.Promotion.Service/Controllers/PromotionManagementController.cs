@@ -15,9 +15,9 @@ public class PromotionManagementController : ControllerBase
 {
 	[HttpPut("{brandId}", Name = "CreatePromotionMainInfo")]
 	public ValueTask<Guid> CreatePromotionAsync(
-			[FromServices] IGetService<CreatePromotionMainInfoCommand, Guid> createService,
-			Guid brandId,
-			[FromBody] CreatePromotionViewModel createModel)
+		[FromServices] IGetService<CreatePromotionMainInfoCommand, Guid> createService,
+		Guid brandId,
+		[FromBody] CreatePromotionViewModel createModel)
 	{
 		var command = new CreatePromotionMainInfoCommand(
 			brandId,
@@ -32,13 +32,27 @@ public class PromotionManagementController : ControllerBase
 	}
 
 	[HttpGet("{promotionId}", Name = "GetPromotionMainInfo")]
-	public ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(
+	public async ValueTask<PromotionViewModel?> GetPromotionMainInfoAsync(
 		[FromServices] IGetService<GetPromotionMainInfoQuery, PromotionMainInfo?> getService,
 		Guid promotionId)
 	{
 		var query = new GetPromotionMainInfoQuery(promotionId);
 
-		return getService.GetAsync(query, HttpContext.RequestAborted);
+		var result = await getService
+			.GetAsync(query, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		return result is null
+			? null
+			: new PromotionViewModel
+			{
+				Id = result.Id,
+				Name = result.Name,
+				EventDuring = result.EventDuring,
+				IsAutoSent = result.IsAutoSent,
+				PromotionLimitAmount = result.PromotionLimitAmount,
+				PromotionType = result.PromotionType
+			};
 	}
 
 	[HttpGet("rule/{promotionId}", Name = "GetPromotionRule")]

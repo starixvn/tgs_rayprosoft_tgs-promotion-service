@@ -2,6 +2,24 @@
 
 public static class DateTimeOffsetExtensions
 {
+	public static DateTimeOffset GetDayOfWeek(this DateTimeOffset dateTimeOffset, int day) =>
+		dateTimeOffset.Subtract(new TimeSpan((int)dateTimeOffset.DayOfWeek - day, 0, 0, 0));
+
+	public static DateTimeOffset GetFirstDayOfMonth(this DateTimeOffset dateTimeOffset) =>
+		dateTimeOffset.AddDays(1 - dateTimeOffset.Day);
+
+	public static DateTimeOffset GetLastDayOfMonth(this DateTimeOffset dateTimeOffset) =>
+		dateTimeOffset.GetFirstDayOfMonth().AddMonths(1).AddDays(-1);
+
+	public static DateTimeOffset GetMonday(this DateTimeOffset dateTimeOffset) =>
+		dateTimeOffset.Subtract(new TimeSpan((int)dateTimeOffset.DayOfWeek - 1, 0, 0, 0));
+
+	public static DateTimeOffset GetSunday(this DateTimeOffset dateTimeOffset) =>
+		dateTimeOffset.Subtract(new TimeSpan((int)dateTimeOffset.DayOfWeek - 7, 0, 0, 0));
+
+	public static string ToDateTimeFormat(this DateTimeOffset dateTimeOffset) =>
+		dateTimeOffset.ToString(@"yyyy-MM-dd HH:mm:ss");
+
 	public static string ToIso8601String(this DateTimeOffset dateTimeOffset, bool containMillisecond = false)
 	{
 		// Returns string format like as below:
@@ -12,24 +30,6 @@ public static class DateTimeOffsetExtensions
 		return dateTimeOffset.ToString(format);
 	}
 
-	public static string ToDateTimeFormat(this DateTimeOffset dateTimeOffset) =>
-		dateTimeOffset.ToString(@"yyyy-MM-dd HH:mm:ss");
-
 	public static string ToUtcDateTimeFormat(this DateTimeOffset dateTimeOffset) =>
 		dateTimeOffset.ToString(@"yyyy-MM-dd HH:mmK");
-
-	public static DateTimeOffset GetMonday(this DateTimeOffset dateTimeOffset) =>
-		dateTimeOffset.Subtract(new TimeSpan((int)dateTimeOffset.DayOfWeek - 1, 0, 0, 0));
-
-	public static DateTimeOffset GetSunday(this DateTimeOffset dateTimeOffset) =>
-		dateTimeOffset.Subtract(new TimeSpan((int)dateTimeOffset.DayOfWeek - 7, 0, 0, 0));
-
-	public static DateTimeOffset GetDayOfWeek(this DateTimeOffset dateTimeOffset, int day) =>
-		dateTimeOffset.Subtract(new TimeSpan((int)dateTimeOffset.DayOfWeek - day, 0, 0, 0));
-
-	public static DateTimeOffset GetFirstDayOfMonth(this DateTimeOffset dateTimeOffset) =>
-		dateTimeOffset.AddDays(1 - dateTimeOffset.Day);
-
-	public static DateTimeOffset GetLastDayOfMonth(this DateTimeOffset dateTimeOffset) =>
-		dateTimeOffset.GetFirstDayOfMonth().AddMonths(1).AddDays(-1);
 }

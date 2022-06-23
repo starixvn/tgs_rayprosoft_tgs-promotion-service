@@ -27,7 +27,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Core.UnitTest
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Service.IntegrationTests", "Tgs.Promotion.Service.IntegrationTests\Tgs.Promotion.Service.IntegrationTests.csproj", "{A5FF41A3-FA0B-432D-964F-5EE098F69363}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.Promotion.Common", "Tgs.Promotion.Common\Tgs.Promotion.Common.csproj", "{532B6CD4-23F4-46CF-8781-105E1F02009C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Promotion.Common", "Tgs.Promotion.Common\Tgs.Promotion.Common.csproj", "{532B6CD4-23F4-46CF-8781-105E1F02009C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.Promotion.Cache", "Tgs.Promotion.Cache\Tgs.Promotion.Cache.csproj", "{84DCAEF7-7F1C-4947-A15F-F19E9AC485A2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,10 @@ Global
 		{532B6CD4-23F4-46CF-8781-105E1F02009C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{532B6CD4-23F4-46CF-8781-105E1F02009C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{532B6CD4-23F4-46CF-8781-105E1F02009C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84DCAEF7-7F1C-4947-A15F-F19E9AC485A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84DCAEF7-7F1C-4947-A15F-F19E9AC485A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84DCAEF7-7F1C-4947-A15F-F19E9AC485A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84DCAEF7-7F1C-4947-A15F-F19E9AC485A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

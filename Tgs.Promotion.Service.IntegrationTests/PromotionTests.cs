@@ -2,9 +2,10 @@
 using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using Tgs.BrandCertificate.Clients;
 using Tgs.MessageQueue;
+using Tgs.PlayerService.Client;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Clients.Protos;
 using Tgs.Promotion.Domain.Entities;
@@ -18,7 +19,7 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Create_Promotion()
 	{
-		var web = new TestPromotionApplication();
+		await using var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
@@ -52,7 +53,7 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Get_Promotion_MainInfo()
 	{
-		var web = new TestPromotionApplication();
+		await using var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
@@ -84,7 +85,7 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Get_Promotion_Rule()
 	{
-		var web = new TestPromotionApplication();
+		await using var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
@@ -130,9 +131,94 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task List_Promotions_By_Brand_Id()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var brandId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = Guid.NewGuid(),
+			BrandId = brandId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now.AddDays(1D),
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}"
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.ListPromotionsAsync(brandId).ToArrayAsync();
+
+		Assert.AreEqual(1, actual.Length);
+	}
+
+	[TestMethod]
+	public async Task List_Promotions_By_PlayerCode()
+	{
+		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
+		var fakeBrandService = Substitute.For<IBrandServiceClient>();
+
+		await using var web = new TestPromotionApplication(builder => builder
+			.ConfigureServices(services => services
+				.AddSingleton(fakePlayerService)
+				.AddSingleton(fakeBrandService)));
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var brandId = Guid.NewGuid();
+		var playerCode = "test";
+		var playerVipLevelId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = Guid.NewGuid(),
+			BrandId = brandId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now.AddDays(1D),
+			PromotionType = "Roulette",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}"
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		_ = fakePlayerService.GetPlayerInfoAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = playerCode,
+				VipLevelId = playerVipLevelId,
+				BrandId = brandId
+			});
+
+		_ = fakeBrandService.GetVipLevelInfosAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
+			.Returns(new[] {
+				new VipLevelInfo(playerVipLevelId, 1)
+			}.ToAsyncEnumerable());
+
+		var actual = await sut.ListPromotionsAsync(brandId, playerCode).ToArrayAsync();
+
+		Assert.AreEqual(1, actual.Length);
+	}
+
+	[TestMethod]
 	public async Task Set_Old_Promotion_Rule()
 	{
-		var web = new TestPromotionApplication();
+		await using var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
@@ -207,7 +293,7 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Set_Promotion_Content()
 	{
-		var web = new TestPromotionApplication();
+		await using var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
@@ -257,7 +343,7 @@ public class PromotionTests
 	public async Task Set_Promotion_Rule()
 	{
 		var fakeMessageSender = Substitute.For<IMessageSender>();
-		var web = new TestPromotionApplication(builder => builder
+		await using var web = new TestPromotionApplication(builder => builder
 			.ConfigureServices(services => services
 				.AddSingleton(fakeMessageSender)));
 
@@ -312,7 +398,7 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Set_Promotion_Status()
 	{
-		var web = new TestPromotionApplication();
+		await using var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
@@ -347,7 +433,7 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Set_Promotion_VipLevels()
 	{
-		var web = new TestPromotionApplication();
+		await using var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
@@ -417,7 +503,7 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Update_Promotion_MainInfo()
 	{
-		using var web = new TestPromotionApplication();
+		await using var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
@@ -467,7 +553,7 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Update_Promotion_Used_Amount()
 	{
-		using var web = new TestPromotionApplication();
+		await using var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
@@ -502,7 +588,7 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Update_Promotion_Used_Amount_But_SnapshotId_Less_Then_Origin_Will_Not_Update()
 	{
-		using var web = new TestPromotionApplication();
+		await using var web = new TestPromotionApplication();
 
 		var httpClient = web.CreateClient();
 
@@ -535,7 +621,6 @@ public class PromotionTests
 		_ = await dbContext.PromotionRows.AddAsync(promotionRow);
 
 		_ = await dbContext.SaveChangesAsync();
-
 
 		await sut.UpdatePromotionUsedAmountAsync(promotionId, 1000M, firstSnapshotId);
 
