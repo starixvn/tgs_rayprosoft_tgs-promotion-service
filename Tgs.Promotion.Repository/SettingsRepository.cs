@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Promotion.Domain.Entities;
@@ -15,7 +16,8 @@ internal class SettingsRepository : ISettingsRepository
 		_tgsContext = tgsContext ?? throw new ArgumentNullException(nameof(tgsContext));
 	}
 
-	public async IAsyncEnumerable<PromotionTypeGroup> GetPromotionTypeGroupsAsync(CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<PromotionTypeGroup> GetPromotionTypeGroupsAsync(
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var promotionSetting = await _tgsContext.Settings
 			.FindAsync(new object?[] { "PromotionTypes" }, cancellationToken: cancellationToken)
