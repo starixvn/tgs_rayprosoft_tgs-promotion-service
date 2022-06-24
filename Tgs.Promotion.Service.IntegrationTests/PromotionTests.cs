@@ -9,6 +9,7 @@ using Tgs.PlayerService.Client;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Clients.Protos;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.Promotion.Models;
 using Tgs.SerialNumberGenerator;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
@@ -34,9 +35,35 @@ public class PromotionTests
 			IsAutoSent = true
 		};
 
-		var resultId = await sut.CreatePromotionAsync(brandId, createInfo, "ModifyUser");
-
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		var promotionTypes = new PromotionTypeGroup[]
+		{
+			new PromotionTypeGroup
+			{
+				Name = "Turnover",
+				Types = new PromotionType[]
+				{
+					new PromotionType
+					{
+						Name = "TestType",
+						SettlementIntervalType = "Daily"
+					}
+				}
+			}
+		};
+
+		_ = await dbContext.Settings.AddAsync(new Setting
+		{
+			Key = "PromotionTypes",
+			Value = JsonSerializer.Serialize(promotionTypes),
+			CreatedByUsername = "test",
+			UpdatedByUsername = "test"
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var resultId = await sut.CreatePromotionAsync(brandId, createInfo, "ModifyUser");
 
 		var actual = dbContext.PromotionRows.First();
 

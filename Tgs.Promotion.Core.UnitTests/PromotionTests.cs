@@ -1,10 +1,10 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Models;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Core.UnitTests;
@@ -16,7 +16,11 @@ public class PromotionTests
 	public async Task Create_Promotion()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
-		var sut = new CreatePromotionMainInfoCommandService(fakePromotionRepository);
+		var fakeQeryPromotionTypeGroupService = Substitute.For<IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup>>();
+
+		var sut = new CreatePromotionMainInfoCommandService(
+			 fakePromotionRepository,
+			 fakeQeryPromotionTypeGroupService);
 
 		var command = new CreatePromotionMainInfoCommand(
 			Guid.NewGuid(),
@@ -31,6 +35,51 @@ public class PromotionTests
 
 		_ = fakePromotionRepository.Received(1)
 			.CreatePromotionAsync(Arg.Any<CreatePromotionMainInfo>(), Arg.Is(command.Modifier));
+	}
+
+	[TestMethod]
+	public async Task Get_Promotion_MainInfo()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new GetPromotionMainInfoQueryService(fakePromotionRepository);
+
+		var query = new GetPromotionMainInfoQuery(Guid.NewGuid());
+
+		_ = await sut.GetAsync(query);
+
+		_ = fakePromotionRepository.Received(1)
+			.GetPromotionMainInfoAsync(Arg.Is(query.PromotionId));
+	}
+
+	[TestMethod]
+	public async Task Get_Promotion_Rule()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new GetPromotionRuleQueryService(fakePromotionRepository);
+
+		var query = new GetPromotionRuleQuery(Guid.NewGuid());
+
+		_ = await sut.GetAsync(query);
+
+		_ = fakePromotionRepository.Received(1)
+			.GetPromotionRuleAsync(Arg.Is(query.PromotionId));
+	}
+
+	[TestMethod]
+	public async Task Get_PromotionTypeGroups()
+	{
+		var fakeSettingRepository = Substitute.For<ISettingsRepository>();
+
+		var sut = new PromotionTypeGroupsQueryService(fakeSettingRepository);
+
+		var query = new PromotionTypeGroupsQuery();
+
+		await sut.QueryAsync(query).ToArrayAsync();
+
+		_ = fakeSettingRepository.Received(1)
+			.GetPromotionTypeGroupsAsync();
 	}
 
 	[TestMethod]
@@ -105,36 +154,6 @@ public class PromotionTests
 		var actual = await sut.QueryAsync(query).ToArrayAsync();
 
 		Assert.AreEqual(1, actual.Length);
-	}
-
-	[TestMethod]
-	public async Task Get_Promotion_MainInfo()
-	{
-		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
-
-		var sut = new GetPromotionMainInfoQueryService(fakePromotionRepository);
-
-		var query = new GetPromotionMainInfoQuery(Guid.NewGuid());
-
-		_ = await sut.GetAsync(query);
-
-		_ = fakePromotionRepository.Received(1)
-			.GetPromotionMainInfoAsync(Arg.Is(query.PromotionId));
-	}
-
-	[TestMethod]
-	public async Task Get_Promotion_Rule()
-	{
-		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
-
-		var sut = new GetPromotionRuleQueryService(fakePromotionRepository);
-
-		var query = new GetPromotionRuleQuery(Guid.NewGuid());
-
-		_ = await sut.GetAsync(query);
-
-		_ = fakePromotionRepository.Received(1)
-			.GetPromotionRuleAsync(Arg.Is(query.PromotionId));
 	}
 
 	[TestMethod]
