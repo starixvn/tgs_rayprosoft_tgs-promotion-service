@@ -123,11 +123,8 @@ public class CreatePromotionBonusWeeklyHandler
 			};
 		}
 
-		var gameTypes = promotions.Select(x => x.GameType).ToArray();
-
 		var playerGameRoundAggregate = await _repository.PlayerGameRebateAggregates
 			.Where(x => x.ReportDate >= previousMonday.UtcDateTime && x.ReportDate <= previousSunday.UtcDateTime)
-			.Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
 			.GroupJoin(_brandGameService.GetQueries(),
 				aggregate => new
 				{
@@ -313,15 +310,13 @@ public class CreatePromotionBonusWeeklyHandler
 
 		var promotionLevels = promotion.PromotionVipLevels.Select(v => v.Level).ToArray();
 
-		var promotionGameProviderIds = promotion.PromotionGameProviders.Select(pg => pg.GameProviderId).ToArray();
-
 		var players = aggregates
 			.Where(promotionLevels.Length > 0,
 				pa => pa.VipLevel != null && promotionLevels.Contains(pa.VipLevel.Value))
 			.Where(promotion.GameType is not null, pa => pa.GameType == promotion.GameType)
-			.Where(promotionGameProviderIds.Length > 0,
-				pa =>
-					promotionGameProviderIds.Contains(pa.GameProviderId))
+			.Where(promotion.PromotionGameProviders.Any(), pa =>
+				promotion.PromotionGameProviders.Select(pg => pg.GameProviderId)
+					.Contains(pa.GameProviderId))
 			.Where(pa => pa.ReportDate >= from)
 			.Where(pa => pa.ReportDate <= to);
 
