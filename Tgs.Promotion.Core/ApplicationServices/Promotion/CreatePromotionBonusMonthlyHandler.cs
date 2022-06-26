@@ -112,15 +112,8 @@ public class
 			};
 		}
 
-		var gameProviderIds = promotions.SelectMany(x => x.PromotionGameProviders).Select(x => x.GameProviderId)
-			.ToArray();
-
-		var gameTypes = promotions.Select(x => x.GameType).ToArray();
-
 		var playerGameRoundAggregate = await _playerGameRebateAggregateService.GetQueries()
 			.Where(x => x.ReportDate >= previousFirstDayOfMonth.UtcDateTime && x.ReportDate <= currentFirstDayOfMonth.UtcDateTime)
-			.Where(x => gameProviderIds.Contains(x.GameProviderId))
-			.Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
 			.GroupJoin(_brandGameService.GetQueries(),
 				aggregate => new
 				{
@@ -323,7 +316,7 @@ public class
 			.Where(promotionLevels.Length > 0,
 				pa => pa.VipLevel != null && promotionLevels.Contains(pa.VipLevel.Value))
 			.Where(promotion.GameType is not null, pa => pa.GameType == promotion.GameType)
-			.Where(pa =>
+			.Where(promotion.PromotionGameProviders.Any(), pa =>
 				promotion.PromotionGameProviders.Select(pg => pg.GameProviderId)
 					.Contains(pa.GameProviderId))
 			.Where(pa => pa.ReportDate >= from)
