@@ -96,22 +96,6 @@ public class
 				x.From < previousFirstDayOfMonth.UtcDateTime && x.To > currentFirstDayOfMonth.UtcDateTime
 			).ToArrayAsync(cancellationToken);
 
-		var promotionIds = promotions.Select(x => x.Id);
-
-		if (await _promotionBonusService.GetQueries()
-				.AnyAsync(
-					x => promotionIds.Contains(x.PromotionId) && previousFirstDayOfMonth.UtcDateTime <= x.From &&
-						previousLastDayOfMonth.UtcDateTime >= x.To,
-					cancellationToken))
-		{
-			return new()
-			{
-				Valid = false,
-				Message =
-					$"Promotion bonus report date range {previousFirstDayOfMonth} - {previousLastDayOfMonth} is already existed Monthly."
-			};
-		}
-
 		var playerGameRoundAggregate = await _playerGameRebateAggregateService.GetQueries()
 			.Where(x => x.ReportDate >= previousFirstDayOfMonth.UtcDateTime && x.ReportDate <= currentFirstDayOfMonth.UtcDateTime)
 			.GroupJoin(_brandGameService.GetQueries(),
@@ -157,7 +141,19 @@ public class
 			})
 			.ToArrayAsync(cancellationToken);
 
-		var promotionBonus = await promotions.ToAsyncEnumerable().SelectAwait(async x =>
+		var promotionBonus = await promotions.ToAsyncEnumerable()
+			.WhereAwait(async x =>
+			{
+				var from = x.From > previousFirstDayOfMonth ? x.From : previousFirstDayOfMonth;
+				var to = x.To < currentFirstDayOfMonth ? x.To : previousLastDayOfMonth;
+
+				return !await _promotionBonusService.GetQueries()
+					.AnyAsync(
+						pb => pb.PromotionId == x.Id && pb.From == from.UtcDateTime &&
+							pb.To == to.UtcDateTime,
+						cancellationToken);
+			})
+			.SelectAwait(async x =>
 		{
 			var id = await _serialNumberGenerator.GenerateAsync(cancellationToken).ConfigureAwait(false);
 			var from = x.From > previousFirstDayOfMonth ? x.From : previousFirstDayOfMonth;
