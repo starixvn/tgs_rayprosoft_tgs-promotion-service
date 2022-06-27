@@ -107,22 +107,6 @@ public class CreatePromotionBonusWeeklyHandler
 				x.From < previousMonday.UtcDateTime && x.To > previousSunday.UtcDateTime
 			).ToArrayAsync(cancellationToken);
 
-		var promotionIds = promotions.Select(x => x.Id);
-
-		if (await _promotionBonusService.GetQueries()
-				.AnyAsync(
-					x => promotionIds.Contains(x.PromotionId) && previousMonday.UtcDateTime <= x.From &&
-						previousSunday.UtcDateTime >= x.To,
-					cancellationToken))
-		{
-			return new()
-			{
-				Valid = false,
-				Message =
-					$"Promotion bonus report date range {previousMonday} - {previousSunday} is already existed Weekly."
-			};
-		}
-
 		var playerGameRoundAggregate = await _repository.PlayerGameRebateAggregates
 			.Where(x => x.ReportDate >= previousMonday.UtcDateTime && x.ReportDate <= previousSunday.UtcDateTime)
 			.GroupJoin(_brandGameService.GetQueries(),
@@ -169,6 +153,17 @@ public class CreatePromotionBonusWeeklyHandler
 			.ToArrayAsync(cancellationToken);
 
 		var promotionBonus = await promotions.ToAsyncEnumerable()
+			.WhereAwait(async x =>
+			{
+				var from = x.From > previousMonday ? x.From : previousMonday;
+				var to = x.To < previousSunday ? x.To : previousSunday;
+
+				return !await _promotionBonusService.GetQueries()
+					.AnyAsync(
+						pb => pb.PromotionId == x.Id && pb.From == from.UtcDateTime &&
+							pb.To == to.UtcDateTime,
+						cancellationToken);
+			})
 			.SelectAwait(async x =>
 			{
 				var id = await _serialNumberGenerator.GenerateAsync(cancellationToken).ConfigureAwait(false);
@@ -190,6 +185,7 @@ public class CreatePromotionBonusWeeklyHandler
 					PromotionId = x.Id,
 					From = from,
 					To = to,
+					AutoSentPlayerBonus = x.AutoSentPlayerBonus,
 					PromotionType = x.PromotionType,
 					TotalAmountLimit = x.TotalAmountLimit,
 					GameType = (GameType?)x.GameType,
