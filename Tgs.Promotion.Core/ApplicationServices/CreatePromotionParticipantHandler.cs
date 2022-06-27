@@ -90,8 +90,15 @@ public class CreatePromotionParticipantHandler : IGetService<CreatePromotionPart
 			request.PromotionId,
 			request.PlayerCode
 		};
-		await _messageSender.PublishAsync(
-			$"tgs.promotion.{promotion.PromotionType.ToLower()}.distribute", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(messageData)), cancellationToken: cancellationToken).ConfigureAwait(false);
+
+		switch (promotion.PromotionType.ToLower())
+		{
+			case "register":
+				_ = await _messageSender!
+					.RequestAsync("tgs.promotion.register.distribute", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(messageData)), cancellationToken: cancellationToken)
+					.ConfigureAwait(false);
+				break;
+		}
 
 		return new MessageResponse { Valid = true };
 	}
