@@ -58,6 +58,7 @@ internal class PlayerBucketRepository : IPlayerBucketRepository
 	{
 		var buckets = requests.Select(x => new PlayerBucket
 		{
+			Id = Guid.NewGuid(),
 			PlayerCode = x.PlayerCode,
 			BucketAmount = x.BucketAmount,
 			BucketType = (short)x.BucketType,
