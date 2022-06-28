@@ -5,6 +5,7 @@ public record PromotionView(
 	Guid Id,
 	string Name,
 	(DateTime From, DateTime To) EventDuring,
+	PromotionStatus Status,
 	string PromotionType,
 	decimal? PromotionLimitAmount,
 	decimal UsedAmount,
