@@ -555,6 +555,38 @@ public class PromotionTests
 
 		_ = await dbContext.PromotionRows.AddAsync(promotionRow);
 
+		var createInfo = new Clients.CreatePromotionMainInfo
+		{
+			Name = "Test Promotion",
+			EventDuring = new During(DateTime.Now.AddDays(-10), DateTime.Now),
+			PromotionType = "TestType",
+			IsAutoSent = true
+		};
+
+		var promotionTypes = new PromotionTypeGroup[]
+		{
+			new PromotionTypeGroup
+			{
+				Name = "Turnover",
+				Types = new PromotionType[]
+				{
+					new PromotionType
+					{
+						Name = "NewType",
+						SettlementIntervalType = "Daily"
+					}
+				}
+			}
+		};
+
+		_ = await dbContext.Settings.AddAsync(new Setting
+		{
+			Key = "PromotionTypes",
+			Value = JsonSerializer.Serialize(promotionTypes),
+			CreatedByUsername = "test",
+			UpdatedByUsername = "test"
+		});
+
 		_ = await dbContext.SaveChangesAsync();
 
 		var newInfo = new Clients.CreatePromotionMainInfo

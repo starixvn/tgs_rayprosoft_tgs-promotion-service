@@ -76,7 +76,7 @@ public class PromotionTests
 
 		var query = new PromotionTypeGroupsQuery();
 
-		await sut.QueryAsync(query).ToArrayAsync();
+		_ = await sut.QueryAsync(query).ToArrayAsync();
 
 		_ = fakeSettingRepository.Received(1)
 			.GetPromotionTypeGroupsAsync();

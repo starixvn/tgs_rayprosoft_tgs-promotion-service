@@ -441,13 +441,15 @@ public class PromotionCheckerTests
 			null,
 			false);
 
-		fakePlayerService.GetPlayerInfoAsync(Arg.Any<string>()).Returns(new PlayerInfo
-		{
-			Status = (short)PlayerStatus.Enabled,
-			RegisteredOn = DateTime.Parse("2022/06/01 17:01:00+00")
-		});
+		_ = fakePlayerService.GetPlayerInfoAsync(Arg.Any<string>())
+			.Returns(new PlayerInfo
+			{
+				RegisteredOn = DateTime.Parse("2022/06/01 17:01:00+00")
+			});
 
-		fakePlayerDataRepository.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>()).Returns(false);
+		_ = fakePlayerDataRepository
+			.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>())
+			.Returns(false);
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
@@ -471,13 +473,16 @@ public class PromotionCheckerTests
 			null,
 			false);
 
-		fakePlayerService.GetPlayerInfoAsync(Arg.Any<string>()).Returns(new PlayerInfo
-		{
-			Status = (short)PlayerStatus.Enabled,
-			RegisteredOn = DateTime.Parse("2022/06/01 16:01:00")
-		});
+		_ = fakePlayerService
+			.GetPlayerInfoAsync(Arg.Any<string>())
+			.Returns(new PlayerInfo
+			{
+				RegisteredOn = DateTime.Parse("2022/06/01 16:01:00")
+			});
 
-		fakePlayerDataRepository.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>()).Returns(false);
+		_ = fakePlayerDataRepository
+			.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>())
+			.Returns(false);
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
@@ -501,13 +506,15 @@ public class PromotionCheckerTests
 			null,
 			false);
 
-		fakePlayerService.GetPlayerInfoAsync(Arg.Any<string>()).Returns(new PlayerInfo
-		{
-			Status = (short)PlayerStatus.Enabled,
-			RegisteredOn = DateTime.Parse("2022/06/03 16:01:00")
-		});
+		_ = fakePlayerService.GetPlayerInfoAsync(Arg.Any<string>())
+			.Returns(new PlayerInfo
+			{
+				RegisteredOn = DateTime.Parse("2022/06/03 16:01:00")
+			});
 
-		fakePlayerDataRepository.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>()).Returns(true);
+		_ = fakePlayerDataRepository
+			.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>())
+			.Returns(true);
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 

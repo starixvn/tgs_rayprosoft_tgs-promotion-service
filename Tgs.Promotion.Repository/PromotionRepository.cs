@@ -102,6 +102,14 @@ public class PromotionRepository : IPromotionRepository
 			.GenerateAsync(cancellationToken)
 			.ConfigureAwait(false);
 
+		var promotionsJson = await _dbContext.Settings.Where(x => x.Key == "PromotionTypes").FirstAsync(cancellationToken).ConfigureAwait(false);
+
+		var promotionTypeGroups =
+			JsonSerializer.Deserialize<PromotionTypeGroup[]>(promotionsJson.Value);
+
+		var promotionType = promotionTypeGroups!.SelectMany(x => x.Types)
+			.First(x => x.Name == createInfo.PromotionType);
+
 		var now = DateTime.UtcNow;
 
 		var promotion = new PromotionRow
@@ -114,6 +122,7 @@ public class PromotionRepository : IPromotionRepository
 			Status = (short)PromotionStatus.Disabled,
 			AutoSentPlayerBonus = createInfo.IsAutoSent,
 			PromotionType = createInfo.PromotionType,
+			SettlementIntervalType = promotionType.SettlementIntervalType,
 			BonusAmountLimit = 0M,
 			AmountUsed = 0,
 			Unlimited = createInfo.PromotionLimitAmount is null ? (short)1 : (short)0,
@@ -622,6 +631,14 @@ public class PromotionRepository : IPromotionRepository
 		if (promotion is null)
 			return;
 
+		var promotionsJson = await _dbContext.Settings.Where(x => x.Key == "PromotionTypes").FirstAsync(cancellationToken).ConfigureAwait(false);
+
+		var promotionTypeGroups =
+			JsonSerializer.Deserialize<PromotionTypeGroup[]>(promotionsJson.Value);
+
+		var promotionType = promotionTypeGroups!.SelectMany(x => x.Types)
+			.First(x => x.Name == updateInfo.PromotionType);
+
 		promotion.Name = updateInfo.Name;
 		promotion.From = updateInfo.EventDuring.From;
 		promotion.To = updateInfo.EventDuring.To;
@@ -629,6 +646,7 @@ public class PromotionRepository : IPromotionRepository
 		promotion.Unlimited = updateInfo.PromotionLimitAmount is null ? (short)1 : (short)0;
 		promotion.TotalAmountLimit = updateInfo.PromotionLimitAmount ?? 0M;
 		promotion.AutoSentPlayerBonus = updateInfo.IsAutoSent;
+		promotion.SettlementIntervalType = promotionType.SettlementIntervalType;
 
 		promotion.UpdatedByUsername = modifier;
 		promotion.UpdatedOn = DateTime.UtcNow;

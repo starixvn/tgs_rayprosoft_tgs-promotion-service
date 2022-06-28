@@ -6,7 +6,7 @@ using OpenTelemetry.Trace;
 using Tgs.MessageQueue.Configuration;
 using Tgs.Promotion.MessageQueue;
 using Tgs.Promotion.Models;
-using Tgs.Promotion.Service;
+using Tgs.Promotion.Service.MessageQueue;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,6 +101,7 @@ builder.Services
 			"tgs.promotion.totalusedamount"))
 	.AddNatsGlobPatternExchange("tgs.promotion.roulette.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.register.setting")
+	.AddGlobPatternExchange<DummyCampaingDetailProcessor>("tgs.promotion.dummy.setting")
 	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.*.setting")
 	.AddNatsGlobPatternExchange("*");
 
