@@ -237,20 +237,23 @@ public class
 		foreach (var playerBonus in playerBonuses)
 		{
 			await Policy.Handle<HttpRequestException>()
-				.WaitAndRetryAsync(3, retryAttempt =>
-					TimeSpan.FromSeconds(1), (exception, time, retryCount, context) =>
-				{
-					_logger.LogError("promotion monthly externalId:{externalId} retryCount:{retryCount} Exception:{exception}",
-						playerBonus.Id.ToString(), retryCount, exception);
-				})
+				.WaitAndRetryAsync(
+					3,
+					retryAttempt => TimeSpan.FromSeconds(1),
+					(exception, time, retryCount, context) => _logger.LogError(
+						"promotion monthly externalId:{externalId} " 
+							+ "retryCount:{retryCount} Exception:{exception}",
+						playerBonus.Id.ToString(),
+						retryCount,
+						exception))
 				.ExecuteAsync(
 					async () =>
 					{
 						if (!await _transactionService.GetQueries()
-							    .AnyAsync(
-								    x => x.PlayerCode == playerBonus.PlayerCode &&
-									    x.ExternalTransactionId == playerBonus.Id.ToString(),
-								    cancellationToken))
+								.AnyAsync(
+									x => x.PlayerCode == playerBonus.PlayerCode &&
+										x.ExternalTransactionId == playerBonus.Id.ToString(),
+									cancellationToken))
 						{
 							var response = await _cashServiceClient
 								.PromotionAsync(
