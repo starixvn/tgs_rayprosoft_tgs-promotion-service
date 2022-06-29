@@ -659,26 +659,10 @@ public class PromotionRepository : IPromotionRepository
 	public ValueTask UpdatePromotionsAsync(PromotionRow[] promotions) =>
 			_promotionService.UpdateEntitiesAsync(promotions);
 
-	public async ValueTask UpdatePromotionUsedAmountAsync(Guid promotionId, Guid snapshotId, decimal amountUsed,
-		CancellationToken cancellationToken = default)
-	{
-		var promotion = await _dbContext.PromotionRows
-			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
-
-		if (promotion is null)
-			return;
-
-		promotion.AmountUsedSnapshotId = snapshotId;
-		promotion.AmountUsed = amountUsed;
-
-		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-	}
-
 	public async ValueTask UpdatePromotionUsedAmountAsync(
 		Guid promotionId,
 		decimal totalAmount,
-		Guid snapshotId,
+		Guid? snapshotId,
 		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
@@ -692,6 +676,7 @@ public class PromotionRepository : IPromotionRepository
 			|| promotion.AmountUsedSnapshotId.Value.CompareTo(snapshotId) < 0)
 		{
 			promotion.AmountUsed = totalAmount;
+			promotion.AmountUsedSnapshotId = snapshotId;
 
 			_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 		}
