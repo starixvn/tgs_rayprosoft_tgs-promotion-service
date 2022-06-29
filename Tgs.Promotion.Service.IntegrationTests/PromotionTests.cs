@@ -639,9 +639,12 @@ public class PromotionTests
 
 		_ = await dbContext.SaveChangesAsync();
 
-		await sut.UpdatePromotionUsedAmountAsync(promotionId, 100M, Guid.NewGuid());
+		var snapshotId = Guid.NewGuid();
+
+		await sut.UpdatePromotionUsedAmountAsync(promotionId, 100M, snapshotId);
 
 		Assert.AreEqual(100M, promotionRow.AmountUsed);
+		Assert.AreEqual(snapshotId, promotionRow.AmountUsedSnapshotId);
 	}
 
 	[TestMethod]

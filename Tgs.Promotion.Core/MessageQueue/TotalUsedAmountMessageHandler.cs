@@ -34,7 +34,11 @@ public class TotalUsedAmountMessageHandler : IMessageHandler
 		_logger.LogInformation("formEvent: ({JsonSerializer.Deserialize<TotalUsedAmountMessageData>(json)})", request);
 
 		await _promotionRepository
-			.UpdatePromotionUsedAmountAsync(request.PromotionId, request.SnapshotId, request.TotalAmount, cancellationToken)
+			.UpdatePromotionUsedAmountAsync(
+				request.PromotionId,
+				request.TotalAmount,
+				request.SnapshotId,
+				cancellationToken)
 			.ConfigureAwait(false);
 	}
 }
