@@ -79,12 +79,6 @@ public class CreatePromotionParticipantHandler : IGetService<CreatePromotionPart
 			.ConfigureAwait(false) || await _promotionParticipantRepository.ExistsAsync(x
 			=> x.PlayerCode == request.PlayerCode && x.PromotionId == request.PromotionId);
 
-		if (!alreadyJoined)
-		{
-			await _promotionParticipantRepository.CreatePromotionParticipantAsync(request.PromotionId,
-				request.PlayerCode);
-		}
-
 		var messageData = new
 		{
 			request.PromotionId,
@@ -98,6 +92,12 @@ public class CreatePromotionParticipantHandler : IGetService<CreatePromotionPart
 					.RequestAsync("tgs.promotion.register.distribute", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(messageData)), cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
 				break;
+		}
+
+		if (!alreadyJoined)
+		{
+			await _promotionParticipantRepository.CreatePromotionParticipantAsync(request.PromotionId,
+				request.PlayerCode);
 		}
 
 		return new MessageResponse { Valid = true };
