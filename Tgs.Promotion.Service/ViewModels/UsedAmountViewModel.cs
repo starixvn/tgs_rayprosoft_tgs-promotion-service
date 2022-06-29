@@ -2,7 +2,7 @@
 
 public class UsedAmountViewModel
 {
-	public Guid SnapshotId { get; init; }
+	public Guid? SnapshotId { get; init; }
 
 	public decimal TotalAmount { get; init; }
 }

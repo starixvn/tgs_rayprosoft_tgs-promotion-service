@@ -309,7 +309,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 	public async ValueTask UpdatePromotionUsedAmountAsync(
 		Guid promotionId,
 		decimal totalAmount,
-		Guid snapshotId,
+		Guid? snapshotId,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new
