@@ -392,40 +392,7 @@ public class PromotionCheckerTests
 	}
 
 	[Test]
-	public async Task Tag_Player_Deposit()
-	{
-		var fakeServiceProvider = Substitute.For<IServiceProvider>();
-		var fakePromotionChecker = Substitute.For<IPromotionChecker>();
-
-		_ = fakeServiceProvider.GetService(Arg.Any<Type>())
-			.Returns(fakePromotionChecker);
-
-		var fakeCheckFactory = new PromotionCheckerFactory(
-			new Dictionary<string, Type>
-			{
-				["FirstDeposit"] = typeof(object),
-				["AccountFirstDeposit"] = typeof(object),
-				["DailyFirstDeposit"] = typeof(object),
-				["DailySecondDeposit"] = typeof(object),
-				["TurnoverRebate"] = typeof(object),
-				["ReliefMoneyDaily"] = typeof(object),
-				["ReliefMoneyWeekly"] = typeof(object),
-				["ReliefMoneyMonthly"] = typeof(object),
-			},
-			fakeServiceProvider);
-
-		var sut = new TagPlayerDepositCommandService(fakeCheckFactory);
-
-		var command = new TagPlayerDepositCommand("ThisIsPlayerCode", null);
-
-		await sut.ExecuteAsync(command);
-
-		_ = fakePromotionChecker.Received(3)
-			.TagPromotionTypeAsync(Arg.Any<string>(), Arg.Any<Guid?>());
-	}
-
-	[Test]
-	public async Task Register_Checker_Return_True_When_Player_RegisterOn_During_The_Promotion()
+	public async Task Register_Checker_Return_False_When_Joined_The_Promotion()
 	{
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
 		var fakePlayerDataRepository = Substitute.For<IPromotionParticipantRepository>();
@@ -444,16 +411,16 @@ public class PromotionCheckerTests
 		_ = fakePlayerService.GetPlayerInfoAsync(Arg.Any<string>())
 			.Returns(new PlayerInfo
 			{
-				RegisteredOn = DateTime.Parse("2022/06/01 17:01:00+00")
+				RegisteredOn = DateTime.Parse("2022/06/03 16:01:00")
 			});
 
 		_ = fakePlayerDataRepository
 			.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>())
-			.Returns(false);
+			.Returns(true);
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
-		Assert.IsTrue(actual);
+		Assert.IsFalse(actual);
 	}
 
 	[Test]
@@ -490,7 +457,7 @@ public class PromotionCheckerTests
 	}
 
 	[Test]
-	public async Task Register_Checker_Return_False_When_Joined_The_Promotion()
+	public async Task Register_Checker_Return_True_When_Player_RegisterOn_During_The_Promotion()
 	{
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
 		var fakePlayerDataRepository = Substitute.For<IPromotionParticipantRepository>();
@@ -509,15 +476,81 @@ public class PromotionCheckerTests
 		_ = fakePlayerService.GetPlayerInfoAsync(Arg.Any<string>())
 			.Returns(new PlayerInfo
 			{
-				RegisteredOn = DateTime.Parse("2022/06/03 16:01:00")
+				RegisteredOn = DateTime.Parse("2022/06/01 17:01:00+00")
 			});
 
 		_ = fakePlayerDataRepository
 			.ExistsAsync(Arg.Any<Expression<Func<PromotionParticipant, bool>>>())
-			.Returns(true);
+			.Returns(false);
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
-		Assert.IsFalse(actual);
+		Assert.IsTrue(actual);
+	}
+
+	[Test]
+	public async Task Tag_Player_Deposit()
+	{
+		var fakeServiceProvider = Substitute.For<IServiceProvider>();
+		var fakePromotionChecker = Substitute.For<IPromotionChecker>();
+
+		_ = fakeServiceProvider.GetService(Arg.Any<Type>())
+			.Returns(fakePromotionChecker);
+
+		var fakeCheckFactory = new PromotionCheckerFactory(
+			new Dictionary<string, Type>
+			{
+				["FirstDeposit"] = typeof(object),
+				["AccountFirstDeposit"] = typeof(object),
+				["DailyFirstDeposit"] = typeof(object),
+				["DailySecondDeposit"] = typeof(object),
+				["TurnoverRebate"] = typeof(object),
+				["ReliefMoneyDaily"] = typeof(object),
+				["ReliefMoneyWeekly"] = typeof(object),
+				["ReliefMoneyMonthly"] = typeof(object),
+			},
+			fakeServiceProvider);
+
+		var sut = new TagPlayerDepositCommandService(fakeCheckFactory);
+
+		var command = new TagPlayerDepositCommand("ThisIsPlayerCode", null);
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionChecker.Received(3)
+			.TagPromotionTypeAsync(Arg.Any<string>(), Arg.Any<Guid?>());
+	}
+
+	[Test]
+	public async Task Untag_Player_Deposit()
+	{
+		var fakeServiceProvider = Substitute.For<IServiceProvider>();
+		var fakePromotionChecker = Substitute.For<IPromotionChecker>();
+
+		_ = fakeServiceProvider.GetService(Arg.Any<Type>())
+			.Returns(fakePromotionChecker);
+
+		var fakeCheckFactory = new PromotionCheckerFactory(
+			new Dictionary<string, Type>
+			{
+				["FirstDeposit"] = typeof(object),
+				["AccountFirstDeposit"] = typeof(object),
+				["DailyFirstDeposit"] = typeof(object),
+				["DailySecondDeposit"] = typeof(object),
+				["TurnoverRebate"] = typeof(object),
+				["ReliefMoneyDaily"] = typeof(object),
+				["ReliefMoneyWeekly"] = typeof(object),
+				["ReliefMoneyMonthly"] = typeof(object),
+			},
+			fakeServiceProvider);
+
+		var sut = new CancelTagPlayerDepositCommandService(fakeCheckFactory);
+
+		var command = new CancelTagPlayerDepositCommand("player1", null);
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionChecker.Received(3)
+			.RollbackTagAsync(Arg.Any<string>(), Arg.Any<Guid?>());
 	}
 }
