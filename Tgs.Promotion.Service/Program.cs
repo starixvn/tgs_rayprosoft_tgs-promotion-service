@@ -61,7 +61,6 @@ builder.Services
 				ext => httpContext.Request.Path.Value.EndsWith($".{ext}")));
 
 builder.Services
-	.AddSingleton<NoopCampaingDetailProcessor>()
 	.AddTgsRepository(builder.Configuration.GetConnectionString("Tgs"))
 	.AddRedis((redisOptions, _) => redisOptions.ConnectionString = builder.Configuration.GetConnectionString("Redis"))
 	.AddPromotionCore()
@@ -85,6 +84,8 @@ builder.Services
 		options.BaseUrl = builder.Configuration.GetValue<Uri>("Promotion:PlayerServiceBaseUrl"));
 
 builder.Services
+	.AddSingleton<NoopCampaingDetailProcessor>()
+	.AddSingleton<DummyCampaingDetailProcessor>()
 	.AddMessageQueue()
 	.AddNatsMessageQueue(config => config
 		.ConfigQueueOptions((options, sp) =>
