@@ -135,6 +135,7 @@ public class PromotionTests
 					Guid.NewGuid(),
 					"Test1",
 					(DateTime.Now.AddDays(-10), DateTime.Now.AddDays(10)),
+					PromotionStatus.Enabled,
 					"AAA",
 					null,
 					0M,

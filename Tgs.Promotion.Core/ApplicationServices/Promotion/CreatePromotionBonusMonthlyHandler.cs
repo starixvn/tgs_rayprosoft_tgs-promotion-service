@@ -259,7 +259,7 @@ public class
 								.PromotionAsync(
 									playerBonus.DefaultWalletId,
 									playerBonus.BonusAmount,
-									"promotion weekly",
+									"promotion monthly",
 									playerBonus.Id.ToString(),
 									null,
 									cancellationToken)
@@ -274,24 +274,6 @@ public class
 							});
 						}
 					});
-
-			var response = await _cashServiceClient
-				.PromotionAsync(
-					playerBonus.DefaultWalletId,
-					playerBonus.BonusAmount,
-					null,
-					playerBonus.Id.ToString(),
-					null,
-					cancellationToken)
-				.ConfigureAwait(false);
-
-			transactionPromotions.Add(new()
-			{
-				TransactionId = response.TransactionId,
-				PromotionId = playerBonus.PromotionId,
-				PromotionBonusId = playerBonus.PromotionBonusId,
-				PromotionType = playerBonus.PromotionType
-			});
 		}
 
 		await _transactionRepository.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());

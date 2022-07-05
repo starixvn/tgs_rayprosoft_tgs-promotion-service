@@ -12,5 +12,6 @@ internal class ListPromotionsByBrandQueryService : IQueryService<ListPromotionsB
 	}
 
 	public IAsyncEnumerable<PromotionView> QueryAsync(ListPromotionsByBrandQuery query, CancellationToken cancellationToken = default)
-		=> _promotionRepository.ListPromotionsAsync(query.BrandId, cancellationToken);
+		=> _promotionRepository.ListPromotionsAsync(query.BrandId, cancellationToken)
+			.Where(promotion => promotion.Status == PromotionStatus.Enabled);
 }

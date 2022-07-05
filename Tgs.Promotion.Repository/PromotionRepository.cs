@@ -356,7 +356,8 @@ public class PromotionRepository : IPromotionRepository
 							  p.MobileBanner,
 							  p.Terms,
 							  p.Localization,
-							  p.CampaignDetail
+							  p.CampaignDetail,
+							  p.Status
 						  }).ToArray();
 
 		var promotionVipLevels = _dbContext.PromotionVipLevels
@@ -373,6 +374,7 @@ public class PromotionRepository : IPromotionRepository
 				p.Id,
 				p.Name,
 				(p.From, p.To),
+				(PromotionStatus)p.Status,
 				p.PromotionType,
 				p.TotalAmountLimit,
 				p.AmountUsed,
