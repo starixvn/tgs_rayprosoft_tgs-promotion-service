@@ -587,6 +587,80 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task Tag_Player_Deposit()
+	{
+		var fakePromotionCheckerFactory = Substitute.For<IPromotionCheckerFactory>();
+
+		await using var web = new TestPromotionApplication(hostBuilder => hostBuilder
+			.ConfigureServices(services => services
+				.AddSingleton(fakePromotionCheckerFactory)));
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionClient(httpClient);
+
+		var playerCode = "player1";
+		var promotionId = Guid.NewGuid();
+
+		var fakeFirstDepositChecker = Substitute.For<IPromotionChecker>();
+		var fakeAccountFirstDepositChecker = Substitute.For<IPromotionChecker>();
+		var fakeDailyFirstDepositChecker = Substitute.For<IPromotionChecker>();
+
+		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("FirstDeposit"))
+			.Returns(fakeFirstDepositChecker);
+		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("AccountFirstDeposit"))
+			.Returns(fakeAccountFirstDepositChecker);
+		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DailyFirstDeposit"))
+			.Returns(fakeDailyFirstDepositChecker);
+
+		await sut.TagPlayerDepositAsync(playerCode, promotionId);
+
+		_ = fakeFirstDepositChecker.Received(1)
+			.TagPromotionTypeAsync(Arg.Is(playerCode), Arg.Is(promotionId));
+		_ = fakeAccountFirstDepositChecker.Received(1)
+			.TagPromotionTypeAsync(Arg.Is(playerCode), Arg.Is(promotionId));
+		_ = fakeDailyFirstDepositChecker.Received(1)
+			.TagPromotionTypeAsync(Arg.Is(playerCode), Arg.Is(promotionId));
+	}
+
+	[TestMethod]
+	public async Task Untag_Player_Deposit()
+	{
+		var fakePromotionCheckerFactory = Substitute.For<IPromotionCheckerFactory>();
+
+		await using var web = new TestPromotionApplication(hostBuilder => hostBuilder
+			.ConfigureServices(services => services
+				.AddSingleton(fakePromotionCheckerFactory)));
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionClient(httpClient);
+
+		var playerCode = "player1";
+		var promotionId = Guid.NewGuid();
+
+		var fakeFirstDepositChecker = Substitute.For<IPromotionChecker>();
+		var fakeAccountFirstDepositChecker = Substitute.For<IPromotionChecker>();
+		var fakeDailyFirstDepositChecker = Substitute.For<IPromotionChecker>();
+
+		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("FirstDeposit"))
+			.Returns(fakeFirstDepositChecker);
+		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("AccountFirstDeposit"))
+			.Returns(fakeAccountFirstDepositChecker);
+		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DailyFirstDeposit"))
+			.Returns(fakeDailyFirstDepositChecker);
+
+		await sut.UntagPlayerDepositAsync(playerCode, promotionId);
+
+		_ = fakeFirstDepositChecker.Received(1)
+			.RollbackTagAsync(Arg.Is(playerCode), Arg.Is(promotionId));
+		_ = fakeAccountFirstDepositChecker.Received(1)
+			.RollbackTagAsync(Arg.Is(playerCode), Arg.Is(promotionId));
+		_ = fakeDailyFirstDepositChecker.Received(1)
+			.RollbackTagAsync(Arg.Is(playerCode), Arg.Is(promotionId));
+	}
+
+	[TestMethod]
 	public async Task Update_Promotion_MainInfo()
 	{
 		await using var web = new TestPromotionApplication();

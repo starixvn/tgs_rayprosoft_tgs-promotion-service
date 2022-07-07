@@ -19,13 +19,21 @@ internal class RegisterChecker : IPromotionChecker
 			.GetPlayerInfoAsync(playerCode)
 			.ConfigureAwait(false);
 
+		if (player is null)
+			return false;
+
+		var playerStatus = await _playerServiceClient
+			.GetPlayerStatusAsync(playerCode)
+			.ConfigureAwait(false);
+
+		if (playerStatus is not PlayerService.Client.PlayerStatus.Enabled)
+			return false;
+
 		var isExists = await _promotionParticipantRepository.ExistsAsync(x
 			=> x.PlayerCode == playerCode && x.PromotionId == promotion.Id)
 			.ConfigureAwait(false);
 
-		return player is not null
-			&& !isExists
-			&& player.Status == (short)PlayerStatus.Enabled
+		return !isExists
 			&& promotion.EventDuring.From <= player.RegisteredOn!.Value
 			&& promotion.EventDuring.To >= player.RegisteredOn!.Value;
 	}

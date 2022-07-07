@@ -6,7 +6,7 @@ using OpenTelemetry.Trace;
 using Tgs.MessageQueue.Configuration;
 using Tgs.Promotion.MessageQueue;
 using Tgs.Promotion.Models;
-using Tgs.Promotion.Service;
+using Tgs.Promotion.Service.MessageQueue;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,7 +61,6 @@ builder.Services
 				ext => httpContext.Request.Path.Value.EndsWith($".{ext}")));
 
 builder.Services
-	.AddSingleton<NoopCampaingDetailProcessor>()
 	.AddTgsRepository(builder.Configuration.GetConnectionString("Tgs"))
 	.AddRedis((redisOptions, _) => redisOptions.ConnectionString = builder.Configuration.GetConnectionString("Redis"))
 	.AddPromotionCore()
@@ -85,6 +84,8 @@ builder.Services
 		options.BaseUrl = builder.Configuration.GetValue<Uri>("Promotion:PlayerServiceBaseUrl"));
 
 builder.Services
+	.AddSingleton<NoopCampaingDetailProcessor>()
+	.AddSingleton<DummyCampaingDetailProcessor>()
 	.AddMessageQueue()
 	.AddNatsMessageQueue(config => config
 		.ConfigQueueOptions((options, sp) =>
@@ -98,6 +99,7 @@ builder.Services
 			"tgs.payment.deposit.status"))
 	.AddNatsGlobPatternExchange("tgs.promotion.roulette.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.register.setting")
+	.AddGlobPatternExchange<DummyCampaingDetailProcessor>("tgs.promotion.dummy.setting")
 	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.*.setting")
 	.AddNatsGlobPatternExchange("*");
 

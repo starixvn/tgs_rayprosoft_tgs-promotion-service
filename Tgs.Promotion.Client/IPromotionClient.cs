@@ -31,5 +31,7 @@ public interface IPromotionClient
 
 	Task TagPlayerDepositAsync(string playerCode, Guid? promotionId);
 
+	Task UntagPlayerDepositAsync(string playerCode, Guid? promotionId);
+
 	Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request);
 }

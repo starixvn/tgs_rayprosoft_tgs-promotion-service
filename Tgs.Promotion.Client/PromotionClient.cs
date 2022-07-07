@@ -222,6 +222,30 @@ public class PromotionClient : IPromotionClient
 		_ = response.EnsureSuccessStatusCode();
 	}
 
+	public async Task UntagPlayerDepositAsync(string playerCode, Guid? promotionId)
+	{
+		var path = promotionId == null
+			? $"/api/promotion/deposit/{playerCode}"
+			: $"/api/promotion/deposit/{playerCode}/{promotionId}";
+
+		var request = new HttpRequestMessage(
+			HttpMethod.Delete,
+			path);
+
+		_ = request.Headers.Remove("Accept");
+		request.Headers.Add("Accept", "application/json");
+
+		var content = new StringContent(string.Empty);
+		_ = content.Headers.Remove("Content-Type");
+		content.Headers.Add("Content-Type", "application/json");
+
+		request.Content = content;
+
+		var response = await _client.SendAsync(request).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+	}
+
 	public async Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request)
 	{
 		var httpRequest = new HttpRequestMessage(HttpMethod.Put, $"/api/promotion/update/{request.Id}")

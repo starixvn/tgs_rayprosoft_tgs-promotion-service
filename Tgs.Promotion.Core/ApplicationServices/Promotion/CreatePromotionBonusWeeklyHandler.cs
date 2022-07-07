@@ -76,7 +76,7 @@ public class CreatePromotionBonusWeeklyHandler
 		var previousSunday = now.AddDays(-7).GetSunday();
 
 		if (!string.IsNullOrEmpty(request.From) &&
-		    DateTimeOffset.TryParse($"{request.From} 00:00 +08:00", out var resultFrom))
+			DateTimeOffset.TryParse($"{request.From} 00:00 +08:00", out var resultFrom))
 		{
 			previousMonday = new(resultFrom.Year,
 				resultFrom.Month,
@@ -88,7 +88,7 @@ public class CreatePromotionBonusWeeklyHandler
 		}
 
 		if (!string.IsNullOrEmpty(request.To) &&
-		    DateTimeOffset.TryParse($"{request.From} 00:00 +08:00", out var resultTo))
+			DateTimeOffset.TryParse($"{request.From} 00:00 +08:00", out var resultTo))
 		{
 			previousSunday = new(resultTo.Year,
 				resultTo.Month,
@@ -257,40 +257,41 @@ public class CreatePromotionBonusWeeklyHandler
 		foreach (var playerBonus in playerBonuses)
 		{
 			await Policy.Handle<HttpRequestException>()
-				.WaitAndRetryAsync(3, retryAttempt =>
-					TimeSpan.FromSeconds(1), (exception, time, retryCount, context) =>
+				.WaitAndRetryAsync(
+					3,
+					retryAttempt => TimeSpan.FromSeconds(1),
+					(exception, time, retryCount, context) => _logger.LogError(
+						"promotion weekly externalId:{externalId} retryCount:{retryCount} Exception:{exception}",
+						playerBonus.Id.ToString(),
+						retryCount,
+						exception))
+				.ExecuteAsync(async () =>
 				{
-					_logger.LogError("promotion weekly externalId:{externalId} retryCount:{retryCount} Exception:{exception}",
-						playerBonus.Id.ToString(), retryCount, exception);
-				})
-				.ExecuteAsync(
-					async () =>
+					if (!await _transactionService.GetQueries()
+						.AnyAsync(
+							x => x.PlayerCode == playerBonus.PlayerCode
+								&& x.ExternalTransactionId == playerBonus.Id.ToString(),
+							cancellationToken))
 					{
-						if (!await _transactionService.GetQueries()
-								.AnyAsync(
-									x => x.PlayerCode == playerBonus.PlayerCode &&
-										x.ExternalTransactionId == playerBonus.Id.ToString(),
-									cancellationToken))
-						{
-							var response = await _cashServiceClient
-								.PromotionAsync(
-									playerBonus.DefaultWalletId,
-									playerBonus.BonusAmount,
-									"promotion weekly",
-									playerBonus.Id.ToString(),
-									null,
-									cancellationToken)
-								.ConfigureAwait(false);
+						var response = await _cashServiceClient
+							.PromotionAsync(
+								playerBonus.DefaultWalletId,
+								playerBonus.BonusAmount,
+								"promotion weekly",
+								playerBonus.Id.ToString(),
+								null,
+								cancellationToken)
+							.ConfigureAwait(false);
 
-							transactionPromotions.Add(new()
-							{
-								TransactionId = response.TransactionId,
-								PromotionId = playerBonus.PromotionId,
-								PromotionBonusId = playerBonus.PromotionBonusId,
-								PromotionType = playerBonus.PromotionType
-							});
-						}
-					});
+						transactionPromotions.Add(new()
+						{
+							TransactionId = response.TransactionId,
+							PromotionId = playerBonus.PromotionId,
+							PromotionBonusId = playerBonus.PromotionBonusId,
+							PromotionType = playerBonus.PromotionType
+						});
+					}
+				});
 		}
 
 		await _transactionRepository.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());
