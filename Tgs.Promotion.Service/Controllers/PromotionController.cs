@@ -27,6 +27,18 @@ public class PromotionController : ControllerBase
 		Guid promotionId, string playerCode)
 		=> getService.GetAsync(new(promotionId, playerCode));
 
+	[HttpDelete("deposit/{playerCode}", Name = "CancelDepositTag")]
+	[HttpDelete("deposit/{playerCode}/{promotionId?}", Name = "CancelDepositTagWithPromotion")]
+	public ValueTask CancelDepositAsync(
+		[FromServices] ICommandService<CancelTagPlayerDepositCommand> untagService,
+		string playerCode,
+		Guid? promotionId)
+	{
+		var command = new CancelTagPlayerDepositCommand(playerCode, promotionId);
+
+		return untagService.ExecuteAsync(command, HttpContext.RequestAborted);
+	}
+
 	[HttpPut("changeorder", Name = "ChangeOrder")]
 	[Description("Change promotions display order")]
 	public async Task<MessageResponse> ChangeOrderAsync(
@@ -77,17 +89,17 @@ public class PromotionController : ControllerBase
 		CreatePromotionRequest request) =>
 		getService.GetAsync(request);
 
-	[HttpPut("deposit/{playerCode}")]
-	[HttpPut("deposit/{playerCode}/{promotionId?}")]
+	[HttpPut("deposit/{playerCode}", Name = "TagDeposit")]
+	[HttpPut("deposit/{playerCode}/{promotionId?}", Name = "TagDepositWithPromotion")]
 	[Description("Tag player deposit")]
-	public async Task DepositAsync(
+	public ValueTask DepositAsync(
 		[FromServices] ICommandService<TagPlayerDepositCommand> tagService,
 		string playerCode,
 		Guid? promotionId)
 	{
 		var command = new TagPlayerDepositCommand(playerCode, promotionId);
 
-		await tagService.ExecuteAsync(command).ConfigureAwait(false);
+		return tagService.ExecuteAsync(command, HttpContext.RequestAborted);
 	}
 
 	[HttpGet("joined")]

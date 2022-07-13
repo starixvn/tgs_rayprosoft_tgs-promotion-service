@@ -22,7 +22,8 @@ public class CreatePromotionBonusWeeklyHandler
 	private readonly IPromotionBonusRepository _promotionBonusFactory;
 	private readonly ITgsService<PromotionBonus> _promotionBonusService;
 	private readonly IPromotionRepository _promotionRepository;
-	private readonly TgsContext _repository;
+	private readonly ITgsService<PlayerGameRebateAggregate> _playerGameRebateAggregateService;
+	private readonly ITgsService<Player> _playerService;
 	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly ITransactionRepository _transactionRepository;
 	private readonly ITgsService<Transaction> _transactionService;
@@ -32,7 +33,8 @@ public class CreatePromotionBonusWeeklyHandler
 		ITgsService<PromotionBonus> promotionBonusService,
 		IPlayerBucketRepository playerBucketService,
 		ICashServiceClient cashServiceClient,
-		TgsContext repository,
+		ITgsService<PlayerGameRebateAggregate> playerGameRebateAggregateService,
+		ITgsService<Player> playerService,
 		IPromotionRepository promotionRepository,
 		IPromotionBonusRepository promotionBonusFactory,
 		ITransactionRepository transactionRepository,
@@ -47,7 +49,8 @@ public class CreatePromotionBonusWeeklyHandler
 			promotionBonusService ?? throw new ArgumentNullException(nameof(promotionBonusService));
 		_playerBucketService = playerBucketService ?? throw new ArgumentNullException(nameof(playerBucketService));
 		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-		_repository = repository ?? throw new ArgumentNullException(nameof(repository));
+		_playerGameRebateAggregateService = playerGameRebateAggregateService ?? throw new ArgumentNullException(nameof(playerGameRebateAggregateService));
+		_playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 		_transactionRepository =
 			transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
@@ -73,7 +76,7 @@ public class CreatePromotionBonusWeeklyHandler
 		var previousSunday = now.AddDays(-7).GetSunday();
 
 		if (!string.IsNullOrEmpty(request.From) &&
-		    DateTimeOffset.TryParse($"{request.From} 00:00 +08:00", out var resultFrom))
+			DateTimeOffset.TryParse($"{request.From} 00:00 +08:00", out var resultFrom))
 		{
 			previousMonday = new(resultFrom.Year,
 				resultFrom.Month,
@@ -85,7 +88,7 @@ public class CreatePromotionBonusWeeklyHandler
 		}
 
 		if (!string.IsNullOrEmpty(request.To) &&
-		    DateTimeOffset.TryParse($"{request.From} 00:00 +08:00", out var resultTo))
+			DateTimeOffset.TryParse($"{request.From} 00:00 +08:00", out var resultTo))
 		{
 			previousSunday = new(resultTo.Year,
 				resultTo.Month,
@@ -107,7 +110,7 @@ public class CreatePromotionBonusWeeklyHandler
 				x.From < previousMonday.UtcDateTime && x.To > previousSunday.UtcDateTime
 			).ToArrayAsync(cancellationToken);
 
-		var playerGameRoundAggregate = await _repository.PlayerGameRebateAggregates
+		var playerGameRoundAggregate = await _playerGameRebateAggregateService.GetQueries()
 			.Where(x => x.ReportDate >= previousMonday.UtcDateTime && x.ReportDate <= previousSunday.UtcDateTime)
 			.GroupJoin(_brandGameService.GetQueries(),
 				aggregate => new
@@ -203,7 +206,7 @@ public class CreatePromotionBonusWeeklyHandler
 		var autoSentPlayerBonuses = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray();
 		var playerCodes = autoSentPlayerBonuses.SelectMany(p => p.Players).Select(p => p.PlayerCode);
 
-		var players = await _repository.Players.AsQueryable()
+		var players = await _playerService.GetQueries()
 			.Where(x => playerCodes.Contains(x.PlayerCode))
 			.Select(x => new
 			{
@@ -254,40 +257,41 @@ public class CreatePromotionBonusWeeklyHandler
 		foreach (var playerBonus in playerBonuses)
 		{
 			await Policy.Handle<HttpRequestException>()
-				.WaitAndRetryAsync(3, retryAttempt =>
-					TimeSpan.FromSeconds(1), (exception, time, retryCount, context) =>
+				.WaitAndRetryAsync(
+					3,
+					retryAttempt => TimeSpan.FromSeconds(1),
+					(exception, time, retryCount, context) => _logger.LogError(
+						"promotion weekly externalId:{externalId} retryCount:{retryCount} Exception:{exception}",
+						playerBonus.Id.ToString(),
+						retryCount,
+						exception))
+				.ExecuteAsync(async () =>
 				{
-					_logger.LogError("promotion weekly externalId:{externalId} retryCount:{retryCount} Exception:{exception}",
-						playerBonus.Id.ToString(), retryCount, exception);
-				})
-				.ExecuteAsync(
-					async () =>
+					if (!await _transactionService.GetQueries()
+						.AnyAsync(
+							x => x.PlayerCode == playerBonus.PlayerCode
+								&& x.ExternalTransactionId == playerBonus.Id.ToString(),
+							cancellationToken))
 					{
-						if (!await _transactionService.GetQueries()
-								.AnyAsync(
-									x => x.PlayerCode == playerBonus.PlayerCode &&
-										x.ExternalTransactionId == playerBonus.Id.ToString(),
-									cancellationToken))
-						{
-							var response = await _cashServiceClient
-								.PromotionAsync(
-									playerBonus.DefaultWalletId,
-									playerBonus.BonusAmount,
-									"promotion weekly",
-									playerBonus.Id.ToString(),
-									null,
-									cancellationToken)
-								.ConfigureAwait(false);
+						var response = await _cashServiceClient
+							.PromotionAsync(
+								playerBonus.DefaultWalletId,
+								playerBonus.BonusAmount,
+								"promotion weekly",
+								playerBonus.Id.ToString(),
+								null,
+								cancellationToken)
+							.ConfigureAwait(false);
 
-							transactionPromotions.Add(new()
-							{
-								TransactionId = response.TransactionId,
-								PromotionId = playerBonus.PromotionId,
-								PromotionBonusId = playerBonus.PromotionBonusId,
-								PromotionType = playerBonus.PromotionType
-							});
-						}
-					});
+						transactionPromotions.Add(new()
+						{
+							TransactionId = response.TransactionId,
+							PromotionId = playerBonus.PromotionId,
+							PromotionBonusId = playerBonus.PromotionBonusId,
+							PromotionType = playerBonus.PromotionType
+						});
+					}
+				});
 		}
 
 		await _transactionRepository.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());

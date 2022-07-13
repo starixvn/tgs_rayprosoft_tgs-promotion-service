@@ -65,6 +65,6 @@ public interface IPromotionServiceClient
 	ValueTask UpdatePromotionUsedAmountAsync(
 		Guid promotionId,
 		decimal totalAmount,
-		Guid snapshotId,
+		Guid? snapshotId,
 		CancellationToken cancellationToken = default);
 }
