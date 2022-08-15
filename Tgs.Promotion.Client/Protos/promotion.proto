@@ -18,3 +18,12 @@ message CampaignDetailResponse {
 	phoenix.protobuf.DecimalValue turnover_multiple = 4;
 	string game_type = 5;
 }
+
+message RoulettePromotionsReqest {
+	string player_code = 1;
+}
+
+message RoulettePromotionsResponse {
+	phoenix.protobuf.GuidValue promotion_id = 1;
+	int32 roulette_count = 2;
+}
