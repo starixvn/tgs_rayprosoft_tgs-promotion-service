@@ -24,6 +24,10 @@ message RoulettePromotionsReqest {
 }
 
 message RoulettePromotionsResponse {
+	repeated RoulettePromotion promotions = 1;
+}
+
+message RoulettePromotion {
 	phoenix.protobuf.GuidValue promotion_id = 1;
 	int32 roulette_count = 2;
 }
