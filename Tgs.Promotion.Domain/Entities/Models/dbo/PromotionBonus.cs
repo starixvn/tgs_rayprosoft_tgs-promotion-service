@@ -24,6 +24,7 @@ namespace Tgs.Promotion.Domain.Entities
         public decimal BonusAmountLimit { get; set; }
         public decimal TurnoverMultiple { get; set; }
         public DateTime CreatedOn { get; set; }
+        public string? Detail { get; set; }
 
         public virtual PromotionRow Promotion { get; set; } = null!;
         public virtual ICollection<PromotionPlayer> PromotionPlayers { get; set; }
