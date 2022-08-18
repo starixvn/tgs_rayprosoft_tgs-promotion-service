@@ -145,17 +145,16 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 
 		var promotionLevels = _promotion.PromotionVipLevels.Select(v => v.Level).ToArray();
 
+		var rule = _promotionSerializer.Deserialize<TurnoverRebateWeeklyRule>(_promotion.CampaignDetail)!;
+
 		var players = _playerWinLossWeekly
 			.Where(promotionLevels.Length > 0,
 				pa => pa.VipLevel != null && promotionLevels.Contains(pa.VipLevel.Value))
-			.Where(_promotion.GameType is not null, pa => pa.GameType == _promotion.GameType)
-			.Where(_promotion.PromotionGameProviders.Any(), pa =>
-				_promotion.PromotionGameProviders.Select(pg => pg.GameProviderId)
-					.Contains(pa.GameProviderId))
+			.Where(rule.GameType is not null, pa => pa.GameType == (short)rule.GameType!)
+			.Where(rule.GameProviderIds.Any(), pa =>
+				rule.GameProviderIds.Contains(pa.GameProviderId))
 			.Where(pa => pa.ReportDate >= from)
 			.Where(pa => pa.ReportDate <= to);
-
-		var rule = _promotionSerializer.Deserialize<TurnoverRebateWeeklyRule>(_promotion.CampaignDetail)!;
 
 		var playerBonus = _promotion.PromotionParticipants.Where(x =>
 			x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode).Distinct().Select(playerCode =>
