@@ -39,7 +39,8 @@ public class PromotionBonusRepository : IPromotionBonusRepository
 				PromotionBonusId = model.Id,
 				BonusAmount = x.BonusAmount,
 				SentOn = model.SentOn?.UtcDateTime
-			}).ToHashSet()
+			}).ToHashSet(),
+			Detail = model.Detail
 		}).ToArray();
 
 		await _promotionBonusService.CreateEntitiesAsync(bonus);

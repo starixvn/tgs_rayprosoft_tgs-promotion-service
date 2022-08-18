@@ -36,6 +36,10 @@ namespace Tgs.Promotion.Domain.Entities.Configurations
 
             entity.Property(e => e.CreatedOn).HasColumnName("created_on");
 
+            entity.Property(e => e.Detail)
+                .HasColumnType("jsonb")
+                .HasColumnName("detail");
+
             entity.Property(e => e.From).HasColumnName("from");
 
             entity.Property(e => e.GameType).HasColumnName("game_type");

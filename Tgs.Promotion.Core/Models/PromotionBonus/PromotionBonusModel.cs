@@ -31,4 +31,6 @@ public class PromotionBonusModel
 	public decimal TotalAmountLimit { get; set; }
 
 	public decimal TurnoverMultiple { get; set; }
+
+	public string? Detail { get; set; }
 }
