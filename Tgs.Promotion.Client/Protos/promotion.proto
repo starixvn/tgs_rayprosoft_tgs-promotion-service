@@ -19,15 +19,15 @@ message CampaignDetailResponse {
 	string game_type = 5;
 }
 
-message RouletteCountPromotionsReqest {
+message RouletteCountRequest {
 	string player_code = 1;
 }
 
-message RouletteCountPromotionsResponse {
-	repeated RouletteCountPromotion promotions = 1;
+message RouletteCountResponse {
+	repeated RouletteCountItem items = 1;
 }
 
-message RouletteCountPromotion {
+message RouletteCountItem {
 	phoenix.protobuf.GuidValue promotion_id = 1;
 	int32 roulette_count = 2;
 }
