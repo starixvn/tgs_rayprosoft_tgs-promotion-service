@@ -60,9 +60,6 @@ public class CreatePromotionBonusWeeklyHandler
 		}
 
 		var promotions = await _promotionRepository.GetPromotionQueries()
-			.Include(x => x.PromotionGameProviders)
-			.Include(x => x.PromotionVipLevels)
-			.Include(x => x.PromotionParticipants)
 			.Where(x => x.Status == (short)PromotionStatus.Enabled)
 			.Where(x => x.SettlementIntervalType == "Weekly")
 			.Where(x => x.From >= previousMonday.UtcDateTime && x.From <= previousSunday.UtcDateTime ||

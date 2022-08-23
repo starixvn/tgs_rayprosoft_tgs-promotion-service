@@ -11,11 +11,20 @@ using Tgs.Promotion.Models.PromotionBucket;
 using Tgs.SerialNumberGenerator;
 
 namespace Tgs.Promotion.ApplicationServices.Promotion;
+
 internal class TurnoverRebateWeeklyDistribution : IDistribution
 {
-	private PromotionRow _promotion;
+	private readonly ICashServiceClient _cashServiceClient;
+	private readonly ILogger<CreatePromotionBonusWeeklyHandler> _logger;
+	private readonly IPlayerBucketRepository _playerBucketService;
+	private readonly IPromotionBonusRepository _promotionBonusFactory;
+	private readonly IPromotionRepository _promotionRepository;
+	private readonly PromotionSerializer _promotionSerializer;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
+	private readonly TgsContext _tgsContext;
+	private readonly ITransactionRepository _transactionRepository;
 	private IEnumerable<PlayerTurnoverWeekly> _playerWinLossWeekly = Array.Empty<PlayerTurnoverWeekly>();
-	private PromotionBonusModel _promotionBonusModel;
+
 	private DateTimeOffset _previousMonday = new DateTimeOffset(DateTimeOffset.Now.Year,
 		DateTimeOffset.Now.Month,
 		DateTimeOffset.Now.Day,
@@ -23,6 +32,7 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 		0,
 		0,
 		new(8, 0, 0)).AddDays(-7).GetMonday();
+
 	private DateTimeOffset _previousSunday = new DateTimeOffset(DateTimeOffset.Now.Year,
 		DateTimeOffset.Now.Month,
 		DateTimeOffset.Now.Day,
@@ -31,65 +41,75 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 		0,
 		new(8, 0, 0)).AddDays(-7).GetSunday();
 
-	private readonly ITgsService<BrandGame> _brandGameService;
-	private readonly ICashServiceClient _cashServiceClient;
-	private readonly IPlayerBucketRepository _playerBucketService;
-	private readonly IPromotionBonusRepository _promotionBonusFactory;
-	private readonly IPromotionRepository _promotionRepository;
-	private readonly ITgsService<PlayerGameRebateAggregate> _playerGameRebateAggregateService;
-	private readonly ITgsService<Player> _playerService;
-	private readonly ISerialNumberGenerator _serialNumberGenerator;
-	private readonly ITransactionRepository _transactionRepository;
-	private readonly ITgsService<Transaction> _transactionService;
-	private readonly PromotionSerializer _promotionSerializer;
-	private readonly ILogger<CreatePromotionBonusWeeklyHandler> _logger;
+	private PromotionRow _promotion;
+	private PromotionBonusModel _promotionBonusModel;
 
 	public TurnoverRebateWeeklyDistribution(
 		IPlayerBucketRepository playerBucketService,
 		ICashServiceClient cashServiceClient,
-		ITgsService<PlayerGameRebateAggregate> playerGameRebateAggregateService,
-		ITgsService<Player> playerService,
 		IPromotionRepository promotionRepository,
 		IPromotionBonusRepository promotionBonusFactory,
 		ITransactionRepository transactionRepository,
 		ISerialNumberGenerator serialNumberGenerator,
-		ITgsService<Transaction> transactionService,
-		ITgsService<BrandGame> brandGameService,
+		TgsContext tgsContext,
 		PromotionSerializer promotionSerializer,
 		ILogger<CreatePromotionBonusWeeklyHandler> logger)
 	{
 		_promotionBonusFactory = promotionBonusFactory;
 		_playerBucketService = playerBucketService;
 		_cashServiceClient = cashServiceClient;
-		_playerGameRebateAggregateService = playerGameRebateAggregateService;
-		_playerService = playerService;
 		_promotionRepository = promotionRepository;
 		_transactionRepository = transactionRepository;
 		_serialNumberGenerator = serialNumberGenerator;
-		_brandGameService = brandGameService;
-		_transactionService = transactionService;
 		_promotionSerializer = promotionSerializer;
+		_tgsContext = tgsContext;
 		_logger = logger;
 	}
 
-	public IDistribution SetPromotion(PromotionRow  promotion,DateTimeOffset? from,DateTimeOffset? to)
+	public IDistribution SetPromotion(PromotionRow promotion, DateTimeOffset? from, DateTimeOffset? to)
 	{
 		_promotion = promotion;
-		_previousMonday = from ?? _previousMonday;
-		_previousSunday = to ?? _previousSunday;
+		_previousMonday = from ?? (_promotion.From > _previousMonday ? _promotion.From : _previousMonday);
+		_previousSunday = to ?? (_promotion.To < _previousSunday ? _promotion.To : _previousSunday);
 
 		if (_promotion == null)
+		{
 			throw new ArgumentNullException(nameof(promotion));
+		}
 
 		return this;
 	}
 
 	public async ValueTask<IDistribution> SetConditionDataAsync(CancellationToken cancellationToken)
 	{
-		_playerWinLossWeekly = await _playerGameRebateAggregateService.GetQueries()
+		var promotionLevels = _tgsContext.PromotionVipLevels.Where(x => x.PromotionId == _promotion.Id)
+			.Select(v => v.Level).ToArray();
+
+		var rule = _promotionSerializer.Deserialize<TurnoverRebateWeeklyRule>(_promotion.CampaignDetail)!;
+
+		_playerWinLossWeekly = await _tgsContext.PlayerGameRebateAggregates
 			.Where(x => x.BrandId == _promotion.BrandId)
 			.Where(x => x.ReportDate >= _previousMonday.UtcDateTime && x.ReportDate <= _previousSunday.UtcDateTime)
-			.GroupJoin(_brandGameService.GetQueries(),
+			.Where(promotionLevels.Length > 0,
+				pa => pa.VipLevel != null && promotionLevels.Contains(pa.VipLevel.Value))
+			.Where(rule.GameType is not null, pa => pa.GameType == (short)rule.GameType!)
+			.Where(rule.GameProviderIds.Any(), pa =>
+				rule.GameProviderIds.Contains(pa.GameProviderId))
+			.Join(_tgsContext.PromotionParticipants.Where(pp => pp.PromotionId == _promotion.Id).Where(x =>
+					x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode)
+				.Distinct(),
+				agg => agg.PlayerCode, playerCode => playerCode, (agg, playerCode) => new
+				{
+					agg.BrandId,
+					agg.ReportDate,
+					agg.PlayerCode,
+					agg.GameId,
+					agg.GameType,
+					agg.GameProviderId,
+					agg.VipLevel,
+					agg.Turnover
+				})
+			.GroupJoin(_tgsContext.BrandGames,
 				aggregate => new
 				{
 					aggregate.BrandId,
@@ -138,35 +158,27 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 	public async ValueTask<IDistribution> CalculateBonusAmountAsync(CancellationToken cancellationToken)
 	{
 		var id = await _serialNumberGenerator.GenerateAsync(cancellationToken).ConfigureAwait(false);
-		var from = _promotion.From > _previousMonday ? _promotion.From : _previousMonday;
-		var to = _promotion.To < _previousSunday ? _promotion.To : _previousSunday;
 
 		var amount = _promotion.AmountUsed;
 
-		var promotionLevels = _promotion.PromotionVipLevels.Select(v => v.Level).ToArray();
-
 		var rule = _promotionSerializer.Deserialize<TurnoverRebateWeeklyRule>(_promotion.CampaignDetail)!;
 
-		var players = _playerWinLossWeekly
-			.Where(promotionLevels.Length > 0,
-				pa => pa.VipLevel != null && promotionLevels.Contains(pa.VipLevel.Value))
-			.Where(rule.GameType is not null, pa => pa.GameType == (short)rule.GameType!)
-			.Where(rule.GameProviderIds.Any(), pa =>
-				rule.GameProviderIds.Contains(pa.GameProviderId))
-			.Where(pa => pa.ReportDate >= from)
-			.Where(pa => pa.ReportDate <= to);
-
-		var playerBonus = _promotion.PromotionParticipants.Where(x =>
-			x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode).Distinct().Select(playerCode =>
+		var playerBonus = _playerWinLossWeekly.GroupBy(x => x.PlayerCode,
+			(playerCode, list) => new
+			{
+				PlayerCode = playerCode,
+				Turnover = list.Sum(s => s.Turnover)
+			}).Select(x =>
 		{
-			var playerTurnover = players.Where(pa => pa.PlayerCode == playerCode).Sum(s => s.Turnover);
+			var playerTurnover = x.Turnover;
 
-			if (amount > _promotion.TotalAmountLimit && _promotion.Unlimited == 0 || playerTurnover < rule.TurnoverLimit)
+			if (amount > _promotion.TotalAmountLimit && _promotion.Unlimited == 0 ||
+			    playerTurnover < rule.TurnoverLimit)
 			{
 				return new PromotionBonusPlayerModel
 				{
 					PromotionBonusId = id,
-					PlayerCode = playerCode!,
+					PlayerCode = x.PlayerCode,
 					BonusAmount = 0M,
 					PromotionType = _promotion.PromotionType
 				};
@@ -183,7 +195,7 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 			return new PromotionBonusPlayerModel
 			{
 				PromotionBonusId = id,
-				PlayerCode = playerCode!,
+				PlayerCode = x.PlayerCode,
 				BonusAmount = playerRebateAmount,
 				PromotionType = _promotion.PromotionType
 			};
@@ -208,8 +220,10 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 			_promotion.Percentage,
 			_promotion.TotalAmountLimit,
 			_promotion.TurnoverMultiple,
-			GameProviderIds = _promotion.PromotionGameProviders.Select(g => g.GameProviderId).ToArray(),
-			VipLevels = _promotion.PromotionVipLevels.Select(v => v.Level).OrderBy(level => level).ToArray(),
+			GameProviderIds = rule.GameProviderIds.ToArray(),
+			VipLevels =
+				_tgsContext.PromotionVipLevels.Where(x => x.PromotionId == _promotion.Id).Select(v => v.Level)
+					.ToArray(),
 			_promotion.CreatedOn,
 			_promotion.UpdatedOn,
 			_promotion.CreatedByUsername,
@@ -224,13 +238,13 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 			_promotion.CampaignDetail
 		};
 
-		_promotionBonusModel = new PromotionBonusModel
+		_promotionBonusModel = new()
 		{
 			Id = id,
 			BrandId = _promotion.BrandId,
 			PromotionId = _promotion.Id,
-			From = from,
-			To = to,
+			From = _previousMonday,
+			To = _previousSunday,
 			AutoSentPlayerBonus = _promotion.AutoSentPlayerBonus,
 			PromotionType = _promotion.PromotionType,
 			TotalAmountLimit = _promotion.TotalAmountLimit,
@@ -241,12 +255,13 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 			CreatedOn = DateTimeOffset.Now,
 			SentOn = _promotion.AutoSentPlayerBonus ? DateTimeOffset.Now : null,
 			Players = playerBonus.Where(p => p.BonusAmount > 0M).ToArray(),
-			Detail = JsonSerializer.Serialize(promotionData,new JsonSerializerOptions
-			{
-				PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-				ReferenceHandler = ReferenceHandler.IgnoreCycles,
-				DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-			})
+			Detail = JsonSerializer.Serialize(promotionData,
+				new JsonSerializerOptions
+				{
+					PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+					ReferenceHandler = ReferenceHandler.IgnoreCycles,
+					DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+				})
 		};
 
 		return this;
@@ -254,14 +269,20 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 
 	public async ValueTask<IDistribution> DistributeBonusAsync(CancellationToken cancellationToken)
 	{
-		await _promotionRepository.UpdatePromotionsAsync(new[] { _promotion! });
-		var bonus = await _promotionBonusFactory.CreatePromotionBonusAsync(new[] { _promotionBonusModel });
+		await _promotionRepository.UpdatePromotionsAsync(new[]
+		{
+			_promotion!
+		});
+		var bonus = await _promotionBonusFactory.CreatePromotionBonusAsync(new[]
+		{
+			_promotionBonusModel
+		});
 
 		if (_promotion.AutoSentPlayerBonus)
 		{
 			var playerCodes = bonus.SelectMany(p => p.PromotionPlayers).Select(p => p.PlayerCode);
 
-			var players = await _playerService.GetQueries()
+			var players = await _tgsContext.Players
 				.Where(x => playerCodes.Contains(x.PlayerCode))
 				.Select(x => new
 				{
@@ -307,7 +328,6 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 			var transactionPromotions = new List<TransactionPromotion>();
 
 			foreach (var playerBonus in playerBonuses)
-			{
 				await Policy.Handle<HttpRequestException>()
 					.WaitAndRetryAsync(
 						3,
@@ -319,7 +339,7 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 							exception))
 					.ExecuteAsync(async () =>
 					{
-						if (!await _transactionService.GetQueries()
+						if (!await _tgsContext.Transactions
 							    .AnyAsync(
 								    x => x.PlayerCode == playerBonus.PlayerCode
 									    && x.ExternalTransactionId == playerBonus.Id.ToString(),
@@ -344,10 +364,10 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 							});
 						}
 					});
-			}
 
 			await _transactionRepository.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());
 		}
 
 		return this;
-	}}
+	}
+}
