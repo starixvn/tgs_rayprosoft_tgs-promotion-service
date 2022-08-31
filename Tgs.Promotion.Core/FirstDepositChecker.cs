@@ -37,4 +37,9 @@ internal class FirstDepositChecker : IPromotionChecker
 
 	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId)
 		=> _playerDataRepository.SetPlayerFirstDepositFlagAsync(playerCode);
+
+	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
+	{
+		return CheckAsync(conditionData.PlayerCode, promotion);
+	}
 }

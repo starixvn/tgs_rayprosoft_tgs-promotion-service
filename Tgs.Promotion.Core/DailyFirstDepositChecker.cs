@@ -24,4 +24,9 @@ internal class DailyFirstDepositChecker : IPromotionChecker
 		=> promotionId is null
 			? ValueTask.CompletedTask
 			: _playerDataRepository.SetPlayerDailyDepositFlagAsync(playerCode);
+
+	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
+	{
+		return CheckAsync(conditionData.PlayerCode, promotion);
+	}
 }
