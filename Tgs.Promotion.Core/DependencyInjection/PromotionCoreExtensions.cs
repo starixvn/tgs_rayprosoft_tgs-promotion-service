@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Tgs.Promotion;
+using Tgs.Promotion.ApplicationServices.Promotion;
 using Tgs.Promotion.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -20,12 +21,14 @@ public static class PromotionCoreExtensions
 			.RegisterPromotionChecker<DailyFirstDepositChecker>("DailyFirstDeposit")
 			.RegisterPromotionChecker<DailySecondDepositChecker>("DailySecondDeposit")
 			.RegisterPromotionChecker<AlwaysTrueChecker>("TurnoverRebate")
+			.RegisterPromotionChecker<AlwaysTrueChecker>("TurnoverRebateWeekly")
 			.RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyDaily")
 			.RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyWeekly")
 			.RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyMonthly")
 			.RegisterPromotionChecker<RegisterChecker>("Register")
 			.RegisterPromotionChecker<AlwaysTrueChecker>("Roulette")
-			.RegisterPromotionChecker<AlwaysTrueChecker>("Dummy");
+			.RegisterPromotionChecker<AlwaysTrueChecker>("Dummy")
+			.RegisterPromotionChecker<AlwaysTrueChecker>("DepositAccumulateRoulette");
 
 		_ = services
 			.AddSerialNumberGenerator()
@@ -33,6 +36,22 @@ public static class PromotionCoreExtensions
 			.AddScoped<IPromotionCheckerFactory>(sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(
 				sp,
 				configuration.GetAllRegisterCheckerTypes()));
+
+		services
+			.AddTransient<ReliefMoneyWeeklyDistribution>()
+			.AddTransient<TurnoverRebateWeeklyDistribution>()
+			.AddTransient<Func<string, IDistribution>>(serviceProvider => key =>
+		{
+			var distribution = new Dictionary<string, Type>
+			{
+				{ "ReliefMoneyWeekly", typeof(ReliefMoneyWeeklyDistribution) },
+				{ "TurnoverRebateWeekly", typeof(TurnoverRebateWeeklyDistribution) }
+			};
+
+			distribution.TryGetValue(key, out var distributionType);
+
+			return (IDistribution)serviceProvider.GetService(distributionType!)!;
+		});
 
 		return services;
 	}
