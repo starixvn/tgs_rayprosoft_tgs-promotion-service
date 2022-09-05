@@ -269,10 +269,11 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 
 	public async ValueTask<IDistribution> DistributeBonusAsync(CancellationToken cancellationToken)
 	{
-		//await _promotionRepository.UpdatePromotionsAsync(new[]
-		//{
-		//	_promotion!
-		//});
+		await _promotionRepository.UpdatePromotionsAsync(new[]
+		{
+			_promotion!
+		});
+
 		var bonus = await _promotionBonusFactory.CreatePromotionBonusAsync(new[]
 		{
 			_promotionBonusModel
