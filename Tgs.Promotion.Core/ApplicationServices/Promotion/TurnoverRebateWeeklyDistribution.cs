@@ -93,8 +93,8 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 			.Where(promotionLevels.Length > 0,
 				pa => pa.VipLevel != null && promotionLevels.Contains(pa.VipLevel.Value))
 			.Where(rule.GameType is not null, pa => pa.GameType == (short)rule.GameType!)
-			.Where(rule.GameProviderIds.Any(), pa =>
-				rule.GameProviderIds.Contains(pa.GameProviderId))
+			.Where(rule.GameProviderIds?.Any(), pa =>
+				rule.GameProviderIds!.Contains(pa.GameProviderId))
 			.Join(_tgsContext.PromotionParticipants.Where(pp => pp.PromotionId == _promotion.Id).Where(x =>
 					x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode)
 				.Distinct(),
@@ -220,7 +220,7 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 			_promotion.Percentage,
 			_promotion.TotalAmountLimit,
 			_promotion.TurnoverMultiple,
-			GameProviderIds = rule.GameProviderIds.ToArray(),
+			GameProviderIds = rule.GameProviderIds?.ToArray(),
 			VipLevels =
 				_tgsContext.PromotionVipLevels.Where(x => x.PromotionId == _promotion.Id).Select(v => v.Level)
 					.ToArray(),
@@ -269,10 +269,10 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 
 	public async ValueTask<IDistribution> DistributeBonusAsync(CancellationToken cancellationToken)
 	{
-		await _promotionRepository.UpdatePromotionsAsync(new[]
-		{
-			_promotion!
-		});
+		//await _promotionRepository.UpdatePromotionsAsync(new[]
+		//{
+		//	_promotion!
+		//});
 		var bonus = await _promotionBonusFactory.CreatePromotionBonusAsync(new[]
 		{
 			_promotionBonusModel
