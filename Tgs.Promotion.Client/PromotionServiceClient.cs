@@ -13,6 +13,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 		WriteIndented = false,
 		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+		Converters = { new JsonStringEnumConverter() }
 	};
 
 	private readonly HttpClient _httpClient;

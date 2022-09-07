@@ -306,21 +306,21 @@ public class
 		return promotion.PromotionType switch
 		{
 			"ReliefMoneyMonthly" => (promotion.PromotionParticipants.Where(x =>
-					x.CreatedOn >= promotion.From && x.CreatedOn <= promotion.To).Select(p =>
+					x.CreatedOn >= promotion.From && x.CreatedOn <= promotion.To).Select(x => x.PlayerCode).Distinct().Select(playerCode =>
 				{
 					if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
 					{
 						return new PromotionBonusPlayerModel
 						{
 							PromotionBonusId = id,
-							PlayerCode = p.PlayerCode!,
+							PlayerCode = playerCode!,
 							BonusAmount = 0M,
 							PromotionType = promotion.PromotionType
 						};
 					}
 
 					var playerRebateAmount =
-						players.Where(pa => pa.PlayerCode == p.PlayerCode).Sum(s => s.WinLoss) *
+						players.Where(pa => pa.PlayerCode == playerCode).Sum(s => s.WinLoss) *
 						promotion.Percentage / 100;
 
 					if (playerRebateAmount <= 0)
@@ -328,7 +328,7 @@ public class
 						return new PromotionBonusPlayerModel
 						{
 							PromotionBonusId = id,
-							PlayerCode = p.PlayerCode!,
+							PlayerCode = playerCode!,
 							BonusAmount = 0,
 							PromotionType = promotion.PromotionType
 						};
@@ -343,7 +343,7 @@ public class
 					return new PromotionBonusPlayerModel
 					{
 						PromotionBonusId = id,
-						PlayerCode = p.PlayerCode!,
+						PlayerCode = playerCode!,
 						BonusAmount = playerRebateAmount,
 						PromotionType = promotion.PromotionType
 					};

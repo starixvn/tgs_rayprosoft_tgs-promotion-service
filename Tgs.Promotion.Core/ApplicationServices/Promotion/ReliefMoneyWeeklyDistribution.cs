@@ -1,0 +1,374 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Polly;
+using Tgs.CashService.Client;
+using Tgs.Promotion.Domain.Entities;
+using Tgs.Promotion.Extensions;
+using Tgs.Promotion.Models.PromotionBonus;
+using Tgs.Promotion.Models.PromotionBucket;
+using Tgs.SerialNumberGenerator;
+
+namespace Tgs.Promotion.ApplicationServices.Promotion;
+internal class ReliefMoneyWeeklyDistribution : IDistribution
+{
+	private PromotionRow _promotion;
+	private IEnumerable<PlayerWinLossWeekly> _playerWinLossWeekly = Array.Empty<PlayerWinLossWeekly>();
+	private PromotionBonusModel _promotionBonusModel;
+	private DateTimeOffset _previousMonday = new DateTimeOffset(DateTimeOffset.Now.Year,
+		DateTimeOffset.Now.Month,
+		DateTimeOffset.Now.Day,
+		0,
+		0,
+		0,
+		new(8, 0, 0)).AddDays(-7).GetMonday();
+	private DateTimeOffset _previousSunday = new DateTimeOffset(DateTimeOffset.Now.Year,
+		DateTimeOffset.Now.Month,
+		DateTimeOffset.Now.Day,
+		0,
+		0,
+		0,
+		new(8, 0, 0)).AddDays(-7).GetSunday();
+
+	private readonly ICashServiceClient _cashServiceClient;
+	private readonly IPlayerBucketRepository _playerBucketService;
+	private readonly IPromotionBonusRepository _promotionBonusFactory;
+	private readonly IPromotionRepository _promotionRepository;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
+	private readonly ITransactionRepository _transactionRepository;
+	private readonly TgsContext _tgsContext;
+	private readonly ILogger<CreatePromotionBonusWeeklyHandler> _logger;
+
+	public ReliefMoneyWeeklyDistribution(
+		IPlayerBucketRepository playerBucketService,
+		ICashServiceClient cashServiceClient,
+		IPromotionRepository promotionRepository,
+		IPromotionBonusRepository promotionBonusFactory,
+		ITransactionRepository transactionRepository,
+		ISerialNumberGenerator serialNumberGenerator,
+		TgsContext tgsContext,
+		ILogger<CreatePromotionBonusWeeklyHandler> logger)
+	{
+		_promotionBonusFactory = promotionBonusFactory;
+		_playerBucketService = playerBucketService;
+		_cashServiceClient = cashServiceClient;
+		_promotionRepository = promotionRepository;
+		_transactionRepository = transactionRepository;
+		_serialNumberGenerator = serialNumberGenerator;
+		_tgsContext = tgsContext;
+		_logger = logger;
+	}
+
+	public IDistribution SetPromotion(PromotionRow promotion,DateTimeOffset? from,DateTimeOffset? to)
+	{
+		_promotion = promotion;
+		_previousMonday = from ?? (_promotion.From > _previousMonday ? _promotion.From : _previousMonday);
+		_previousSunday = to ?? (_promotion.To < _previousSunday ? _promotion.To : _previousSunday);
+
+		if (_promotion == null)
+			throw new ArgumentNullException(nameof(promotion));
+
+		return this;
+	}
+
+	public async ValueTask<IDistribution> SetConditionDataAsync(CancellationToken cancellationToken)
+	{ 
+		var promotionLevels = _tgsContext.PromotionVipLevels.Where(x => x.PromotionId == _promotion.Id)
+			.Select(v => v.Level).ToArray();
+
+		var promotionGameProviderIds = _tgsContext.PromotionGameProviders.Where(x => x.PromotionId == _promotion.Id)
+			.Select(v => v.GameProviderId).ToArray();
+
+		_playerWinLossWeekly = await _tgsContext.PlayerGameRebateAggregates
+			.Where(x => x.BrandId == _promotion.BrandId)
+			.Where(x => x.ReportDate >= _previousMonday.UtcDateTime && x.ReportDate <= _previousSunday.UtcDateTime)
+			.Where(promotionLevels.Length > 0,
+				pa => pa.VipLevel != null && promotionLevels.Contains(pa.VipLevel.Value))
+			.Where(_promotion.GameType is not null, pa => pa.GameType == _promotion.GameType)
+			.Where(promotionGameProviderIds.Any(), pa =>
+				promotionGameProviderIds.Contains(pa.GameProviderId))
+			.Join(_tgsContext.PromotionParticipants.Where(pp => pp.PromotionId == _promotion.Id).Where(x =>
+				x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode).Distinct(), agg => agg.PlayerCode,playerCode => playerCode,(agg,playerCode)=> new
+			{
+				agg.BrandId,
+				agg.ReportDate,
+				agg.PlayerCode,
+				agg.GameId,
+				agg.GameType,
+				agg.GameProviderId,
+				agg.VipLevel,
+				agg.WinLoss
+			})
+
+			.GroupJoin(_tgsContext.BrandGames,
+				aggregate => new
+				{
+					aggregate.BrandId,
+					aggregate.GameId
+				},
+				brandGame => new
+				{
+					brandGame.BrandId,
+					brandGame.GameId
+				},
+				(aggregate, brandGame) => new
+				{
+					aggregate,
+					brandGame
+				})
+			.SelectMany(x => x.brandGame.DefaultIfEmpty(),
+				(x, brandGame) => new
+				{
+					x.aggregate,
+					brandGame
+				})
+			.Where(x => x.brandGame == null || x.brandGame.Rebate)
+			.GroupBy(x => new
+			{
+				x.aggregate.BrandId,
+				x.aggregate.PlayerCode,
+				x.aggregate.GameType,
+				x.aggregate.GameProviderId,
+				x.aggregate.VipLevel,
+				x.aggregate.ReportDate
+			}, (player, list) => new PlayerWinLossWeekly
+			{
+				BrandId = player.BrandId,
+				PlayerCode = player.PlayerCode,
+				GameType = player.GameType,
+				VipLevel = player.VipLevel,
+				GameProviderId = player.GameProviderId,
+				ReportDate = player.ReportDate,
+				WinLoss = list.Sum(l => l.aggregate.WinLoss)
+			})
+			.ToArrayAsync(cancellationToken);
+
+		return this;
+	}
+
+	public async ValueTask<IDistribution> CalculateBonusAmountAsync(CancellationToken cancellationToken)
+	{
+		var promotionLevels = _tgsContext.PromotionVipLevels.Where(x => x.PromotionId == _promotion.Id)
+			.Select(v => v.Level).ToArray();
+
+		var promotionGameProviderIds = _tgsContext.PromotionGameProviders.Where(x => x.PromotionId == _promotion.Id)
+			.Select(v => v.GameProviderId).ToArray();
+
+		var id = await _serialNumberGenerator.GenerateAsync(cancellationToken).ConfigureAwait(false);
+
+		var amount = _promotion.AmountUsed;
+
+		var playerBonus = _playerWinLossWeekly.GroupBy(x => x.PlayerCode,(playerCode,list)=>new
+		{
+			PlayerCode = playerCode,
+			WinLoss = list.Sum(s => s.WinLoss)
+		}).Select(x =>
+		{
+			if (amount > _promotion.TotalAmountLimit && _promotion.Unlimited == 0)
+			{
+				return new PromotionBonusPlayerModel
+				{
+					PromotionBonusId = id,
+					PlayerCode = x.PlayerCode,
+					BonusAmount = 0M,
+					PromotionType = _promotion.PromotionType
+				};
+			}
+
+			var playerRebateAmount = x.WinLoss * _promotion.Percentage / 100;
+
+			if (playerRebateAmount <= 0)
+			{
+				return new PromotionBonusPlayerModel
+				{
+					PromotionBonusId = id,
+					PlayerCode = x.PlayerCode,
+					BonusAmount = 0,
+					PromotionType = _promotion.PromotionType
+				};
+			}
+
+			playerRebateAmount = playerRebateAmount > _promotion.BonusAmountLimit
+				? _promotion.BonusAmountLimit
+				: playerRebateAmount;
+
+			amount += playerRebateAmount;
+
+			return new PromotionBonusPlayerModel
+			{
+				PromotionBonusId = id,
+				PlayerCode = x.PlayerCode,
+				BonusAmount = playerRebateAmount,
+				PromotionType = _promotion.PromotionType
+			};
+		}).ToArray();
+
+		_promotion.AmountUsed = amount;
+
+		var promotionData = new
+		{
+			_promotion.Id,
+			_promotion.BrandId,
+			_promotion.From,
+			_promotion.To,
+			Status = (PromotionStatus)_promotion.Status,
+			_promotion.Name,
+			_promotion.AutoSentPlayerBonus,
+			_promotion.PromotionType,
+			_promotion.BonusAmountLimit,
+			_promotion.AmountUsed,
+			Unlimited = _promotion.Unlimited == 1,
+			GameType = (GameType?)_promotion.GameType,
+			_promotion.Percentage,
+			_promotion.TotalAmountLimit,
+			_promotion.TurnoverMultiple,
+			GameProviderIds = promotionLevels,
+			VipLevels = promotionGameProviderIds,
+			_promotion.CreatedOn,
+			_promotion.UpdatedOn,
+			_promotion.CreatedByUsername,
+			_promotion.UpdatedByUsername,
+			_promotion.SubSubject,
+			_promotion.Content,
+			_promotion.Terms,
+			_promotion.DesktopBanner,
+			_promotion.MobileBanner,
+			_promotion.Localization,
+			Number = _promotion.DisplayOrder,
+			_promotion.CampaignDetail
+		};
+
+		_promotionBonusModel = new PromotionBonusModel
+		{
+			Id = id,
+			BrandId = _promotion.BrandId,
+			PromotionId = _promotion.Id,
+			From = _previousMonday,
+			To = _previousSunday,
+			AutoSentPlayerBonus = _promotion.AutoSentPlayerBonus,
+			PromotionType = _promotion.PromotionType,
+			TotalAmountLimit = _promotion.TotalAmountLimit,
+			GameType = (GameType?)_promotion.GameType,
+			Percentage = _promotion.Percentage,
+			BonusAmountLimit = _promotion.BonusAmountLimit,
+			TurnoverMultiple = _promotion.TurnoverMultiple,
+			CreatedOn = DateTimeOffset.Now,
+			SentOn = _promotion.AutoSentPlayerBonus ? DateTimeOffset.Now : null,
+			Players = playerBonus.Where(p => p.BonusAmount > 0M).ToArray(),
+			Detail = JsonSerializer.Serialize(promotionData,new JsonSerializerOptions
+			{
+				PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+				ReferenceHandler = ReferenceHandler.IgnoreCycles,
+				DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+			})
+		};
+
+		return this;
+	}
+
+	public async ValueTask<IDistribution> DistributeBonusAsync(CancellationToken cancellationToken)
+	{
+		await _promotionRepository.UpdatePromotionsAsync(new[] { _promotion! });
+		var bonus = await _promotionBonusFactory.CreatePromotionBonusAsync(new[] { _promotionBonusModel });
+
+		if (_promotion.AutoSentPlayerBonus)
+		{
+			var playerCodes = bonus.SelectMany(p => p.PromotionPlayers).Select(p => p.PlayerCode);
+
+			var players = await _tgsContext.Players
+				.Where(x => playerCodes.Contains(x.PlayerCode))
+				.Select(x => new
+				{
+					x.BrandId,
+					x.PlayerCode,
+					x.DefaultWalletId
+				})
+				.ToArrayAsync(cancellationToken);
+
+			var playerBonuses = bonus
+				.SelectMany(x => x.PromotionPlayers
+					.Join(
+						players,
+						pb => pb.PlayerCode,
+						p => p.PlayerCode,
+						(pb, p) => new
+						{
+							pb,
+							p
+						})
+					.Select(p => new
+					{
+						p.pb.Id,
+						x.BrandId,
+						p.p.PlayerCode,
+						p.p.DefaultWalletId,
+						BucketAmount = p.pb.BonusAmount * x.TurnoverMultiple,
+						p.pb.BonusAmount,
+						BucketType = BucketType.Promotion,
+						x.PromotionId,
+						PromotionBonusId = x.Id,
+						x.PromotionType
+					}))
+				.ToArray();
+
+			await _playerBucketService.CreatePlayerBucketsAsync(playerBonuses.Select(x =>
+				new CreatePlayerBucketRequest(x.BrandId,
+					x.PlayerCode,
+					x.DefaultWalletId,
+					x.BucketType,
+					x.BucketAmount)).ToArray()).ConfigureAwait(false);
+
+			var transactionPromotions = new List<TransactionPromotion>();
+
+			foreach (var playerBonus in playerBonuses)
+			{
+				await Policy.Handle<HttpRequestException>()
+					.WaitAndRetryAsync(
+						3,
+						retryAttempt => TimeSpan.FromSeconds(1),
+						(exception, time, retryCount, context) => _logger.LogError(
+							"promotion weekly externalId:{externalId} retryCount:{retryCount} Exception:{exception}",
+							playerBonus.Id.ToString(),
+							retryCount,
+							exception))
+					.ExecuteAsync(async () =>
+					{
+						if (!await _tgsContext.Transactions
+							    .AnyAsync(
+								    x => x.PlayerCode == playerBonus.PlayerCode
+									    && x.ExternalTransactionId == playerBonus.Id.ToString(),
+								    cancellationToken))
+						{
+							var response = await _cashServiceClient
+								.PromotionAsync(
+									playerBonus.DefaultWalletId,
+									playerBonus.BonusAmount,
+									"promotion relief money weekly",
+									playerBonus.Id.ToString(),
+									null,
+									cancellationToken)
+								.ConfigureAwait(false);
+
+							transactionPromotions.Add(new()
+							{
+								TransactionId = response.TransactionId,
+								PromotionId = playerBonus.PromotionId,
+								PromotionBonusId = playerBonus.PromotionBonusId,
+								PromotionType = playerBonus.PromotionType
+							});
+						}
+					});
+			}
+
+			await _transactionRepository.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());
+		}
+
+		return this;
+	}
+}

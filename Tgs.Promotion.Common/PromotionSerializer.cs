@@ -9,7 +9,8 @@ public class PromotionSerializer
 	{
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 		WriteIndented = false,
-		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+		Converters = { new JsonStringEnumConverter() }
 	};
 
 	public T? Deserialize<T>(string json)
