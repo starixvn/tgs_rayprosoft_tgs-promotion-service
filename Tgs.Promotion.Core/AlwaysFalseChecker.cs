@@ -10,9 +10,6 @@ internal class AlwaysFalseChecker : IPromotionChecker
 	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
 
 	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
-	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule) => throw new NotImplementedException();
-
-	public ValueTask<bool> CheckJoinAsync<IConditionData1>(string playerCode, PromotionMainInfo promotion,
-		IConditionData1 conditionData)
-		=> throw new NotImplementedException();
+	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule) 
+		=> CheckAsync(conditionData.PlayerCode, promotion);
 }

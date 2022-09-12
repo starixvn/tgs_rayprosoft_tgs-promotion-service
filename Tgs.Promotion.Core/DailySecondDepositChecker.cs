@@ -20,7 +20,5 @@ internal class DailySecondDepositChecker : IPromotionChecker
 
 	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
 	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
-	{
-		return CheckAsync(conditionData.PlayerCode, promotion);
-	}
+		=> CheckAsync(conditionData.PlayerCode, promotion);
 }

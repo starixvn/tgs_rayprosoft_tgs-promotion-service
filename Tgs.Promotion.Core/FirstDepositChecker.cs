@@ -39,7 +39,5 @@ internal class FirstDepositChecker : IPromotionChecker
 		=> _playerDataRepository.SetPlayerFirstDepositFlagAsync(playerCode);
 
 	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
-	{
-		return CheckAsync(conditionData.PlayerCode, promotion);
-	}
+		=> CheckAsync(conditionData.PlayerCode, promotion);
 }
