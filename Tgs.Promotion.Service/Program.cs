@@ -100,6 +100,7 @@ builder.Services
 			"tgs.payment.deposit.status"))
 	.AddNatsGlobPatternExchange("tgs.promotion.roulette.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.register.setting")
+	.AddNatsGlobPatternExchange("tgs.promotion.depositreward.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.depositaccumulateroulette.setting")
 	.AddGlobPatternExchange<TurnoverRebateWeeklyCampaignDetailProcessor>("tgs.promotion.turnoverrebateweekly.setting")
 	.AddGlobPatternExchange<DummyCampaingDetailProcessor>("tgs.promotion.dummy.setting")

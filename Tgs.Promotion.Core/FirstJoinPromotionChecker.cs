@@ -56,4 +56,7 @@ internal class FirstJoinPromotionChecker : IPromotionChecker
 			: _playerDataRepository
 			.SetPlayerFirstJoinPromotionAsync(playerCode);
 	}
+
+	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
+		=> CheckAsync(conditionData.PlayerCode, promotion);
 }

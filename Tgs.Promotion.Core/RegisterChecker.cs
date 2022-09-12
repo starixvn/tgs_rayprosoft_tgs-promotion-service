@@ -43,4 +43,6 @@ internal class RegisterChecker : IPromotionChecker
 	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
 
 	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
+	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
+		=> CheckAsync(conditionData.PlayerCode, promotion);
 }
