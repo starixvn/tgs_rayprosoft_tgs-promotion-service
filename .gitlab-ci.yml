@@ -113,6 +113,7 @@ deploy-dev:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
+        --name-template tgs \
         -f - 
       {
         "nodeSelector": $node_selector,
@@ -123,6 +124,7 @@ deploy-dev:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
+        --name-template tgs \
         -f - \
         | kubectl -n $namespace apply -f -
       {
@@ -155,6 +157,7 @@ deploy-staging:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
+        --name-template tgs \
         -f - 
       {
         "nodeSelector": $node_selector,
@@ -165,6 +168,7 @@ deploy-staging:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
+        --name-template tgs \
         -f - \
         | kubectl -n $namespace apply -f -
       {
@@ -197,6 +201,7 @@ deploy-prod:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
+        --name-template tgs \
         -f - 
       {
         "nodeSelector": $node_selector,
@@ -207,6 +212,7 @@ deploy-prod:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
+        --name-template tgs \
         -f - \
         | kubectl -n $namespace apply -f -
       {
