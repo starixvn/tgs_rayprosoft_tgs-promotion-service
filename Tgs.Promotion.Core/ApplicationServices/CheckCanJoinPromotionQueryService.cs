@@ -31,8 +31,12 @@ internal class CheckCanJoinPromotionQueryService : IGetService<CheckCanJoinPromo
 		var checker = _promotionCheckerFactory.GetPromotionChecker(promotionData.PromotionType);
 
 		var isAllowed = await checker
-			.CheckAsync(
-				query.PlayerCode,
+			.CheckJoinAsync(
+				new ConditionData(
+					query.BrandId,
+					query.PromotionId,
+					query.PlayerCode,
+					query.Amount),
 				new PromotionMainInfo(
 					promotionData.Id,
 					promotionData.BrandId,
@@ -40,7 +44,14 @@ internal class CheckCanJoinPromotionQueryService : IGetService<CheckCanJoinPromo
 					(promotionData.From, promotionData.To),
 					promotionData.PromotionType,
 					promotionData.TotalAmountLimit,
-					promotionData.AutoSentPlayerBonus))
+					promotionData.AutoSentPlayerBonus),
+				new PromotionRule(
+					JsonDocument.Parse(promotionData.CampaignDetail),
+					promotionData.BonusAmountLimit,
+					promotionData.Percentage,
+					promotionData.TurnoverMultiple,
+					(GameType?)promotionData.GameType
+					))
 			.ConfigureAwait(false);
 		if (!isAllowed)
 		{

@@ -13,6 +13,7 @@ namespace Tgs.Promotion.Domain.Entities
         public decimal BonusAmount { get; set; }
         public DateTime? SentOn { get; set; }
         public string? SentByUsername { get; set; }
+        public decimal BucketAmountByManual { get; set; }
 
         public virtual Player PlayerCodeNavigation { get; set; } = null!;
         public virtual PromotionBonus PromotionBonus { get; set; } = null!;

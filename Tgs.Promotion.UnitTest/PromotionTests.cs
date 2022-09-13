@@ -177,13 +177,14 @@ public class PromotionTests
 			.Returns(new PromotionRow
 			{
 				BrandId = query.BrandId,
-				PromotionType = "TestPromotionType"
+				PromotionType = "TestPromotionType",
+				CampaignDetail = "{}"
 			});
 
 		var fakeChecker = Substitute.For<IPromotionChecker>();
 
 		_ = fakeChecker
-			.CheckAsync(Arg.Any<string>(), Arg.Any<PromotionMainInfo>())
+			.CheckJoinAsync(Arg.Any<ConditionData>(), Arg.Any<PromotionMainInfo>(), Arg.Any<PromotionRule>())
 			.Returns(true);
 
 		_ = fakeServiceProvider

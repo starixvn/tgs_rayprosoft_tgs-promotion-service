@@ -28,6 +28,10 @@ namespace Tgs.Promotion.Domain.Entities.Configurations
                 .HasPrecision(18, 6)
                 .HasColumnName("bonus_amount");
 
+            entity.Property(e => e.BucketAmountByManual)
+                .HasPrecision(18, 6)
+                .HasColumnName("bucket_amount_by_manual");
+
             entity.Property(e => e.PlayerCode)
                 .HasMaxLength(16)
                 .HasColumnName("player_code");
