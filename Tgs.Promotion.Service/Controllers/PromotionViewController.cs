@@ -32,7 +32,8 @@ public class PromotionViewController : ControllerBase
 				UsedAmount = item.UsedAmount,
 				VipLevels = item.VipLevels,
 				Localization = item.Localization,
-				CampaignDetail = item.CampaignDetail
+				CampaignDetail = item.CampaignDetail,
+				Order = item.Order
 			});
 	}
 
@@ -60,7 +61,8 @@ public class PromotionViewController : ControllerBase
 				UsedAmount = item.UsedAmount,
 				VipLevels = item.VipLevels,
 				Localization = item.Localization,
-				CampaignDetail = item.CampaignDetail
+				CampaignDetail = item.CampaignDetail,
+				Order = item.Order
 			});
 	}
 }

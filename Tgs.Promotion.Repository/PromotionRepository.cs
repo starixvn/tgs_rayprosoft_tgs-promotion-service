@@ -357,7 +357,8 @@ public class PromotionRepository : IPromotionRepository
 							  p.Terms,
 							  p.Localization,
 							  p.CampaignDetail,
-							  p.Status
+							  p.Status,
+							  p.DisplayOrder
 						  }).ToArray();
 
 		var promotionVipLevels = _dbContext.PromotionVipLevels
@@ -387,7 +388,8 @@ public class PromotionRepository : IPromotionRepository
 				JsonDocument.Parse(string.IsNullOrWhiteSpace(p.Localization)
 					? "{}"
 					: p.Localization),
-				JsonDocument.Parse(p.CampaignDetail)))
+				JsonDocument.Parse(p.CampaignDetail),
+				p.DisplayOrder))
 			.ToAsyncEnumerable();
 	}
 

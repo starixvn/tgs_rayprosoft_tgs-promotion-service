@@ -146,7 +146,8 @@ public class PromotionTests
 					null,
 					null,
 					JsonDocument.Parse("{}"),
-					JsonDocument.Parse("{}"))
+					JsonDocument.Parse("{}"),
+					0)
 			}.ToAsyncEnumerable());
 
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Any<string>())

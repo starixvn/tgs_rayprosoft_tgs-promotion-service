@@ -16,4 +16,5 @@ public record PromotionView(
 	string? Content,
 	string? Convention,
 	JsonDocument Localization,
-	JsonDocument CampaignDetail);
+	JsonDocument CampaignDetail,
+	int Order);

@@ -31,4 +31,6 @@ public record PromotionView
 	public IEnumerable<int> VipLevels { get; init; } = Array.Empty<int>();
 
 	public JsonDocument CampaignDetail { get; init; } = default!;
+
+	public int Order { get; init; }
 }
