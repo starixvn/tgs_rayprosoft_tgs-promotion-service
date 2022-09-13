@@ -46,7 +46,7 @@ push-nuget:
   only:
     - main
   script:
-    - dotnet pack -c $BuildConfiguration "Tgs.Promotion.Client/Tgs.Promotion.Client.csproj" --no-build --no-restore
+    - dotnet pack -c $BuildConfiguration "Tgs.Promotion.Client/Tgs.Promotion.Client.csproj" --no-restore
     - dotnet nuget push "Tgs.Promotion.Client/bin/$BuildConfiguration/*.nupkg" -s "raypro-baget" -k $NugetApiKey --skip-duplicate
   artifacts:
     name: Nuget
