@@ -27,6 +27,9 @@ internal class FirstJoinPromotionChecker : IPromotionChecker
 		return player is not null && player.FirstPromotionOn == null;
 	}
 
+	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
+		=> CheckAsync(conditionData.PlayerCode, promotion);
+
 	public async ValueTask CommitTagAsync(string playerCode, Guid? promotionId)
 	{
 		if (promotionId is null)
@@ -56,7 +59,4 @@ internal class FirstJoinPromotionChecker : IPromotionChecker
 			: _playerDataRepository
 			.SetPlayerFirstJoinPromotionAsync(playerCode);
 	}
-
-	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
-		=> CheckAsync(conditionData.PlayerCode, promotion);
 }

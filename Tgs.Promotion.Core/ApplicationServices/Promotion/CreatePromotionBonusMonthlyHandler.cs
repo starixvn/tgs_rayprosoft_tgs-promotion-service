@@ -19,6 +19,7 @@ public class
 	private readonly ITgsService<BrandGame> _brandGameService;
 	private readonly ICashServiceClient _cashServiceClient;
 
+	private readonly ILogger<CreatePromotionBonusMonthlyHandler> _logger;
 	private readonly IPlayerBucketRepository _playerBucketService;
 	private readonly ITgsService<PlayerGameRebateAggregate> _playerGameRebateAggregateService;
 	private readonly ITgsService<Player> _playerService;
@@ -29,7 +30,6 @@ public class
 	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly ITransactionRepository _transactionRepository;
 	private readonly ITgsService<Transaction> _transactionService;
-	private readonly ILogger<CreatePromotionBonusMonthlyHandler> _logger;
 
 	public CreatePromotionBonusMonthlyHandler(
 		IPromotionBonusRepository promotionBonusFactory,
@@ -241,7 +241,7 @@ public class
 					3,
 					retryAttempt => TimeSpan.FromSeconds(1),
 					(exception, time, retryCount, context) => _logger.LogError(
-						"promotion monthly externalId:{externalId} " 
+						"promotion monthly externalId:{externalId} "
 							+ "retryCount:{retryCount} Exception:{exception}",
 						playerBonus.Id.ToString(),
 						retryCount,

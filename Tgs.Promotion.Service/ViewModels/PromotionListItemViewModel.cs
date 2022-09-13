@@ -20,6 +20,8 @@ public class PromotionListItemViewModel
 
 	public string Name { get; set; } = default!;
 
+	public int Order { get; set; }
+
 	public string? PersonalComputerBanner { get; set; }
 
 	public decimal? PromotionLimitAmount { get; set; }

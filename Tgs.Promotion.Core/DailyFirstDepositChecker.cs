@@ -12,8 +12,11 @@ internal class DailyFirstDepositChecker : IPromotionChecker
 	public ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
 		=> _playerDataRepository.CheckPlayerIsDailyFirstDepositAsync(playerCode);
 
+	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
+		=> CheckAsync(conditionData.PlayerCode, promotion);
+
 	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId)
-		=> ValueTask.CompletedTask;
+			=> ValueTask.CompletedTask;
 
 	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId)
 		=> promotionId is null
@@ -24,7 +27,4 @@ internal class DailyFirstDepositChecker : IPromotionChecker
 		=> promotionId is null
 			? ValueTask.CompletedTask
 			: _playerDataRepository.SetPlayerDailyDepositFlagAsync(playerCode);
-
-	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
-		=> CheckAsync(conditionData.PlayerCode, promotion);
 }

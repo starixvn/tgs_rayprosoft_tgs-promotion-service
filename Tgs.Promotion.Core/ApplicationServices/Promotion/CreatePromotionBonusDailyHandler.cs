@@ -251,7 +251,7 @@ public class
 				{
 					if (!await _transactionService.GetQueries()
 						.AnyAsync(
-							x => x.PlayerCode == playerBonus.PlayerCode 
+							x => x.PlayerCode == playerBonus.PlayerCode
 								&& x.ExternalTransactionId == playerBonus.Id.ToString(),
 							cancellationToken))
 					{

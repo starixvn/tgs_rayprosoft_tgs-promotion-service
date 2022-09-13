@@ -38,7 +38,7 @@ public static class PromotionCoreExtensions
 				sp,
 				configuration.GetAllRegisterCheckerTypes()));
 
-		services
+		_ = services
 			.AddTransient<ReliefMoneyWeeklyDistribution>()
 			.AddTransient<TurnoverRebateWeeklyDistribution>()
 			.AddTransient<Func<string, IDistribution>>(serviceProvider => key =>
@@ -49,7 +49,7 @@ public static class PromotionCoreExtensions
 				{ "TurnoverRebateWeekly", typeof(TurnoverRebateWeeklyDistribution) }
 			};
 
-			distribution.TryGetValue(key, out var distributionType);
+			_ = distribution.TryGetValue(key, out var distributionType);
 
 			return (IDistribution)serviceProvider.GetService(distributionType!)!;
 		});

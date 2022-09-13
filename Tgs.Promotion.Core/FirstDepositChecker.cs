@@ -27,8 +27,11 @@ internal class FirstDepositChecker : IPromotionChecker
 		return player != null && player.FirstDepositOn == null;
 	}
 
+	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
+		=> CheckAsync(conditionData.PlayerCode, promotion);
+
 	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId)
-		=> _playerDataRepository
+			=> _playerDataRepository
 			.RemovePlayerFirstDepositFlagAsync(playerCode);
 
 	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId)
@@ -37,7 +40,4 @@ internal class FirstDepositChecker : IPromotionChecker
 
 	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId)
 		=> _playerDataRepository.SetPlayerFirstDepositFlagAsync(playerCode);
-
-	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
-		=> CheckAsync(conditionData.PlayerCode, promotion);
 }

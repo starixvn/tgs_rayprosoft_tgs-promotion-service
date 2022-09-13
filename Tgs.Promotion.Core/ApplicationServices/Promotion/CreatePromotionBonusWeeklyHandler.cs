@@ -9,8 +9,8 @@ namespace Tgs.Promotion.ApplicationServices.Promotion;
 public class CreatePromotionBonusWeeklyHandler
 	: IGetService<CreatePromotionBonusWeeklyRequest, MessageResponse>
 {
-	private readonly IPromotionRepository _promotionRepository;
 	private readonly Func<string, IDistribution> _distributionFunc;
+	private readonly IPromotionRepository _promotionRepository;
 
 	public CreatePromotionBonusWeeklyHandler(
 		IPromotionRepository promotionRepository,
