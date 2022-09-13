@@ -4,7 +4,6 @@ using MockQueryable.Moq;
 using NSubstitute;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Repository;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
 

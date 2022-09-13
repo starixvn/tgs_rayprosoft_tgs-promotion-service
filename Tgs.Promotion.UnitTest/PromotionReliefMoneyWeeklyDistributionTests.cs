@@ -69,13 +69,13 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 			.AsQueryable()
 			.BuildMock();
 
-		promotionRepositoryMock.GetPromotionQueries().Returns(promotions);
+		_ = promotionRepositoryMock.GetPromotionQueries().Returns(promotions);
 
 		var request = new CreatePromotionBonusWeeklyRequest();
 
 		_ = await promotionsQueryHandlerMock.GetAsync(request, default);
 
-		funcDistributionMock.Received(1)
+		_ = funcDistributionMock.Received(1)
 			.Invoke(Arg.Is("ReliefMoneyWeekly"));
 	}
 }

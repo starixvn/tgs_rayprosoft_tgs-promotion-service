@@ -14,6 +14,45 @@ namespace Tgs.Promotion.UnitTest;
 [TestFixture]
 public class PromotionCheckerTests
 {
+	[TestCase(100, true)]
+	[TestCase(99, false)]
+	public async Task Deposit_Reward_Checker_Return_True_When_Player_Deposit_Amount_More_Then_Setting(decimal amount, bool response)
+	{
+		var fakePromotionSerializer = Substitute.For<PromotionSerializer>();
+
+		var sut = new DepositRewardChecker(fakePromotionSerializer);
+
+		var brandId = Guid.NewGuid();
+		var promotionId = Guid.NewGuid();
+
+		var conditionData = new ConditionData(
+			brandId,
+			promotionId,
+			"playerCode",
+			amount
+			);
+
+		var promotion = new PromotionMainInfo(
+			Guid.NewGuid(),
+			Guid.NewGuid(),
+			"Test Promotion",
+			(DateTime.Parse("2022/06/01 17:00:00+00"), DateTime.Parse("2022/06/05 17:00:00+00")),
+			"Register",
+			null,
+			false);
+
+		var rule = new PromotionRule(
+			JsonDocument.Parse(@"{""depositMinimumLimit"":100,""percentage"":10,""bonusAmount"":100,""turnoverMultiple"":10}"),
+			100,
+			10,
+			10,
+			null);
+
+		var actual = await sut.CheckJoinAsync(conditionData, promotion, rule);
+
+		Assert.IsTrue(actual == response);
+	}
+
 	[Test]
 	public async Task FirstDeposit_Player_FirstDepositOn_Is_Null_Should_Return_True()
 	{
@@ -487,46 +526,6 @@ public class PromotionCheckerTests
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
 		Assert.IsTrue(actual);
-	}
-
-	[TestCase(100, true)]
-	[TestCase(99, false)]
-	public async Task Deposit_Reward_Checker_Return_True_When_Player_Deposit_Amount_More_Then_Setting(decimal amount, bool response)
-	{
-		var fakePromotionSerializer = Substitute.For<PromotionSerializer>();
-
-		var sut = new DepositRewardChecker(fakePromotionSerializer);
-
-		var brandId = Guid.NewGuid();
-		var promotionId = Guid.NewGuid();
-
-		var conditionData = new ConditionData(
-			brandId,
-			promotionId,
-			"playerCode",
-			amount
-			);
-
-		var promotion = new PromotionMainInfo(
-			Guid.NewGuid(),
-			Guid.NewGuid(),
-			"Test Promotion",
-			(DateTime.Parse("2022/06/01 17:00:00+00"), DateTime.Parse("2022/06/05 17:00:00+00")),
-			"Register",
-			null,
-			false);
-
-		var rule = new PromotionRule(
-			JsonDocument.Parse(@"{""depositMinimumLimit"":100,""percentage"":10,""bonusAmount"":100,""turnoverMultiple"":10}"),
-			100,
-			10,
-			10,
-			null);
-
-
-		var actual = await sut.CheckJoinAsync(conditionData, promotion, rule);
-
-		Assert.IsTrue(actual == response);
 	}
 
 	[Test]
