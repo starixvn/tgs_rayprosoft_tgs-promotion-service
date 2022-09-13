@@ -1,0 +1,217 @@
+variables:
+  ImageName: pgtgs/promotion-api
+  TgsSettingKey: promotion-api
+  HelmTemplateFolderName: promotion-api
+
+stages:
+  - build
+  - test
+  - publish
+  - deploy-dev
+  - deploy-staging
+  - deploy-prod
+
+build-code:
+  stage: build
+  script:
+    - dotnet build -c $BuildConfiguration
+  only:
+    - merge_requests
+    - main
+  artifacts:
+    untracked: true
+    expire_in: "1 days"
+
+unit-test:
+  stage: test
+  script:
+    - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
+  needs:
+    - job: build-code
+      artifacts: true
+  only:
+    - merge_requests
+    - main
+  artifacts:
+    when: always
+    reports:
+      junit: ./TestReports/*-TestReport.xml
+
+push-nuget:
+  stage: publish
+  needs:
+    - job: build-code
+      artifacts: true
+    - unit-test
+  only:
+    - main
+  script:
+    - dotnet pack -c $BuildConfiguration "Tgs.Promotion.Client/Tgs.Promotion.Client.csproj" --no-restore --no-build
+    - dotnet nuget push "Tgs.Promotion.Client/bin/$BuildConfiguration/*.nupkg" -s "raypro-baget" -k $NugetApiKey --skip-duplicate
+  artifacts:
+    name: Nuget
+    untracked: false
+    expire_in: "30 days"
+    paths:
+      - Tgs.Promotion.Client/bin/$BuildConfiguration/*.nupkg
+
+push-docker-image:
+  stage: publish
+  needs:
+    - job: build-code
+      artifacts: true
+    - unit-test
+  only:
+    - main
+  script:
+    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
+    - dotnet build "Tgs.Promotion.Service/Tgs.Promotion.Service.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
+    - docker push $ImageName:$Tag
+
+push-k8s-template:
+  stage: publish
+  needs:
+    - unit-test
+  only:
+    - main
+  script:
+    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
+    - mkdir -p artifacts/k8s
+    - cp -R deployment/k8s/$HelmTemplateFolderName artifacts/k8s/
+    - |
+      yq -i e '
+        .image.repository = strenv(ImageName) |
+        .image.tag = strenv(Tag)
+      ' artifacts/k8s/$HelmTemplateFolderName/values.yaml
+  artifacts:
+    name: HelmTemplate
+    untracked: false
+    expire_in: "180 days"
+    paths:
+      - artifacts/**/*
+
+deploy-dev:
+  variables:
+    GIT_STRATEGY: none
+    namespace: dev
+  environment:
+    name: dev
+  stage: deploy-dev
+  needs:
+    - push-nuget
+    - push-docker-image
+    - job: push-k8s-template
+      artifacts: true
+  only:
+    - main
+  before_script:
+    - export KUBECONFIG=$KubeConfig_Raypro_dev
+  script:
+    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
+    - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
+    - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
+    - |
+      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
+        -n $namespace \
+        -f - 
+      {
+        "nodeSelector": $node_selector,
+        "tolerations": [$dedicated],
+        "resources": $resources
+      }
+      EOF
+    - |
+      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
+        -n $namespace \
+        -f - \
+        | kubectl -n $namespace apply -f -
+      {
+        "nodeSelector": $node_selector,
+        "tolerations": [$dedicated],
+        "resources": $resources
+      }
+      EOF
+
+deploy-staging:
+  variables:
+    GIT_STRATEGY: none
+    namespace: staging
+  environment:
+    name: staging
+  stage: deploy-staging
+  needs:
+    - deploy-dev
+    - job: push-k8s-template
+      artifacts: true
+  only:
+    - main
+  when: manual
+  before_script:
+    - export KUBECONFIG=$KubeConfig_Raypro_staging
+  script:
+    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
+    - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
+    - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
+    - |
+      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
+        -n $namespace \
+        -f - 
+      {
+        "nodeSelector": $node_selector,
+        "tolerations": [$dedicated],
+        "resources": $resources
+      }
+      EOF
+    - |
+      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
+        -n $namespace \
+        -f - \
+        | kubectl -n $namespace apply -f -
+      {
+        "nodeSelector": $node_selector,
+        "tolerations": [$dedicated],
+        "resources": $resources
+      }
+      EOF
+
+deploy-prod:
+  variables:
+    GIT_STRATEGY: none
+    namespace: prod
+  environment:
+    name: prod
+  stage: deploy-prod
+  needs:
+    - deploy-staging
+    - job: push-k8s-template
+      artifacts: true
+  only:
+    - main
+  when: manual
+  before_script:
+    - export KUBECONFIG=$KubeConfig_Raypro_prod
+  script:
+    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
+    - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
+    - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
+    - |
+      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
+        -n $namespace \
+        -f - 
+      {
+        "nodeSelector": $node_selector,
+        "tolerations": [$dedicated],
+        "resources": $resources
+      }
+      EOF
+    - |
+      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
+        -n $namespace \
+        -f - \
+        | kubectl -n $namespace apply -f -
+      {
+        "nodeSelector": $node_selector,
+        "tolerations": [$dedicated],
+        "resources": $resources
+      }
+      EOF
