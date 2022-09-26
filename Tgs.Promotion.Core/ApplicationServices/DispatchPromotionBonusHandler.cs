@@ -52,7 +52,9 @@ public class DispatchPromotionBonusHandler : IGetService<DispatchPromotionBonusR
 			x.PlayerCodeNavigation.BrandId,
 			x.PlayerCode,
 			x.PlayerCodeNavigation.DefaultWalletId,
-			BucketAmount = x.BonusAmount * x.PromotionBonus.TurnoverMultiple,
+			BucketAmount = x.BucketAmountByManual > 0 ? 
+				x.BucketAmountByManual : 
+				x.BonusAmount * x.PromotionBonus.TurnoverMultiple,
 			x.BonusAmount,
 			BucketType = BucketType.Promotion,
 			x.PromotionBonus.PromotionId,
