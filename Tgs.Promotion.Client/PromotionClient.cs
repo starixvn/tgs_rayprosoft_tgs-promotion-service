@@ -90,8 +90,10 @@ public class PromotionClient : IPromotionClient
 
 	public async Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
 		GetJoinedPromotionsRequest request)
-	{
-		var httpRequest = new HttpRequestMessage(HttpMethod.Get, $"/api/promotion/joined?playerCode={request.PlayerCode}&from={request.From.ToUniversalTime():u}&to={request.To.ToUniversalTime():u}");
+	{		
+		var path = ClientPath.AppendWithProperties("/api/promotion/joined?", request);
+		var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
 		_ = response.EnsureSuccessStatusCode();
