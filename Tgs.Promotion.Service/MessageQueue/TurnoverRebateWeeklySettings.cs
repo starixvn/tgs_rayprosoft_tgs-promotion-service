@@ -5,4 +5,5 @@ public record TurnoverRebateWeeklySettings(
 	decimal BonusAmountLimit,
 	decimal Percentage,
 	decimal TurnoverMultiple,
-	decimal TurnoverLimit);
+	decimal TurnoverLimit,
+	bool PlayerAutoJoin);
