@@ -86,6 +86,7 @@ builder.Services
 builder.Services
 	.AddSingleton<NoopCampaingDetailProcessor>()
 	.AddSingleton<DummyCampaingDetailProcessor>()
+	.AddSingleton<TurnoverRebateDailyCampaignDetailProcessor>()
 	.AddSingleton<TurnoverRebateWeeklyCampaignDetailProcessor>()
 	.AddMessageQueue()
 	.AddNatsMessageQueue(config => config
@@ -102,6 +103,7 @@ builder.Services
 	.AddNatsGlobPatternExchange("tgs.promotion.register.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.depositreward.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.depositaccumulateroulette.setting")
+	.AddGlobPatternExchange<TurnoverRebateDailyCampaignDetailProcessor>("tgs.promotion.turnoverrebate.setting")
 	.AddGlobPatternExchange<TurnoverRebateWeeklyCampaignDetailProcessor>("tgs.promotion.turnoverrebateweekly.setting")
 	.AddGlobPatternExchange<DummyCampaingDetailProcessor>("tgs.promotion.dummy.setting")
 	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.*.setting")
