@@ -82,6 +82,15 @@ public class PromotionController : ControllerBase
 		return result;
 	}
 
+	[HttpGet("checkjoined/{promotionId}/{playerCode}", Name = "CheckPromotionJoinedAsync")]
+	public ValueTask<bool> CheckPromotionJoinedAsync(
+		[FromServices] IGetService<CheckPromotionJoinedQuery, bool> checkService,
+		string playerCode,
+		Guid promotionId)
+		=> checkService.GetAsync(new CheckPromotionJoinedQuery(
+			playerCode,
+			promotionId));
+
 	[HttpPost(Name = "CreatePromotion")]
 	[Description("Create a promotion")]
 	public ValueTask<MessageResponse> CreatePromotionAsync(

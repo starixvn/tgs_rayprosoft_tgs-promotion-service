@@ -58,6 +58,20 @@ public class PromotionClient : IPromotionClient
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 	}
 
+	public async Task<bool> CheckPromotionJoinedAsync(
+		string playerCode,
+		Guid promotionId)
+	{
+		var response = await _client
+			.GetAsync($"/api/promotion/checkjoined/{promotionId}/{playerCode}")
+			.ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		return JsonSerializer.Deserialize<bool>(await response.Content.ReadAsStringAsync(),
+			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+	}
+
 	public async Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request)
 	{
 		var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotion")
