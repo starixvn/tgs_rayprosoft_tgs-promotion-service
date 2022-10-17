@@ -76,7 +76,7 @@ public class PromotionTests
 		Assert.AreEqual(1, actual.Status);
 		Assert.AreEqual(resultId, actual.Id);
 	}
-
+	
 	[TestMethod]
 	public async Task Get_Promotion_MainInfo()
 	{
