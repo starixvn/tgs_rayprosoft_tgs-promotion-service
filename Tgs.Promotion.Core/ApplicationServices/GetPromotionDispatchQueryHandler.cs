@@ -59,6 +59,8 @@ internal class
 			};
 		}
 
+		var before60Day = DateTime.UtcNow.AddDays(-60);
+
 		var promotionGroup = promotionTypeGroups.FirstOrDefault(x => x.Name == request.PromotionGroup);
 		var promotionTypes = promotionGroup?.Types.Select(x => x.Name).ToArray() ?? Array.Empty<string>();
 
@@ -69,6 +71,7 @@ internal class
 		var promotionDistributes = _promotionDistributionRepository.GetPromotionDistributionQueries()
 			.Include(x => x.Promotion)
 			.Where(x => x.BrandId == request.BrandId)
+			.Where(x => x.CreatedOn >= before60Day)
 			.Where(request.From, x => request.From <= x.CreatedOn)
 			.Where(request.To, x => request.To >= x.CreatedOn)
 			.Where(promotion is not null, x => x.PromotionId == promotion!.Id)
@@ -101,7 +104,10 @@ internal class
 			});
 
 		var promotionPlayers = _promotionBonusService.GetPromotionBonusPlayersQueries()
+			.Include(x => x.PromotionBonus)
+			.ThenInclude(x => x.Promotion)
 			.Where(x => x.PromotionBonus.BrandId == request.BrandId)
+			.Where(x => x.PromotionBonus.CreatedOn >= before60Day)
 			.Where(request.From, x => request.From <= x.PromotionBonus.CreatedOn)
 			.Where(request.To, x => request.To >= x.PromotionBonus.CreatedOn)
 			.Where(promotion is not null, x => x.PromotionBonus.PromotionId == promotion!.Id)

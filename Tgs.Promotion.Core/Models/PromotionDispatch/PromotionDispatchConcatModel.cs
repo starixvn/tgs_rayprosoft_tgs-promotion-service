@@ -10,8 +10,6 @@ public class PromotionDispatchConcatModel
 
 	public Guid PromotionBonusId { get; set; }
 
-	public string PromotionGroup { get; set; } = default!;
-
 	public Guid PromotionId { get; set; }
 
 	public string PromotionName { get; set; } = default!;
