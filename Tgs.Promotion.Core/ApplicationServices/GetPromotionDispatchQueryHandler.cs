@@ -1,4 +1,6 @@
 ﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Extensions;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.PromotionDispatch;
@@ -9,20 +11,21 @@ namespace Tgs.Promotion.ApplicationServices;
 internal class
 	GetPromotionDispatchQueryHandler : IGetService<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>>
 {
-	private readonly IPromotionBonusRepository _promotionBonusService;
 	private readonly ISettingsRepository _settingRepository;
 	private readonly IPlayerRepository _tgsPlayerService;
 	private readonly IPromotionRepository _tgsPromotionService;
+	private readonly TgsContext _tgsRepository;
 
-	public GetPromotionDispatchQueryHandler(IPromotionBonusRepository promotionBonusService,
+	public GetPromotionDispatchQueryHandler(
 		IPromotionRepository tgsPromotionService,
 		IPlayerRepository tgsPlayerService,
-		ISettingsRepository settingRepository)
+		ISettingsRepository settingRepository,
+		TgsContext tgsRepository)
 	{
-		_promotionBonusService = promotionBonusService;
 		_tgsPromotionService = tgsPromotionService;
 		_tgsPlayerService = tgsPlayerService;
 		_settingRepository = settingRepository;
+		_tgsRepository = tgsRepository;
 	}
 
 	public async ValueTask<PagedResponse<PromotionDispatchModel>> GetAsync(
@@ -34,13 +37,25 @@ internal class
 			.ConfigureAwait(false);
 
 		if (promotionsJson is null)
-			return new PagedResponse<PromotionDispatchModel>(0, Array.Empty<PromotionDispatchModel>()) { Valid = false, Message = "promotion types is not found." };
+		{
+			return new(0, Array.Empty<PromotionDispatchModel>())
+			{
+				Valid = false,
+				Message = "promotion types is not found."
+			};
+		}
 
 		var promotionTypeGroups = JsonSerializer
 			.Deserialize<PromotionTypeGroup[]>(promotionsJson.Value);
 
 		if (promotionTypeGroups is null)
-			return new PagedResponse<PromotionDispatchModel>(0, Array.Empty<PromotionDispatchModel>()) { Valid = false, Message = "promotion group type is not found." };
+		{
+			return new(0, Array.Empty<PromotionDispatchModel>())
+			{
+				Valid = false,
+				Message = "promotion group type is not found."
+			};
+		}
 
 		var promotionGroup = promotionTypeGroups.FirstOrDefault(x => x.Name == request.PromotionGroup);
 		var promotionTypes = promotionGroup?.Types.Select(x => x.Name).ToArray() ?? Array.Empty<string>();
@@ -49,7 +64,41 @@ internal class
 			.GetPromotionAsync(x => x.Name == request.PromotionName)
 			.ConfigureAwait(false);
 
-		var promotionDispatchPages = await _promotionBonusService.GetPromotionBonusPlayersQueries()
+		var promotionDistributes = _tgsRepository.PromotionDistributes
+			.Include(x => x.Promotion)
+			.Where(x => x.BrandId == request.BrandId)
+			.Where(request.From, x => request.From <= x.CreatedOn)
+			.Where(request.To, x => request.To >= x.CreatedOn)
+			.Where(promotion is not null, x => x.PromotionId == promotion!.Id)
+			.Where(promotionTypes, x => promotionTypes.Contains(x.Promotion.PromotionType))
+			.Join(_tgsPlayerService.GetPlayerQueries().Where(request.Username, x => x.Username == request.Username),
+				x => x.PlayerCode, p => p.PlayerCode,
+				(x, p) => new
+				{
+					PromotionBonusId = x.Id,
+					x.PromotionId,
+					PromotionName = x.Promotion.Name,
+					x.Promotion.PromotionType,
+					x.CreatedOn,
+					x.SentOn,
+					p.Username,
+					p.PlayerCode,
+					x.BonusAmount
+				})
+			.Select(x => new PromotionDispatchConcatModel
+			{
+				PromotionBonusId = x.PromotionBonusId,
+				PromotionId = x.PromotionId,
+				PromotionName = x.PromotionName,
+				PromotionType = x.PromotionType,
+				CreatedOn = x.CreatedOn,
+				SentOn = x.SentOn,
+				Username = x.Username,
+				PlayerCode = x.PlayerCode,
+				BonusAmount = x.BonusAmount.ToString()
+			});
+
+		var promotionPlayers = _tgsRepository.PromotionPlayers
 			.Where(x => x.PromotionBonus.BrandId == request.BrandId)
 			.Where(request.From, x => request.From <= x.PromotionBonus.CreatedOn)
 			.Where(request.To, x => request.To >= x.PromotionBonus.CreatedOn)
@@ -59,32 +108,66 @@ internal class
 				x => x.PlayerCode, p => p.PlayerCode,
 				(x, p) => new
 				{
+					x.PromotionBonusId,
+					x.PromotionBonus.PromotionId,
 					PromotionName = x.PromotionBonus.Promotion.Name,
-					x.PromotionBonus,
-					x.PlayerCode,
+					x.PromotionBonus.PromotionType,
+					x.PromotionBonus.CreatedOn,
 					x.BonusAmount,
 					x.SentOn,
-					Player = p
+					p.Username,
+					p.PlayerCode
 				})
-			.Select(x => new PromotionDispatchModel
+			.Select(x => new PromotionDispatchConcatModel
 			{
-				PromotionBonusId = x.PromotionBonus.Id,
-				PromotionId = x.PromotionBonus.PromotionId,
+				PromotionBonusId = x.PromotionBonusId,
+				PromotionId = x.PromotionId,
 				PromotionName = x.PromotionName,
-				PromotionType = x.PromotionBonus.PromotionType,
-				CreatedOn = x.PromotionBonus.CreatedOn,
-				Username = x.Player.Username,
+				PromotionType = x.PromotionType,
+				CreatedOn = x.CreatedOn,
+				SentOn = x.SentOn,
+				Username = x.Username,
 				PlayerCode = x.PlayerCode,
-				BonusAmount = x.BonusAmount,
-				SentOn = x.SentOn
-			})
-			.CreatePagedResponseAsync(request);
+				BonusAmount = x.BonusAmount.ToString()
+			});
 
-		foreach (var item in promotionDispatchPages.Items)
+		promotionDistributes = promotionDistributes.Concat(promotionPlayers)
+				.Select(x => new PromotionDispatchConcatModel
+				{
+					PromotionBonusId = x.PromotionBonusId,
+					PromotionId = x.PromotionId,
+					PromotionName = x.PromotionName,
+					PromotionType = x.PromotionType,
+					CreatedOn = x.CreatedOn,
+					Username = x.Username,
+					PlayerCode = x.PlayerCode,
+					SentOn = x.SentOn,
+					BonusAmount = x.BonusAmount
+				}).AsNoTracking();
+
+		var promotionDispatchConcatPages =
+			await promotionDistributes.CreatePagedResponseAsync(request).ConfigureAwait(false);
+
+		var promotionDispatches = promotionDispatchConcatPages.Items.Select(x => new PromotionDispatchModel
 		{
-			item.PromotionGroup = promotionTypeGroups
-				.First(p => p.Types.Select(t => t.Name).Contains(item.PromotionType)).Name;
-		}
+			PromotionBonusId = x.PromotionBonusId,
+			PromotionId = x.PromotionId,
+			PromotionName = x.PromotionName,
+			PromotionType = x.PromotionType,
+			PromotionGroup = promotionTypeGroups
+				.First(p => p.Types.Select(t => t.Name).Contains(x.PromotionType)).Name,
+			CreatedOn = x.CreatedOn,
+			Username = x.Username,
+			PlayerCode = x.PlayerCode,
+			SentOn = x.SentOn,
+			BonusAmount = decimal.Parse(x.BonusAmount)
+		}).ToArray();
+
+		var promotionDispatchPages =
+			new PagedResponse<PromotionDispatchModel>(promotionDispatchConcatPages.TotalCount, promotionDispatches)
+			{
+				Valid = true
+			};
 
 		return promotionDispatchPages;
 	}
