@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MockQueryable.Moq;
 using NSubstitute;
 using Tgs.Promotion.Clients;
+using Tgs.Promotion.Clients.Models.PromotionDispatch;
 using Tgs.Promotion.Domain.Entities;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
@@ -17,13 +18,20 @@ public class PromotionDispatchTests
 			.ConfigureServices(services =>
 			{
 				var fakPromotionBonusRepository = Substitute.For<IPromotionBonusRepository>();
+				var fakPromotionDistributionRepository = Substitute.For<IPromotionDistributionRepository>();
 				var fakeSettingsRepository = Substitute.For<ISettingsRepository>();
 				var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 				var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 
 				var promotionPlayers = Array.Empty<PromotionPlayer>();
+
+				var promotionDistributes = Array.Empty<PromotionDistribute>();
+
 				_ = fakPromotionBonusRepository.GetPromotionBonusPlayersQueries(Arg.Any<Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>?>(), Arg.Any<bool>())
 					.Returns(promotionPlayers.AsQueryable().BuildMock());
+
+				_ = fakPromotionDistributionRepository.GetPromotionDistributionQueries(Arg.Any<Func<IQueryable<PromotionDistribute>, IQueryable<PromotionDistribute>>?>(), Arg.Any<bool>())
+					.Returns(promotionDistributes.AsQueryable().BuildMock());
 
 				_ = fakeSettingsRepository
 					.GetSettingAsync(Arg.Any<Expression<Func<Setting, bool>>>(),
@@ -38,6 +46,7 @@ public class PromotionDispatchTests
 
 				_ = services.AddSingleton(fakeSettingsRepository);
 				_ = services.AddSingleton(fakPromotionBonusRepository);
+				_ = services.AddSingleton(fakPromotionDistributionRepository);
 				_ = services.AddSingleton(fakePlayerRepository);
 				_ = services.AddSingleton(fakePromotionRepository);
 			}));
@@ -48,9 +57,11 @@ public class PromotionDispatchTests
 
 		var brandId = Guid.NewGuid();
 
-		var actual = await sut.GetPromotionDispatchesAsync(new Clients.Models.PromotionDispatch.GetPromotionDispatchesRequest
+		var actual = await sut.GetPromotionDispatchesAsync(new GetPromotionDispatchesRequest
 		{
-			BrandId = brandId
+			BrandId = brandId,
+			Page = 1,
+			Rows = 20
 		});
 
 		Assert.IsNotNull(actual);

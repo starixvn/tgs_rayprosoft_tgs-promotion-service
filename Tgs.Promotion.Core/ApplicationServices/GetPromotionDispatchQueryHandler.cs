@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Extensions;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.PromotionDispatch;
@@ -11,21 +10,24 @@ namespace Tgs.Promotion.ApplicationServices;
 internal class
 	GetPromotionDispatchQueryHandler : IGetService<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>>
 {
+	private readonly IPromotionBonusRepository _promotionBonusService;
+	private readonly IPromotionDistributionRepository _promotionDistributionRepository;
 	private readonly ISettingsRepository _settingRepository;
 	private readonly IPlayerRepository _tgsPlayerService;
 	private readonly IPromotionRepository _tgsPromotionService;
-	private readonly TgsContext _tgsRepository;
 
 	public GetPromotionDispatchQueryHandler(
+		IPromotionBonusRepository promotionBonusService,
+		IPromotionDistributionRepository promotionDistributionRepository,
 		IPromotionRepository tgsPromotionService,
 		IPlayerRepository tgsPlayerService,
-		ISettingsRepository settingRepository,
-		TgsContext tgsRepository)
+		ISettingsRepository settingRepository)
 	{
+		_promotionBonusService = promotionBonusService;
+		_promotionDistributionRepository = promotionDistributionRepository;
 		_tgsPromotionService = tgsPromotionService;
 		_tgsPlayerService = tgsPlayerService;
 		_settingRepository = settingRepository;
-		_tgsRepository = tgsRepository;
 	}
 
 	public async ValueTask<PagedResponse<PromotionDispatchModel>> GetAsync(
@@ -64,7 +66,7 @@ internal class
 			.GetPromotionAsync(x => x.Name == request.PromotionName)
 			.ConfigureAwait(false);
 
-		var promotionDistributes = _tgsRepository.PromotionDistributes
+		var promotionDistributes = _promotionDistributionRepository.GetPromotionDistributionQueries()
 			.Include(x => x.Promotion)
 			.Where(x => x.BrandId == request.BrandId)
 			.Where(request.From, x => request.From <= x.CreatedOn)
@@ -98,7 +100,7 @@ internal class
 				BonusAmount = x.BonusAmount.ToString()
 			});
 
-		var promotionPlayers = _tgsRepository.PromotionPlayers
+		var promotionPlayers = _promotionBonusService.GetPromotionBonusPlayersQueries()
 			.Where(x => x.PromotionBonus.BrandId == request.BrandId)
 			.Where(request.From, x => request.From <= x.PromotionBonus.CreatedOn)
 			.Where(request.To, x => request.To >= x.PromotionBonus.CreatedOn)
@@ -132,21 +134,20 @@ internal class
 			});
 
 		promotionDistributes = promotionDistributes.Concat(promotionPlayers)
-				.Select(x => new PromotionDispatchConcatModel
-				{
-					PromotionBonusId = x.PromotionBonusId,
-					PromotionId = x.PromotionId,
-					PromotionName = x.PromotionName,
-					PromotionType = x.PromotionType,
-					CreatedOn = x.CreatedOn,
-					Username = x.Username,
-					PlayerCode = x.PlayerCode,
-					SentOn = x.SentOn,
-					BonusAmount = x.BonusAmount
-				}).AsNoTracking();
+			.Select(x => new PromotionDispatchConcatModel
+			{
+				PromotionBonusId = x.PromotionBonusId,
+				PromotionId = x.PromotionId,
+				PromotionName = x.PromotionName,
+				PromotionType = x.PromotionType,
+				CreatedOn = x.CreatedOn,
+				Username = x.Username,
+				PlayerCode = x.PlayerCode,
+				SentOn = x.SentOn,
+				BonusAmount = x.BonusAmount
+			}).AsNoTracking();
 
-		var promotionDispatchConcatPages =
-			await promotionDistributes.CreatePagedResponseAsync(request).ConfigureAwait(false);
+		var promotionDispatchConcatPages = await promotionDistributes.CreatePagedResponseAsync(request);
 
 		var promotionDispatches = promotionDispatchConcatPages.Items.Select(x => new PromotionDispatchModel
 		{
