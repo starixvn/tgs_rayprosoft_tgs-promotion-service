@@ -62,6 +62,7 @@ internal class
 		var before60Day = DateTime.UtcNow.AddDays(-60);
 
 		var promotionGroup = promotionTypeGroups.FirstOrDefault(x => x.Name == request.PromotionGroup);
+
 		var promotionTypes = promotionGroup?.Types.Select(x => x.Name).ToArray() ?? Array.Empty<string>();
 
 		var promotion = await _tgsPromotionService
@@ -154,11 +155,18 @@ internal class
 			}).AsNoTracking();
 
 		var totalCount = await promotionDistributes.CountAsync(cancellationToken);
+
 		var page = request.Page <= 0 ? 0 : request.Page - 1;
+
 		var pageSize = request.Rows <= 0 ? 10 : request.Rows;
+
 		var items = await promotionDistributes
 			.OrderByDescending(x => !x.SentOn.HasValue)
-			.ThenBy(x => x.SentOn).Skip(page * pageSize).Take(pageSize).ToArrayAsync(cancellationToken);
+			.ThenByDescending(x => x.SentOn)
+			.Skip(page * pageSize)
+			.Take(pageSize)
+			.ToArrayAsync(cancellationToken)
+			.ConfigureAwait(false);
 
 		var promotionDispatches = items.Select(x => new PromotionDispatchModel
 		{
@@ -176,10 +184,7 @@ internal class
 		}).ToArray();
 
 		var promotionDispatchPages =
-			new PagedResponse<PromotionDispatchModel>(totalCount, promotionDispatches)
-			{
-				Valid = true
-			};
+			new PagedResponse<PromotionDispatchModel>(totalCount, promotionDispatches) { Valid = true };
 
 		return promotionDispatchPages;
 	}
