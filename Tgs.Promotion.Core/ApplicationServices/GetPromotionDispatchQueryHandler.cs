@@ -107,7 +107,7 @@ internal class
 			.Include(x => x.PromotionBonus)
 			.ThenInclude(x => x.Promotion)
 			.Where(x => x.PromotionBonus.BrandId == request.BrandId)
-			.Where(x => x.PromotionBonus.CreatedOn >= before60Day)
+			.Where(x => x.PromotionBonus.CreatedOn >= before60Day || x.SentOn == null)
 			.Where(request.From, x => request.From <= x.PromotionBonus.CreatedOn)
 			.Where(request.To, x => request.To >= x.PromotionBonus.CreatedOn)
 			.Where(promotion is not null, x => x.PromotionBonus.PromotionId == promotion!.Id)
@@ -153,9 +153,14 @@ internal class
 				BonusAmount = x.BonusAmount
 			}).AsNoTracking();
 
-		var promotionDispatchConcatPages = await promotionDistributes.CreatePagedResponseAsync(request);
+		var totalCount = await promotionDistributes.CountAsync(cancellationToken);
+		var page = request.Page <= 0 ? 0 : request.Page - 1;
+		var pageSize = request.Rows <= 0 ? 10 : request.Rows;
+		var items = await promotionDistributes
+			.OrderByDescending(x => x.SentOn.HasValue)
+			.ThenBy(x => x.SentOn).Skip(page * pageSize).Take(pageSize).ToArrayAsync(cancellationToken);
 
-		var promotionDispatches = promotionDispatchConcatPages.Items.Select(x => new PromotionDispatchModel
+		var promotionDispatches = items.Select(x => new PromotionDispatchModel
 		{
 			PromotionBonusId = x.PromotionBonusId,
 			PromotionId = x.PromotionId,
@@ -171,7 +176,7 @@ internal class
 		}).ToArray();
 
 		var promotionDispatchPages =
-			new PagedResponse<PromotionDispatchModel>(promotionDispatchConcatPages.TotalCount, promotionDispatches)
+			new PagedResponse<PromotionDispatchModel>(totalCount, promotionDispatches)
 			{
 				Valid = true
 			};
