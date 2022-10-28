@@ -157,7 +157,7 @@ internal class
 		var page = request.Page <= 0 ? 0 : request.Page - 1;
 		var pageSize = request.Rows <= 0 ? 10 : request.Rows;
 		var items = await promotionDistributes
-			.OrderByDescending(x => x.SentOn.HasValue)
+			.OrderByDescending(x => !x.SentOn.HasValue)
 			.ThenBy(x => x.SentOn).Skip(page * pageSize).Take(pageSize).ToArrayAsync(cancellationToken);
 
 		var promotionDispatches = items.Select(x => new PromotionDispatchModel
