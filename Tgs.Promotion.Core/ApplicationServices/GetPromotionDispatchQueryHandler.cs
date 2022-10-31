@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Tgs.Promotion.Extensions;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.PromotionDispatch;
@@ -65,17 +66,13 @@ internal class
 
 		var promotionTypes = promotionGroup?.Types.Select(x => x.Name).ToArray() ?? Array.Empty<string>();
 
-		var promotion = await _tgsPromotionService
-			.GetPromotionAsync(x => x.Name == request.PromotionName)
-			.ConfigureAwait(false);
-
 		var promotionDistributes = _promotionDistributionRepository.GetPromotionDistributionQueries()
 			.Include(x => x.Promotion)
 			.Where(x => x.BrandId == request.BrandId)
 			.Where(x => x.CreatedOn >= before60Day)
 			.Where(request.From, x => request.From <= x.CreatedOn)
 			.Where(request.To, x => request.To >= x.CreatedOn)
-			.Where(promotion is not null, x => x.PromotionId == promotion!.Id)
+			.Where(!request.PromotionName.IsNullOrEmpty(), x => x.Promotion.Name == request.PromotionName)
 			.Where(promotionTypes, x => promotionTypes.Contains(x.Promotion.PromotionType))
 			.Join(_tgsPlayerService.GetPlayerQueries().Where(request.Username, x => x.Username == request.Username),
 				x => x.PlayerCode, p => p.PlayerCode,
@@ -111,7 +108,8 @@ internal class
 			.Where(x => x.PromotionBonus.CreatedOn >= before60Day || x.SentOn == null)
 			.Where(request.From, x => request.From <= x.PromotionBonus.CreatedOn)
 			.Where(request.To, x => request.To >= x.PromotionBonus.CreatedOn)
-			.Where(promotion is not null, x => x.PromotionBonus.PromotionId == promotion!.Id)
+			.Where(!request.PromotionName.IsNullOrEmpty(),
+				x => x.PromotionBonus.Promotion.Name == request.PromotionName)
 			.Where(promotionTypes, x => promotionTypes.Contains(x.PromotionBonus.PromotionType))
 			.Join(_tgsPlayerService.GetPlayerQueries().Where(request.Username, x => x.Username == request.Username),
 				x => x.PlayerCode, p => p.PlayerCode,
