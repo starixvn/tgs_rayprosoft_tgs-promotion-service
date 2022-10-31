@@ -73,16 +73,18 @@ public class
 		CreatePromotionBonusMonthlyRequest request,
 		CancellationToken cancellationToken)
 	{
-		var now = new DateTimeOffset(DateTimeOffset.Now.Year,
-			DateTimeOffset.Now.Month,
-			DateTimeOffset.Now.Day,
+		var today8TimeZone = DateTimeOffset.UtcNow.ToOffset(new(8, 0, 0));
+
+		var now = new DateTimeOffset(today8TimeZone.Year,
+			today8TimeZone.Month,
+			today8TimeZone.Day,
 			0,
 			0,
 			0,
 			new(8, 0, 0));
 
-		var previousLastDayOfMonth = now.AddMonths(-1).GetLastDayOfMonth();
 		var previousFirstDayOfMonth = now.AddMonths(-1).GetFirstDayOfMonth();
+		var previousLastDayOfMonth = now.AddMonths(-1).GetLastDayOfMonth();
 		var currentFirstDayOfMonth = now.GetFirstDayOfMonth();
 
 		var promotions = await _promotionService.GetQueries()
