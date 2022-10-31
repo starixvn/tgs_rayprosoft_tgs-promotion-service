@@ -2,8 +2,8 @@
 using Tgs.CashService.Client;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
-using Tgs.Promotion.Models.PromotionBucket;
 using Tgs.Promotion.Models.PromotionDispatch;
+using Tgs.Service.PlayerBuckets;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
@@ -11,22 +11,22 @@ namespace Tgs.Promotion.ApplicationServices;
 public class DispatchPromotionBonusHandler : IGetService<DispatchPromotionBonusRequest, MessageResponse>
 {
 	private readonly ICashServiceClient _cashServiceClient;
+	private readonly IPlayerBucketClient _playerBucketClient;
 	private readonly IPromotionBonusRepository _promotionBonusService;
-	private readonly IPlayerBucketRepository _service;
 	private readonly ITransactionRepository _transactionRepository;
 
 	public DispatchPromotionBonusHandler(
-		IPlayerBucketRepository service,
 		IPromotionBonusRepository promotionBonusService,
 		ICashServiceClient cashServiceClient,
-		ITransactionRepository transactionRepository)
+		ITransactionRepository transactionRepository,
+		IPlayerBucketClient playerBucketClient)
 	{
-		_service = service ?? throw new ArgumentNullException(nameof(service));
 		_promotionBonusService =
 			promotionBonusService ?? throw new ArgumentNullException(nameof(promotionBonusService));
 		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
 		_transactionRepository =
 			transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
+		_playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
 	}
 
 	public async ValueTask<MessageResponse> GetAsync(
@@ -47,20 +47,21 @@ public class DispatchPromotionBonusHandler : IGetService<DispatchPromotionBonusR
 				request.Players.Any(p => p.PlayerCode == x.PlayerCode && p.PromotionBonusId == x.PromotionBonusId))
 			.ToArray();
 
-		var playerBuckets = players.Select(x => new
-		{
-			x.PlayerCodeNavigation.BrandId,
-			x.PlayerCode,
-			x.PlayerCodeNavigation.DefaultWalletId,
-			BucketAmount = x.BucketAmountByManual > 0 ? 
-				x.BucketAmountByManual : 
-				x.BonusAmount * x.PromotionBonus.TurnoverMultiple,
-			x.BonusAmount,
-			BucketType = BucketType.Promotion,
-			x.PromotionBonus.PromotionId,
-			x.PromotionBonusId,
-			x.PromotionBonus.PromotionType
-		})
+		var playerBuckets = players
+			.Select(x => new
+			{
+				x.PlayerCodeNavigation.BrandId,
+				x.PlayerCode,
+				x.PlayerCodeNavigation.DefaultWalletId,
+				BucketAmount = x.BucketAmountByManual > 0 ?
+					x.BucketAmountByManual :
+					x.BonusAmount * x.PromotionBonus.TurnoverMultiple,
+				x.BonusAmount,
+				BucketType = BucketType.Promotion,
+				x.PromotionBonus.PromotionId,
+				x.PromotionBonusId,
+				x.PromotionBonus.PromotionType
+			})
 			.ToArray();
 
 		foreach (var promotionPlayer in players)
@@ -68,13 +69,12 @@ public class DispatchPromotionBonusHandler : IGetService<DispatchPromotionBonusR
 			promotionPlayer.SentOn = DateTime.UtcNow;
 		}
 
-		await _service.CreatePlayerBucketsAsync(playerBuckets.Select(x =>
-				new CreatePlayerBucketRequest(x.BrandId,
-					x.PlayerCode,
-					x.DefaultWalletId,
-					x.BucketType,
-					x.BucketAmount))
-			.ToArray()).ConfigureAwait(false);
+		_ = await Task.WhenAll(playerBuckets.Select(pb => Task.Run(async () => await _playerBucketClient.CreateBucketAsync(
+			pb.PlayerCode,
+			pb.BucketAmount,
+			pb.BucketType,
+			pb.PromotionId.ToString(),
+			cancellationToken).ConfigureAwait(false)))).ConfigureAwait(false);
 
 		await _promotionBonusService.UpdatePromotionBonusPlayersAsync(players);
 

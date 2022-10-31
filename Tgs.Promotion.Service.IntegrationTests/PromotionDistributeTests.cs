@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.Service.PlayerBuckets;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
 
@@ -12,7 +14,11 @@ public class PromotionDistributeTests
 	{
 		var planId = Guid.NewGuid();
 
-		await using var web = new TestPromotionApplication();
+		var fakePlayerBucketClent = Substitute.For<IPlayerBucketClient>();
+
+		await using var web = new TestPromotionApplication(hostBuilder => hostBuilder
+			.ConfigureServices(services => services
+				.AddSingleton(fakePlayerBucketClent)));
 
 		var httpClient = web.CreateClient();
 
@@ -52,7 +58,6 @@ public class PromotionDistributeTests
 			null);
 
 		var record = dbContext.PromotionDistributes.First();
-		var bucketRecord = dbContext.PlayerBuckets.First();
 
 		Assert.AreNotEqual(Guid.Empty, actual);
 		Assert.AreEqual(promotionId, record.PromotionId);
@@ -60,7 +65,13 @@ public class PromotionDistributeTests
 		Assert.AreEqual(100M, record.Bucket);
 		Assert.AreEqual(playerCode, record.PlayerCode);
 		Assert.AreEqual(planId, record.PlanId);
-		Assert.AreEqual(100M, bucketRecord.BucketAmount);
+
+		_ = fakePlayerBucketClent.Received(1)
+			.CreateBucketAsync(
+				Arg.Is(playerCode),
+				Arg.Is(100M),
+				Arg.Is(BucketType.Promotion),
+				Arg.Any<string>());
 	}
 
 	[TestMethod]

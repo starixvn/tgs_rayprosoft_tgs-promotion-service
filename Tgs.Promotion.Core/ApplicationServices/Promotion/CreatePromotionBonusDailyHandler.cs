@@ -6,8 +6,8 @@ using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Extensions;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.PromotionBonus;
-using Tgs.Promotion.Models.PromotionBucket;
 using Tgs.SerialNumberGenerator;
+using Tgs.Service.PlayerBuckets;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices.Promotion;
@@ -18,7 +18,7 @@ public class
 	private readonly ITgsService<BrandGame> _brandGameService;
 	private readonly ICashServiceClient _cashServiceClient;
 	private readonly ILogger<CreatePromotionBonusDailyQueryHandler> _logger;
-	private readonly IPlayerBucketRepository _playerBucketService;
+	private readonly IPlayerBucketClient _playerBucketClient;
 	private readonly ITgsService<PlayerGameRebateAggregate> _playerGameRebateAggregateService;
 	private readonly ITgsService<Player> _playerService;
 	private readonly IPromotionBonusRepository _promotionBonusFactory;
@@ -31,7 +31,7 @@ public class
 
 	public CreatePromotionBonusDailyQueryHandler(
 		IPromotionBonusRepository promotionBonusFactory,
-		IPlayerBucketRepository playerBucketService,
+		IPlayerBucketClient playerBucketClient,
 		ICashServiceClient cashServiceClient,
 		ITransactionRepository transactionRepository,
 		IPromotionRepository promotionRepository,
@@ -46,7 +46,7 @@ public class
 	{
 		_promotionBonusFactory =
 			promotionBonusFactory ?? throw new ArgumentNullException(nameof(promotionBonusFactory));
-		_playerBucketService = playerBucketService ?? throw new ArgumentNullException(nameof(playerBucketService));
+		_playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
 		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 		_transactionRepository =
@@ -227,12 +227,12 @@ public class
 					}))
 			.ToArray();
 
-		await _playerBucketService.CreatePlayerBucketsAsync(playerBonuses.Select(x =>
-			new CreatePlayerBucketRequest(x.BrandId,
-				x.PlayerCode,
-				x.DefaultWalletId,
-				x.BucketType,
-				x.BucketAmount)).ToArray()).ConfigureAwait(false);
+		_ = await Task.WhenAll(playerBonuses.Select(pb => Task.Run(async () => await _playerBucketClient.CreateBucketAsync(
+				pb.PlayerCode,
+				pb.BucketAmount,
+				pb.BucketType,
+				pb.Id.ToString(),
+				cancellationToken).ConfigureAwait(false))).ToArray()).ConfigureAwait(false);
 
 		var transactionPromotions = new List<TransactionPromotion>();
 

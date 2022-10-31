@@ -10,6 +10,7 @@ using Tgs.Promotion.ApplicationServices.Promotion;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models.PromotionBonus;
 using Tgs.SerialNumberGenerator;
+using Tgs.Service.PlayerBuckets;
 
 namespace Tgs.Promotion.UnitTest;
 
@@ -20,9 +21,9 @@ public class PromotionReliefMoneyDailyDistributionTests
 	public async Task Can_Distribute_Daily_Promotions()
 	{
 		var promotionRowServiceMock = Substitute.For<ITgsService<PromotionRow>>();
+		var fakePlayerBucketCleint = Substitute.For<IPlayerBucketClient>();
 		var brandGameServiceMock = Substitute.For<ITgsService<BrandGame>>();
 		var cashServiceClientMock = Substitute.For<ICashServiceClient>();
-		var playerBucketRepositoryMock = Substitute.For<IPlayerBucketRepository>();
 		var promotionBonusRepositoryMock = Substitute.For<IPromotionBonusRepository>();
 		var playerGameRebateAggregateServiceMock = Substitute.For<ITgsService<PlayerGameRebateAggregate>>();
 		var playerServiceMock = Substitute.For<ITgsService<Player>>();
@@ -36,7 +37,7 @@ public class PromotionReliefMoneyDailyDistributionTests
 		var promotionsQueryHandlerMock =
 			new CreatePromotionBonusDailyQueryHandler(
 				promotionBonusRepositoryMock,
-				playerBucketRepositoryMock,
+				fakePlayerBucketCleint,
 				cashServiceClientMock,
 				transactionRepositoryMock,
 				promotionRepositoryMock,
@@ -173,7 +174,7 @@ public class PromotionReliefMoneyDailyDistributionTests
 		var promotionRowServiceMock = Substitute.For<ITgsService<PromotionRow>>();
 		var brandGameServiceMock = Substitute.For<ITgsService<BrandGame>>();
 		var cashServiceClientMock = Substitute.For<ICashServiceClient>();
-		var playerBucketRepositoryMock = Substitute.For<IPlayerBucketRepository>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 		var promotionBonusRepositoryMock = Substitute.For<IPromotionBonusRepository>();
 		var playerGameRebateAggregateServiceMock = Substitute.For<ITgsService<PlayerGameRebateAggregate>>();
 		var playerServiceMock = Substitute.For<ITgsService<Player>>();
@@ -187,7 +188,7 @@ public class PromotionReliefMoneyDailyDistributionTests
 		var promotionsQueryHandlerMock =
 			new CreatePromotionBonusDailyQueryHandler(
 				promotionBonusRepositoryMock,
-				playerBucketRepositoryMock,
+				fakePlayerBucketClient,
 				cashServiceClientMock,
 				transactionRepositoryMock,
 				promotionRepositoryMock,

@@ -32,7 +32,6 @@ public static class TgsRepositoryExtensions
 			.AddTransient<IPromotionParticipantRepository, PromotionParticipantRepository>()
 			.AddTransient<ISettingsRepository, SettingsRepository>()
 			.AddTransient<IPromotionPlayerRepository, PromotionPlayerRepository>()
-			.AddTransient<IPlayerBucketRepository, PlayerBucketRepository>()
 			.AddTransient<IPlayerDataRepository, RedisPlayerDataRepository>()
 			.AddTransient<IPromotionDistributionRepository, PromotionDistributionRepository>();
 }

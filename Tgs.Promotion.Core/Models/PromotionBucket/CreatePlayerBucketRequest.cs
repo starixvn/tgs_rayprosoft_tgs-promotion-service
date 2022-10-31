@@ -1,4 +1,6 @@
-﻿namespace Tgs.Promotion.Models.PromotionBucket;
+﻿using Tgs.Service.PlayerBuckets;
+
+namespace Tgs.Promotion.Models.PromotionBucket;
 
 public record CreatePlayerBucketRequest(
 	Guid BrandId,
