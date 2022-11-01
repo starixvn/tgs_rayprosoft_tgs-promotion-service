@@ -13,4 +13,6 @@ public class PromotionRuleViewModel
 	public decimal Percentage { get; init; }
 
 	public decimal TurnoverMultiple { get; init; }
+
+	public IEnumerable<int> VipLevels { get; set; } = Array.Empty<int>();
 }

@@ -57,7 +57,7 @@ public class PromotionManagementController : ControllerBase
 
 	[HttpGet("rule/{promotionId}", Name = "GetPromotionRule")]
 	public async ValueTask<PromotionRuleViewModel?> GetPromotionRuleAsync(
-		[FromServices] IGetService<GetPromotionRuleQuery, PromotionRule?> getService,
+		[FromServices] IGetService<GetPromotionRuleQuery, PromotionRuleView?> getService,
 		Guid promotionId)
 	{
 		var query = new GetPromotionRuleQuery(promotionId);
@@ -74,7 +74,8 @@ public class PromotionManagementController : ControllerBase
 				BonusAmountLimit = rule.BonusAmountLimit,
 				GameType = rule.GameType,
 				Percentage = rule.Percentage,
-				TurnoverMultiple = rule.TurnoverMultiple
+				TurnoverMultiple = rule.TurnoverMultiple,
+				VipLevels = rule.VipLevels
 			};
 	}
 

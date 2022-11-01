@@ -1,8 +1,10 @@
 ﻿using System.Text.Json;
+using ExpectedObjects;
 using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using NSubstitute.Extensions;
 using Tgs.BrandCertificate.Clients;
 using Tgs.MessageQueue;
 using Tgs.PlayerService.Client;
@@ -120,6 +122,8 @@ public class PromotionTests
 
 		var promotionId = Guid.NewGuid();
 
+		var vipLevels = new[] { 1, 2 };
+
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
 		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
@@ -137,6 +141,14 @@ public class PromotionTests
 			TurnoverMultiple = 30M
 		});
 
+		await dbContext.PromotionVipLevels.AddRangeAsync(
+		vipLevels.Select(lvl => new PromotionVipLevel
+		{
+			Level = lvl,
+			PromotionId = promotionId,
+			VipLevelId = Guid.NewGuid()
+		}).ToArray());
+
 		_ = await dbContext.SaveChangesAsync();
 
 		var expected = new StubPromotionRule
@@ -148,13 +160,18 @@ public class PromotionTests
 			BonusAmountLimit = 10M,
 			GameType = GameType.Lottery,
 			Percentage = 20M,
-			TurnoverMultiple = 30M
+			TurnoverMultiple = 30M,
+			VipLevels = vipLevels
 		};
 
 		var actual = await sut.GetPromotionRuleAsync<StubPromotionRule>(promotionId);
 
 		Assert.IsNotNull(actual);
-		Assert.AreEqual(expected, actual);
+
+		expected
+			.ToExpectedObject(ctx =>
+				ctx.IgnoreEqualsOverride())
+			.ShouldMatch(actual);
 	}
 
 	[TestMethod]

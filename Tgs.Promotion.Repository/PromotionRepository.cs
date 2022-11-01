@@ -269,11 +269,11 @@ public class PromotionRepository : IPromotionRepository
 	}
 
 	public async ValueTask<bool> ExistsAsync(
-				Expression<Func<PromotionRow, bool>> predicate)
+		Expression<Func<PromotionRow, bool>> predicate)
 		=> await _promotionService.GetQueries().AnyAsync(predicate).ConfigureAwait(false);
 
 	public async ValueTask<PromotionRow?> GetPromotionAsync(
-						Expression<Func<PromotionRow, bool>> predicate,
+		Expression<Func<PromotionRow, bool>> predicate,
 		Func<IQueryable<PromotionRow>, IQueryable<PromotionRow>>? preQuery)
 	{
 		preQuery ??= c => c;
@@ -316,20 +316,27 @@ public class PromotionRepository : IPromotionRepository
 			: preQuery(_promotionService.GetQueries()).AsNoTracking();
 	}
 
-	public async ValueTask<PromotionRule?> GetPromotionRuleAsync(Guid promotionId, CancellationToken cancellationToken = default)
+	public async ValueTask<PromotionRuleView?> GetPromotionRuleAsync(Guid promotionId, CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
 			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
+		var promotionVipLevels = await _dbContext.PromotionVipLevels
+			.Where(vip => vip.PromotionId == promotionId)
+			.Select(vip => vip.Level)
+			.ToArrayAsync(cancellationToken)
+			.ConfigureAwait(false);
+
 		return promotion is null
 			? null
-			: new PromotionRule(
+			: new PromotionRuleView(
 			JsonDocument.Parse(promotion.CampaignDetail),
 			promotion.BonusAmountLimit,
 			promotion.Percentage,
 			promotion.TurnoverMultiple,
-			(GameType?)promotion.GameType);
+			(GameType?)promotion.GameType,
+			promotionVipLevels);
 	}
 
 	public IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, CancellationToken cancellationToken = default)
