@@ -3,7 +3,7 @@ using Tgs.Promotion.Clients;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
-public static class ServiceExtensions
+public static class ServiceCollectionExtensions
 {
 	public static IServiceCollection AddPromotionClientServices(
 		this IServiceCollection services,
