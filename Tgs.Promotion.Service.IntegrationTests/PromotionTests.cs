@@ -109,7 +109,7 @@ public class PromotionTests
 
 		_ = await dbContext.SaveChangesAsync();
 
-		var expected = new Tgs.Promotion.Clients.PromotionContentInfo
+		var expected = new PromotionContent
 		{
 			Content = "Test Promotion Content",
 			SubSubject = "Test Promotion Subject",
