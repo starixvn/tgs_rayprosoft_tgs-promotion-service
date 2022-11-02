@@ -288,7 +288,7 @@ public class PromotionRepository : IPromotionRepository
 	public async ValueTask<PromotionRow?> GetPromotionByIdAsync(Guid promotionId)
 		=> await _promotionService.GetQueries().FirstOrDefaultAsync(x => x.Id == promotionId).ConfigureAwait(false);
 
-	public async ValueTask<PromotionContentInfo?> GetPromotionContentAsync(Guid promotionId, CancellationToken cancellationToken = default)
+	public async ValueTask<PromotionContentDetail?> GetPromotionContentAsync(Guid promotionId, CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
 			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
@@ -296,15 +296,15 @@ public class PromotionRepository : IPromotionRepository
 
 		return promotion is null
 			? null
-			: new PromotionContentInfo(
+			: new PromotionContentDetail(
+				promotion.SubSubject,
+				promotion.DesktopBanner,
+				promotion.MobileBanner,
 				promotion.Content,
 				promotion.Terms,
-				promotion.SubSubject,
 				JsonDocument.Parse(string.IsNullOrWhiteSpace(promotion.Localization)
 					? "{}"
-					: promotion.Localization),
-				promotion.DesktopBanner,
-				promotion.MobileBanner);
+					: promotion.Localization));
 	}
 
 	public async ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(Guid promotionId, CancellationToken cancellationToken = default)

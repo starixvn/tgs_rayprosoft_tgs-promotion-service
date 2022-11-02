@@ -34,7 +34,7 @@ public interface IPromotionRepository
 
 	ValueTask<PromotionRow?> GetPromotionByIdAsync(Guid promotionId);
 
-	ValueTask<PromotionContentInfo?> GetPromotionContentAsync(Guid promotionId, CancellationToken cancellationToken = default);
+	ValueTask<PromotionContentDetail?> GetPromotionContentAsync(Guid promotionId, CancellationToken cancellationToken = default);
 
 	ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(Guid promotionId, CancellationToken cancellationToken = default);
 

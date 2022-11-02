@@ -33,7 +33,7 @@ public class PromotionManagementController : ControllerBase
 
 	[HttpGet("content/{promotionId}", Name = "GetPromotionContent")]
 	public async ValueTask<PromotionContentViewModel?> GetPromotionContentAsync(
-		[FromServices] IGetService<GetPromotionContentQuery, PromotionContentInfo?> getService,
+		[FromServices] IGetService<GetPromotionContentQuery, PromotionContentDetail?> getService,
 		Guid promotionId)
 	{
 		var query = new GetPromotionContentQuery(promotionId);
