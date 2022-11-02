@@ -6,4 +6,5 @@ public record PromotionRule(
 	decimal BonusAmountLimit,
 	decimal Percentage,
 	decimal TurnoverMultiple,
-	GameType? GameType);
+	GameType? GameType,
+	IEnumerable<int> VipLevels);

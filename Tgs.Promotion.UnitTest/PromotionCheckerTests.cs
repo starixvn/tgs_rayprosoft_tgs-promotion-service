@@ -46,7 +46,8 @@ public class PromotionCheckerTests
 			100,
 			10,
 			10,
-			null);
+			null,
+			Array.Empty<int>());
 
 		var actual = await sut.CheckJoinAsync(conditionData, promotion, rule);
 

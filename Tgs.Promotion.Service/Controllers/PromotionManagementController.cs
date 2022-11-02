@@ -81,7 +81,7 @@ public class PromotionManagementController : ControllerBase
 
 	[HttpGet("rule/{promotionId}", Name = "GetPromotionRule")]
 	public async ValueTask<PromotionRuleViewModel?> GetPromotionRuleAsync(
-		[FromServices] IGetService<GetPromotionRuleQuery, PromotionRuleView?> getService,
+		[FromServices] IGetService<GetPromotionRuleQuery, PromotionRule?> getService,
 		Guid promotionId)
 	{
 		var query = new GetPromotionRuleQuery(promotionId);

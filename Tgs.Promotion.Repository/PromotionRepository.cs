@@ -335,7 +335,7 @@ public class PromotionRepository : IPromotionRepository
 			: preQuery(_promotionService.GetQueries()).AsNoTracking();
 	}
 
-	public async ValueTask<PromotionRuleView?> GetPromotionRuleAsync(Guid promotionId, CancellationToken cancellationToken = default)
+	public async ValueTask<PromotionRule?> GetPromotionRuleAsync(Guid promotionId, CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
 			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
@@ -349,7 +349,7 @@ public class PromotionRepository : IPromotionRepository
 
 		return promotion is null
 			? null
-			: new PromotionRuleView(
+			: new PromotionRule(
 			JsonDocument.Parse(promotion.CampaignDetail),
 			promotion.BonusAmountLimit,
 			promotion.Percentage,

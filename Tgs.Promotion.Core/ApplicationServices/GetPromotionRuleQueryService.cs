@@ -2,7 +2,7 @@
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class GetPromotionRuleQueryService : IGetService<GetPromotionRuleQuery, PromotionRuleView?>
+internal class GetPromotionRuleQueryService : IGetService<GetPromotionRuleQuery, PromotionRule?>
 {
 	private readonly IPromotionRepository _promotionRepository;
 
@@ -11,6 +11,6 @@ internal class GetPromotionRuleQueryService : IGetService<GetPromotionRuleQuery,
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 	}
 
-	public ValueTask<PromotionRuleView?> GetAsync(GetPromotionRuleQuery query, CancellationToken cancellationToken = default)
+	public ValueTask<PromotionRule?> GetAsync(GetPromotionRuleQuery query, CancellationToken cancellationToken = default)
 		=> _promotionRepository.GetPromotionRuleAsync(query.PromotionId, cancellationToken);
 }

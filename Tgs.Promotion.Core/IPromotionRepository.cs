@@ -42,7 +42,7 @@ public interface IPromotionRepository
 		Func<IQueryable<PromotionRow>, IQueryable<PromotionRow>>? preQuery = null,
 		bool tracking = false);
 
-	ValueTask<PromotionRuleView?> GetPromotionRuleAsync(Guid promotionId, CancellationToken cancellationToken = default);
+	ValueTask<PromotionRule?> GetPromotionRuleAsync(Guid promotionId, CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, CancellationToken cancellationToken = default);
 
