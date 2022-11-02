@@ -4,7 +4,6 @@ using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-using NSubstitute.Extensions;
 using Tgs.BrandCertificate.Clients;
 using Tgs.MessageQueue;
 using Tgs.PlayerService.Client;
@@ -78,7 +77,61 @@ public class PromotionTests
 		Assert.AreEqual(1, actual.Status);
 		Assert.AreEqual(resultId, actual.Id);
 	}
-	
+
+	[TestMethod]
+	public async Task Get_Promotion_Content()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = promotionId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now,
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}",
+			Content = "Test Promotion Content",
+			SubSubject = "Test Promotion Subject",
+			Terms = "Test Promotion Terms",
+			DesktopBanner = "http://www.google.com/test.png",
+			MobileBanner = null,
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var expected = new Tgs.Promotion.Clients.PromotionContentInfo
+		{
+			Content = "Test Promotion Content",
+			SubSubject = "Test Promotion Subject",
+			Convention = "Test Promotion Terms",
+			Localization = JsonDocument.Parse("{}"),
+			PersonalComputerBanner = "http://www.google.com/test.png",
+			MobileBanner = null
+		};
+
+		var actual = await sut.GetPromotionContentAsync(promotionId);
+
+		Assert.IsNotNull(actual);
+
+		expected
+			.ToExpectedObject(ctx =>
+				{
+					ctx.PushStrategy<JsonDocumentComparisionStrategy>();
+					_ = ctx.IgnoreEqualsOverride();
+				})
+			.ShouldMatch(actual);
+	}
+
 	[TestMethod]
 	public async Task Get_Promotion_MainInfo()
 	{
