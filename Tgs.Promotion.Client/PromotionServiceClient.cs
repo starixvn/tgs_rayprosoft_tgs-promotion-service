@@ -88,6 +88,21 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			.ConfigureAwait(false);
 	}
 
+	public async ValueTask<PromotionContent?> GetPromotionContentAsync(Guid promotionId, CancellationToken cancellationToken = default)
+	{
+		var response = await _httpClient.GetAsync(
+			$"/api/promotion-mgr/content/{promotionId}",
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		return await response.Content
+			.ReadFromJsonAsync<PromotionContent>(
+				_JsonSerializerOptions,
+				cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+	}
+
 	public async ValueTask<PromotionDistributePlanInfo> GetPromotionDistributePlanAsync(
 		Guid promotionId,
 		long conditionHash,

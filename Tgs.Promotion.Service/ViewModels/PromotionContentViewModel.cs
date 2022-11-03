@@ -12,8 +12,6 @@ public class PromotionContentViewModel
 
 	public string? MobileBanner { get; init; }
 
-	public string Modifier { get; init; } = default!;
-
 	public string? PersonalComputerBanner { get; init; }
 
 	public string? SubSubject { get; init; }

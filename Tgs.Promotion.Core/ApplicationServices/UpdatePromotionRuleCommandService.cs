@@ -32,7 +32,8 @@ internal class UpdatePromotionRuleCommandService : ICommandService<UpdatePromoti
 				command.BonusAmountLimit,
 				command.Percentage,
 				command.TurnoverMultiple,
-				command.GameType),
+				command.GameType,
+				Array.Empty<int>()),
 			command.Modifier,
 			cancellationToken).ConfigureAwait(false);
 	}

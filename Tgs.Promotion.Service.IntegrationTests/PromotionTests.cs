@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using ExpectedObjects;
 using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -76,7 +77,61 @@ public class PromotionTests
 		Assert.AreEqual(1, actual.Status);
 		Assert.AreEqual(resultId, actual.Id);
 	}
-	
+
+	[TestMethod]
+	public async Task Get_Promotion_Content()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = promotionId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now,
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}",
+			Content = "Test Promotion Content",
+			SubSubject = "Test Promotion Subject",
+			Terms = "Test Promotion Terms",
+			DesktopBanner = "http://www.google.com/test.png",
+			MobileBanner = null,
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var expected = new PromotionContent
+		{
+			Content = "Test Promotion Content",
+			SubSubject = "Test Promotion Subject",
+			Convention = "Test Promotion Terms",
+			Localization = JsonDocument.Parse("{}"),
+			PersonalComputerBanner = "http://www.google.com/test.png",
+			MobileBanner = null
+		};
+
+		var actual = await sut.GetPromotionContentAsync(promotionId);
+
+		Assert.IsNotNull(actual);
+
+		expected
+			.ToExpectedObject(ctx =>
+				{
+					ctx.PushStrategy<JsonDocumentComparisionStrategy>();
+					_ = ctx.IgnoreEqualsOverride();
+				})
+			.ShouldMatch(actual);
+	}
+
 	[TestMethod]
 	public async Task Get_Promotion_MainInfo()
 	{
@@ -120,6 +175,8 @@ public class PromotionTests
 
 		var promotionId = Guid.NewGuid();
 
+		var vipLevels = new[] { 1, 2 };
+
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
 		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
@@ -137,6 +194,14 @@ public class PromotionTests
 			TurnoverMultiple = 30M
 		});
 
+		await dbContext.PromotionVipLevels.AddRangeAsync(
+		vipLevels.Select(lvl => new PromotionVipLevel
+		{
+			Level = lvl,
+			PromotionId = promotionId,
+			VipLevelId = Guid.NewGuid()
+		}).ToArray());
+
 		_ = await dbContext.SaveChangesAsync();
 
 		var expected = new StubPromotionRule
@@ -148,13 +213,18 @@ public class PromotionTests
 			BonusAmountLimit = 10M,
 			GameType = GameType.Lottery,
 			Percentage = 20M,
-			TurnoverMultiple = 30M
+			TurnoverMultiple = 30M,
+			VipLevels = vipLevels
 		};
 
 		var actual = await sut.GetPromotionRuleAsync<StubPromotionRule>(promotionId);
 
 		Assert.IsNotNull(actual);
-		Assert.AreEqual(expected, actual);
+
+		expected
+			.ToExpectedObject(ctx =>
+				ctx.IgnoreEqualsOverride())
+			.ShouldMatch(actual);
 	}
 
 	[TestMethod]

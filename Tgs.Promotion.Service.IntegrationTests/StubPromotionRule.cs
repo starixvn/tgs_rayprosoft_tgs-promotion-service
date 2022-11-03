@@ -10,4 +10,6 @@ internal record StubPromotionRule
 	public decimal Percentage { get; init; }
 
 	public decimal TurnoverMultiple { get; init; }
+
+	public IEnumerable<int> VipLevels { get; init; } = Array.Empty<int>();
 }

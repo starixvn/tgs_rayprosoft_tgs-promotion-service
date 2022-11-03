@@ -38,6 +38,21 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task Get_Promotion_Content()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new GetPromotionContentQueryService(fakePromotionRepository);
+
+		var query = new GetPromotionContentQuery(Guid.NewGuid());
+
+		_ = await sut.GetAsync(query);
+
+		_ = fakePromotionRepository.Received(1)
+			.GetPromotionContentAsync(Arg.Is(query.PromotionId));
+	}
+
+	[TestMethod]
 	public async Task Get_Promotion_MainInfo()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
