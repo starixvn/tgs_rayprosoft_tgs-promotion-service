@@ -8,25 +8,21 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class
-	GetPromotionDispatchQueryHandler : IGetService<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>>
+internal class GetPromotionDispatchQueryHandler : IGetService<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>>
 {
 	private readonly IPromotionBonusRepository _promotionBonusService;
 	private readonly IPromotionDistributionRepository _promotionDistributionRepository;
 	private readonly ISettingsRepository _settingRepository;
 	private readonly IPlayerRepository _tgsPlayerService;
-	private readonly IPromotionRepository _tgsPromotionService;
 
 	public GetPromotionDispatchQueryHandler(
 		IPromotionBonusRepository promotionBonusService,
 		IPromotionDistributionRepository promotionDistributionRepository,
-		IPromotionRepository tgsPromotionService,
 		IPlayerRepository tgsPlayerService,
 		ISettingsRepository settingRepository)
 	{
 		_promotionBonusService = promotionBonusService;
 		_promotionDistributionRepository = promotionDistributionRepository;
-		_tgsPromotionService = tgsPromotionService;
 		_tgsPlayerService = tgsPlayerService;
 		_settingRepository = settingRepository;
 	}

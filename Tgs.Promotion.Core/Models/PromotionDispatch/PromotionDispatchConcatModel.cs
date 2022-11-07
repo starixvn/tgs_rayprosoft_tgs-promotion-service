@@ -2,7 +2,7 @@
 
 public class PromotionDispatchConcatModel
 {
-	public string BonusAmount { get; set; }
+	public string BonusAmount { get; set; } = default!;
 
 	public DateTimeOffset CreatedOn { get; set; }
 

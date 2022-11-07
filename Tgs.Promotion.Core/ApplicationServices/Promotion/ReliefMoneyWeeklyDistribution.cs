@@ -7,8 +7,8 @@ using Tgs.CashService.Client;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Extensions;
 using Tgs.Promotion.Models.PromotionBonus;
-using Tgs.Promotion.Models.PromotionBucket;
 using Tgs.SerialNumberGenerator;
+using Tgs.Service.PlayerBuckets;
 
 namespace Tgs.Promotion.ApplicationServices.Promotion;
 
@@ -16,7 +16,7 @@ internal class ReliefMoneyWeeklyDistribution : IDistribution
 {
 	private readonly ICashServiceClient _cashServiceClient;
 	private readonly ILogger<CreatePromotionBonusWeeklyHandler> _logger;
-	private readonly IPlayerBucketRepository _playerBucketService;
+	private readonly IPlayerBucketClient _playerBucketClient;
 	private readonly IPromotionBonusRepository _promotionBonusFactory;
 	private readonly IPromotionRepository _promotionRepository;
 	private readonly ISerialNumberGenerator _serialNumberGenerator;
@@ -46,7 +46,7 @@ internal class ReliefMoneyWeeklyDistribution : IDistribution
 	private PromotionBonusModel? _promotionBonusModel;
 
 	public ReliefMoneyWeeklyDistribution(
-		IPlayerBucketRepository playerBucketService,
+		IPlayerBucketClient playerBucketClient,
 		ICashServiceClient cashServiceClient,
 		IPromotionRepository promotionRepository,
 		IPromotionBonusRepository promotionBonusFactory,
@@ -56,7 +56,7 @@ internal class ReliefMoneyWeeklyDistribution : IDistribution
 		ILogger<CreatePromotionBonusWeeklyHandler> logger)
 	{
 		_promotionBonusFactory = promotionBonusFactory ?? throw new ArgumentNullException(nameof(promotionBonusFactory));
-		_playerBucketService = playerBucketService ?? throw new ArgumentNullException(nameof(playerBucketService));
+		_playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
 		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 		_transactionRepository = transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
@@ -230,12 +230,12 @@ internal class ReliefMoneyWeeklyDistribution : IDistribution
 					}))
 				.ToArray();
 
-			await _playerBucketService.CreatePlayerBucketsAsync(playerBonuses.Select(x =>
-				new CreatePlayerBucketRequest(x.BrandId,
-					x.PlayerCode,
-					x.DefaultWalletId,
-					x.BucketType,
-					x.BucketAmount)).ToArray()).ConfigureAwait(false);
+			_ = await Task.WhenAll(playerBonuses.Select(pb => Task.Run(async () => await _playerBucketClient.CreateBucketAsync(
+				pb.PlayerCode,
+				pb.BucketAmount,
+				pb.BucketType,
+				pb.Id.ToString(),
+				cancellationToken).ConfigureAwait(false)))).ConfigureAwait(false);
 
 			var transactionPromotions = new List<TransactionPromotion>();
 

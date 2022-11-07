@@ -1,4 +1,5 @@
 ﻿using Tgs.CashService.Client;
+using Tgs.Service.PlayerBuckets;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
@@ -6,20 +7,20 @@ namespace Tgs.Promotion.ApplicationServices;
 internal class DistributePromotionBonusCommandService : IGetService<DistributePromotionBonusCommand, Guid>
 {
 	private readonly ICashServiceClient _cashServiceClient;
-	private readonly IPlayerBucketRepository _playerBucketRepository;
 	private readonly IPlayerRepository _playerRepository;
+	private readonly IPlayerBucketClient _playerBucketClient;
 	private readonly IPromotionRepository _promotionRepository;
 
 	public DistributePromotionBonusCommandService(
 		IPromotionRepository promotionRepository,
 		ICashServiceClient cashServiceClient,
 		IPlayerRepository playerRepository,
-		IPlayerBucketRepository playerBucketRepository)
+		IPlayerBucketClient playerBucketClient)
 	{
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
 		_playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-		_playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
+		_playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
 	}
 
 	public async ValueTask<Guid> GetAsync(DistributePromotionBonusCommand command,
@@ -42,10 +43,11 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 				cancellationToken)
 			.ConfigureAwait(false);
 
-		await _playerBucketRepository.CreatePlayerBucketAsync(
+		_ = await _playerBucketClient.CreateBucketAsync(
 			player.PlayerCode,
-			BucketType.Promotion,
 			command.NeedTurnover,
+			BucketType.Promotion,
+			command.PlanId.ToString(),
 			cancellationToken).ConfigureAwait(false);
 
 		_ = await _cashServiceClient.PromotionAsync(

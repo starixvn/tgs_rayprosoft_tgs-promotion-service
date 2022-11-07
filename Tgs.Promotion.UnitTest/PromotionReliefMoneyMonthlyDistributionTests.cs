@@ -10,6 +10,7 @@ using Tgs.Promotion.ApplicationServices.Promotion;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models.PromotionBonus;
 using Tgs.SerialNumberGenerator;
+using Tgs.Service.PlayerBuckets;
 
 namespace Tgs.Promotion.UnitTest;
 
@@ -22,7 +23,7 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 		var promotionRowServiceMock = Substitute.For<ITgsService<PromotionRow>>();
 		var brandGameServiceMock = Substitute.For<ITgsService<BrandGame>>();
 		var cashServiceClientMock = Substitute.For<ICashServiceClient>();
-		var playerBucketRepositoryMock = Substitute.For<IPlayerBucketRepository>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 		var playerGameRebateAggregateServiceMock = Substitute.For<ITgsService<PlayerGameRebateAggregate>>();
 		var playerServiceMock = Substitute.For<ITgsService<Player>>();
 		var promotionBonusRepositoryMock = Substitute.For<IPromotionBonusRepository>();
@@ -36,7 +37,7 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 		var promotionsQueryHandlerMock =
 			new CreatePromotionBonusMonthlyHandler(
 				promotionBonusRepositoryMock,
-				playerBucketRepositoryMock,
+				fakePlayerBucketClient,
 				cashServiceClientMock,
 				transactionRepositoryMock,
 				promotionRepositoryMock,
@@ -174,7 +175,7 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 		var promotionRowServiceMock = Substitute.For<ITgsService<PromotionRow>>();
 		var brandGameServiceMock = Substitute.For<ITgsService<BrandGame>>();
 		var cashServiceClientMock = Substitute.For<ICashServiceClient>();
-		var playerBucketRepositoryMock = Substitute.For<IPlayerBucketRepository>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 		var playerGameRebateAggregateServiceMock = Substitute.For<ITgsService<PlayerGameRebateAggregate>>();
 		var playerServiceMock = Substitute.For<ITgsService<Player>>();
 		var promotionBonusRepositoryMock = Substitute.For<IPromotionBonusRepository>();
@@ -188,7 +189,7 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 		var promotionsQueryHandlerMock =
 			new CreatePromotionBonusMonthlyHandler(
 				promotionBonusRepositoryMock,
-				playerBucketRepositoryMock,
+				fakePlayerBucketClient,
 				cashServiceClientMock,
 				transactionRepositoryMock,
 				promotionRepositoryMock,

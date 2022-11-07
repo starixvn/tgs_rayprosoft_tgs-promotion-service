@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.MessageQueue.Configuration;
+using Tgs.PlayerBucket.Clients.DependencyInjection;
 using Tgs.Promotion.MessageQueue;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Service.MessageQueue;
@@ -81,7 +82,8 @@ builder.Services
 	.AddBrandServiceClient((options, _) =>
 		options.BrandCertificateBaseUrl = builder.Configuration.GetValue<Uri>("Promotion:BrandServiceBaseUrl"))
 	.AddPlayerServiceClient((options, _) =>
-		options.BaseUrl = builder.Configuration.GetValue<Uri>("Promotion:PlayerServiceBaseUrl"));
+		options.BaseUrl = builder.Configuration.GetValue<Uri>("Promotion:PlayerServiceBaseUrl"))
+	.AddPlayerBucketClient();
 
 builder.Services
 	.AddSingleton<NoopCampaingDetailProcessor>()

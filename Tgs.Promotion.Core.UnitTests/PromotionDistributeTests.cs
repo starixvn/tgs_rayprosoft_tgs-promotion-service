@@ -2,6 +2,7 @@
 using Tgs.CashService.Client;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.Service.PlayerBuckets;
 
 namespace Tgs.Promotion.Core.UnitTests;
 
@@ -14,13 +15,13 @@ public class PromotionDistributeTests
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-		var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 
 		var sut = new DistributePromotionBonusCommandService(
 			fakePromotionRepository,
 			fakeCashServiceClient,
 			fakePlayerRepository,
-			fakePlayerBucketRepository);
+			fakePlayerBucketClient);
 
 		var command = new DistributePromotionBonusCommand(
 			 Guid.NewGuid(),
@@ -50,11 +51,13 @@ public class PromotionDistributeTests
 
 		Assert.AreNotEqual(Guid.Empty, actual);
 
-		_ = fakePlayerBucketRepository.Received(1)
-			.CreatePlayerBucketAsync(
+		_ = fakePlayerBucketClient.Received(1)
+			.CreateBucketAsync(
 				Arg.Is(command.PlayerCode),
+				Arg.Is(command.NeedTurnover),
 				Arg.Is(BucketType.Promotion),
-				  Arg.Is(command.NeedTurnover));
+				Arg.Any<string>());
+
 		_ = fakeCashServiceClient.Received(1)
 			.PromotionAsync(
 				Arg.Is(walletId),
@@ -70,13 +73,13 @@ public class PromotionDistributeTests
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-		var fakePlayerBucketRepostory = Substitute.For<IPlayerBucketRepository>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 
 		var sut = new DistributePromotionBonusCommandService(
 			fakePromotionRepository,
 			fakeCashServiceClient,
 			fakePlayerRepository,
-			fakePlayerBucketRepostory);
+			fakePlayerBucketClient);
 
 		var command = new DistributePromotionBonusCommand(
 			 Guid.NewGuid(),
