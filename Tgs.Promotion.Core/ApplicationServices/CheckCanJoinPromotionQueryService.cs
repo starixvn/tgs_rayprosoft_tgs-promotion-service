@@ -50,7 +50,8 @@ internal class CheckCanJoinPromotionQueryService : IGetService<CheckCanJoinPromo
 					promotionData.BonusAmountLimit,
 					promotionData.Percentage,
 					promotionData.TurnoverMultiple,
-					(GameType?)promotionData.GameType
+					(GameType?)promotionData.GameType,
+					Array.Empty<int>()
 					))
 			.ConfigureAwait(false);
 		if (!isAllowed)

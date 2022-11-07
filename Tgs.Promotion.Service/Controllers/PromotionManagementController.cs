@@ -31,6 +31,30 @@ public class PromotionManagementController : ControllerBase
 		return createService.GetAsync(command, HttpContext.RequestAborted);
 	}
 
+	[HttpGet("content/{promotionId}", Name = "GetPromotionContent")]
+	public async ValueTask<PromotionContentViewModel?> GetPromotionContentAsync(
+		[FromServices] IGetService<GetPromotionContentQuery, PromotionContentDetail?> getService,
+		Guid promotionId)
+	{
+		var query = new GetPromotionContentQuery(promotionId);
+
+		var result = await getService
+			.GetAsync(query, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		return result is null
+			? null
+			: new PromotionContentViewModel
+			{
+				Content = result.Content,
+				Convention = result.Convention,
+				Localization = result.Localization,
+				SubSubject = result.SubSubject,
+				PersonalComputerBanner = result.PersonalComputerBanner,
+				MobileBanner = result.MobileBanner
+			};
+	}
+
 	[HttpGet("{promotionId}", Name = "GetPromotionMainInfo")]
 	public async ValueTask<PromotionViewModel?> GetPromotionMainInfoAsync(
 		[FromServices] IGetService<GetPromotionMainInfoQuery, PromotionMainInfo?> getService,
@@ -74,7 +98,8 @@ public class PromotionManagementController : ControllerBase
 				BonusAmountLimit = rule.BonusAmountLimit,
 				GameType = rule.GameType,
 				Percentage = rule.Percentage,
-				TurnoverMultiple = rule.TurnoverMultiple
+				TurnoverMultiple = rule.TurnoverMultiple,
+				VipLevels = rule.VipLevels
 			};
 	}
 
@@ -97,7 +122,7 @@ public class PromotionManagementController : ControllerBase
 	public ValueTask UpdatePromotionContentAsync(
 		[FromServices] ICommandService<UpdatePromotionContentCommand> updateService,
 		Guid promotionId,
-		[FromBody] PromotionContentViewModel contentModel)
+		[FromBody] UpdatePromotionContentViewModel contentModel)
 	{
 		var command = new UpdatePromotionContentCommand(
 			promotionId,

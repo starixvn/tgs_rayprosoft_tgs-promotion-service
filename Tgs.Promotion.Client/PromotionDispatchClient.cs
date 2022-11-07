@@ -5,13 +5,6 @@ using Tgs.Promotion.Clients.Models.PromotionDispatch;
 
 namespace Tgs.Promotion.Clients;
 
-public interface IPromotionDispatchClient
-{
-	Task<MessageResponse> DispatchPromotionAsync(DispatchPromotionBonusRequest request);
-
-	Task<PagedResponse<PromotionDispatchModel>> GetPromotionDispatchesAsync(GetPromotionDispatchesRequest request);
-}
-
 public class PromotionDispatchClient : IPromotionDispatchClient
 {
 	private readonly HttpClient _client;

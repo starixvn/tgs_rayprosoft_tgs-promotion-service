@@ -102,8 +102,8 @@ internal class GetPromotionDispatchQueryHandler : IGetService<GetPromotionDispat
 			.ThenInclude(x => x.Promotion)
 			.Where(x => x.PromotionBonus.BrandId == request.BrandId)
 			.Where(x => x.PromotionBonus.CreatedOn >= before60Day || x.SentOn == null)
-			.Where(request.From, x => request.From <= x.PromotionBonus.CreatedOn)
-			.Where(request.To, x => request.To >= x.PromotionBonus.CreatedOn)
+			.Where(request.From, x => request.From <= x.SentOn)
+			.Where(request.To, x => request.To >= x.SentOn)
 			.Where(!request.PromotionName.IsNullOrEmpty(),
 				x => x.PromotionBonus.Promotion.Name == request.PromotionName)
 			.Where(promotionTypes, x => promotionTypes.Contains(x.PromotionBonus.PromotionType))
