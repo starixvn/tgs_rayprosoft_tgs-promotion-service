@@ -9,7 +9,6 @@ namespace Tgs.Promotion.Domain.Entities
     {
         public Player()
         {
-            PlayerBuckets = new HashSet<PlayerBucket>();
             PromotionParticipants = new HashSet<PromotionParticipant>();
             PromotionPlayers = new HashSet<PromotionPlayer>();
         }
@@ -49,7 +48,6 @@ namespace Tgs.Promotion.Domain.Entities
         public string? Birthday { get; set; }
 
         public virtual VipLevel? Vip { get; set; }
-        public virtual ICollection<PlayerBucket> PlayerBuckets { get; set; }
         public virtual ICollection<PromotionParticipant> PromotionParticipants { get; set; }
         public virtual ICollection<PromotionPlayer> PromotionPlayers { get; set; }
     }

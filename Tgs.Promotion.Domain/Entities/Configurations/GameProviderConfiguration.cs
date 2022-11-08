@@ -16,12 +16,6 @@ namespace Tgs.Promotion.Domain.Entities.Configurations
         {
             entity.ToTable("game_providers", "dbo");
 
-            entity.HasIndex(e => e.Name, "ix_game_providers_name");
-
-            entity.HasIndex(e => e.Name, "ix_trgm_game_providers_name")
-                .HasMethod("gin")
-                .HasOperators(new[] { "gin_trgm_ops" });
-
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
