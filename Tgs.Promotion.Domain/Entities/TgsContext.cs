@@ -22,12 +22,12 @@ namespace Tgs.Promotion.Domain.Entities
         public virtual DbSet<BrandGame> BrandGames { get; set; } = null!;
         public virtual DbSet<GameProvider> GameProviders { get; set; } = null!;
         public virtual DbSet<Player> Players { get; set; } = null!;
-        public virtual DbSet<PlayerBucket> PlayerBuckets { get; set; } = null!;
         public virtual DbSet<PlayerGameRebateAggregate> PlayerGameRebateAggregates { get; set; } = null!;
         public virtual DbSet<PlayerVipLevelSeasonPromotion> PlayerVipLevelSeasonPromotions { get; set; } = null!;
         public virtual DbSet<PlayerVipLevelUpgradePromotion> PlayerVipLevelUpgradePromotions { get; set; } = null!;
         public virtual DbSet<PromotionBonus> PromotionBonuses { get; set; } = null!;
         public virtual DbSet<PromotionDistribute> PromotionDistributes { get; set; } = null!;
+        public virtual DbSet<PromotionDistributeLog> PromotionDistributeLogs { get; set; } = null!;
         public virtual DbSet<PromotionDistributePlan> PromotionDistributePlans { get; set; } = null!;
         public virtual DbSet<PromotionGameProvider> PromotionGameProviders { get; set; } = null!;
         public virtual DbSet<PromotionParticipant> PromotionParticipants { get; set; } = null!;
@@ -42,18 +42,17 @@ namespace Tgs.Promotion.Domain.Entities
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasPostgresExtension("ltree")
-                .HasPostgresExtension("pg_trgm")
-                .HasPostgresExtension("uuid-ossp");
+                .HasPostgresExtension("pg_trgm");
 
             modelBuilder.ApplyConfiguration(new Configurations.BrandGameConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.GameProviderConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PlayerBucketConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerGameRebateAggregateConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerVipLevelSeasonPromotionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerVipLevelUpgradePromotionConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionBonusConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionDistributeConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PromotionDistributeLogConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionDistributePlanConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionGameProviderConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PromotionParticipantConfiguration());

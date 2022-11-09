@@ -7,8 +7,8 @@ namespace Tgs.Promotion.ApplicationServices;
 internal class DistributePromotionBonusCommandService : IGetService<DistributePromotionBonusCommand, Guid>
 {
 	private readonly ICashServiceClient _cashServiceClient;
-	private readonly IPlayerRepository _playerRepository;
 	private readonly IPlayerBucketClient _playerBucketClient;
+	private readonly IPlayerRepository _playerRepository;
 	private readonly IPromotionRepository _promotionRepository;
 
 	public DistributePromotionBonusCommandService(
@@ -47,15 +47,15 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 			player.PlayerCode,
 			command.NeedTurnover,
 			BucketType.Promotion,
-			command.PlanId.ToString(),
+			distributeId.ToString(),
 			cancellationToken).ConfigureAwait(false);
 
 		_ = await _cashServiceClient.PromotionAsync(
 			player.DefaultWalletId,
 			command.Amount,
-				null,
+			null,
 			distributeId.ToString(),
-				null,
+			null,
 			cancellationToken).ConfigureAwait(false);
 
 		return distributeId;
