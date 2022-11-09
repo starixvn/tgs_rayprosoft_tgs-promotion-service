@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Collections.Immutable;
+using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using Tgs.PlayerService.Client;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Service.PlayerBuckets;
@@ -15,10 +17,12 @@ public class PromotionDistributeTests
 		var planId = Guid.NewGuid();
 
 		var fakePlayerBucketClent = Substitute.For<IPlayerBucketClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
 		await using var web = new TestPromotionApplication(hostBuilder => hostBuilder
 			.ConfigureServices(services => services
-				.AddSingleton(fakePlayerBucketClent)));
+				.AddSingleton(fakePlayerBucketClent)
+				.AddSingleton(fakePlayerServiceClient)));
 
 		var httpClient = web.CreateClient();
 
@@ -27,18 +31,20 @@ public class PromotionDistributeTests
 		var promotionId = Guid.NewGuid();
 		var playerCode = "playerCode";
 
-		var dbContext = web.Services.GetRequiredService<TgsContext>();
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = playerCode,
+				BrandId = Guid.NewGuid()
+			});
 
-		_ = await dbContext.Players.AddAsync(new Player
-		{
-			PlayerCode = playerCode,
-			DefaultWalletCurrencyCode = "CNY",
-			Password = Array.Empty<byte>(),
-			Salt = Array.Empty<byte>(),
-			Username = "player",
-			WithdrawPassword = Array.Empty<byte>(),
-			WithdrawSalt = Array.Empty<byte>()
-		});
+		_ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(playerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = Guid.NewGuid().ToString()
+			}.ToImmutableDictionary());
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
 		_ = await dbContext.PromotionDistributePlans.AddAsync(new PromotionDistributePlan
 		{

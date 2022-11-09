@@ -1,4 +1,6 @@
-﻿using Tgs.CashService.Client;
+﻿using System.Collections.Immutable;
+using Tgs.CashService.Client;
+using Tgs.PlayerService.Client;
 using Tgs.Service.PlayerBuckets;
 using Tgs.ServiceUtility;
 
@@ -8,30 +10,39 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 {
 	private readonly ICashServiceClient _cashServiceClient;
 	private readonly IPlayerBucketClient _playerBucketClient;
-	private readonly IPlayerRepository _playerRepository;
+	private readonly IPlayerServiceClient _playerServiceClient;
 	private readonly IPromotionRepository _promotionRepository;
 
 	public DistributePromotionBonusCommandService(
 		IPromotionRepository promotionRepository,
 		ICashServiceClient cashServiceClient,
-		IPlayerRepository playerRepository,
+		IPlayerServiceClient playerServiceClient,
 		IPlayerBucketClient playerBucketClient)
 	{
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-		_playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 		_playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
 	}
 
 	public async ValueTask<Guid> GetAsync(DistributePromotionBonusCommand command,
 		CancellationToken cancellationToken = default)
 	{
-		var player = await _playerRepository
-			.GetPlayerByPlayerCodeAsync(command.PlayerCode)
-			.ConfigureAwait(false);
+		var player = await _playerServiceClient.GetPlayerInfoAsync(
+			command.PlayerCode,
+			cancellationToken).ConfigureAwait(false);
 
 		if (player is null)
 			throw new InvalidOperationException($"Player with player code {command.PlayerCode} does not exist");
+
+		var playerProperties = await _playerServiceClient.GetPlayerPropertiesAsync(
+			player.PlayerCode,
+			cancellationToken).ConfigureAwait(false);
+
+		if (playerProperties is null)
+			throw new InvalidOperationException($"Player with player code {command.PlayerCode} does not exist");
+
+		var walletId = Guid.Parse(playerProperties.GetValueOrDefault("DefaultWalletId")!);
 
 		var distributeId = await _promotionRepository
 			.CreatePromotionDistributeAsync(
@@ -51,7 +62,7 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 			cancellationToken).ConfigureAwait(false);
 
 		_ = await _cashServiceClient.PromotionAsync(
-			player.DefaultWalletId,
+			walletId,
 			command.Amount,
 			null,
 			distributeId.ToString(),

@@ -1,5 +1,7 @@
-﻿using NSubstitute;
+﻿using System.Collections.Immutable;
+using NSubstitute;
 using Tgs.CashService.Client;
+using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Service.PlayerBuckets;
@@ -12,7 +14,7 @@ public class PromotionDistributeTests
 	[TestMethod]
 	public async Task Distribute_Bonus_By_Plan_And_Player()
 	{
-		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
@@ -20,7 +22,7 @@ public class PromotionDistributeTests
 		var sut = new DistributePromotionBonusCommandService(
 			fakePromotionRepository,
 			fakeCashServiceClient,
-			fakePlayerRepository,
+			fakePlayerServiceClient,
 			fakePlayerBucketClient);
 
 		var command = new DistributePromotionBonusCommand(
@@ -31,12 +33,19 @@ public class PromotionDistributeTests
 			 "manager");
 
 		var walletId = Guid.NewGuid();
-		_ = fakePlayerRepository.GetPlayerByPlayerCodeAsync(Arg.Is(command.PlayerCode))
-			.Returns(new Player
+
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
 			{
 				PlayerCode = command.PlayerCode,
-				DefaultWalletId = walletId
+				BrandId = Guid.NewGuid()
 			});
+
+		_ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = walletId.ToString()
+			}.ToImmutableDictionary());
 
 		var newDistributeId = Guid.NewGuid();
 		_ = fakePromotionRepository.CreatePromotionDistributeAsync(
@@ -70,7 +79,7 @@ public class PromotionDistributeTests
 	[TestMethod]
 	public async Task Distribute_Bonus_Without_Find_Player_Will_Throw_Exception()
 	{
-		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
@@ -78,7 +87,7 @@ public class PromotionDistributeTests
 		var sut = new DistributePromotionBonusCommandService(
 			fakePromotionRepository,
 			fakeCashServiceClient,
-			fakePlayerRepository,
+			fakePlayerServiceClient,
 			fakePlayerBucketClient);
 
 		var command = new DistributePromotionBonusCommand(
