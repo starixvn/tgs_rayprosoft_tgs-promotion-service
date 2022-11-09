@@ -313,7 +313,6 @@ internal class ReliefMoneyWeeklyDistribution : IDistribution
 					agg.VipLevel,
 					agg.WinLoss
 				})
-
 			.GroupJoin(_tgsContext.BrandGames,
 				aggregate => new
 				{
