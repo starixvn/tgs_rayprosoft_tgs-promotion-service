@@ -54,6 +54,16 @@ public class PromotionDistributeTests
 			ConditionHash = 0L
 		});
 
+		await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = promotionId,
+			BrandId = Guid.NewGuid(),
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}",
+			PromotionType = "Test",
+			Name = "TTT"
+		});
+
 		_ = await dbContext.SaveChangesAsync();
 
 		var actual = await sut.DistributePromotionBonusAsync(

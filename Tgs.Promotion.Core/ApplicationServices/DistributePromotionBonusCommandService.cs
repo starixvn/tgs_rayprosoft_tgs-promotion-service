@@ -17,15 +17,18 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 	private readonly IPlayerServiceClient _playerServiceClient;
 	private readonly IPromotionRepository _promotionRepository;
 	private readonly ISerialNumberGenerator _serialNumberGenerator;
+	private readonly IServiceCoordinator _serviceCoordinator;
 
 	public DistributePromotionBonusCommandService(
 		IPromotionRepository promotionRepository,
+		IServiceCoordinator serviceCoordinator,
 		ICashServiceClient cashServiceClient,
 		IPlayerServiceClient playerServiceClient,
 		IPlayerBucketClient playerBucketClient,
 		ISerialNumberGenerator serialNumberGenerator)
 	{
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+		_serviceCoordinator = serviceCoordinator ?? throw new ArgumentNullException(nameof(serviceCoordinator));
 		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
 		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 		_playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
@@ -55,6 +58,9 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 			command.PlanId,
 			cancellationToken).ConfigureAwait(false))!;
 
+		var promotion = (await _serviceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(
+			new(plan.PromotionId), cancellationToken).ConfigureAwait(false))!;
+
 		var distributeId = await _serialNumberGenerator
 			.GenerateAsync(cancellationToken)
 			.ConfigureAwait(false);
@@ -67,10 +73,9 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 			plan.PromotionId,
 			command.Amount,
 			command.NeedTurnover,
-			DateTime.UtcNow);
+			null);
 
 		await _promotionRepository.CreatePromotionDistributeAsync(
-			distributeId,
 			createDistributeInfo,
 			command.Distributor,
 			cancellationToken).ConfigureAwait(false);
@@ -91,31 +96,46 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 			distributeLog,
 			cancellationToken).ConfigureAwait(false);
 
-		await _promotionRepository.InsertPromotionDistributeLogAsync(
-			distributeLog with
+		if (promotion.IsAutoSent)
+		{
+			_ = await _playerBucketClient.CreateBucketAsync(
+				player.PlayerCode,
+				command.NeedTurnover,
+				BucketType.Promotion,
+				distributeId.ToString(),
+				cancellationToken).ConfigureAwait(false);
+
+			_ = await _cashServiceClient.PromotionAsync(
+				walletId,
+				command.Amount,
+				null,
+				distributeId.ToString(),
+				null,
+				cancellationToken).ConfigureAwait(false);
+
+			var distributedInfo = createDistributeInfo with
 			{
-				Id = await _serialNumberGenerator
-					.GenerateAsync(cancellationToken)
-					.ConfigureAwait(false),
-				Action = DistributeAction.Distribute,
-				ChangeSets = JsonDocument.Parse("[]")
-			},
-			cancellationToken).ConfigureAwait(false);
+				SentOn = DateTime.UtcNow
+			};
 
-		_ = await _playerBucketClient.CreateBucketAsync(
-			player.PlayerCode,
-			command.NeedTurnover,
-			BucketType.Promotion,
-			distributeId.ToString(),
-			cancellationToken).ConfigureAwait(false);
+			await _promotionRepository.UpdatePromotionDistributeAsync(
+				distributedInfo.Id,
+				distributedInfo.SentOn.Value,
+				cancellationToken).ConfigureAwait(false);
 
-		_ = await _cashServiceClient.PromotionAsync(
-			walletId,
-			command.Amount,
-			null,
-			distributeId.ToString(),
-			null,
-			cancellationToken).ConfigureAwait(false);
+			await _promotionRepository.InsertPromotionDistributeLogAsync(
+				distributeLog with
+				{
+					Id = await _serialNumberGenerator
+						.GenerateAsync(cancellationToken)
+						.ConfigureAwait(false),
+					Action = DistributeAction.Distribute,
+					ChangeSets = JsonSerializer.SerializeToDocument(distributedInfo.CreatePatch(
+						createDistributeInfo,
+						PromotionUtility.SerializerOptions))
+				},
+				cancellationToken).ConfigureAwait(false);
+		}
 
 		return distributeId;
 	}

@@ -6,6 +6,7 @@ using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.SerialNumberGenerator;
 using Tgs.Service.PlayerBuckets;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Core.UnitTests;
 
@@ -16,6 +17,7 @@ public class PromotionDistributeTests
 	public async Task Distribute_Bonus_By_Plan_And_Player()
 	{
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
@@ -23,6 +25,7 @@ public class PromotionDistributeTests
 
 		var sut = new DistributePromotionBonusCommandService(
 			fakePromotionRepository,
+			fakeServiceCoordinator,
 			fakeCashServiceClient,
 			fakePlayerServiceClient,
 			fakePlayerBucketClient,
@@ -57,11 +60,20 @@ public class PromotionDistributeTests
 				Guid.NewGuid(),
 				0));
 
+		_ = fakeServiceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(Arg.Any<GetPromotionMainInfoQuery>())
+			.Returns(new PromotionMainInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				"Ttt",
+				(From: DateTime.Now.AddDays(-1D), To: DateTime.Now.AddDays(1D)),
+				"Test",
+				null,
+				true));
+
 		_ = await sut.GetAsync(command);
 
 		_ = fakePromotionRepository.Received(1)
 			.CreatePromotionDistributeAsync(
-				Arg.Any<Guid>(),
 				Arg.Any<PromotionDistributeInfo>(),
 				Arg.Is(command.Distributor));
 
@@ -85,14 +97,15 @@ public class PromotionDistributeTests
 	public async Task Distribute_Bonus_Without_Find_Player_Will_Throw_Exception()
 	{
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
-
 		var sut = new DistributePromotionBonusCommandService(
 			fakePromotionRepository,
+			fakeServiceCoordinator,
 			fakeCashServiceClient,
 			fakePlayerServiceClient,
 			fakePlayerBucketClient,

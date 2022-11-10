@@ -14,9 +14,13 @@ public interface IPromotionRepository
 	ValueTask<Guid> CreatePromotionAsync(CreatePromotionMainInfo createInfo, string modifier, CancellationToken cancellationToken = default);
 
 	ValueTask CreatePromotionDistributeAsync(
-		Guid createId,
 		PromotionDistributeInfo createInfo,
 		string? distributor,
+		CancellationToken cancellationToken = default);
+
+	ValueTask UpdatePromotionDistributeAsync(
+		Guid distributeId,
+		DateTime sentOn,
 		CancellationToken cancellationToken = default);
 
 	ValueTask<PromotionDistributePlanInfo> CreatePromotionDistributePlanAsync(

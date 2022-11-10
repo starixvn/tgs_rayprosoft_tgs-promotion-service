@@ -64,7 +64,7 @@ builder.Services
 builder.Services
 	.AddTgsRepository(builder.Configuration.GetConnectionString("Tgs")!)
 	.AddRedis((redisOptions, _) => redisOptions.ConnectionString =
-		builder.Configuration.GetConnectionString("Redis"))
+		builder.Configuration.GetConnectionString("Redis")!)
 	.AddPromotionCore()
 	.AddMemoryCache()
 	.AddPromotionServiceCache()
@@ -94,7 +94,7 @@ builder.Services
 		{
 			var configuration = sp.GetRequiredService<IConfiguration>();
 
-			options.Url = configuration.GetConnectionString("Nats");
+			options.Url = configuration.GetConnectionString("Nats")!;
 		})
 		.AddHandler<DepositStatusChangedMessageHandler>(
 			"tgs.payment.deposit.status",

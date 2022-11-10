@@ -146,11 +146,11 @@ public class PromotionRepository : IPromotionRepository
 		return promotionId;
 	}
 
-	public async ValueTask CreatePromotionDistributeAsync(Guid createId, PromotionDistributeInfo createInfo, string? distributor, CancellationToken cancellationToken = default)
+	public async ValueTask CreatePromotionDistributeAsync(PromotionDistributeInfo createInfo, string? distributor, CancellationToken cancellationToken = default)
 	{
 		_ = await _dbContext.PromotionDistributes.AddAsync(new PromotionDistribute
 		{
-			Id = createId,
+			Id = createInfo.Id,
 			BrandId = createInfo.BrandId,
 			PromotionId = createInfo.PromotionId,
 			PlanId = createInfo.PlanId,
@@ -659,8 +659,24 @@ public class PromotionRepository : IPromotionRepository
 		scope.Complete();
 	}
 
+	public async ValueTask UpdatePromotionDistributeAsync(Guid distributeId, DateTime sentOn, CancellationToken cancellationToken = default)
+	{
+		var distribute = await _dbContext.PromotionDistributes.FindAsync(
+			new object?[] { distributeId },
+			cancellationToken: cancellationToken).ConfigureAwait(false);
+
+		if (distribute is null)
+			return;
+
+		distribute.SentOn = sentOn.ToUniversalTime();
+
+		_ = await _dbContext
+			.SaveChangesAsync(cancellationToken)
+			.ConfigureAwait(false);
+	}
+
 	public async ValueTask UpdatePromotionMainInfoAsync(
-		Guid promotionId,
+			Guid promotionId,
 		UpdatePromotionMainInfo updateInfo,
 		string modifier,
 		CancellationToken cancellationToken = default)
