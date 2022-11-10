@@ -4,6 +4,7 @@ using Tgs.CashService.Client;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.SerialNumberGenerator;
 using Tgs.Service.PlayerBuckets;
 
 namespace Tgs.Promotion.Core.UnitTests;
@@ -18,12 +19,14 @@ public class PromotionDistributeTests
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
 		var sut = new DistributePromotionBonusCommandService(
 			fakePromotionRepository,
 			fakeCashServiceClient,
 			fakePlayerServiceClient,
-			fakePlayerBucketClient);
+			fakePlayerBucketClient,
+			fakeSerialNumberGenerator);
 
 		var command = new DistributePromotionBonusCommand(
 			 Guid.NewGuid(),
@@ -47,18 +50,20 @@ public class PromotionDistributeTests
 				["DefaultWalletId"] = walletId.ToString()
 			}.ToImmutableDictionary());
 
-		var newDistributeId = Guid.NewGuid();
-		_ = fakePromotionRepository.CreatePromotionDistributeAsync(
-			Arg.Is(command.PlanId),
-			Arg.Is(command.PlayerCode),
-			Arg.Is(command.Amount),
-			Arg.Is(command.NeedTurnover),
-			Arg.Is(command.Distributor))
-			.Returns(newDistributeId);
+		_ = fakePromotionRepository.FindPromotionDistributePlanAsync(Arg.Is(command.PlanId))
+			.Returns(new PromotionDistributePlanInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				0));
 
-		var actual = await sut.GetAsync(command);
+		_ = await sut.GetAsync(command);
 
-		Assert.AreNotEqual(Guid.Empty, actual);
+		_ = fakePromotionRepository.Received(1)
+			.CreatePromotionDistributeAsync(
+				Arg.Any<Guid>(),
+				Arg.Any<PromotionDistributeInfo>(),
+				Arg.Is(command.Distributor));
 
 		_ = fakePlayerBucketClient.Received(1)
 			.CreateBucketAsync(
@@ -72,7 +77,7 @@ public class PromotionDistributeTests
 				Arg.Is(walletId),
 				Arg.Is(command.Amount),
 				Arg.Any<string>(),
-				Arg.Is(newDistributeId.ToString()),
+				Arg.Any<string>(),
 				Arg.Is(default(Guid?)));
 	}
 
@@ -83,12 +88,15 @@ public class PromotionDistributeTests
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
 
 		var sut = new DistributePromotionBonusCommandService(
 			fakePromotionRepository,
 			fakeCashServiceClient,
 			fakePlayerServiceClient,
-			fakePlayerBucketClient);
+			fakePlayerBucketClient,
+			fakeSerialNumberGenerator);
 
 		var command = new DistributePromotionBonusCommand(
 			 Guid.NewGuid(),

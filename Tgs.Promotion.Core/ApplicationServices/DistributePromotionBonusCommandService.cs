@@ -1,6 +1,10 @@
 ﻿using System.Collections.Immutable;
+using System.Text.Json;
+using Json.Patch;
+using Json.Pointer;
 using Tgs.CashService.Client;
 using Tgs.PlayerService.Client;
+using Tgs.SerialNumberGenerator;
 using Tgs.Service.PlayerBuckets;
 using Tgs.ServiceUtility;
 
@@ -12,17 +16,20 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 	private readonly IPlayerBucketClient _playerBucketClient;
 	private readonly IPlayerServiceClient _playerServiceClient;
 	private readonly IPromotionRepository _promotionRepository;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
 
 	public DistributePromotionBonusCommandService(
 		IPromotionRepository promotionRepository,
 		ICashServiceClient cashServiceClient,
 		IPlayerServiceClient playerServiceClient,
-		IPlayerBucketClient playerBucketClient)
+		IPlayerBucketClient playerBucketClient,
+		ISerialNumberGenerator serialNumberGenerator)
 	{
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
 		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 		_playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
+		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 	}
 
 	public async ValueTask<Guid> GetAsync(DistributePromotionBonusCommand command,
@@ -44,15 +51,56 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 
 		var walletId = Guid.Parse(playerProperties.GetValueOrDefault("DefaultWalletId")!);
 
-		var distributeId = await _promotionRepository
-			.CreatePromotionDistributeAsync(
-				command.PlanId,
-				command.PlayerCode,
-				command.Amount,
-				command.NeedTurnover,
-				command.Distributor,
-				cancellationToken)
+		var plan = (await _promotionRepository.FindPromotionDistributePlanAsync(
+			command.PlanId,
+			cancellationToken).ConfigureAwait(false))!;
+
+		var distributeId = await _serialNumberGenerator
+			.GenerateAsync(cancellationToken)
 			.ConfigureAwait(false);
+
+		var createDistributeInfo = new PromotionDistributeInfo(
+			distributeId,
+			player.BrandId,
+			command.PlanId,
+			player.PlayerCode,
+			plan.PromotionId,
+			command.Amount,
+			command.NeedTurnover,
+			DateTime.UtcNow);
+
+		await _promotionRepository.CreatePromotionDistributeAsync(
+			distributeId,
+			createDistributeInfo,
+			command.Distributor,
+			cancellationToken).ConfigureAwait(false);
+
+		var jsonCreatePatch = new JsonPatch(PatchOperation.Add(
+			JsonPointer.Create<PromotionDistributeInfo>(o => o),
+			JsonSerializer.SerializeToNode(createDistributeInfo, PromotionUtility.SerializerOptions)));
+
+		var distributeLog = new PromotionDistributeLog(
+			await _serialNumberGenerator
+				.GenerateAsync(cancellationToken)
+				.ConfigureAwait(false),
+			distributeId,
+			DistributeAction.Create,
+			JsonSerializer.SerializeToDocument(jsonCreatePatch));
+
+		await _promotionRepository.InsertPromotionDistributeLogAsync(
+			distributeLog,
+			cancellationToken).ConfigureAwait(false);
+
+		await _promotionRepository.InsertPromotionDistributeLogAsync(
+			distributeLog with
+			{
+				Id = await _serialNumberGenerator
+					.GenerateAsync(cancellationToken)
+					.ConfigureAwait(false),
+				Action = DistributeAction.Distribute,
+				ChangeSets = JsonDocument.Parse("[]")
+			},
+			cancellationToken).ConfigureAwait(false);
 
 		_ = await _playerBucketClient.CreateBucketAsync(
 			player.PlayerCode,
