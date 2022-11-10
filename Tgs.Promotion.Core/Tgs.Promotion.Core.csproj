@@ -9,21 +9,22 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.123" />
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.2.32">
+    <PackageReference Include="JsonPatch.Net" Version="2.0.4" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.4.27">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Polly" Version="7.2.3" />
-    <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.15-beta" />
-    <PackageReference Include="Tgs.CashService.Client" Version="0.1.0" />
-    <PackageReference Include="Tgs.Payment.Client" Version="0.4.6" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.5.0" />
+    <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.20" />
+    <PackageReference Include="Tgs.CashService.Client" Version="0.1.5" />
+    <PackageReference Include="Tgs.Payment.Client" Version="0.4.8" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.18" />
     <PackageReference Include="Tgs.PlayerBucket.Client" Version="0.0.3" />
-    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.15" />
-    <PackageReference Include="Tgs.SerialNumberGenerator" Version="0.0.3" />
-    <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
-    <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.3" />
+    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.23" />
+    <PackageReference Include="Tgs.SerialNumberGenerator" Version="0.0.5" />
+    <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
+    <PackageReference Include="PagingUtility.AsyncEnumerable" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>

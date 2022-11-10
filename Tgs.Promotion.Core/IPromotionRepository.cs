@@ -13,12 +13,14 @@ public interface IPromotionRepository
 
 	ValueTask<Guid> CreatePromotionAsync(CreatePromotionMainInfo createInfo, string modifier, CancellationToken cancellationToken = default);
 
-	ValueTask<Guid> CreatePromotionDistributeAsync(
-		Guid planId,
-		string playerCode,
-		decimal bonusAmount,
-		decimal needTurnover,
+	ValueTask CreatePromotionDistributeAsync(
+		PromotionDistributeInfo createInfo,
 		string? distributor,
+		CancellationToken cancellationToken = default);
+
+	ValueTask UpdatePromotionDistributeAsync(
+		Guid distributeId,
+		DateTime sentOn,
 		CancellationToken cancellationToken = default);
 
 	ValueTask<PromotionDistributePlanInfo> CreatePromotionDistributePlanAsync(
@@ -27,6 +29,8 @@ public interface IPromotionRepository
 		CancellationToken cancellationToken = default);
 
 	ValueTask<bool> ExistsAsync(Expression<Func<PromotionRow, bool>> predicate);
+
+	ValueTask<PromotionDistributePlanInfo?> FindPromotionDistributePlanAsync(Guid planId, CancellationToken cancellationToken = default);
 
 	ValueTask<PromotionRow?> GetPromotionAsync(
 		Expression<Func<PromotionRow, bool>> predicate,
@@ -43,6 +47,8 @@ public interface IPromotionRepository
 		bool tracking = false);
 
 	ValueTask<PromotionRule?> GetPromotionRuleAsync(Guid promotionId, CancellationToken cancellationToken = default);
+
+	ValueTask InsertPromotionDistributeLogAsync(PromotionDistributeLog log, CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, CancellationToken cancellationToken = default);
 

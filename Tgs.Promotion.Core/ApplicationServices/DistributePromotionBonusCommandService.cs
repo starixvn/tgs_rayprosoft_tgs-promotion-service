@@ -1,4 +1,10 @@
-﻿using Tgs.CashService.Client;
+﻿using System.Collections.Immutable;
+using System.Text.Json;
+using Json.Patch;
+using Json.Pointer;
+using Tgs.CashService.Client;
+using Tgs.PlayerService.Client;
+using Tgs.SerialNumberGenerator;
 using Tgs.Service.PlayerBuckets;
 using Tgs.ServiceUtility;
 
@@ -8,55 +14,128 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 {
 	private readonly ICashServiceClient _cashServiceClient;
 	private readonly IPlayerBucketClient _playerBucketClient;
-	private readonly IPlayerRepository _playerRepository;
+	private readonly IPlayerServiceClient _playerServiceClient;
 	private readonly IPromotionRepository _promotionRepository;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
+	private readonly IServiceCoordinator _serviceCoordinator;
 
 	public DistributePromotionBonusCommandService(
 		IPromotionRepository promotionRepository,
+		IServiceCoordinator serviceCoordinator,
 		ICashServiceClient cashServiceClient,
-		IPlayerRepository playerRepository,
-		IPlayerBucketClient playerBucketClient)
+		IPlayerServiceClient playerServiceClient,
+		IPlayerBucketClient playerBucketClient,
+		ISerialNumberGenerator serialNumberGenerator)
 	{
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+		_serviceCoordinator = serviceCoordinator ?? throw new ArgumentNullException(nameof(serviceCoordinator));
 		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-		_playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 		_playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
+		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 	}
 
 	public async ValueTask<Guid> GetAsync(DistributePromotionBonusCommand command,
 		CancellationToken cancellationToken = default)
 	{
-		var player = await _playerRepository
-			.GetPlayerByPlayerCodeAsync(command.PlayerCode)
-			.ConfigureAwait(false);
+		var player = await _playerServiceClient.GetPlayerInfoAsync(
+			command.PlayerCode,
+			cancellationToken).ConfigureAwait(false);
 
 		if (player is null)
 			throw new InvalidOperationException($"Player with player code {command.PlayerCode} does not exist");
 
-		var distributeId = await _promotionRepository
-			.CreatePromotionDistributeAsync(
-				command.PlanId,
-				command.PlayerCode,
-				command.Amount,
-				command.NeedTurnover,
-				command.Distributor,
-				cancellationToken)
+		var playerProperties = await _playerServiceClient.GetPlayerPropertiesAsync(
+			player.PlayerCode,
+			cancellationToken).ConfigureAwait(false);
+
+		if (playerProperties is null)
+			throw new InvalidOperationException($"Player with player code {command.PlayerCode} does not exist");
+
+		var walletId = Guid.Parse(playerProperties.GetValueOrDefault("DefaultWalletId")!);
+
+		var plan = (await _promotionRepository.FindPromotionDistributePlanAsync(
+			command.PlanId,
+			cancellationToken).ConfigureAwait(false))!;
+
+		var promotion = (await _serviceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(
+			new(plan.PromotionId), cancellationToken).ConfigureAwait(false))!;
+
+		var distributeId = await _serialNumberGenerator
+			.GenerateAsync(cancellationToken)
 			.ConfigureAwait(false);
 
-		_ = await _playerBucketClient.CreateBucketAsync(
+		var createDistributeInfo = new PromotionDistributeInfo(
+			distributeId,
+			player.BrandId,
+			command.PlanId,
 			player.PlayerCode,
+			plan.PromotionId,
+			command.Amount,
 			command.NeedTurnover,
-			BucketType.Promotion,
-			distributeId.ToString(),
+			null);
+
+		await _promotionRepository.CreatePromotionDistributeAsync(
+			createDistributeInfo,
+			command.Distributor,
 			cancellationToken).ConfigureAwait(false);
 
-		_ = await _cashServiceClient.PromotionAsync(
-			player.DefaultWalletId,
-			command.Amount,
-			null,
-			distributeId.ToString(),
-			null,
+		var jsonCreatePatch = new JsonPatch(PatchOperation.Add(
+			JsonPointer.Create<PromotionDistributeInfo>(o => o),
+			JsonSerializer.SerializeToNode(createDistributeInfo, PromotionUtility.SerializerOptions)));
+
+		var distributeLog = new PromotionDistributeLog(
+			await _serialNumberGenerator
+				.GenerateAsync(cancellationToken)
+				.ConfigureAwait(false),
+			distributeId,
+			DistributeAction.Create,
+			JsonSerializer.SerializeToDocument(jsonCreatePatch));
+
+		await _promotionRepository.InsertPromotionDistributeLogAsync(
+			distributeLog,
 			cancellationToken).ConfigureAwait(false);
+
+		if (promotion.IsAutoSent)
+		{
+			_ = await _playerBucketClient.CreateBucketAsync(
+				player.PlayerCode,
+				command.NeedTurnover,
+				BucketType.Promotion,
+				distributeId.ToString(),
+				cancellationToken).ConfigureAwait(false);
+
+			_ = await _cashServiceClient.PromotionAsync(
+				walletId,
+				command.Amount,
+				null,
+				distributeId.ToString(),
+				null,
+				cancellationToken).ConfigureAwait(false);
+
+			var distributedInfo = createDistributeInfo with
+			{
+				SentOn = DateTime.UtcNow
+			};
+
+			await _promotionRepository.UpdatePromotionDistributeAsync(
+				distributedInfo.Id,
+				distributedInfo.SentOn.Value,
+				cancellationToken).ConfigureAwait(false);
+
+			await _promotionRepository.InsertPromotionDistributeLogAsync(
+				distributeLog with
+				{
+					Id = await _serialNumberGenerator
+						.GenerateAsync(cancellationToken)
+						.ConfigureAwait(false),
+					Action = DistributeAction.Distribute,
+					ChangeSets = JsonSerializer.SerializeToDocument(distributedInfo.CreatePatch(
+						createDistributeInfo,
+						PromotionUtility.SerializerOptions))
+				},
+				cancellationToken).ConfigureAwait(false);
+		}
 
 		return distributeId;
 	}

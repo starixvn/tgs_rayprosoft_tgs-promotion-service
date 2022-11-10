@@ -1,8 +1,12 @@
-﻿using NSubstitute;
+﻿using System.Collections.Immutable;
+using NSubstitute;
 using Tgs.CashService.Client;
+using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.SerialNumberGenerator;
 using Tgs.Service.PlayerBuckets;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Core.UnitTests;
 
@@ -12,16 +16,20 @@ public class PromotionDistributeTests
 	[TestMethod]
 	public async Task Distribute_Bonus_By_Plan_And_Player()
 	{
-		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
 		var sut = new DistributePromotionBonusCommandService(
 			fakePromotionRepository,
+			fakeServiceCoordinator,
 			fakeCashServiceClient,
-			fakePlayerRepository,
-			fakePlayerBucketClient);
+			fakePlayerServiceClient,
+			fakePlayerBucketClient,
+			fakeSerialNumberGenerator);
 
 		var command = new DistributePromotionBonusCommand(
 			 Guid.NewGuid(),
@@ -31,25 +39,43 @@ public class PromotionDistributeTests
 			 "manager");
 
 		var walletId = Guid.NewGuid();
-		_ = fakePlayerRepository.GetPlayerByPlayerCodeAsync(Arg.Is(command.PlayerCode))
-			.Returns(new Player
+
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
 			{
 				PlayerCode = command.PlayerCode,
-				DefaultWalletId = walletId
+				BrandId = Guid.NewGuid()
 			});
 
-		var newDistributeId = Guid.NewGuid();
-		_ = fakePromotionRepository.CreatePromotionDistributeAsync(
-			Arg.Is(command.PlanId),
-			Arg.Is(command.PlayerCode),
-			Arg.Is(command.Amount),
-			Arg.Is(command.NeedTurnover),
-			Arg.Is(command.Distributor))
-			.Returns(newDistributeId);
+		_ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = walletId.ToString()
+			}.ToImmutableDictionary());
 
-		var actual = await sut.GetAsync(command);
+		_ = fakePromotionRepository.FindPromotionDistributePlanAsync(Arg.Is(command.PlanId))
+			.Returns(new PromotionDistributePlanInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				0));
 
-		Assert.AreNotEqual(Guid.Empty, actual);
+		_ = fakeServiceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(Arg.Any<GetPromotionMainInfoQuery>())
+			.Returns(new PromotionMainInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				"Ttt",
+				(From: DateTime.Now.AddDays(-1D), To: DateTime.Now.AddDays(1D)),
+				"Test",
+				null,
+				true));
+
+		_ = await sut.GetAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.CreatePromotionDistributeAsync(
+				Arg.Any<PromotionDistributeInfo>(),
+				Arg.Is(command.Distributor));
 
 		_ = fakePlayerBucketClient.Received(1)
 			.CreateBucketAsync(
@@ -63,23 +89,27 @@ public class PromotionDistributeTests
 				Arg.Is(walletId),
 				Arg.Is(command.Amount),
 				Arg.Any<string>(),
-				Arg.Is(newDistributeId.ToString()),
+				Arg.Any<string>(),
 				Arg.Is(default(Guid?)));
 	}
 
 	[TestMethod]
 	public async Task Distribute_Bonus_Without_Find_Player_Will_Throw_Exception()
 	{
-		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
 		var sut = new DistributePromotionBonusCommandService(
 			fakePromotionRepository,
+			fakeServiceCoordinator,
 			fakeCashServiceClient,
-			fakePlayerRepository,
-			fakePlayerBucketClient);
+			fakePlayerServiceClient,
+			fakePlayerBucketClient,
+			fakeSerialNumberGenerator);
 
 		var command = new DistributePromotionBonusCommand(
 			 Guid.NewGuid(),
