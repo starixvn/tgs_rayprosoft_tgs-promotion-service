@@ -62,17 +62,15 @@ builder.Services
 				ext => httpContext.Request.Path.Value.EndsWith($".{ext}")));
 
 builder.Services
-	.AddTgsRepository(builder.Configuration.GetConnectionString("Tgs"))
-	.AddRedis((redisOptions, _) => redisOptions.ConnectionString = builder.Configuration.GetConnectionString("Redis"))
+	.AddTgsRepository(builder.Configuration.GetConnectionString("Tgs")!)
+	.AddRedis((redisOptions, _) => redisOptions.ConnectionString =
+		builder.Configuration.GetConnectionString("Redis"))
 	.AddPromotionCore()
 	.AddMemoryCache()
 	.AddPromotionServiceCache()
-	.AddPaymentServiceClient((options, sp) =>
-	{
-		var config = sp.GetRequiredService<IConfiguration>();
-
-		options.PaymentServiceBaseUrl = config.GetValue<Uri>("Promotion:PaymentServiceBaseUrl");
-	})
+	.AddPaymentServiceClient((clientBuilder) => clientBuilder
+		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =
+			builder.Configuration.GetValue<Uri>("Promotion:PaymentServiceBaseUrl")))
 	.AddCashServiceClient((options, sp) =>
 	{
 		var config = sp.GetRequiredService<IConfiguration>();

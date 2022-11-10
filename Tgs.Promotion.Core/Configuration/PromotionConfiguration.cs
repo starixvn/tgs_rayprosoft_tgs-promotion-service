@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Tgs.CashService.Client;
-using Tgs.Payment.Clients;
 
 namespace Tgs.Promotion.Configuration;
 
@@ -24,7 +23,7 @@ public class PromotionConfiguration
 	}
 
 	public PromotionConfiguration AddPaymentServiceClient(
-		Action<PaymentServiceClientOptions, IServiceProvider> configure)
+		Action<IHttpClientBuilder> configure)
 	{
 		_ = Services.AddPaymentServiceClient(configure);
 
@@ -32,7 +31,7 @@ public class PromotionConfiguration
 	}
 
 	public PromotionConfiguration AddPlayerDataRepository<TPlayerDataRepository>()
-				where TPlayerDataRepository : class, IPlayerDataRepository
+		where TPlayerDataRepository : class, IPlayerDataRepository
 	{
 		_ = Services.AddTransient<IPlayerDataRepository, TPlayerDataRepository>();
 
@@ -64,7 +63,7 @@ public class PromotionConfiguration
 	}
 
 	public PromotionConfiguration AddPromotionRepository<TPromotionRepository>()
-			where TPromotionRepository : class, IPromotionRepository
+		where TPromotionRepository : class, IPromotionRepository
 	{
 		_ = Services.AddTransient<IPromotionRepository, TPromotionRepository>();
 

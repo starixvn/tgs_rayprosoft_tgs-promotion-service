@@ -5,7 +5,7 @@ using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.Promotion;
 using Tgs.Promotion.Service.ViewModels;
 using Tgs.ServiceUtility;
-using TGS.Paging;
+using Tgs.Paging;
 
 namespace Tgs.Promotion.Service.Controllers;
 
