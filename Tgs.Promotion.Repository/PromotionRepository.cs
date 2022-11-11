@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections.Immutable;
+using System.Data;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -499,6 +500,34 @@ public class PromotionRepository : IPromotionRepository
 				promotion.Unlimited == 1 ? null : promotion.TotalAmountLimit,
 				promotion.AutoSentPlayerBonus);
 	}
+
+	public IAsyncEnumerable<PromotionMainInfo> QueryPromotionsByPromotionTypeAsync(string promotionType, CancellationToken cancellationToken = default)
+		=> _dbContext.PromotionRows.AsQueryable()
+			.Where(p => p.PromotionType == promotionType
+				&& p.Status == (short)PromotionStatus.Enabled)
+			.Select(p => new
+			{
+				p.Id,
+				p.BrandId,
+				p.Name,
+				p.From,
+				p.To,
+				p.PromotionType,
+				p.TotalAmountLimit,
+				p.AutoSentPlayerBonus
+			})
+			.ToArrayAsync(cancellationToken: cancellationToken)
+			.ToAsyncEnumerable()
+			.Select(arr => arr.ToAsyncEnumerable())
+			.Concat()
+			.Select(p => new PromotionMainInfo(
+				p.Id,
+				p.BrandId,
+				p.Name,
+				(p.From, p.To),
+				p.PromotionType,
+				p.TotalAmountLimit,
+				p.AutoSentPlayerBonus));
 
 	public async ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount)
 	{

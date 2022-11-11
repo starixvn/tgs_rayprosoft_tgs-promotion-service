@@ -35,7 +35,7 @@ internal class CachedPromotionTypeGroupsQueryService : IQueryService<PromotionTy
 				.ConfigureAwait(false);
 		}).ConfigureAwait(false);
 
-		foreach (var item in items)
+		foreach (var item in items!)
 			yield return item;
 	}
 }

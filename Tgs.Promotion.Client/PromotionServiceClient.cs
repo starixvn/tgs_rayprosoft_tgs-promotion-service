@@ -225,8 +225,27 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			yield return id;
 	}
 
+	public IAsyncEnumerable<PromotionView> ListPromotionsByPromotionTypeAsync(string promotionType, CancellationToken cancellationToken = default)
+		=> _httpClient.GetAsync(
+			$"/api/promotion-mgr/{promotionType}",
+			cancellationToken)
+			.ToAsyncEnumerable()
+			.Do(response => response.EnsureSuccessStatusCode())
+			.Select(response => response.Content
+				.ReadFromJsonAsync<IEnumerable<PromotionView>>(_JsonSerializerOptions)
+				.ToAsyncEnumerable()
+				.Where(arr => arr is not null)
+				.Select(arr => arr!.ToAsyncEnumerable())
+				.Concat())
+			.Concat()
+			.ToArrayAsync(cancellationToken: cancellationToken)
+			.AsTask()
+			.ToAsyncEnumerable()
+			.Select(arr => arr.ToAsyncEnumerable())
+			.Concat();
+
 	public async ValueTask SetPromotionContentAsync(
-						Guid promotionId,
+		Guid promotionId,
 		PromotionContent content,
 		string modifier,
 		CancellationToken cancellationToken = default)

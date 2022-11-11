@@ -55,7 +55,7 @@ public class PromotionManagementController : ControllerBase
 			};
 	}
 
-	[HttpGet("{promotionId}", Name = "GetPromotionMainInfo")]
+	[HttpGet("{promotionId:Guid}", Name = "GetPromotionMainInfo")]
 	public async ValueTask<PromotionViewModel?> GetPromotionMainInfoAsync(
 		[FromServices] IGetService<GetPromotionMainInfoQuery, PromotionMainInfo?> getService,
 		Guid promotionId)
@@ -77,6 +77,25 @@ public class PromotionManagementController : ControllerBase
 				PromotionLimitAmount = result.PromotionLimitAmount,
 				PromotionType = result.PromotionType
 			};
+	}
+
+	[HttpGet("{promotionType}", Name = "GetPromotionMainInfosByPromotionType")]
+	public IAsyncEnumerable<PromotionViewModel> GetPromotionMainInfosByPromotionTypeAsync(
+		[FromServices] IQueryService<GetPromotionMainInfosByPromotionTypeQuery, PromotionMainInfo> queryService,
+		string promotionType)
+	{
+		var query = new GetPromotionMainInfosByPromotionTypeQuery(promotionType);
+
+		return queryService.QueryAsync(query, HttpContext.RequestAborted)
+			.Select(info => new PromotionViewModel
+			{
+				Id = info.Id,
+				EventDuring = info.EventDuring,
+				Name = info.Name,
+				IsAutoSent = info.IsAutoSent,
+				PromotionLimitAmount = info.PromotionLimitAmount,
+				PromotionType = info.PromotionType
+			});
 	}
 
 	[HttpGet("rule/{promotionId}", Name = "GetPromotionRule")]

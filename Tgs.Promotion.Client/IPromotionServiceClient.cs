@@ -42,6 +42,8 @@ public interface IPromotionServiceClient
 		string? promotionType,
 		CancellationToken cancellationToken = default);
 
+	IAsyncEnumerable<PromotionView> ListPromotionsByPromotionTypeAsync(string promotionType, CancellationToken cancellationToken = default);
+
 	ValueTask SetPromotionContentAsync(
 		Guid promotionId,
 		PromotionContent content,

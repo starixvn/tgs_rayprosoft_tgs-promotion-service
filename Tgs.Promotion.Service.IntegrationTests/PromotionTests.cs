@@ -3,6 +3,7 @@ using ExpectedObjects;
 using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
 using Tgs.MessageQueue;
@@ -130,6 +131,48 @@ public class PromotionTests
 					_ = ctx.IgnoreEqualsOverride();
 				})
 			.ShouldMatch(actual);
+	}
+
+	[TestMethod]
+	public async Task 依據PromotionType取得PromotionMainInfoAsync()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionType = "TestType";
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		await dbContext.PromotionRows.AddRangeAsync(
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				Name = "Test Promotion",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now,
+				PromotionType = "TestType",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}"
+			},
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				Name = "Test Promotion",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now,
+				PromotionType = "TestType",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}"
+			});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.ListPromotionsByPromotionTypeAsync(promotionType).ToArrayAsync();
+
+		Assert.AreEqual(2, actual.Length);
 	}
 
 	[TestMethod]
