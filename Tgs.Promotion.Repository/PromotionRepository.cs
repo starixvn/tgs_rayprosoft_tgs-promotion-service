@@ -588,7 +588,7 @@ public class PromotionRepository : IPromotionRepository
 
 	public async ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount)
 	{
-		const string sql = "dbo.promotion_update_amount_used";
+		const string sql = "select * from dbo.promotion_update_amount_used(@promotion_id,@amount)";
 
 		var conn = _dbContext.Database.GetDbConnection();
 		var transaction = _dbContext.Database.CurrentTransaction?.GetDbTransaction();
@@ -597,9 +597,9 @@ public class PromotionRepository : IPromotionRepository
 				sql,
 				new Dictionary<string, object>
 				{
-					{ "_promotion_id", promotionId },
-					{ "_amount", amount }
-				}, commandType: CommandType.StoredProcedure, transaction: transaction)
+					{ "@promotion_id", promotionId },
+					{ "@amount", amount }
+				}, commandType: CommandType.Text, transaction: transaction)
 			.ConfigureAwait(false);
 	}
 
