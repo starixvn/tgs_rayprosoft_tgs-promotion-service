@@ -17,6 +17,7 @@ namespace Tgs.Promotion.Domain.Entities
         public string? Distributor { get; set; }
         public DateTime? SentOn { get; set; }
         public decimal Bucket { get; set; }
+        public Guid? ReferenceId { get; set; }
 
         public virtual PromotionRow Promotion { get; set; } = null!;
     }

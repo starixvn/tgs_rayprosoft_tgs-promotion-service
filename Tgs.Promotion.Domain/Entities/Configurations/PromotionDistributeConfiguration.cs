@@ -42,6 +42,8 @@ namespace Tgs.Promotion.Domain.Entities.Configurations
 
             entity.Property(e => e.PromotionId).HasColumnName("promotion_id");
 
+            entity.Property(e => e.ReferenceId).HasColumnName("reference_id");
+
             entity.Property(e => e.SentOn).HasColumnName("sent_on");
 
             entity.HasOne(d => d.Promotion)
