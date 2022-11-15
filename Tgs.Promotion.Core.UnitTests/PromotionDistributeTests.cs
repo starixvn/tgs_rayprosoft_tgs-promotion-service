@@ -36,6 +36,7 @@ public class PromotionDistributeTests
 			 "player1",
 			 100M,
 			 1000M,
+			 null,
 			 "manager");
 
 		var walletId = Guid.NewGuid();
@@ -94,6 +95,91 @@ public class PromotionDistributeTests
 	}
 
 	[TestMethod]
+	public async Task Distribute_Bonus_By_Plan_And_Player_With_ReferenceId()
+	{
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
+		var sut = new DistributePromotionBonusCommandService(
+			fakePromotionRepository,
+			fakeServiceCoordinator,
+			fakeCashServiceClient,
+			fakePlayerServiceClient,
+			fakePlayerBucketClient,
+			fakeSerialNumberGenerator);
+
+		var command = new DistributePromotionBonusCommand(
+			 Guid.NewGuid(),
+			 "player1",
+			 100M,
+			 1000M,
+			 Guid.NewGuid(),
+			 "manager");
+
+		var walletId = Guid.NewGuid();
+
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = Guid.NewGuid()
+			});
+
+		_ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = walletId.ToString()
+			}.ToImmutableDictionary());
+
+		_ = fakePromotionRepository.FindPromotionDistributePlanAsync(Arg.Is(command.PlanId))
+			.Returns(new PromotionDistributePlanInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				0));
+
+		_ = fakeServiceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(Arg.Any<GetPromotionMainInfoQuery>())
+			.Returns(new PromotionMainInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				"Ttt",
+				(From: DateTime.Now.AddDays(-1D), To: DateTime.Now.AddDays(1D)),
+				"Test",
+				null,
+				true));
+
+		_ = await sut.GetAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.CreatePromotionDistributeAsync(
+				Arg.Is<PromotionDistributeInfo>(
+					x =>
+						x.PlanId == command.PlanId
+						&& x.PlayerCode == command.PlayerCode
+						&& x.ReferenceId == command.ReferenceId),
+				Arg.Is(command.Distributor));
+
+		_ = fakePlayerBucketClient.Received(1)
+			.CreateBucketAsync(
+				Arg.Is(command.PlayerCode),
+				Arg.Is(command.NeedTurnover),
+				Arg.Is(BucketType.Promotion),
+				Arg.Any<string>());
+
+		_ = fakeCashServiceClient.Received(1)
+			.PromotionAsync(
+				Arg.Is(walletId),
+				Arg.Is(command.Amount),
+				Arg.Any<string>(),
+				Arg.Any<string>(),
+				Arg.Is(default(Guid?)));
+	}
+
+	[TestMethod]
 	public async Task Distribute_Bonus_Without_Find_Player_Will_Throw_Exception()
 	{
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
@@ -116,6 +202,7 @@ public class PromotionDistributeTests
 			 "player1",
 			 100M,
 			 1000M,
+			 null,
 			 "manager");
 
 		_ = await Assert.ThrowsExceptionAsync<InvalidOperationException>(

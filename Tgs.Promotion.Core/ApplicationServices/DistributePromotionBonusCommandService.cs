@@ -73,6 +73,7 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 			plan.PromotionId,
 			command.Amount,
 			command.NeedTurnover,
+			command.ReferenceId,
 			null);
 
 		await _promotionRepository.CreatePromotionDistributeAsync(

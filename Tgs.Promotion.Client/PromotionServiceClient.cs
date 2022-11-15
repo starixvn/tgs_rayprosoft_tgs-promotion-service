@@ -64,12 +64,14 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		decimal amount,
 		decimal needTurnover,
 		string? distributor,
+		Guid? referenceId,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new
 		{
 			Amount = amount,
 			NeedTurnover = needTurnover,
+			ReferenceId = referenceId,
 			Distributor = distributor
 		};
 		var requestContent = new StringContent(

@@ -5,4 +5,5 @@ public record DistributePromotionBonusCommand(
 	string PlayerCode,
 	decimal Amount,
 	decimal NeedTurnover,
+	Guid? ReferenceId,
 	string? Distributor);

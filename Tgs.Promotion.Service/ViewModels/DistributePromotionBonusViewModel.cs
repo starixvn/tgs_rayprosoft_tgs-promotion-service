@@ -7,4 +7,6 @@ public class DistributePromotionBonusViewModel
 	public string? Distributor { get; init; }
 
 	public decimal NeedTurnover { get; init; }
+
+	public Guid? ReferenceId { get; init; }
 }

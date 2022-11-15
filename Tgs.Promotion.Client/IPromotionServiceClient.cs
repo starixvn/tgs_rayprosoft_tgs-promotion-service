@@ -14,6 +14,7 @@ public interface IPromotionServiceClient
 		decimal amount,
 		decimal needTurnover,
 		string? distributor,
+		Guid? referenceId,
 		CancellationToken cancellationToken = default);
 
 	ValueTask<PromotionContent?> GetPromotionContentAsync(Guid promotionId,
