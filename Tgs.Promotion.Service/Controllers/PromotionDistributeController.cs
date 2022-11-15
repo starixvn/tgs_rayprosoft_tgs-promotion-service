@@ -27,6 +27,7 @@ public class PromotionDistributeController : ControllerBase
 			playerCode,
 			request.Amount,
 			request.NeedTurnover,
+			request.ReferenceId,
 			request.Distributor);
 
 		return getService.GetAsync(command);

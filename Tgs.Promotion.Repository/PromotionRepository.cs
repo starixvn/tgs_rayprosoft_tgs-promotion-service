@@ -157,6 +157,7 @@ public class PromotionRepository : IPromotionRepository
 			PlayerCode = createInfo.PlayerCode,
 			BonusAmount = createInfo.BonusAmount,
 			Bucket = createInfo.Bucket,
+			ReferenceId = createInfo.ReferenceId,
 			Distributor = distributor,
 			CreatedOn = DateTime.UtcNow,
 			SentOn = createInfo.SentOn?.ToUniversalTime()

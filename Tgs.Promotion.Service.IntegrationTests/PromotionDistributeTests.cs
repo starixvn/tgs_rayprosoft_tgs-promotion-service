@@ -16,12 +16,12 @@ public class PromotionDistributeTests
 	{
 		var planId = Guid.NewGuid();
 
-		var fakePlayerBucketClent = Substitute.For<IPlayerBucketClient>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
 		await using var web = new TestPromotionApplication(hostBuilder => hostBuilder
 			.ConfigureServices(services => services
-				.AddSingleton(fakePlayerBucketClent)
+				.AddSingleton(fakePlayerBucketClient)
 				.AddSingleton(fakePlayerServiceClient)));
 
 		var httpClient = web.CreateClient();
@@ -54,7 +54,7 @@ public class PromotionDistributeTests
 			ConditionHash = 0L
 		});
 
-		await dbContext.PromotionRows.AddAsync(new PromotionRow
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
 		{
 			Id = promotionId,
 			BrandId = Guid.NewGuid(),
@@ -71,6 +71,7 @@ public class PromotionDistributeTests
 			playerCode,
 			10M,
 			100M,
+			null,
 			null);
 
 		var record = dbContext.PromotionDistributes.First();
@@ -81,8 +82,91 @@ public class PromotionDistributeTests
 		Assert.AreEqual(100M, record.Bucket);
 		Assert.AreEqual(playerCode, record.PlayerCode);
 		Assert.AreEqual(planId, record.PlanId);
+		Assert.IsNull(record.ReferenceId);
 
-		_ = fakePlayerBucketClent.Received(1)
+		_ = fakePlayerBucketClient.Received(1)
+			.CreateBucketAsync(
+				Arg.Is(playerCode),
+				Arg.Is(100M),
+				Arg.Is(BucketType.Promotion),
+				Arg.Any<string>());
+	}
+
+	[TestMethod]
+	public async Task Can_Create_Promotion_Distribute_With_ReferenceId()
+	{
+		var planId = Guid.NewGuid();
+
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+		await using var web = new TestPromotionApplication(hostBuilder => hostBuilder
+			.ConfigureServices(services => services
+				.AddSingleton(fakePlayerBucketClient)
+				.AddSingleton(fakePlayerServiceClient)));
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+		var playerCode = "playerCode";
+		var referenceId = Guid.NewGuid();
+
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = playerCode,
+				BrandId = Guid.NewGuid()
+			});
+
+		_ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(playerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = Guid.NewGuid().ToString()
+			}.ToImmutableDictionary());
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = await dbContext.PromotionDistributePlans.AddAsync(new PromotionDistributePlan
+		{
+			Id = planId,
+			PromotionId = promotionId,
+			BrandId = Guid.NewGuid(),
+			ConditionHash = 0L
+		});
+
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = promotionId,
+			BrandId = Guid.NewGuid(),
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}",
+			PromotionType = "Test",
+			Name = "TTT"
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.DistributePromotionBonusAsync(
+			planId,
+			playerCode,
+			10M,
+			100M,
+			null,
+			referenceId);
+
+		var record = dbContext.PromotionDistributes.First();
+
+		Assert.AreNotEqual(Guid.Empty, actual);
+		Assert.AreEqual(promotionId, record.PromotionId);
+		Assert.AreEqual(10M, record.BonusAmount);
+		Assert.AreEqual(100M, record.Bucket);
+		Assert.AreEqual(playerCode, record.PlayerCode);
+		Assert.AreEqual(planId, record.PlanId);
+		Assert.AreEqual(referenceId, record.ReferenceId);
+
+		_ = fakePlayerBucketClient.Received(1)
 			.CreateBucketAsync(
 				Arg.Is(playerCode),
 				Arg.Is(100M),

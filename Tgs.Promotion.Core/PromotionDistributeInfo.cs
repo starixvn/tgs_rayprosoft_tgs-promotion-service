@@ -7,4 +7,5 @@ public record PromotionDistributeInfo(
 	Guid PromotionId,
 	decimal BonusAmount,
 	decimal Bucket,
+	Guid? ReferenceId,
 	DateTime? SentOn);
