@@ -371,6 +371,126 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task Query_PromotionIds_With_Name()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var brandId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		await dbContext.PromotionRows.AddRangeAsync(
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Name = "Test Promotion",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now.AddDays(1D),
+				PromotionType = "TestType",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}",
+				Status = (short)PromotionStatus.Enabled
+			},
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Name = "Test Promotion2",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now.AddDays(1D),
+				PromotionType = "TestType",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}",
+				Status = (short)PromotionStatus.Disabled
+			},
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Name = "Test Promotion3",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now.AddDays(1D),
+				PromotionType = "TestType",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}",
+				Status = (short)PromotionStatus.Archived
+			});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut
+			.QueryPromotionIdsWithNameAsync(brandId, "Test", null)
+			.ToArrayAsync();
+
+		Assert.AreEqual(3, actual.Length);
+	}
+
+	[TestMethod]
+	public async Task Query_PromotionIds_With_Name_And_PromotionType()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var brandId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		await dbContext.PromotionRows.AddRangeAsync(
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Name = "Test Promotion",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now.AddDays(1D),
+				PromotionType = "TestType1",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}",
+				Status = (short)PromotionStatus.Enabled
+			},
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Name = "Test Promotion2",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now.AddDays(1D),
+				PromotionType = "TestType1",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}",
+				Status = (short)PromotionStatus.Disabled
+			},
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Name = "Test Promotion3",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now.AddDays(1D),
+				PromotionType = "TestType2",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}",
+				Status = (short)PromotionStatus.Archived
+			});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut
+			.QueryPromotionIdsWithNameAsync(brandId, "Test", "TestType1")
+			.ToArrayAsync();
+
+		Assert.AreEqual(2, actual.Length);
+	}
+
+	[TestMethod]
 	public async Task Set_Old_Promotion_Rule()
 	{
 		await using var web = new TestPromotionApplication();

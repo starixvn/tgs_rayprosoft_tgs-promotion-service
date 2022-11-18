@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
 using NSubstitute;
+using Pipelines.Sockets.Unofficial.Arenas;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
@@ -171,6 +172,134 @@ public class PromotionTests
 		var actual = await sut.QueryAsync(query).ToArrayAsync();
 
 		Assert.AreEqual(1, actual.Length);
+	}
+
+	[TestMethod]
+	public async Task Query_PromotionIds_With_Name()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var brandId = Guid.NewGuid();
+
+		var promotions = new[]
+		{
+			new PromotionMainInfo(
+				Guid.NewGuid(),
+				brandId,
+				"test1",
+				(DateTime.Parse("2022-01-01"), DateTime.Parse("2022-01-31")),
+					"Roulette",
+					null,
+					false),
+			new PromotionMainInfo(
+				Guid.NewGuid(),
+				brandId,
+				"test2",
+				(DateTime.Parse("2022-01-01"), DateTime.Parse("2022-01-31")),
+				"Roulette",
+				null,
+				false),
+			new PromotionMainInfo(
+				Guid.NewGuid(),
+				brandId,
+				"test3",
+				(DateTime.Parse("2022-01-01"), DateTime.Parse("2022-01-31")),
+				"Roulette",
+				null,
+				false)
+		};
+
+		var query = new PromotionIdsWithNameQuery(
+			brandId,
+			"test",
+			null);
+
+		_ = fakePromotionRepository
+			.QueryPromotionsWithNameAsync(
+				Arg.Is(brandId),
+			Arg.Is(query.PromotionName),
+				Arg.Any<CancellationToken>())
+				.Returns(promotions.ToAsyncEnumerable());
+
+		var sut = new PromotionIdsWithNameQueryService(fakePromotionRepository);
+
+		var actual = await sut.QueryAsync(query).ToArrayAsync();
+
+		Assert.AreEqual(3, actual.Length);
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.QueryPromotionsWithNameAsync(
+				Arg.Is(brandId),
+				Arg.Is(query.PromotionName),
+				Arg.Any<CancellationToken>());
+	}
+
+	[TestMethod]
+	public async Task Query_PromotionIds_With_Name_And_PromotionType()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var brandId = Guid.NewGuid();
+
+		var promotions = new[]
+		{
+			new PromotionMainInfo(
+				Guid.NewGuid(),
+				brandId,
+				"test1",
+				(DateTime.Parse("2022-01-01"), DateTime.Parse("2022-01-31")),
+				"Roulette",
+				null,
+				false),
+			new PromotionMainInfo(
+				Guid.NewGuid(),
+				brandId,
+				"test2",
+				(DateTime.Parse("2022-01-01"), DateTime.Parse("2022-01-31")),
+				"Roulette",
+				null,
+				false),
+			new PromotionMainInfo(
+				Guid.NewGuid(),
+				brandId,
+				"test3",
+				(DateTime.Parse("2022-01-01"), DateTime.Parse("2022-01-31")),
+				"DepositAccumulateRoulette",
+				null,
+				false)
+		};
+
+		var expected = promotions
+			.Where(p => p.PromotionType == "Roulette")
+			.Select(p => p.Id)
+			.ToArray();
+
+		var query = new PromotionIdsWithNameQuery(
+			brandId,
+			"test",
+			"Roulette");
+
+		_ = fakePromotionRepository
+			.QueryPromotionsWithNameAsync(
+				Arg.Is(brandId),
+				Arg.Is(query.PromotionName),
+				Arg.Any<CancellationToken>())
+			.Returns(promotions.ToAsyncEnumerable());
+
+		var sut = new PromotionIdsWithNameQueryService(fakePromotionRepository);
+
+		var actual = await sut.QueryAsync(query).ToArrayAsync();
+
+		Assert.AreEqual(2, actual.Length);
+		CollectionAssert.AreEqual(expected, actual);
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.QueryPromotionsWithNameAsync(
+				Arg.Is(brandId),
+				Arg.Is(query.PromotionName),
+				Arg.Any<CancellationToken>());
 	}
 
 	[TestMethod]
