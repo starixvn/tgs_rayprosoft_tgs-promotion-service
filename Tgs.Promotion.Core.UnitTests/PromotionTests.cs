@@ -215,9 +215,8 @@ public class PromotionTests
 			null);
 
 		_ = fakePromotionRepository
-			.QueryPromotionsWithNameAsync(
+			.QueryPromotionsAsync(
 				Arg.Is(brandId),
-			Arg.Is(query.PromotionName),
 				Arg.Any<CancellationToken>())
 				.Returns(promotions.ToAsyncEnumerable());
 
@@ -229,9 +228,8 @@ public class PromotionTests
 
 		_ = fakePromotionRepository
 			.Received(1)
-			.QueryPromotionsWithNameAsync(
+			.QueryPromotionsAsync(
 				Arg.Is(brandId),
-				Arg.Is(query.PromotionName),
 				Arg.Any<CancellationToken>());
 	}
 
@@ -281,9 +279,8 @@ public class PromotionTests
 			"Roulette");
 
 		_ = fakePromotionRepository
-			.QueryPromotionsWithNameAsync(
+			.QueryPromotionsAsync(
 				Arg.Is(brandId),
-				Arg.Is(query.PromotionName),
 				Arg.Any<CancellationToken>())
 			.Returns(promotions.ToAsyncEnumerable());
 
@@ -296,9 +293,8 @@ public class PromotionTests
 
 		_ = fakePromotionRepository
 			.Received(1)
-			.QueryPromotionsWithNameAsync(
+			.QueryPromotionsAsync(
 				Arg.Is(brandId),
-				Arg.Is(query.PromotionName),
 				Arg.Any<CancellationToken>());
 	}
 

@@ -432,14 +432,13 @@ public class PromotionRepository : IPromotionRepository
 			.ToAsyncEnumerable();
 	}
 
-	public async IAsyncEnumerable<PromotionMainInfo> QueryPromotionsWithNameAsync(
+	public async IAsyncEnumerable<PromotionMainInfo> QueryPromotionsAsync(
 		Guid brandId,
-		string promotionName,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var promotionRows = await _dbContext.PromotionRows
 			.Where(promotion => promotion.BrandId == brandId
-								&& promotion.Name.StartsWith(promotionName))
+				&& promotion.Status != (short)PromotionStatus.Archived)
 			.Select(promotion => new
 			{
 				promotion.Id,

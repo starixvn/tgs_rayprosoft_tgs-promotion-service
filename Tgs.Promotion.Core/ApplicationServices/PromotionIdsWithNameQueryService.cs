@@ -16,10 +16,11 @@ internal class PromotionIdsWithNameQueryService : IQueryService<PromotionIdsWith
 		PromotionIdsWithNameQuery query,
 		CancellationToken cancellationToken = default)
 	{
-		var results = _promotionRepository.QueryPromotionsWithNameAsync(
-			query.BrandId,
-			query.PromotionName,
-			cancellationToken);
+		var results = _promotionRepository
+			.QueryPromotionsAsync(
+				query.BrandId,
+				cancellationToken)
+			.Where(promotion => promotion.Name.StartsWith(query.PromotionName));
 
 		if (!string.IsNullOrEmpty(query.PromotionType))
 			results = results.Where(promotion => promotion.PromotionType == query.PromotionType);
