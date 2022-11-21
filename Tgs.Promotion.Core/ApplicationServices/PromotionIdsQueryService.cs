@@ -3,18 +3,18 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class PromotionIdsWithNameQueryService : IQueryService<PromotionIdsWithNameQuery, Guid>
+internal class PromotionIdsQueryService : IQueryService<PromotionIdsQuery, Guid>
 {
 	private readonly IPromotionRepository _promotionRepository;
 
-	public PromotionIdsWithNameQueryService(
+	public PromotionIdsQueryService(
 		IPromotionRepository promotionRepository)
 	{
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 	}
 
 	public async IAsyncEnumerable<Guid> QueryAsync(
-		PromotionIdsWithNameQuery query,
+		PromotionIdsQuery query,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var results = !string.IsNullOrEmpty(query.PromotionType)

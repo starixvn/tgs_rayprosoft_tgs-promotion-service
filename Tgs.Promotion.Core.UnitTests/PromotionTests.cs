@@ -208,7 +208,7 @@ public class PromotionTests
 				false)
 		};
 
-		var query = new PromotionIdsWithNameQuery(
+		var query = new PromotionIdsQuery(
 			brandId,
 			"test",
 			null);
@@ -219,7 +219,7 @@ public class PromotionTests
 				Arg.Any<CancellationToken>())
 				.Returns(promotions.ToAsyncEnumerable());
 
-		var sut = new PromotionIdsWithNameQueryService(fakePromotionRepository);
+		var sut = new PromotionIdsQueryService(fakePromotionRepository);
 
 		var actual = await sut.QueryAsync(query).ToArrayAsync();
 
@@ -263,7 +263,7 @@ public class PromotionTests
 			.Select(p => p.Id)
 			.ToArray();
 
-		var query = new PromotionIdsWithNameQuery(
+		var query = new PromotionIdsQuery(
 			brandId,
 			"test",
 			"Roulette");
@@ -275,7 +275,7 @@ public class PromotionTests
 				Arg.Any<CancellationToken>())
 			.Returns(promotions.ToAsyncEnumerable());
 
-		var sut = new PromotionIdsWithNameQueryService(fakePromotionRepository);
+		var sut = new PromotionIdsQueryService(fakePromotionRepository);
 
 		var actual = await sut.QueryAsync(query).ToArrayAsync();
 

@@ -200,7 +200,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			yield return promotion;
 	}
 
-	public async IAsyncEnumerable<Guid> QueryPromotionIdsWithNameAsync(
+	public async IAsyncEnumerable<Guid> QueryPromotionIdsAsync(
 		Guid brandId,
 		string promotionName,
 		string? promotionType,

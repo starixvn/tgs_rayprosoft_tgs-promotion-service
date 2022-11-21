@@ -424,7 +424,7 @@ public class PromotionTests
 		_ = await dbContext.SaveChangesAsync();
 
 		var actual = await sut
-			.QueryPromotionIdsWithNameAsync(brandId, "Test", null)
+			.QueryPromotionIdsAsync(brandId, "Test", null)
 			.ToArrayAsync();
 
 		Assert.AreEqual(2, actual.Length);
@@ -484,7 +484,7 @@ public class PromotionTests
 		_ = await dbContext.SaveChangesAsync();
 
 		var actual = await sut
-			.QueryPromotionIdsWithNameAsync(brandId, "Test", "TestType1")
+			.QueryPromotionIdsAsync(brandId, "Test", "TestType1")
 			.ToArrayAsync();
 
 		Assert.AreEqual(1, actual.Length);

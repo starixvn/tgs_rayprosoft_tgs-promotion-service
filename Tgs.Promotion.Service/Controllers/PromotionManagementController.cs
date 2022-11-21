@@ -103,14 +103,14 @@ public class PromotionManagementController : ControllerBase
 			};
 	}
 
-	[HttpGet("ids/{brandId}/{promotionName}", Name = "QueryPromotionIdsWithName")]
-	public IAsyncEnumerable<Guid> QueryPromotionIdsWithNameAsync(
-		[FromServices] IQueryService<PromotionIdsWithNameQuery, Guid> queryService,
+	[HttpGet("ids/{brandId}/{promotionName}", Name = "QueryPromotionIds")]
+	public IAsyncEnumerable<Guid> QueryPromotionIdsAsync(
+		[FromServices] IQueryService<PromotionIdsQuery, Guid> queryService,
 		Guid brandId,
 		string promotionName,
 		[FromQuery(Name = "promotionType")] string? promotionType)
 	{
-		var query = new PromotionIdsWithNameQuery(
+		var query = new PromotionIdsQuery(
 			brandId,
 			promotionName,
 			promotionType);
