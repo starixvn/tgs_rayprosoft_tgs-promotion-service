@@ -174,6 +174,123 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task Query_PromotionIds_With_Name()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var brandId = Guid.NewGuid();
+
+		var promotions = new[]
+		{
+			new PromotionMainInfo(
+				Guid.NewGuid(),
+				brandId,
+				"test1",
+				(DateTime.Parse("2022-01-01"), DateTime.Parse("2022-01-31")),
+					"Roulette",
+					null,
+					false),
+			new PromotionMainInfo(
+				Guid.NewGuid(),
+				brandId,
+				"test2",
+				(DateTime.Parse("2022-01-01"), DateTime.Parse("2022-01-31")),
+				"Roulette",
+				null,
+				false),
+			new PromotionMainInfo(
+				Guid.NewGuid(),
+				brandId,
+				"test3",
+				(DateTime.Parse("2022-01-01"), DateTime.Parse("2022-01-31")),
+				"Roulette",
+				null,
+				false)
+		};
+
+		var query = new PromotionIdsQuery(
+			brandId,
+			"test",
+			null);
+
+		_ = fakePromotionRepository
+			.QueryPromotionsAsync(
+				Arg.Is(brandId),
+				Arg.Any<CancellationToken>())
+				.Returns(promotions.ToAsyncEnumerable());
+
+		var sut = new PromotionIdsQueryService(fakePromotionRepository);
+
+		var actual = await sut.QueryAsync(query).ToArrayAsync();
+
+		Assert.AreEqual(3, actual.Length);
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.QueryPromotionsAsync(
+				Arg.Is(brandId),
+				Arg.Any<CancellationToken>());
+	}
+
+	[TestMethod]
+	public async Task Query_PromotionIds_With_Name_And_PromotionType()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var brandId = Guid.NewGuid();
+
+		var promotions = new[]
+		{
+			new PromotionMainInfo(
+				Guid.NewGuid(),
+				brandId,
+				"test1",
+				(DateTime.Parse("2022-01-01"), DateTime.Parse("2022-01-31")),
+				"Roulette",
+				null,
+				false),
+			new PromotionMainInfo(
+				Guid.NewGuid(),
+				brandId,
+				"test2",
+				(DateTime.Parse("2022-01-01"), DateTime.Parse("2022-01-31")),
+				"Roulette",
+				null,
+				false)
+		};
+
+		var expected = promotions
+			.Select(p => p.Id)
+			.ToArray();
+
+		var query = new PromotionIdsQuery(
+			brandId,
+			"test",
+			"Roulette");
+
+		_ = fakePromotionRepository
+			.QueryPromotionsByPromotionTypeAsync(
+				Arg.Is(brandId),
+				Arg.Is(query.PromotionType!),
+				Arg.Any<CancellationToken>())
+			.Returns(promotions.ToAsyncEnumerable());
+
+		var sut = new PromotionIdsQueryService(fakePromotionRepository);
+
+		var actual = await sut.QueryAsync(query).ToArrayAsync();
+
+		Assert.AreEqual(2, actual.Length);
+		CollectionAssert.AreEqual(expected, actual);
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.QueryPromotionsByPromotionTypeAsync(
+				Arg.Is(brandId),
+				Arg.Is(query.PromotionType!),
+				Arg.Any<CancellationToken>());
+	}
+
+	[TestMethod]
 	public async Task Set_Promotion_Rule()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();

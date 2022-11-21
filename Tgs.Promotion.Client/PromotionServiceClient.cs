@@ -1,8 +1,10 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net;
+using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Web;
 
 namespace Tgs.Promotion.Clients;
 
@@ -198,8 +200,33 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			yield return promotion;
 	}
 
+	public async IAsyncEnumerable<Guid> QueryPromotionIdsAsync(
+		Guid brandId,
+		string promotionName,
+		string? promotionType,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		var queryStrings = HttpUtility.ParseQueryString(string.Empty);
+		if (!string.IsNullOrEmpty(promotionType))
+			queryStrings.Add("promotionType", promotionType);
+
+		var response = await _httpClient.GetAsync(
+				$"/api/promotion-mgr/ids/{brandId}/{WebUtility.UrlEncode(promotionName)}?{queryStrings}",
+				cancellationToken)
+			.ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		var promotionIds = await response.Content
+			.ReadFromJsonAsync<IEnumerable<Guid>>(_JsonSerializerOptions, cancellationToken)
+			.ConfigureAwait(false);
+
+		foreach (var id in promotionIds ?? Array.Empty<Guid>())
+			yield return id;
+	}
+
 	public async ValueTask SetPromotionContentAsync(
-					Guid promotionId,
+						Guid promotionId,
 		PromotionContent content,
 		string modifier,
 		CancellationToken cancellationToken = default)
@@ -271,7 +298,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 	}
 
 	public async ValueTask SetPromotionVipLevelsAsync(
-						Guid promotionId,
+		Guid promotionId,
 		IEnumerable<int> vipLevels,
 		string modifier,
 		CancellationToken cancellationToken = default)

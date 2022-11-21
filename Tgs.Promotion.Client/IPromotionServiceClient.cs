@@ -36,6 +36,12 @@ public interface IPromotionServiceClient
 
 	IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, string playerCode, CancellationToken cancellationToken = default);
 
+	IAsyncEnumerable<Guid> QueryPromotionIdsAsync(
+		Guid brandId,
+		string promotionName,
+		string? promotionType,
+		CancellationToken cancellationToken = default);
+
 	ValueTask SetPromotionContentAsync(
 		Guid promotionId,
 		PromotionContent content,

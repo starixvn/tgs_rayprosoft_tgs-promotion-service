@@ -18,11 +18,6 @@ public interface IPromotionRepository
 		string? distributor,
 		CancellationToken cancellationToken = default);
 
-	ValueTask UpdatePromotionDistributeAsync(
-		Guid distributeId,
-		DateTime sentOn,
-		CancellationToken cancellationToken = default);
-
 	ValueTask<PromotionDistributePlanInfo> CreatePromotionDistributePlanAsync(
 		Guid promotionId,
 		long conditionHash,
@@ -52,6 +47,15 @@ public interface IPromotionRepository
 
 	IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, CancellationToken cancellationToken = default);
 
+	IAsyncEnumerable<PromotionMainInfo> QueryPromotionsAsync(
+		Guid brandId,
+		CancellationToken cancellationToken = default);
+
+	IAsyncEnumerable<PromotionMainInfo> QueryPromotionsByPromotionTypeAsync(
+		Guid brandId,
+		string promotionType,
+		CancellationToken cancellationToken = default);
+
 	ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount);
 
 	ValueTask SetPromotionContentAsync(Guid promotionId, PromotionContentDetail content, string modifier, CancellationToken cancellationToken = default);
@@ -67,6 +71,11 @@ public interface IPromotionRepository
 	ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount);
 
 	ValueTask UpdatePromotionAsync(PromotionRow promotion, UpdatePromotionRequest request);
+
+	ValueTask UpdatePromotionDistributeAsync(
+		Guid distributeId,
+		DateTime sentOn,
+		CancellationToken cancellationToken = default);
 
 	ValueTask UpdatePromotionMainInfoAsync(Guid promotionId, UpdatePromotionMainInfo updateInfo, string modifier, CancellationToken cancellationToken = default);
 

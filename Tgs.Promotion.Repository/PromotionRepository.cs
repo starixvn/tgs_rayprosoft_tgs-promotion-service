@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Transactions;
@@ -431,6 +432,74 @@ public class PromotionRepository : IPromotionRepository
 			.ToAsyncEnumerable();
 	}
 
+	public async IAsyncEnumerable<PromotionMainInfo> QueryPromotionsAsync(
+		Guid brandId,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		var promotionRows = await _dbContext.PromotionRows
+			.Where(promotion => promotion.BrandId == brandId
+				&& promotion.Status != (short)PromotionStatus.Archived)
+			.Select(promotion => new
+			{
+				promotion.Id,
+				promotion.BrandId,
+				promotion.Name,
+				promotion.From,
+				promotion.To,
+				promotion.PromotionType,
+				promotion.Unlimited,
+				promotion.TotalAmountLimit,
+				promotion.AutoSentPlayerBonus
+			})
+			.ToArrayAsync(cancellationToken)
+			.ConfigureAwait(false);
+
+		foreach (var promotion in promotionRows)
+			yield return new PromotionMainInfo(
+				promotion.Id,
+				promotion.BrandId,
+				promotion.Name,
+				(promotion.From, promotion.To),
+				promotion.PromotionType,
+				promotion.Unlimited == 1 ? null : promotion.TotalAmountLimit,
+				promotion.AutoSentPlayerBonus);
+	}
+
+	public async IAsyncEnumerable<PromotionMainInfo> QueryPromotionsByPromotionTypeAsync(
+		Guid brandId,
+		string promotionType,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		var promotionRows = await _dbContext.PromotionRows
+			.Where(promotion => promotion.BrandId == brandId
+								&& promotion.Status != (short)PromotionStatus.Archived
+								&& promotion.PromotionType == promotionType)
+			.Select(promotion => new
+			{
+				promotion.Id,
+				promotion.BrandId,
+				promotion.Name,
+				promotion.From,
+				promotion.To,
+				promotion.PromotionType,
+				promotion.Unlimited,
+				promotion.TotalAmountLimit,
+				promotion.AutoSentPlayerBonus
+			})
+			.ToArrayAsync(cancellationToken)
+			.ConfigureAwait(false);
+
+		foreach (var promotion in promotionRows)
+			yield return new PromotionMainInfo(
+				promotion.Id,
+				promotion.BrandId,
+				promotion.Name,
+				(promotion.From, promotion.To),
+				promotion.PromotionType,
+				promotion.Unlimited == 1 ? null : promotion.TotalAmountLimit,
+				promotion.AutoSentPlayerBonus);
+	}
+
 	public async ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount)
 	{
 		const string sql = "select * from dbo.promotion_revert_amount_used(@promotion_id,@amount)";
@@ -677,7 +746,7 @@ public class PromotionRepository : IPromotionRepository
 	}
 
 	public async ValueTask UpdatePromotionMainInfoAsync(
-			Guid promotionId,
+		Guid promotionId,
 		UpdatePromotionMainInfo updateInfo,
 		string modifier,
 		CancellationToken cancellationToken = default)
@@ -739,7 +808,7 @@ public class PromotionRepository : IPromotionRepository
 	}
 
 	private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
-				PromotionRow promotion,
+		PromotionRow promotion,
 		CreatePromotionRequest request)
 	{
 		var promotionGameProviders = _gameProviderService.GetQueries()
