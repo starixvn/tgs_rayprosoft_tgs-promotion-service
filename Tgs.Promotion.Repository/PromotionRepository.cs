@@ -465,7 +465,7 @@ public class PromotionRepository : IPromotionRepository
 				promotion.AutoSentPlayerBonus);
 	}
 
-	public async IAsyncEnumerable<PromotionMainInfo> QueryPromotionsWithPromotionTypeAsync(
+	public async IAsyncEnumerable<PromotionMainInfo> QueryPromotionsByPromotionTypeAsync(
 		Guid brandId,
 		string promotionType,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)

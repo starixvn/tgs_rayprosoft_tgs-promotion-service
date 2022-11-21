@@ -18,7 +18,7 @@ internal class PromotionIdsWithNameQueryService : IQueryService<PromotionIdsWith
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var results = !string.IsNullOrEmpty(query.PromotionType)
-			? _promotionRepository.QueryPromotionsWithPromotionTypeAsync(
+			? _promotionRepository.QueryPromotionsByPromotionTypeAsync(
 				query.BrandId,
 				query.PromotionType,
 				cancellationToken)

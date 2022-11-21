@@ -269,7 +269,7 @@ public class PromotionTests
 			"Roulette");
 
 		_ = fakePromotionRepository
-			.QueryPromotionsWithPromotionTypeAsync(
+			.QueryPromotionsByPromotionTypeAsync(
 				Arg.Is(brandId),
 				Arg.Is(query.PromotionType!),
 				Arg.Any<CancellationToken>())
@@ -284,7 +284,7 @@ public class PromotionTests
 
 		_ = fakePromotionRepository
 			.Received(1)
-			.QueryPromotionsWithPromotionTypeAsync(
+			.QueryPromotionsByPromotionTypeAsync(
 				Arg.Is(brandId),
 				Arg.Is(query.PromotionType!),
 				Arg.Any<CancellationToken>());
