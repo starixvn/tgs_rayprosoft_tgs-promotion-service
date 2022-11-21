@@ -51,6 +51,11 @@ public interface IPromotionRepository
 		Guid brandId,
 		CancellationToken cancellationToken = default);
 
+	IAsyncEnumerable<PromotionMainInfo> QueryPromotionsWithPromotionTypeAsync(
+		Guid brandId,
+		string promotionType,
+		CancellationToken cancellationToken = default);
+
 	ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount);
 
 	ValueTask SetPromotionContentAsync(Guid promotionId, PromotionContentDetail content, string modifier, CancellationToken cancellationToken = default);

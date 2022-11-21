@@ -427,7 +427,7 @@ public class PromotionTests
 			.QueryPromotionIdsWithNameAsync(brandId, "Test", null)
 			.ToArrayAsync();
 
-		Assert.AreEqual(3, actual.Length);
+		Assert.AreEqual(2, actual.Length);
 	}
 
 	[TestMethod]
@@ -463,7 +463,7 @@ public class PromotionTests
 				Name = "Test Promotion2",
 				From = DateTime.Now.AddDays(-10D),
 				To = DateTime.Now.AddDays(1D),
-				PromotionType = "TestType1",
+				PromotionType = "TestType2",
 				AutoSentPlayerBonus = true,
 				CampaignDetail = "{}",
 				Status = (short)PromotionStatus.Disabled
@@ -487,7 +487,7 @@ public class PromotionTests
 			.QueryPromotionIdsWithNameAsync(brandId, "Test", "TestType1")
 			.ToArrayAsync();
 
-		Assert.AreEqual(2, actual.Length);
+		Assert.AreEqual(1, actual.Length);
 	}
 
 	[TestMethod]

@@ -1,4 +1,5 @@
-﻿using Tgs.ServiceUtility;
+﻿using System.Runtime.CompilerServices;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
@@ -12,19 +13,23 @@ internal class PromotionIdsWithNameQueryService : IQueryService<PromotionIdsWith
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 	}
 
-	public IAsyncEnumerable<Guid> QueryAsync(
+	public async IAsyncEnumerable<Guid> QueryAsync(
 		PromotionIdsWithNameQuery query,
-		CancellationToken cancellationToken = default)
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		var results = _promotionRepository
-			.QueryPromotionsAsync(
+		var results = !string.IsNullOrEmpty(query.PromotionType)
+			? _promotionRepository.QueryPromotionsWithPromotionTypeAsync(
 				query.BrandId,
+				query.PromotionType,
 				cancellationToken)
-			.Where(promotion => promotion.Name.StartsWith(query.PromotionName));
+			: _promotionRepository.QueryPromotionsAsync(query.BrandId, cancellationToken);
 
-		if (!string.IsNullOrEmpty(query.PromotionType))
-			results = results.Where(promotion => promotion.PromotionType == query.PromotionType);
+		var promotions = await results
+			.Where(p => p.Name.StartsWith(query.PromotionName))
+			.ToArrayAsync(cancellationToken)
+			.ConfigureAwait(false);
 
-		return results.Select(promotion => promotion.Id);
+		foreach (var promotion in promotions)
+			yield return promotion.Id;
 	}
 }

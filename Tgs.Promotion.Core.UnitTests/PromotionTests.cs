@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
 using NSubstitute;
-using Pipelines.Sockets.Unofficial.Arenas;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
@@ -257,19 +256,10 @@ public class PromotionTests
 				(DateTime.Parse("2022-01-01"), DateTime.Parse("2022-01-31")),
 				"Roulette",
 				null,
-				false),
-			new PromotionMainInfo(
-				Guid.NewGuid(),
-				brandId,
-				"test3",
-				(DateTime.Parse("2022-01-01"), DateTime.Parse("2022-01-31")),
-				"DepositAccumulateRoulette",
-				null,
 				false)
 		};
 
 		var expected = promotions
-			.Where(p => p.PromotionType == "Roulette")
 			.Select(p => p.Id)
 			.ToArray();
 
@@ -279,8 +269,9 @@ public class PromotionTests
 			"Roulette");
 
 		_ = fakePromotionRepository
-			.QueryPromotionsAsync(
+			.QueryPromotionsWithPromotionTypeAsync(
 				Arg.Is(brandId),
+				Arg.Is(query.PromotionType!),
 				Arg.Any<CancellationToken>())
 			.Returns(promotions.ToAsyncEnumerable());
 
@@ -293,8 +284,9 @@ public class PromotionTests
 
 		_ = fakePromotionRepository
 			.Received(1)
-			.QueryPromotionsAsync(
+			.QueryPromotionsWithPromotionTypeAsync(
 				Arg.Is(brandId),
+				Arg.Is(query.PromotionType!),
 				Arg.Any<CancellationToken>());
 	}
 

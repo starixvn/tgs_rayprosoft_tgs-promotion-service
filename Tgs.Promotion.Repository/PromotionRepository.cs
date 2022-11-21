@@ -465,6 +465,41 @@ public class PromotionRepository : IPromotionRepository
 				promotion.AutoSentPlayerBonus);
 	}
 
+	public async IAsyncEnumerable<PromotionMainInfo> QueryPromotionsWithPromotionTypeAsync(
+		Guid brandId,
+		string promotionType,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		var promotionRows = await _dbContext.PromotionRows
+			.Where(promotion => promotion.BrandId == brandId
+								&& promotion.Status != (short)PromotionStatus.Archived
+								&& promotion.PromotionType == promotionType)
+			.Select(promotion => new
+			{
+				promotion.Id,
+				promotion.BrandId,
+				promotion.Name,
+				promotion.From,
+				promotion.To,
+				promotion.PromotionType,
+				promotion.Unlimited,
+				promotion.TotalAmountLimit,
+				promotion.AutoSentPlayerBonus
+			})
+			.ToArrayAsync(cancellationToken)
+			.ConfigureAwait(false);
+
+		foreach (var promotion in promotionRows)
+			yield return new PromotionMainInfo(
+				promotion.Id,
+				promotion.BrandId,
+				promotion.Name,
+				(promotion.From, promotion.To),
+				promotion.PromotionType,
+				promotion.Unlimited == 1 ? null : promotion.TotalAmountLimit,
+				promotion.AutoSentPlayerBonus);
+	}
+
 	public async ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount)
 	{
 		const string sql = "select * from dbo.promotion_revert_amount_used(@promotion_id,@amount)";
