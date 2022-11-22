@@ -218,35 +218,8 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 			new(8, 0, 0));
 		var previousMonth = now.AddMonths(-1);
 		var firstDayOfMonth = new DateTime(previousMonth.Year, previousMonth.Month, 1);
-		var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
-		var promotions = new PromotionRow[]
-			{
-				new PromotionRow
-				{
-					Id = promotionId,
-					BrandId = brandId,
-					From = firstDayOfMonth,
-					To = lastDayOfMonth,
-					SettlementIntervalType = "Monthly",
-					PromotionType = "ReliefMoneyMonthly",
-					Percentage = 10,
-					BonusAmountLimit = 100,
-					Unlimited = 1,
-					TotalAmountLimit = 1000,
-					Status = (short)PromotionStatus.Enabled,
-					GameType = (short?)GameType.Slot,
-					AutoSentPlayerBonus = true,
-					PromotionParticipants = new[]
-					{
-						new PromotionParticipant
-						{
-							PlayerCode = playerCode,
-							CreatedOn = firstDayOfMonth
-						}
-					}
-				}
-			}
+		var promotions = Array.Empty<PromotionRow>()
 			.AsQueryable()
 			.BuildMock();
 

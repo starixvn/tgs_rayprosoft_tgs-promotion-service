@@ -90,7 +90,8 @@ public class PromotionReliefMoneyDailyDistributionTests
 							PlayerCode = playerCode,
 							CreatedOn = reportDate.ToUniversalTime().DateTime
 						}
-					}
+					},
+					CampaignDetail = "{}"
 				}
 			}
 			.AsQueryable()
