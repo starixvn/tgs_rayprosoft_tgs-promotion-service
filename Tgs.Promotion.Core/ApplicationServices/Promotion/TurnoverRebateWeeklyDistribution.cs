@@ -7,7 +7,6 @@ using Tgs.CashService.Client;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Extensions;
 using Tgs.Promotion.Models.PromotionBonus;
-using Tgs.Promotion.Models.PromotionBucket;
 using Tgs.SerialNumberGenerator;
 using Tgs.Service.PlayerBuckets;
 
@@ -290,7 +289,7 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 
 		var rule = _promotionSerializer.Deserialize<TurnoverRebateWeeklyRule>(_promotion!.CampaignDetail)!;
 
-		_playerWinLossWeekly = await _tgsContext.PlayerGameRebateAggregates
+		var playerWinLossWeeklies = _tgsContext.PlayerGameRebateAggregates
 			.Where(x => x.BrandId == _promotion.BrandId)
 			.Where(x => x.ReportDate >= _previousMonday.UtcDateTime && x.ReportDate <= _previousSunday.UtcDateTime)
 			.Where(promotionLevels.Length > 0,
@@ -298,20 +297,6 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 			.Where(rule.GameType is not null, pa => pa.GameType == (short)rule.GameType!)
 			.Where(rule.GameProviderIds?.Any(), pa =>
 				rule.GameProviderIds!.Contains(pa.GameProviderId))
-			.Join(_tgsContext.PromotionParticipants.Where(pp => pp.PromotionId == _promotion.Id).Where(x =>
-					x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode)
-				.Distinct(),
-				agg => agg.PlayerCode, playerCode => playerCode, (agg, playerCode) => new
-				{
-					agg.BrandId,
-					agg.ReportDate,
-					agg.PlayerCode,
-					agg.GameId,
-					agg.GameType,
-					agg.GameProviderId,
-					agg.VipLevel,
-					agg.Turnover
-				})
 			.GroupJoin(_tgsContext.BrandGames,
 				aggregate => new
 				{
@@ -352,8 +337,38 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 				GameProviderId = player.GameProviderId,
 				ReportDate = player.ReportDate,
 				Turnover = list.Sum(l => l.aggregate.Turnover)
-			})
-			.ToArrayAsync(cancellationToken);
+			});
+
+		if (CheckIsAutoJoin(_promotion.CampaignDetail))
+		{
+			_playerWinLossWeekly = await playerWinLossWeeklies.ToArrayAsync(cancellationToken).ConfigureAwait(false);
+		}
+		else
+		{
+			_playerWinLossWeekly = await playerWinLossWeeklies
+				.Join(_tgsContext.PromotionParticipants.Where(pp => pp.PromotionId == _promotion.Id).Where(x =>
+					x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode).Distinct(), agg => agg.PlayerCode, playerCode => playerCode, (agg, playerCode) => new
+				{
+					agg.BrandId,
+					agg.ReportDate,
+					agg.PlayerCode,
+					agg.GameType,
+					agg.GameProviderId,
+					agg.VipLevel,
+					agg.Turnover
+				})
+				.Select(x => new PlayerTurnoverWeekly
+				{
+					BrandId = x.BrandId,
+					PlayerCode = x.PlayerCode,
+					GameType = x.GameType,
+					VipLevel = x.VipLevel,
+					GameProviderId = x.GameProviderId,
+					ReportDate = x.ReportDate,
+					Turnover = x.Turnover
+				})
+				.ToArrayAsync(cancellationToken).ConfigureAwait(false);
+		}
 
 		return this;
 	}
@@ -365,5 +380,10 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 		_previousSunday = to ?? (_promotion.To < _previousSunday ? _promotion.To : _previousSunday);
 
 		return _promotion == null ? throw new ArgumentNullException(nameof(promotion)) : (IDistribution)this;
+	}
+
+	private static bool CheckIsAutoJoin(string campaignDetail)
+	{
+		return JsonSerializer.Deserialize<PlayerAutoJoinModel>(campaignDetail, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })?.PlayerAutoJoin ?? false;
 	}
 }
