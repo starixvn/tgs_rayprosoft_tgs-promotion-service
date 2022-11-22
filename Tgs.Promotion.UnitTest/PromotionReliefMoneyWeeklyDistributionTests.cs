@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using MockQueryable.Moq;
 using Moq;
 using NSubstitute;
@@ -203,11 +204,9 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 		tgsContextMock.PromotionParticipants.Returns(mockPromotionParticipantSet.Object);
 
 		_ = reliefMoneyWeeklyDistributionMock.SetPromotion(promotions.First(), previousMonday, previousSunday);
-		_ = await reliefMoneyWeeklyDistributionMock.SetConditionDataAsync(Arg.Any<CancellationToken>());
+		_ = await reliefMoneyWeeklyDistributionMock.SetConditionDataAsync(default);
 
-		_ = tgsContextMock.Received(0)
-			.PromotionParticipants.Where(Arg.Any<IQueryable<PromotionParticipant>>(),
-				Arg.Any<Expression<Func<PromotionParticipant, bool>>>());
+		_ = tgsContextMock.Received(0).PromotionParticipants;
 	}
 
 	[Test]
@@ -325,11 +324,9 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 		tgsContextMock.PromotionParticipants.Returns(mockPromotionParticipantSet.Object);
 
 		_ = reliefMoneyWeeklyDistributionMock.SetPromotion(promotions.First(), previousMonday, previousSunday);
-		_ = await reliefMoneyWeeklyDistributionMock.SetConditionDataAsync(Arg.Any<CancellationToken>());
+		_ = await reliefMoneyWeeklyDistributionMock.SetConditionDataAsync(default);
 
-		_ = tgsContextMock.Received(1)
-			.PromotionParticipants.Where(Arg.Any<IQueryable<PromotionParticipant>>(),
-				Arg.Any<Expression<Func<PromotionParticipant, bool>>>());
+		_ = tgsContextMock.Received(1).PromotionParticipants;
 	}
 
 	private static Mock<DbSet<T>> GetDbSet<T>(IQueryable<T> data) where T : class
