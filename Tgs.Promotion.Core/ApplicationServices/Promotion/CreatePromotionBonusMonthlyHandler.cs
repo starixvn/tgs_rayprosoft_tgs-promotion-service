@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Tgs.CashService.Client;
@@ -303,19 +304,24 @@ public class
 				promotion.PromotionGameProviders.Select(pg => pg.GameProviderId)
 					.Contains(pa.GameProviderId))
 			.Where(pa => pa.ReportDate >= from)
-			.Where(pa => pa.ReportDate <= to);
+			.Where(pa => pa.ReportDate <= to)
+			.ToArray();
+
+		var joinedPlayerCodes = CheckIsAutoJoin(promotion.CampaignDetail)
+			? players.Select(x => x.PlayerCode).Distinct()
+			: promotion.PromotionParticipants.Where(x =>
+				x.CreatedOn >= promotion.From && x.CreatedOn <= promotion.To).Select(x => x.PlayerCode!).Distinct();
 
 		return promotion.PromotionType switch
 		{
-			"ReliefMoneyMonthly" => (promotion.PromotionParticipants.Where(x =>
-					x.CreatedOn >= promotion.From && x.CreatedOn <= promotion.To).Select(x => x.PlayerCode).Distinct().Select(playerCode =>
+			"ReliefMoneyMonthly" => (joinedPlayerCodes.Select(playerCode =>
 				{
 					if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
 					{
 						return new PromotionBonusPlayerModel
 						{
 							PromotionBonusId = id,
-							PlayerCode = playerCode!,
+							PlayerCode = playerCode,
 							BonusAmount = 0M,
 							PromotionType = promotion.PromotionType
 						};
@@ -353,5 +359,10 @@ public class
 				.ToArray(), amount),
 			_ => (Array.Empty<PromotionBonusPlayerModel>(), 0)
 		};
+	}
+
+	private static bool CheckIsAutoJoin(string campaignDetail)
+	{
+		return JsonSerializer.Deserialize<PlayerAutoJoinModel>(campaignDetail, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })?.PlayerAutoJoin ?? false;
 	}
 }
