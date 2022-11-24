@@ -210,6 +210,75 @@ public class PromotionDistributeTests
 	}
 
 	[TestMethod]
+	public async Task Distribute_Log_Will_Add_SentOn_After_Distributed()
+	{
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
+		var sut = new DistributePromotionBonusCommandService(
+			fakePromotionRepository,
+			fakeServiceCoordinator,
+			fakeCashServiceClient,
+			fakePlayerServiceClient,
+			fakePlayerBucketClient,
+			fakeSerialNumberGenerator);
+
+		var command = new DistributePromotionBonusCommand(
+			 Guid.NewGuid(),
+			 "player1",
+			 100M,
+			 1000M,
+			 null,
+			 "manager");
+
+		var walletId = Guid.NewGuid();
+
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = Guid.NewGuid()
+			});
+
+		_ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = walletId.ToString()
+			}.ToImmutableDictionary());
+
+		_ = fakePromotionRepository.FindPromotionDistributePlanAsync(Arg.Is(command.PlanId))
+			.Returns(new PromotionDistributePlanInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				0));
+
+		_ = fakeServiceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(Arg.Any<GetPromotionMainInfoQuery>())
+			.Returns(new PromotionMainInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				"Ttt",
+				(From: DateTime.Now.AddDays(-1D), To: DateTime.Now.AddDays(1D)),
+				"Test",
+				null,
+				true));
+
+		_ = await sut.GetAsync(command);
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.InsertPromotionDistributeLogAsync(
+				Arg.Is<PromotionDistributeLog>(x =>
+					x.Action == DistributeAction.Distribute &&
+					x.ChangeSets.RootElement.EnumerateArray().Single().GetProperty("op").GetString() == "add" &&
+					x.ChangeSets.RootElement.EnumerateArray().Single().GetProperty("path").GetString() == "/sentOn"));
+	}
+
+	[TestMethod]
 	public async Task Get_Promotion_Distribute_Plan()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
