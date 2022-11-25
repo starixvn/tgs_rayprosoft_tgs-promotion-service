@@ -131,8 +131,8 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 						.GenerateAsync(cancellationToken)
 						.ConfigureAwait(false),
 					Action = DistributeAction.Distribute,
-					ChangeSets = JsonSerializer.SerializeToDocument(distributedInfo.CreatePatch(
-						createDistributeInfo,
+					ChangeSets = JsonSerializer.SerializeToDocument(createDistributeInfo.CreatePatch(
+						distributedInfo,
 						PromotionUtility.SerializerOptions))
 				},
 				cancellationToken).ConfigureAwait(false);
