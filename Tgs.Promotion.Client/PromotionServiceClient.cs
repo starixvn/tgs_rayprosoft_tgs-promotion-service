@@ -225,14 +225,14 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			yield return id;
 	}
 
-	public IAsyncEnumerable<PromotionView> ListPromotionsByPromotionTypeAsync(string promotionType, CancellationToken cancellationToken = default)
+	public IAsyncEnumerable<PromotionMainInfo> ListPromotionsByPromotionTypeAsync(string promotionType, CancellationToken cancellationToken = default)
 		=> _httpClient.GetAsync(
 			$"/api/promotion-mgr/{promotionType}",
 			cancellationToken)
 			.ToAsyncEnumerable()
 			.Do(response => response.EnsureSuccessStatusCode())
 			.Select(response => response.Content
-				.ReadFromJsonAsync<IEnumerable<PromotionView>>(_JsonSerializerOptions)
+				.ReadFromJsonAsync<IEnumerable<PromotionMainInfo>>(_JsonSerializerOptions)
 				.ToAsyncEnumerable()
 				.Where(arr => arr is not null)
 				.Select(arr => arr!.ToAsyncEnumerable())
