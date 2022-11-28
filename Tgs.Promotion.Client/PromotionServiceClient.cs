@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Web;
 
@@ -143,19 +144,26 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			.ConfigureAwait(false);
 	}
 
-	public async ValueTask<TRule?> GetPromotionRuleAsync<TRule>(Guid promotionId, CancellationToken cancellationToken = default)
+	public ValueTask<TRule?> GetPromotionRuleAsync<TRule>(Guid promotionId, CancellationToken cancellationToken = default)
 		where TRule : class
-	{
-		var response = await _httpClient.GetAsync(
-			$"/api/promotion-mgr/rule/{promotionId}",
-			cancellationToken).ConfigureAwait(false);
-
-		_ = response.EnsureSuccessStatusCode();
-
-		return await response.Content
-			.ReadFromJsonAsync<TRule>(_JsonSerializerOptions, cancellationToken)
-			.ConfigureAwait(false);
-	}
+		=> _httpClient
+			.GetAsync(
+				$"/api/promotion-mgr/rule/{promotionId}",
+				cancellationToken)
+			.ToAsyncEnumerable()
+			.Do(response => response.EnsureSuccessStatusCode())
+			.SelectMany(response => response.Content
+				.ReadFromJsonAsync<JsonNode>(_JsonSerializerOptions, cancellationToken)
+				.ToAsyncEnumerable())
+			.Where(node => node is not null)
+			.Select(node => node!)
+			.Do(node =>
+			{
+				if (node["compaignDetail"] is not null && node["campaignDetail"] is null)
+					node["campaignDetail"] = JsonNode.Parse(node["compaignDetail"]!.ToJsonString());
+			})
+			.Select(node => node.Deserialize<TRule>(_JsonSerializerOptions))
+			.FirstOrDefaultAsync(cancellationToken);
 
 	public async IAsyncEnumerable<PromotionView> ListPromotionsAsync(
 		Guid brandId,
@@ -200,8 +208,27 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			yield return promotion;
 	}
 
+	public IAsyncEnumerable<PromotionMainInfo> ListPromotionsByPromotionTypeAsync(string promotionType, CancellationToken cancellationToken = default)
+		=> _httpClient.GetAsync(
+			$"/api/promotion-mgr/{promotionType}",
+			cancellationToken)
+			.ToAsyncEnumerable()
+			.Do(response => response.EnsureSuccessStatusCode())
+			.Select(response => response.Content
+				.ReadFromJsonAsync<IEnumerable<PromotionMainInfo>>(_JsonSerializerOptions)
+				.ToAsyncEnumerable()
+				.Where(arr => arr is not null)
+				.Select(arr => arr!.ToAsyncEnumerable())
+				.Concat())
+			.Concat()
+			.ToArrayAsync(cancellationToken: cancellationToken)
+			.AsTask()
+			.ToAsyncEnumerable()
+			.Select(arr => arr.ToAsyncEnumerable())
+			.Concat();
+
 	public async IAsyncEnumerable<Guid> QueryPromotionIdsAsync(
-		Guid brandId,
+			Guid brandId,
 		string promotionName,
 		string? promotionType,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -224,25 +251,6 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		foreach (var id in promotionIds ?? Array.Empty<Guid>())
 			yield return id;
 	}
-
-	public IAsyncEnumerable<PromotionMainInfo> ListPromotionsByPromotionTypeAsync(string promotionType, CancellationToken cancellationToken = default)
-		=> _httpClient.GetAsync(
-			$"/api/promotion-mgr/{promotionType}",
-			cancellationToken)
-			.ToAsyncEnumerable()
-			.Do(response => response.EnsureSuccessStatusCode())
-			.Select(response => response.Content
-				.ReadFromJsonAsync<IEnumerable<PromotionMainInfo>>(_JsonSerializerOptions)
-				.ToAsyncEnumerable()
-				.Where(arr => arr is not null)
-				.Select(arr => arr!.ToAsyncEnumerable())
-				.Concat())
-			.Concat()
-			.ToArrayAsync(cancellationToken: cancellationToken)
-			.AsTask()
-			.ToAsyncEnumerable()
-			.Select(arr => arr.ToAsyncEnumerable())
-			.Concat();
 
 	public async ValueTask SetPromotionContentAsync(
 		Guid promotionId,

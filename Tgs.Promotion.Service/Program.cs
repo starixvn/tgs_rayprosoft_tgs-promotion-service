@@ -8,6 +8,7 @@ using Tgs.PlayerBucket.Clients.DependencyInjection;
 using Tgs.Promotion.MessageQueue;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Service.MessageQueue;
+using Tgs.Promotion.Service.ViewModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -112,10 +113,17 @@ builder.Services
 	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.*.setting")
 	.AddNatsGlobPatternExchange("*");
 
-builder.Services.AddHealthChecks();
+builder.Services
+	.AddHealthChecks();
 
-builder.Services.AddControllers();
-builder.Services.AddSwaggerGen();
+builder.Services
+	.AddControllers()
+	.AddJsonOptions(jsonOptions =>
+	{
+		jsonOptions.JsonSerializerOptions.Converters.Add(new PromotionRuleViewModelJsonConverter());
+	});
+builder.Services
+	.AddSwaggerGen();
 
 var app = builder.Build();
 

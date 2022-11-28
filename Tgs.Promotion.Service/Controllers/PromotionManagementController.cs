@@ -113,7 +113,7 @@ public class PromotionManagementController : ControllerBase
 			? null
 			: new PromotionRuleViewModel
 			{
-				CompaignDetail = rule.CampaignDetail,
+				CampaignDetail = rule.CampaignDetail,
 				BonusAmountLimit = rule.BonusAmountLimit,
 				GameType = rule.GameType,
 				Percentage = rule.Percentage,
