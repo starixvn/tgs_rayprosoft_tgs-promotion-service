@@ -185,12 +185,14 @@ public class PromotionTests
 		var sut = new PromotionServiceClient(httpClient);
 
 		var promotionId = Guid.NewGuid();
+		var brandId = Guid.NewGuid();
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
 		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
 		{
 			Id = promotionId,
+			BrandId = brandId,
 			Name = "Test Promotion",
 			From = DateTime.Now.AddDays(-10D),
 			To = DateTime.Now,
@@ -205,6 +207,7 @@ public class PromotionTests
 
 		Assert.IsNotNull(actual);
 		Assert.AreEqual(promotionId, actual.Id);
+		Assert.AreEqual(brandId, actual.BrandId);
 	}
 
 	[TestMethod]

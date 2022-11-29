@@ -71,6 +71,7 @@ public class PromotionManagementController : ControllerBase
 			: new PromotionViewModel
 			{
 				Id = result.Id,
+				BrandId = result.BrandId,
 				Name = result.Name,
 				EventDuring = result.EventDuring,
 				IsAutoSent = result.IsAutoSent,
@@ -90,6 +91,7 @@ public class PromotionManagementController : ControllerBase
 			.Select(info => new PromotionViewModel
 			{
 				Id = info.Id,
+				BrandId = info.BrandId,
 				EventDuring = info.EventDuring,
 				Name = info.Name,
 				IsAutoSent = info.IsAutoSent,
