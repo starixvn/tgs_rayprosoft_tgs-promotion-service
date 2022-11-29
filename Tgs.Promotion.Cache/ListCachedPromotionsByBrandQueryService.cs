@@ -34,7 +34,7 @@ internal class ListCachedPromotionsByBrandQueryService : IQueryService<ListPromo
 				.ConfigureAwait(false);
 		}).ConfigureAwait(false);
 
-		foreach (var item in items)
+		foreach (var item in items!)
 			yield return item;
 	}
 }

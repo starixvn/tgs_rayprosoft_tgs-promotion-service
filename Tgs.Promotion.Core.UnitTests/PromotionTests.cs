@@ -462,4 +462,19 @@ public class PromotionTests
 				Arg.Is<IEnumerable<int>>(levels => levels.Count() == 2 && levels.First() == 1 && levels.Last() == 2),
 				Arg.Is(command.Modifier));
 	}
+
+	[TestMethod]
+	public async Task 根據PromotionType取得PromotionMainInfoAsync()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new GetPromotionMainInfosByPromotionTypeQueryService(fakePromotionRepository);
+
+		var query = new GetPromotionMainInfosByPromotionTypeQuery("TestType");
+
+		_ = await sut.QueryAsync(query).ToArrayAsync();
+
+		_ = fakePromotionRepository.Received(1)
+			.QueryPromotionsByPromotionTypeAsync(Arg.Is(query.PromotionType));
+	}
 }

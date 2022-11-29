@@ -2,6 +2,8 @@
 
 public class PromotionViewModel
 {
+	public Guid BrandId { get; init; }
+
 	public DuringViewModel EventDuring { get; init; }
 
 	public Guid Id { get; init; }
