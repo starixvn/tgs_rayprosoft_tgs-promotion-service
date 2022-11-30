@@ -308,7 +308,7 @@ public class
 			.ToArray();
 
 		var joinedPlayerCodes = CheckIsAutoJoin(promotion.CampaignDetail)
-			? players.Select(x => x.PlayerCode).Distinct()
+			? players.Where(x => x.BrandId == promotion.BrandId).Select(x => x.PlayerCode).Distinct()
 			: promotion.PromotionParticipants.Where(x =>
 				x.CreatedOn >= promotion.From && x.CreatedOn <= promotion.To).Select(x => x.PlayerCode!).Distinct();
 
