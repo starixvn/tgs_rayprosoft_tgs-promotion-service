@@ -341,8 +341,7 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 
 		if (CheckIsAutoJoin(_promotion.CampaignDetail))
 		{
-			_playerWinLossWeekly = await playerWinLossWeeklies.Where(x => x.BrandId == _promotion.BrandId)
-				.ToArrayAsync(cancellationToken).ConfigureAwait(false);
+			_playerWinLossWeekly = await playerWinLossWeeklies.ToArrayAsync(cancellationToken).ConfigureAwait(false);
 		}
 		else
 		{

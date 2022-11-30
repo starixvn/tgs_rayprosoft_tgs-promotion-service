@@ -292,6 +292,7 @@ public class
 		var promotionLevels = promotion.PromotionVipLevels.Select(v => v.Level).ToArray();
 
 		var players = aggregates
+			.Where(x => x.BrandId == promotion.BrandId)
 			.Where(promotionLevels.Length > 0,
 				pa => pa.VipLevel != null && promotionLevels.Contains(pa.VipLevel.Value))
 			.Where(promotion.GameType is not null, pa => pa.GameType == promotion.GameType)
@@ -300,7 +301,7 @@ public class
 					.Contains(pa.GameProviderId)).ToArray();
 
 		var joinedPlayerCodes = CheckIsAutoJoin(promotion.CampaignDetail)
-			? players.Where(x => x.BrandId == promotion.BrandId).Select(x => x.PlayerCode).Distinct()
+			? players.Select(x => x.PlayerCode).Distinct()
 			: promotion.PromotionParticipants.Where(x =>
 				x.CreatedOn >= promotion.From && x.CreatedOn <= promotion.To).Select(x => x.PlayerCode!).Distinct();
 
