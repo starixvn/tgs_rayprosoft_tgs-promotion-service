@@ -341,13 +341,15 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 
 		if (CheckIsAutoJoin(_promotion.CampaignDetail))
 		{
-			_playerWinLossWeekly = await playerWinLossWeeklies.ToArrayAsync(cancellationToken).ConfigureAwait(false);
+			_playerWinLossWeekly = await playerWinLossWeeklies.Where(x => x.BrandId == _promotion.BrandId)
+				.ToArrayAsync(cancellationToken).ConfigureAwait(false);
 		}
 		else
 		{
 			_playerWinLossWeekly = await playerWinLossWeeklies
 				.Join(_tgsContext.PromotionParticipants.Where(pp => pp.PromotionId == _promotion.Id).Where(x =>
-					x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode).Distinct(), agg => agg.PlayerCode, playerCode => playerCode, (agg, playerCode) => new
+						x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode)
+					.Distinct(), agg => agg.PlayerCode, playerCode => playerCode, (agg, playerCode) => new
 				{
 					agg.BrandId,
 					agg.ReportDate,
