@@ -131,7 +131,7 @@ push-k8s-template-dev:
     - feats/tgs-2522-integrate-player-bucket
 
 deploy-dev:
-  extends: .deploy-job-template
+  extends: .deploy-template
   variables:
     namespace: dev
     kube_config: KubeConfig_Raypro_dev
@@ -146,7 +146,7 @@ deploy-dev:
     - feats/tgs-2522-integrate-player-bucket
 
 deploy-staging:
-  extends: .deploy-job-template
+  extends: .deploy-template
   variables:
     namespace: staging
     kube_config: KubeConfig_Raypro_staging
@@ -162,7 +162,7 @@ deploy-staging:
   when: manual
 
 deploy-prod:
-  extends: .deploy-job-template
+  extends: .deploy-template
   variables:
     namespace: prod
     kube_config: KubeConfig_Raypro_staging
