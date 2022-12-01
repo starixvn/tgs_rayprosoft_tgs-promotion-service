@@ -107,8 +107,10 @@ builder.Services
 	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneydaily.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneyweekly.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneymonthly.setting")
-	.AddGlobPatternExchange<TurnoverRebateDailyCampaignDetailProcessor>("tgs.promotion.turnoverrebate.setting")
-	.AddGlobPatternExchange<TurnoverRebateWeeklyCampaignDetailProcessor>("tgs.promotion.turnoverrebateweekly.setting")
+	//.AddGlobPatternExchange<TurnoverRebateDailyCampaignDetailProcessor>("tgs.promotion.turnoverrebate.setting")
+	//.AddGlobPatternExchange<TurnoverRebateWeeklyCampaignDetailProcessor>("tgs.promotion.turnoverrebateweekly.setting")
+	.AddNatsGlobPatternExchange("tgs.promotion.turnoverrebate.setting")
+	.AddNatsGlobPatternExchange("tgs.promotion.turnoverrebateweekly.setting")
 	.AddGlobPatternExchange<DummyCampaingDetailProcessor>("tgs.promotion.dummy.setting")
 	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.*.setting")
 	.AddNatsGlobPatternExchange("*");
