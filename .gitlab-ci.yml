@@ -1,7 +1,13 @@
+include:
+  - project: rayprosoft/tgs-ci-scripts
+    ref: main
+    file: GitLab/Templates/gitlab-job-templates.yml
+
 variables:
   ImageName: pgtgs/promotion-api
   TgsSettingKey: promotion-api
   HelmTemplateFolderName: promotion-api
+  BuildCacheKey: Tgs.Promotion.$CI_PIPELINE_IID
 
 stages:
   - build
@@ -18,33 +24,51 @@ build-code:
   only:
     - merge_requests
     - main
-  artifacts:
+  cache:
+    key: $BuildCacheKey
     untracked: true
-    expire_in: "1 days"
+
+build-code-dev:
+  extends: build-code
+  only:
+    - feats/tgs-2522-integrate-player-bucket
 
 unit-test:
   stage: test
   script:
     - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
   needs:
-    - job: build-code
-      artifacts: true
+    - build-code
   only:
     - merge_requests
     - main
+  cache:
+    key: $BuildCacheKey
+    untracked: true
+    policy: pull
   artifacts:
     when: always
     reports:
       junit: ./TestReports/*-TestReport.xml
 
+unit-test-dev:
+  extends: unit-test
+  needs:
+    - build-code-dev
+  only:
+    - feats/tgs-2522-integrate-player-bucket
+
 push-nuget:
   stage: publish
   needs:
-    - job: build-code
-      artifacts: true
+    - build-code
     - unit-test
   only:
     - main
+  cache:
+    key: $BuildCacheKey
+    untracked: true
+    policy: pull
   script:
     - dotnet pack -c $BuildConfiguration "Tgs.Promotion.Client/Tgs.Promotion.Client.csproj" --no-restore
     - dotnet nuget push "Tgs.Promotion.Client/bin/$BuildConfiguration/*.nupkg" -s "raypro-baget" -k $NugetApiKey --skip-duplicate
@@ -58,15 +82,24 @@ push-nuget:
 push-docker-image:
   stage: publish
   needs:
-    - job: build-code
-      artifacts: true
     - unit-test
   only:
     - main
+  cache:
+    key: $BuildCacheKey
+    untracked: true
+    policy: pull
   script:
     - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
     - dotnet build "Tgs.Promotion.Service/Tgs.Promotion.Service.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
     - docker push $ImageName:$Tag
+
+push-docker-image-dev:
+  extends: push-docker-image
+  needs:
+    - unit-test-dev
+  only:
+    - feats/tgs-2522-integrate-player-bucket
 
 push-k8s-template:
   stage: publish
@@ -90,6 +123,13 @@ push-k8s-template:
     paths:
       - artifacts/**/*
 
+push-k8s-template-dev:
+  extends: push-k8s-template
+  needs:
+    - unit-test-dev
+  only:
+    - feats/tgs-2522-integrate-player-bucket
+
 deploy-dev:
   variables:
     GIT_STRATEGY: none
@@ -98,12 +138,11 @@ deploy-dev:
     name: dev
   stage: deploy-dev
   needs:
-    - push-nuget
-    - push-docker-image
-    - job: push-k8s-template
+    - push-docker-image-dev
+    - job: push-k8s-template-dev
       artifacts: true
   only:
-    - main
+    - feats/tgs-2522-integrate-player-bucket
   before_script:
     - export KUBECONFIG=$KubeConfig_Raypro_dev
   script:
