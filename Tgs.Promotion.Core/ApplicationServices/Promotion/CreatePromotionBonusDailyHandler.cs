@@ -248,13 +248,6 @@ public class
 								cancellationToken).ConfigureAwait(false)), cancellationToken)))
 			.ConfigureAwait(false);
 
-		_ = await Task.WhenAll(playerBonuses.Select(pb => Task.Run(async () => await _playerBucketClient.CreateBucketAsync(
-				pb.PlayerCode,
-				pb.BucketAmount,
-				pb.BucketType,
-				pb.Id.ToString(),
-				cancellationToken).ConfigureAwait(false))).ToArray()).ConfigureAwait(false);
-
 		var transactionPromotions = new List<TransactionPromotion>();
 
 		foreach (var playerBonus in playerBonuses)
