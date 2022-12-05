@@ -73,8 +73,11 @@ public class CreatePromotionBonusWeeklyHandler
 		await promotions.ToAsyncEnumerable()
 				.ForEachAwaitAsync(async x =>
 				{
+					var from = x.From > previousMonday ? x.From : previousMonday;
+					var to = x.To < previousSunday ? x.To : previousSunday;
+
 					var distributionService = _distributionFunc.Invoke(x.PromotionType);
-					var distribution = distributionService.SetPromotion(x, previousMonday, previousSunday);
+					var distribution = distributionService.SetPromotion(x, from, to);
 					_ = await distribution.SetConditionDataAsync(cancellationToken).ConfigureAwait(false);
 					_ = await distribution.CalculateBonusAmountAsync(cancellationToken).ConfigureAwait(false);
 					_ = await distribution.DistributeBonusAsync(cancellationToken).ConfigureAwait(false);

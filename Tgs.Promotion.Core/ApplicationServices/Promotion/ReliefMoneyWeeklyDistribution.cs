@@ -230,12 +230,25 @@ internal class ReliefMoneyWeeklyDistribution : IDistribution
 					}))
 				.ToArray();
 
-			_ = await Task.WhenAll(playerBonuses.Select(pb => Task.Run(async () => await _playerBucketClient.CreateBucketAsync(
-				pb.PlayerCode,
-				pb.BucketAmount,
-				pb.BucketType,
-				pb.Id.ToString(),
-				cancellationToken).ConfigureAwait(false)))).ConfigureAwait(false);
+			_ = await Task.WhenAll(playerBonuses.Select(pb => Task.Run(async () =>
+					await Policy.Handle<Exception>()
+						.RetryAsync(
+							1,
+							(exception, retryCount) => _logger.LogError(
+								"Promotion Relief Weekly PlayerCode:{pb.PlayerCode} BucketAmount:{pb.BucketAmount} retryCount:{retryCount} Exception:{exception}",
+								pb.PlayerCode,
+								pb.BucketAmount,
+								retryCount,
+								exception))
+						.ExecuteAsync(
+							async () =>
+								await _playerBucketClient.CreateBucketAsync(
+									pb.PlayerCode,
+									pb.BucketAmount,
+									pb.BucketType,
+									pb.Id.ToString(),
+									cancellationToken).ConfigureAwait(false)), cancellationToken)))
+				.ConfigureAwait(false);
 
 			var transactionPromotions = new List<TransactionPromotion>();
 
