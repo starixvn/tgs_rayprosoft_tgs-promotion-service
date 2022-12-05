@@ -165,7 +165,7 @@ deploy-prod:
   extends: .deploy-template
   variables:
     namespace: prod
-    kube_config: KubeConfig_Raypro_staging
+    kube_config: KubeConfig_Raypro_prod
   environment:
     name: prod
   stage: deploy-prod
