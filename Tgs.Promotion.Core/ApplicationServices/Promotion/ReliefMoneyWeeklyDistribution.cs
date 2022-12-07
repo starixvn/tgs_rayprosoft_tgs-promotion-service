@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Numerics;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -232,12 +230,25 @@ internal class ReliefMoneyWeeklyDistribution : IDistribution
 					}))
 				.ToArray();
 
-			_ = await Task.WhenAll(playerBonuses.Select(pb => Task.Run(async () => await _playerBucketClient.CreateBucketAsync(
-				pb.PlayerCode,
-				pb.BucketAmount,
-				pb.BucketType,
-				pb.Id.ToString(),
-				cancellationToken).ConfigureAwait(false)))).ConfigureAwait(false);
+			_ = await Task.WhenAll(playerBonuses.Select(pb => Task.Run(async () =>
+					await Policy.Handle<Exception>()
+						.RetryAsync(
+							1,
+							(exception, retryCount) => _logger.LogError(
+								"Promotion Relief Weekly PlayerCode:{pb.PlayerCode} BucketAmount:{pb.BucketAmount} retryCount:{retryCount} Exception:{exception}",
+								pb.PlayerCode,
+								pb.BucketAmount,
+								retryCount,
+								exception))
+						.ExecuteAsync(
+							async () =>
+								await _playerBucketClient.CreateBucketAsync(
+									pb.PlayerCode,
+									pb.BucketAmount,
+									pb.BucketType,
+									pb.Id.ToString(),
+									cancellationToken).ConfigureAwait(false)), cancellationToken)))
+				.ConfigureAwait(false);
 
 			var transactionPromotions = new List<TransactionPromotion>();
 
@@ -353,7 +364,8 @@ internal class ReliefMoneyWeeklyDistribution : IDistribution
 		{
 			_playerWinLossWeekly = await playerWinLossWeeklies
 				.Join(_tgsContext.PromotionParticipants.Where(pp => pp.PromotionId == _promotion.Id).Where(x =>
-					x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode).Distinct(), agg => agg.PlayerCode, playerCode => playerCode, (agg, playerCode) => new
+						x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode)
+					.Distinct(), agg => agg.PlayerCode, playerCode => playerCode, (agg, playerCode) => new
 				{
 					agg.BrandId,
 					agg.ReportDate,
@@ -362,7 +374,7 @@ internal class ReliefMoneyWeeklyDistribution : IDistribution
 					agg.GameProviderId,
 					agg.VipLevel,
 					agg.WinLoss
-					})
+				})
 				.Select(x => new PlayerWinLossWeekly
 				{
 					BrandId = x.BrandId,

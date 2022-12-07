@@ -228,12 +228,25 @@ public class
 				}))
 			.ToArray();
 
-		_ = await Task.WhenAll(playerBonuses.Select(pb => Task.Run(async () => await _playerBucketClient.CreateBucketAsync(
-				pb.PlayerCode,
-				pb.BucketAmount,
-				pb.BucketType,
-				pb.Id.ToString(),
-				cancellationToken).ConfigureAwait(false)))).ConfigureAwait(false);
+		_ = await Task.WhenAll(playerBonuses.Select(pb => Task.Run(async () =>
+				await Policy.Handle<Exception>()
+					.RetryAsync(
+						1,
+						(exception, retryCount) => _logger.LogError(
+							"Promotion Monthly PlayerCode:{pb.PlayerCode} BucketAmount:{pb.BucketAmount} retryCount:{retryCount} Exception:{exception}",
+							pb.PlayerCode,
+							pb.BucketAmount,
+							retryCount,
+							exception))
+					.ExecuteAsync(
+						async () =>
+							await _playerBucketClient.CreateBucketAsync(
+								pb.PlayerCode,
+								pb.BucketAmount,
+								pb.BucketType,
+								pb.Id.ToString(),
+								cancellationToken).ConfigureAwait(false)), cancellationToken)))
+			.ConfigureAwait(false);
 
 		var transactionPromotions = new List<TransactionPromotion>();
 
@@ -297,6 +310,7 @@ public class
 		var promotionLevels = promotion.PromotionVipLevels.Select(v => v.Level).ToArray();
 
 		var players = aggregates
+			.Where(x => x.BrandId == promotion.BrandId)
 			.Where(promotionLevels.Length > 0,
 				pa => pa.VipLevel != null && promotionLevels.Contains(pa.VipLevel.Value))
 			.Where(promotion.GameType is not null, pa => pa.GameType == promotion.GameType)
