@@ -185,23 +185,23 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 
 		var promotionVipLevels = Array.Empty<PromotionVipLevel>().AsQueryable();
 		var mockPromotionVipLevelSet = GetDbSet(promotionVipLevels);
-		tgsContextMock.PromotionVipLevels.Returns(mockPromotionVipLevelSet.Object);
+		_ = tgsContextMock.PromotionVipLevels.Returns(mockPromotionVipLevelSet.Object);
 
 		var promotionGameProviders = Array.Empty<PromotionGameProvider>().AsQueryable();
 		var mockPromotionGameProviderSet = GetDbSet(promotionGameProviders);
-		tgsContextMock.PromotionGameProviders.Returns(mockPromotionGameProviderSet.Object);
+		_ = tgsContextMock.PromotionGameProviders.Returns(mockPromotionGameProviderSet.Object);
 
 		var playerGameAggregates = gameAggregates.AsQueryable();
 		var mockPlayerGameAggregateSet = GetDbSet(playerGameAggregates);
-		tgsContextMock.PlayerGameRebateAggregates.Returns(mockPlayerGameAggregateSet.Object);
+		_ = tgsContextMock.PlayerGameRebateAggregates.Returns(mockPlayerGameAggregateSet.Object);
 
 		var brandGames = Array.Empty<BrandGame>().AsQueryable();
 		var mockBrandGameSet = GetDbSet(brandGames);
-		tgsContextMock.BrandGames.Returns(mockBrandGameSet.Object);
+		_ = tgsContextMock.BrandGames.Returns(mockBrandGameSet.Object);
 
 		var promotionParticipants = Array.Empty<PromotionParticipant>().AsQueryable();
 		var mockPromotionParticipantSet = GetDbSet(promotionParticipants);
-		tgsContextMock.PromotionParticipants.Returns(mockPromotionParticipantSet.Object);
+		_ = tgsContextMock.PromotionParticipants.Returns(mockPromotionParticipantSet.Object);
 
 		_ = reliefMoneyWeeklyDistributionMock.SetPromotion(promotions.First(), previousMonday, previousSunday);
 		_ = await reliefMoneyWeeklyDistributionMock.SetConditionDataAsync(default);
@@ -305,23 +305,23 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 
 		var promotionVipLevels = Array.Empty<PromotionVipLevel>().AsQueryable();
 		var mockPromotionVipLevelSet = GetDbSet(promotionVipLevels);
-		tgsContextMock.PromotionVipLevels.Returns(mockPromotionVipLevelSet.Object);
+		_ = tgsContextMock.PromotionVipLevels.Returns(mockPromotionVipLevelSet.Object);
 
 		var promotionGameProviders = Array.Empty<PromotionGameProvider>().AsQueryable();
 		var mockPromotionGameProviderSet = GetDbSet(promotionGameProviders);
-		tgsContextMock.PromotionGameProviders.Returns(mockPromotionGameProviderSet.Object);
+		_ = tgsContextMock.PromotionGameProviders.Returns(mockPromotionGameProviderSet.Object);
 
 		var playerGameAggregates = gameAggregates.AsQueryable();
 		var mockPlayerGameAggregateSet = GetDbSet(playerGameAggregates);
-		tgsContextMock.PlayerGameRebateAggregates.Returns(mockPlayerGameAggregateSet.Object);
+		_ = tgsContextMock.PlayerGameRebateAggregates.Returns(mockPlayerGameAggregateSet.Object);
 
 		var brandGames = Array.Empty<BrandGame>().AsQueryable();
 		var mockBrandGameSet = GetDbSet(brandGames);
-		tgsContextMock.BrandGames.Returns(mockBrandGameSet.Object);
+		_ = tgsContextMock.BrandGames.Returns(mockBrandGameSet.Object);
 
 		var promotionParticipants = Array.Empty<PromotionParticipant>().AsQueryable();
 		var mockPromotionParticipantSet = GetDbSet(promotionParticipants);
-		tgsContextMock.PromotionParticipants.Returns(mockPromotionParticipantSet.Object);
+		_ = tgsContextMock.PromotionParticipants.Returns(mockPromotionParticipantSet.Object);
 
 		_ = reliefMoneyWeeklyDistributionMock.SetPromotion(promotions.First(), previousMonday, previousSunday);
 		_ = await reliefMoneyWeeklyDistributionMock.SetConditionDataAsync(default);
@@ -332,10 +332,10 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 	private static Mock<DbSet<T>> GetDbSet<T>(IQueryable<T> data) where T : class
 	{
 		var mockSet = new Mock<DbSet<T>>();
-		mockSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(data.Provider);
-		mockSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(data.Expression);
-		mockSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(data.ElementType);
-		mockSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(data.GetEnumerator());
+		_ = mockSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(data.Provider);
+		_ = mockSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(data.Expression);
+		_ = mockSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(data.ElementType);
+		_ = mockSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(data.GetEnumerator());
 		return mockSet;
 	}
 }

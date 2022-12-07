@@ -364,9 +364,7 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 					Status = (short)PromotionStatus.Enabled,
 					GameType = (short?)GameType.Slot,
 					AutoSentPlayerBonus = true,
-					PromotionParticipants = new PromotionParticipant[]
-					{
-					},
+					PromotionParticipants = Array.Empty<PromotionParticipant>(),
 					CampaignDetail = "{\"playerAutoJoin\": true}"
 				}
 			}
@@ -513,9 +511,7 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 					Status = (short)PromotionStatus.Enabled,
 					GameType = (short?)GameType.Slot,
 					AutoSentPlayerBonus = true,
-					PromotionParticipants = new PromotionParticipant[]
-					{
-					},
+					PromotionParticipants = Array.Empty<PromotionParticipant>(),
 					CampaignDetail = "{\"playerAutoJoin\": false}"
 				}
 			}

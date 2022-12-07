@@ -14,9 +14,9 @@ namespace Tgs.Promotion.ApplicationServices.Promotion;
 
 internal class TurnoverRebateWeeklyDistribution : IDistribution
 {
-	private readonly IPlayerBucketClient _playerBucketClient;
 	private readonly ICashServiceClient _cashServiceClient;
 	private readonly ILogger<CreatePromotionBonusWeeklyHandler> _logger;
+	private readonly IPlayerBucketClient _playerBucketClient;
 	private readonly IPromotionBonusRepository _promotionBonusFactory;
 	private readonly IPromotionRepository _promotionRepository;
 	private readonly PromotionSerializer _promotionSerializer;
@@ -352,25 +352,20 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 				Turnover = list.Sum(l => l.aggregate.Turnover)
 			});
 
-		if (CheckIsAutoJoin(_promotion.CampaignDetail))
-		{
-			_playerWinLossWeekly = await playerWinLossWeeklies.ToArrayAsync(cancellationToken).ConfigureAwait(false);
-		}
-		else
-		{
-			_playerWinLossWeekly = await playerWinLossWeeklies
+		_playerWinLossWeekly = !CheckIsAutoJoin(_promotion.CampaignDetail)
+			? await playerWinLossWeeklies
 				.Join(_tgsContext.PromotionParticipants.Where(pp => pp.PromotionId == _promotion.Id).Where(x =>
 						x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode)
 					.Distinct(), agg => agg.PlayerCode, playerCode => playerCode, (agg, playerCode) => new
-				{
-					agg.BrandId,
-					agg.ReportDate,
-					agg.PlayerCode,
-					agg.GameType,
-					agg.GameProviderId,
-					agg.VipLevel,
-					agg.Turnover
-				})
+					{
+						agg.BrandId,
+						agg.ReportDate,
+						agg.PlayerCode,
+						agg.GameType,
+						agg.GameProviderId,
+						agg.VipLevel,
+						agg.Turnover
+					})
 				.Select(x => new PlayerTurnoverWeekly
 				{
 					BrandId = x.BrandId,
@@ -381,8 +376,8 @@ internal class TurnoverRebateWeeklyDistribution : IDistribution
 					ReportDate = x.ReportDate,
 					Turnover = x.Turnover
 				})
-				.ToArrayAsync(cancellationToken).ConfigureAwait(false);
-		}
+				.ToArrayAsync(cancellationToken).ConfigureAwait(false)
+			: (IEnumerable<PlayerTurnoverWeekly>)await playerWinLossWeeklies.ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
 		return this;
 	}

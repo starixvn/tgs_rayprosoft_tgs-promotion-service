@@ -360,7 +360,7 @@ public class PromotionReliefMoneyDailyDistributionTests
 					Status = (short)PromotionStatus.Enabled,
 					GameType = (short?)GameType.Slot,
 					AutoSentPlayerBonus = true,
-					PromotionParticipants = new PromotionParticipant[] { },
+					PromotionParticipants = Array.Empty<PromotionParticipant>(),
 					CampaignDetail = "{\"playerAutoJoin\": true}"
 				}
 			}
@@ -657,9 +657,7 @@ public class PromotionReliefMoneyDailyDistributionTests
 					Status = (short)PromotionStatus.Enabled,
 					GameType = (short?)GameType.Slot,
 					AutoSentPlayerBonus = true,
-					PromotionParticipants = new PromotionParticipant[]
-					{
-					},
+					PromotionParticipants = Array.Empty<PromotionParticipant>(),
 					CampaignDetail = "{\"playerAutoJoin\": false}"
 				}
 			}
@@ -737,5 +735,4 @@ public class PromotionReliefMoneyDailyDistributionTests
 		_ = await cashServiceClientMock.Received(0)
 			.PromotionAsync(Arg.Is(walletId), Arg.Is<decimal>(10), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Guid?>());
 	}
-
 }

@@ -120,10 +120,8 @@ builder.Services
 
 builder.Services
 	.AddControllers()
-	.AddJsonOptions(jsonOptions =>
-	{
-		jsonOptions.JsonSerializerOptions.Converters.Add(new PromotionRuleViewModelJsonConverter());
-	});
+	.AddJsonOptions(jsonOptions => jsonOptions.JsonSerializerOptions.Converters.Add(
+		new PromotionRuleViewModelJsonConverter()));
 builder.Services
 	.AddSwaggerGen();
 
