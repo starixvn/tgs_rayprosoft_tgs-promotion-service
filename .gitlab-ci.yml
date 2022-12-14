@@ -155,7 +155,7 @@ deploy-staging:
   stage: deploy-staging
   needs:
     - deploy-dev
-    - job: push-k8s-template
+    - job: push-k8s-template-dev
       artifacts: true
   only:
     - feats/tgs-2522-integrate-player-bucket
