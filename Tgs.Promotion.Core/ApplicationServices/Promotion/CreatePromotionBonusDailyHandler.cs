@@ -320,38 +320,38 @@ public class
 
 		return promotion.PromotionType switch
 		{
-			"TurnoverRebate" => (joinedPlayerCodes.Select(playerCode =>
-				{
-					if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
-					{
-						return new PromotionBonusPlayerModel
-						{
-							PromotionBonusId = id,
-							PlayerCode = playerCode,
-							BonusAmount = 0M,
-							PromotionType = promotion.PromotionType
-						};
-					}
+			//"TurnoverRebate" => (joinedPlayerCodes.Select(playerCode =>
+			//	{
+			//		if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)
+			//		{
+			//			return new PromotionBonusPlayerModel
+			//			{
+			//				PromotionBonusId = id,
+			//				PlayerCode = playerCode,
+			//				BonusAmount = 0M,
+			//				PromotionType = promotion.PromotionType
+			//			};
+			//		}
 
-					var playerRebateAmount =
-						players.Where(pa => pa.PlayerCode == playerCode).Sum(s => s.Turnover) *
-						promotion.Percentage / 100;
+			//		var playerRebateAmount =
+			//			players.Where(pa => pa.PlayerCode == playerCode).Sum(s => s.Turnover) *
+			//			promotion.Percentage / 100;
 
-					playerRebateAmount = playerRebateAmount > promotion.BonusAmountLimit
-						? promotion.BonusAmountLimit
-						: playerRebateAmount;
+			//		playerRebateAmount = playerRebateAmount > promotion.BonusAmountLimit
+			//			? promotion.BonusAmountLimit
+			//			: playerRebateAmount;
 
-					amount += playerRebateAmount;
+			//		amount += playerRebateAmount;
 
-					return new()
-					{
-						PromotionBonusId = id,
-						PlayerCode = playerCode,
-						BonusAmount = playerRebateAmount,
-						PromotionType = promotion.PromotionType
-					};
-				})
-				.ToArray(), amount),
+			//		return new()
+			//		{
+			//			PromotionBonusId = id,
+			//			PlayerCode = playerCode,
+			//			BonusAmount = playerRebateAmount,
+			//			PromotionType = promotion.PromotionType
+			//		};
+			//	})
+			//	.ToArray(), amount),
 			"ReliefMoneyDaily" => (joinedPlayerCodes.Select(playerCode =>
 				{
 					if (amount > promotion.TotalAmountLimit && promotion.Unlimited == 0)

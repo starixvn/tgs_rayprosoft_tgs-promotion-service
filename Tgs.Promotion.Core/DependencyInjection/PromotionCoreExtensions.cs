@@ -45,8 +45,8 @@ public static class PromotionCoreExtensions
 		{
 			var distribution = new Dictionary<string, Type>
 			{
-				{ "ReliefMoneyWeekly", typeof(ReliefMoneyWeeklyDistribution) },
-				{ "TurnoverRebateWeekly", typeof(TurnoverRebateWeeklyDistribution) }
+				{ "ReliefMoneyWeekly", typeof(ReliefMoneyWeeklyDistribution) }
+				//{ "TurnoverRebateWeekly", typeof(TurnoverRebateWeeklyDistribution) }
 			};
 
 			_ = distribution.TryGetValue(key, out var distributionType);

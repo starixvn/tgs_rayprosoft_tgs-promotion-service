@@ -62,12 +62,12 @@ public class CreatePromotionBonusWeeklyHandler
 		var promotions = await _promotionRepository.GetPromotionQueries()
 			.Where(x => x.Status == (short)PromotionStatus.Enabled)
 			.Where(x => x.SettlementIntervalType == "Weekly")
-			.Where(x => x.From >= previousMonday.UtcDateTime && x.From <= previousSunday.UtcDateTime ||
-				x.To >= previousMonday.UtcDateTime && x.To <= previousSunday.UtcDateTime ||
-				x.From < previousMonday.UtcDateTime && x.To > previousSunday.UtcDateTime
-			)
-			.Where(x => !x.PromotionBonus.Any(pb => pb.PromotionId == x.Id && pb.From == (x.From > previousMonday.UtcDateTime ? x.From : previousMonday.UtcDateTime) &&
-				pb.To == (x.To < previousSunday.UtcDateTime ? x.To : previousSunday.UtcDateTime)))
+			.Where(x => x.From >= previousMonday.UtcDateTime && x.From <= previousSunday.UtcDateTime 
+				|| x.To >= previousMonday.UtcDateTime && x.To <= previousSunday.UtcDateTime 
+				|| x.From < previousMonday.UtcDateTime && x.To > previousSunday.UtcDateTime)
+			.Where(x => !x.PromotionBonus.Any(pb => pb.PromotionId == x.Id 
+				&& pb.From == (x.From > previousMonday.UtcDateTime ? x.From : previousMonday.UtcDateTime) 
+				&& pb.To == (x.To < previousSunday.UtcDateTime ? x.To : previousSunday.UtcDateTime)))
 			.ToArrayAsync(cancellationToken);
 
 		await promotions.ToAsyncEnumerable()

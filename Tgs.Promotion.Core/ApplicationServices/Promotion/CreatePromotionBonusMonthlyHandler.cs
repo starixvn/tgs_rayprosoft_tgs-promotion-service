@@ -13,9 +13,7 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices.Promotion;
 
-public class
-	CreatePromotionBonusMonthlyHandler : IGetService<CreatePromotionBonusMonthlyRequest,
-		MessageResponse>
+public class CreatePromotionBonusMonthlyHandler : IGetService<CreatePromotionBonusMonthlyRequest, MessageResponse>
 {
 	private readonly ITgsService<BrandGame> _brandGameService;
 	private readonly ICashServiceClient _cashServiceClient;
@@ -76,7 +74,8 @@ public class
 	{
 		var today8TimeZone = DateTimeOffset.UtcNow.ToOffset(new(8, 0, 0));
 
-		var now = new DateTimeOffset(today8TimeZone.Year,
+		var now = new DateTimeOffset(
+			today8TimeZone.Year,
 			today8TimeZone.Month,
 			today8TimeZone.Day,
 			0,
@@ -94,10 +93,10 @@ public class
 			.Include(x => x.PromotionParticipants)
 			.Where(x => x.Status == (short)PromotionStatus.Enabled)
 			.Where(x => x.SettlementIntervalType == "Monthly")
-			.Where(x => x.From >= previousFirstDayOfMonth.UtcDateTime && x.From <= currentFirstDayOfMonth.UtcDateTime ||
-				x.To >= previousFirstDayOfMonth.UtcDateTime && x.To <= currentFirstDayOfMonth.UtcDateTime ||
-				x.From < previousFirstDayOfMonth.UtcDateTime && x.To > currentFirstDayOfMonth.UtcDateTime
-			).ToArrayAsync(cancellationToken);
+			.Where(x => x.From >= previousFirstDayOfMonth.UtcDateTime && x.From <= currentFirstDayOfMonth.UtcDateTime
+				|| x.To >= previousFirstDayOfMonth.UtcDateTime && x.To <= currentFirstDayOfMonth.UtcDateTime
+				|| x.From < previousFirstDayOfMonth.UtcDateTime && x.To > currentFirstDayOfMonth.UtcDateTime)
+			.ToArrayAsync(cancellationToken);
 
 		var playerGameRoundAggregate = await _playerGameRebateAggregateService.GetQueries()
 			.Where(x => x.ReportDate >= previousFirstDayOfMonth.UtcDateTime && x.ReportDate <= currentFirstDayOfMonth.UtcDateTime)
@@ -151,40 +150,39 @@ public class
 				var to = x.To < currentFirstDayOfMonth ? x.To : previousLastDayOfMonth;
 
 				return !await _promotionBonusService.GetQueries()
-					.AnyAsync(
-						pb => pb.PromotionId == x.Id && pb.From == from.UtcDateTime &&
-							pb.To == to.UtcDateTime,
-						cancellationToken);
+					.AnyAsync(pb => pb.PromotionId == x.Id
+						&& pb.From == from.UtcDateTime
+						&& pb.To == to.UtcDateTime, cancellationToken);
 			})
 			.SelectAwait(async x =>
-		{
-			var id = await _serialNumberGenerator.GenerateAsync(cancellationToken).ConfigureAwait(false);
-			var from = x.From > previousFirstDayOfMonth ? x.From : previousFirstDayOfMonth;
-			var to = x.To < currentFirstDayOfMonth ? x.To : previousLastDayOfMonth;
-
-			var (players, amountUsed) =
-				GetPromotionBonusPlayers(id, x, playerGameRoundAggregate, from, to);
-			x.AmountUsed = amountUsed;
-
-			return new PromotionBonusModel
 			{
-				Id = id,
-				BrandId = x.BrandId,
-				PromotionId = x.Id,
-				From = from,
-				To = to,
-				AutoSentPlayerBonus = x.AutoSentPlayerBonus,
-				PromotionType = x.PromotionType,
-				TotalAmountLimit = x.TotalAmountLimit,
-				GameType = (GameType?)x.GameType,
-				Percentage = x.Percentage,
-				BonusAmountLimit = x.BonusAmountLimit,
-				TurnoverMultiple = x.TurnoverMultiple,
-				CreatedOn = DateTimeOffset.Now,
-				SentOn = x.AutoSentPlayerBonus ? DateTimeOffset.Now : null,
-				Players = players.Where(p => p.BonusAmount > 0M).ToArray()
-			};
-		}).ToArrayAsync(cancellationToken: cancellationToken);
+				var id = await _serialNumberGenerator.GenerateAsync(cancellationToken).ConfigureAwait(false);
+				var from = x.From > previousFirstDayOfMonth ? x.From : previousFirstDayOfMonth;
+				var to = x.To < currentFirstDayOfMonth ? x.To : previousLastDayOfMonth;
+
+				var (players, amountUsed) = GetPromotionBonusPlayers(id, x, playerGameRoundAggregate, from, to);
+				x.AmountUsed = amountUsed;
+
+				return new PromotionBonusModel
+				{
+					Id = id,
+					BrandId = x.BrandId,
+					PromotionId = x.Id,
+					From = from,
+					To = to,
+					AutoSentPlayerBonus = x.AutoSentPlayerBonus,
+					PromotionType = x.PromotionType,
+					TotalAmountLimit = x.TotalAmountLimit,
+					GameType = (GameType?)x.GameType,
+					Percentage = x.Percentage,
+					BonusAmountLimit = x.BonusAmountLimit,
+					TurnoverMultiple = x.TurnoverMultiple,
+					CreatedOn = DateTimeOffset.Now,
+					SentOn = x.AutoSentPlayerBonus ? DateTimeOffset.Now : null,
+					Players = players.Where(p => p.BonusAmount > 0M).ToArray()
+				};
+			})
+			.ToArrayAsync(cancellationToken: cancellationToken);
 
 		var autoSentPlayerBonuses = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray();
 		var playerCodes = autoSentPlayerBonuses.SelectMany(p => p.Players).Select(p => p.PlayerCode);
@@ -228,24 +226,23 @@ public class
 				}))
 			.ToArray();
 
-		_ = await Task.WhenAll(playerBonuses.Select(pb => Task.Run(async () =>
-				await Policy.Handle<Exception>()
-					.RetryAsync(
-						1,
-						(exception, retryCount) => _logger.LogError(
-							"Promotion Monthly PlayerCode:{pb.PlayerCode} BucketAmount:{pb.BucketAmount} retryCount:{retryCount} Exception:{exception}",
-							pb.PlayerCode,
-							pb.BucketAmount,
-							retryCount,
-							exception))
-					.ExecuteAsync(
-						async () =>
-							await _playerBucketClient.CreateBucketAsync(
-								pb.PlayerCode,
-								pb.BucketAmount,
-								pb.BucketType,
-								pb.Id.ToString(),
-								cancellationToken).ConfigureAwait(false)), cancellationToken)))
+		_ = await Task.WhenAll(playerBonuses.Select(pb => Task.Run(async () => await Policy.Handle<Exception>()
+			.RetryAsync(
+				1,
+				(exception, retryCount) => _logger.LogError(
+					"Promotion Monthly PlayerCode:{pb.PlayerCode} BucketAmount:{pb.BucketAmount} retryCount:{retryCount} Exception:{exception}",
+					pb.PlayerCode,
+					pb.BucketAmount,
+					retryCount,
+					exception))
+			.ExecuteAsync(
+				async () => await _playerBucketClient.CreateBucketAsync(
+					pb.PlayerCode,
+					pb.BucketAmount,
+					pb.BucketType,
+					pb.Id.ToString(),
+					cancellationToken).ConfigureAwait(false)),
+				cancellationToken)))
 			.ConfigureAwait(false);
 
 		var transactionPromotions = new List<TransactionPromotion>();
@@ -262,40 +259,44 @@ public class
 						playerBonus.Id.ToString(),
 						retryCount,
 						exception))
-				.ExecuteAsync(
-					async () =>
+				.ExecuteAsync(async () =>
+				{
+					if (!await _transactionService.GetQueries()
+						.AnyAsync(x => x.PlayerCode == playerBonus.PlayerCode
+							&& x.ExternalTransactionId == playerBonus.Id.ToString(), cancellationToken))
 					{
-						if (!await _transactionService.GetQueries()
-								.AnyAsync(
-									x => x.PlayerCode == playerBonus.PlayerCode &&
-										x.ExternalTransactionId == playerBonus.Id.ToString(),
-									cancellationToken))
-						{
-							var response = await _cashServiceClient
-								.PromotionAsync(
-									playerBonus.DefaultWalletId,
-									playerBonus.BonusAmount,
-									"promotion monthly",
-									playerBonus.Id.ToString(),
-									null,
-									cancellationToken)
-								.ConfigureAwait(false);
+						var response = await _cashServiceClient
+							.PromotionAsync(
+								playerBonus.DefaultWalletId,
+								playerBonus.BonusAmount,
+								"promotion monthly",
+								playerBonus.Id.ToString(),
+								null,
+								cancellationToken)
+							.ConfigureAwait(false);
 
-							transactionPromotions.Add(new()
-							{
-								TransactionId = response.TransactionId,
-								PromotionId = playerBonus.PromotionId,
-								PromotionBonusId = playerBonus.PromotionBonusId,
-								PromotionType = playerBonus.PromotionType
-							});
-						}
-					});
+						transactionPromotions.Add(new()
+						{
+							TransactionId = response.TransactionId,
+							PromotionId = playerBonus.PromotionId,
+							PromotionBonusId = playerBonus.PromotionBonusId,
+							PromotionType = playerBonus.PromotionType
+						});
+					}
+				});
 		}
 
 		await _transactionRepository.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());
 
-		return new()
-		{ Valid = true };
+		return new MessageResponse()
+		{
+			Valid = true
+		};
+	}
+
+	private static bool CheckIsAutoJoin(string campaignDetail)
+	{
+		return JsonSerializer.Deserialize<PlayerAutoJoinModel>(campaignDetail, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })?.PlayerAutoJoin ?? false;
 	}
 
 	private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(
@@ -373,10 +374,5 @@ public class
 				.ToArray(), amount),
 			_ => (Array.Empty<PromotionBonusPlayerModel>(), 0)
 		};
-	}
-
-	private static bool CheckIsAutoJoin(string campaignDetail)
-	{
-		return JsonSerializer.Deserialize<PlayerAutoJoinModel>(campaignDetail, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })?.PlayerAutoJoin ?? false;
 	}
 }
