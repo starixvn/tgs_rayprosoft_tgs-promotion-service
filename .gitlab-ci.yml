@@ -158,7 +158,7 @@ deploy-staging:
     - job: push-k8s-template
       artifacts: true
   only:
-    - main
+    - feats/tgs-2522-integrate-player-bucket
   when: manual
 
 deploy-prod:
