@@ -1,6 +1,9 @@
 ﻿using System.Text.Json;
 using Google.Protobuf;
+using Json.More;
+using JsonCons.Utilities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Tgs.MessageQueue;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Clients.Protos;
@@ -103,6 +106,7 @@ public class PromotionManagementController : ControllerBase
 	[HttpGet("rule/{promotionId}", Name = "GetPromotionRule")]
 	public async ValueTask<PromotionRuleViewModel?> GetPromotionRuleAsync(
 		[FromServices] IGetService<GetPromotionRuleQuery, PromotionRule?> getService,
+		[FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
 		Guid promotionId)
 	{
 		var query = new GetPromotionRuleQuery(promotionId);
@@ -111,11 +115,17 @@ public class PromotionManagementController : ControllerBase
 			.GetAsync(query, HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 
+		var jsonDoc = JsonSerializer.SerializeToNode(rule, jsonOptionsAccessor.Value.JsonSerializerOptions)!;
+
+		jsonDoc.AsObject().Remove("CampaignDetail");
+
 		return rule is null
 			? null
 			: new PromotionRuleViewModel
 			{
-				CampaignDetail = rule.CampaignDetail,
+				CampaignDetail = JsonMergePatch.ApplyMergePatch(
+					jsonDoc.ToJsonDocument().RootElement,
+					rule.CampaignDetail.RootElement),
 				BonusAmountLimit = rule.BonusAmountLimit,
 				GameType = rule.GameType,
 				Percentage = rule.Percentage,

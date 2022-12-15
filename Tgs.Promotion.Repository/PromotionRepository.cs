@@ -348,12 +348,12 @@ public class PromotionRepository : IPromotionRepository
 		return promotion is null
 			? null
 			: new PromotionRule(
-			JsonDocument.Parse(promotion.CampaignDetail),
-			promotion.BonusAmountLimit,
-			promotion.Percentage,
-			promotion.TurnoverMultiple,
-			(GameType?)promotion.GameType,
-			promotionVipLevels);
+				JsonDocument.Parse(promotion.CampaignDetail),
+				promotion.BonusAmountLimit,
+				promotion.Percentage,
+				promotion.TurnoverMultiple,
+				(GameType?)promotion.GameType,
+				promotionVipLevels);
 	}
 
 	public async ValueTask InsertPromotionDistributeLogAsync(PromotionDistributeLog log, CancellationToken cancellationToken = default)
