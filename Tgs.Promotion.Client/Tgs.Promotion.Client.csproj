@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <Version>1.0.36</Version>
-    <RootNamespace>Tgs.Promotion.Clients</RootNamespace>
-    <Authors>Raypro</Authors>
-    <PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-promotion-service</PackageProjectUrl>
-    <RepositoryUrl>https://gitlab.com/rayprosoft/tgs-promotion-service.git</RepositoryUrl>
-    <PackageTags>Tgs Promotion</PackageTags>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Version>1.0.37</Version>
+		<RootNamespace>Tgs.Promotion.Clients</RootNamespace>
+		<Authors>Raypro</Authors>
+		<PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-promotion-service</PackageProjectUrl>
+		<RepositoryUrl>https://gitlab.com/rayprosoft/tgs-promotion-service.git</RepositoryUrl>
+		<PackageTags>Tgs Promotion</PackageTags>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<None Remove="Protos\promotion.proto" />
