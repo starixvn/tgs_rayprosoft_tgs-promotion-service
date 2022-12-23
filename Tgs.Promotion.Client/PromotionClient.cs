@@ -29,21 +29,6 @@ public class PromotionClient : IPromotionClient
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 	}
 
-	public async Task<MessageResponse> ChangePromotionStatusAsync(UpdatePromotionStatusRequest request)
-	{
-		var httpRequest = new HttpRequestMessage(HttpMethod.Put, $"/api/promotion/{request.PromotionId}/{request.Status}")
-		{
-			Content =
-				new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
-		};
-		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
-
-		_ = response.EnsureSuccessStatusCode();
-
-		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
-	}
-
 	public async Task<bool> CheckCanJoinDepositPromotionAsync(
 		Guid brandId, string playerCode,
 		Guid promotionId, decimal amount)
@@ -69,21 +54,6 @@ public class PromotionClient : IPromotionClient
 		_ = response.EnsureSuccessStatusCode();
 
 		return JsonSerializer.Deserialize<bool>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
-	}
-
-	public async Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request)
-	{
-		var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotion")
-		{
-			Content =
-				new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
-		};
-		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
-
-		_ = response.EnsureSuccessStatusCode();
-
-		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
 			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 	}
 
@@ -260,20 +230,5 @@ public class PromotionClient : IPromotionClient
 		var response = await _client.SendAsync(request).ConfigureAwait(false);
 
 		_ = response.EnsureSuccessStatusCode();
-	}
-
-	public async Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request)
-	{
-		var httpRequest = new HttpRequestMessage(HttpMethod.Put, $"/api/promotion/update/{request.Id}")
-		{
-			Content =
-				new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
-		};
-		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
-
-		_ = response.EnsureSuccessStatusCode();
-
-		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 	}
 }
