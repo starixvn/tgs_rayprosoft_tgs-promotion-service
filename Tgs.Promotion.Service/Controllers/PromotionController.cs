@@ -56,6 +56,7 @@ public class PromotionController : ControllerBase
 		{ Valid = true };
 	}
 
+	[Obsolete("過時, 改用 PromotionManagement 相關 api")]
 	[HttpPut("{promotionId}/{status}", Name = "ChangePromotionStatus")]
 	[Description("Change promotion status")]
 	public ValueTask<MessageResponse> ChangePromotionStatusAsync(
@@ -91,6 +92,7 @@ public class PromotionController : ControllerBase
 			playerCode,
 			promotionId));
 
+	[Obsolete("過時, 改用 PromotionManagement 相關 api")]
 	[HttpPost(Name = "CreatePromotion")]
 	[Description("Create a promotion")]
 	public ValueTask<MessageResponse> CreatePromotionAsync(
@@ -188,6 +190,7 @@ public class PromotionController : ControllerBase
 		await revertService.ExecuteAsync(command).ConfigureAwait(false);
 	}
 
+	[Obsolete("過時, 改用 PromotionManagement 相關 api")]
 	[HttpPut("update/{id}", Name = "UpdatePromotion")]
 	[Description("Update a promotion")]
 	public ValueTask<MessageResponse> UpdatePromotionAsync(
