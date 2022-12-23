@@ -19,10 +19,10 @@
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.20" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.1.5" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.8" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.18" />
-    <PackageReference Include="Tgs.PlayerBucket.Client" Version="0.0.3" />
-    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.23" />
-    <PackageReference Include="Tgs.SerialNumberGenerator" Version="0.0.5" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.20" />
+    <PackageReference Include="Tgs.PlayerBucket.Client" Version="0.0.7" />
+    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.27" />
+    <PackageReference Include="Tgs.SerialNumberGenerator" Version="1.0.0" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
     <PackageReference Include="PagingUtility.AsyncEnumerable" Version="1.1.0" />
   </ItemGroup>

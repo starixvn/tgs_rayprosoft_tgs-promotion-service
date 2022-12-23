@@ -12,9 +12,9 @@ using Tgs.Promotion.Service.ViewModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.ConfigureAppConfiguration((_, builder) => builder
+builder.Configuration
 	.AddJsonFile("/config/appsettings.json", true)
-	.AddEnvironmentVariables());
+	.AddEnvironmentVariables();
 
 builder.Logging
 	.AddOpenTelemetry(options =>
@@ -82,7 +82,9 @@ builder.Services
 		options.BrandCertificateBaseUrl = builder.Configuration.GetValue<Uri>("Promotion:BrandServiceBaseUrl"))
 	.AddPlayerServiceClient((options, _) =>
 		options.BaseUrl = builder.Configuration.GetValue<Uri>("Promotion:PlayerServiceBaseUrl"))
-	.AddPlayerBucketClient();
+	.AddPlayerBucketClient(httpClientBuilder => httpClientBuilder
+		.ConfigureHttpClient(httpClient => 
+			httpClient.BaseAddress = builder.Configuration.GetValue<Uri>("Promotion:PlayerBucketBaseUrl")));
 
 builder.Services
 	.AddSingleton<NoopCampaingDetailProcessor>()
