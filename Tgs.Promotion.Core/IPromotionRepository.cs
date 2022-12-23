@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Text.Json;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.Promotion;
@@ -21,6 +22,20 @@ public interface IPromotionRepository
 	ValueTask<PromotionDistributePlanInfo> CreatePromotionDistributePlanAsync(
 		Guid promotionId,
 		long conditionHash,
+		CancellationToken cancellationToken = default);
+
+	ValueTask CreatePromotionEventAsync(
+		Guid eventId,
+		Guid promotionId,
+		PromotionEventAction action,
+		JsonDocument changeSets,
+		string? modifier,
+		CancellationToken cancellationToken = default);
+
+	ValueTask UpdatePromotionSnapshotAsync(
+		PromotionSnapshot snapshot,
+		Guid snapshotId,
+		DateTime createdOn,
 		CancellationToken cancellationToken = default);
 
 	ValueTask<bool> ExistsAsync(Expression<Func<PromotionRow, bool>> predicate);

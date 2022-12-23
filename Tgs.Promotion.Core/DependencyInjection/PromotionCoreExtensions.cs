@@ -54,6 +54,8 @@ public static class PromotionCoreExtensions
 			return (IDistribution)serviceProvider.GetService(distributionType!)!;
 		});
 
+		_ = services.AddSingleton<ISystemClock, DefaultSystemClock>();
+
 		return services;
 	}
 }

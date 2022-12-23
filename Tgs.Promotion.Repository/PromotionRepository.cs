@@ -252,8 +252,31 @@ public class PromotionRepository : IPromotionRepository
 			plan.ConditionHash);
 	}
 
+	public async ValueTask CreatePromotionEventAsync(
+		Guid eventId,
+		Guid promotionId,
+		PromotionEventAction action,
+		JsonDocument changeSets,
+		string? modifier,
+		CancellationToken cancellationToken = default)
+	{
+		_ = await _dbContext.PromotionEventSources.AddAsync(
+			new PromotionEventSource
+			{
+				Id = eventId,
+				PromotionId = promotionId,
+				Action = action.ToString(),
+				ChangeSets = JsonSerializer.Serialize(changeSets),
+				ModifyUser = modifier,
+				CreatedOn = DateTime.UtcNow
+			},
+			cancellationToken).ConfigureAwait(false);
+
+		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+	}
+
 	public async ValueTask<bool> ExistsAsync(
-		Expression<Func<PromotionRow, bool>> predicate)
+			Expression<Func<PromotionRow, bool>> predicate)
 		=> await _promotionService.GetQueries().AnyAsync(predicate).ConfigureAwait(false);
 
 	public ValueTask<PromotionDistributePlanInfo?> FindPromotionDistributePlanAsync(Guid planId, CancellationToken cancellationToken = default)
@@ -271,7 +294,7 @@ public class PromotionRepository : IPromotionRepository
 			.SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
 	public async ValueTask<PromotionRow?> GetPromotionAsync(
-			Expression<Func<PromotionRow, bool>> predicate,
+		Expression<Func<PromotionRow, bool>> predicate,
 		Func<IQueryable<PromotionRow>, IQueryable<PromotionRow>>? preQuery)
 	{
 		preQuery ??= c => c;
@@ -812,6 +835,50 @@ public class PromotionRepository : IPromotionRepository
 
 	public ValueTask UpdatePromotionsAsync(PromotionRow[] promotions) =>
 			_promotionService.UpdateEntitiesAsync(promotions);
+
+	public async ValueTask UpdatePromotionSnapshotAsync(
+		PromotionSnapshot snapshot,
+		Guid snapshotId,
+		DateTime createdOn,
+		CancellationToken cancellationToken = default)
+	{
+		var dbSnapshot = await _dbContext.PromotionRows
+							 .FindAsync(new object[] { snapshot.Id }, cancellationToken)
+							 .ConfigureAwait(false)
+						 ?? (await _dbContext.PromotionRows
+							 .AddAsync(new PromotionRow { Id = snapshot.Id }, cancellationToken)
+							 .ConfigureAwait(false)).Entity;
+
+		if (dbSnapshot.SnapshotEventId is null)
+		{
+			dbSnapshot.BrandId = snapshot.BrandId;
+			dbSnapshot.Name = snapshot.Name;
+			dbSnapshot.From = snapshot.From;
+			dbSnapshot.To = snapshot.To;
+			dbSnapshot.Status = (short)snapshot.Status;
+			dbSnapshot.PromotionType = snapshot.PromotionType;
+			dbSnapshot.SettlementIntervalType = snapshot.SettlementIntervalType;
+			dbSnapshot.AutoSentPlayerBonus = snapshot.AutoSentPlayerBonus;
+			dbSnapshot.BonusAmountLimit = snapshot.BonusAmountLimit;
+			dbSnapshot.Unlimited = snapshot.Unlimited;
+			dbSnapshot.Percentage = snapshot.Percentage;
+			dbSnapshot.TotalAmountLimit = snapshot.TotalAmountLimit;
+			dbSnapshot.TurnoverMultiple = snapshot.TurnoverMultiple;
+			dbSnapshot.CampaignDetail = snapshot.CampaignDetail;
+			dbSnapshot.Localization = snapshot.Localization;
+			dbSnapshot.DesktopBanner = snapshot.DesktopBanner;
+			dbSnapshot.MobileBanner = snapshot.MobileBanner;
+			dbSnapshot.SubSubject = snapshot.SubSubject;
+			dbSnapshot.Terms = snapshot.Terms;
+			dbSnapshot.CreatedByUsername = snapshot.CreatedByUsername;
+			dbSnapshot.CreatedOn = snapshot.CreatedOn;
+			dbSnapshot.UpdatedByUsername = snapshot.UpdatedByUsername;
+			dbSnapshot.UpdatedOn = snapshot.UpdatedOn;
+			dbSnapshot.SnapshotEventId = snapshotId;
+		}
+
+		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+	}
 
 	public async ValueTask UpdatePromotionUsedAmountAsync(
 		Guid promotionId,

@@ -52,8 +52,7 @@ public class PromotionController : ControllerBase
 
 		await commandService.ExecuteAsync(command).ConfigureAwait(false);
 
-		return new()
-		{ Valid = true };
+		return new() { Valid = true };
 	}
 
 	[Obsolete("過時, 改用 PromotionManagement 相關 api")]
