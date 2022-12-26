@@ -894,7 +894,7 @@ public class PromotionRepository : IPromotionRepository
 							 .AddAsync(new PromotionRow { Id = snapshot.Id }, cancellationToken)
 							 .ConfigureAwait(false)).Entity;
 
-		if (dbSnapshot.SnapshotEventId is null)
+		if (dbSnapshot.SnapshotEventId is null || dbSnapshot.SnapshotEventId.Value.CompareTo(snapshotId) < 0)
 		{
 			dbSnapshot.BrandId = snapshot.BrandId;
 			dbSnapshot.Name = snapshot.Name;
