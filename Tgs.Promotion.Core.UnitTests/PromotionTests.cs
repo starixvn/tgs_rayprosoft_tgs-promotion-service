@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
@@ -676,26 +677,136 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Update_Promotion_MainInfo()
 	{
+		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+		var fakeQueryPromotionTypeGroupService = Substitute.For<IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup>>();
 
-		var sut = new UpdatePromotionMainInfoCommandService(fakePromotionRepository);
+		var sut = new UpdatePromotionMainInfoCommandService(
+			fakeSystemClock,
+			fakeSerialNumberGenerator,
+			fakePromotionRepository, 
+			fakeQueryPromotionTypeGroupService);
 
 		var command = new UpdatePromotionMainInfoCommand(
 			Guid.NewGuid(),
-			"TestPromotion",
+			"Test_Promotion",
 			(DateTime.Now.AddDays(-10), DateTime.Now),
-			"TestType",
+			"Test_Type",
 			null,
 			true,
 			"ModifyUser");
 
+		var currentTime = DateTimeOffset.UtcNow;
+		_ = fakeSystemClock.UtcNow.Returns(currentTime);
+
+		var utcDateTime = currentTime.UtcDateTime;
+		
+		var promotion = new PromotionSnapshot(
+			command.PromotionId,
+			"TestPromotion",
+			Guid.NewGuid(),
+			utcDateTime.AddDays(-15),
+			utcDateTime.AddDays(-10),
+			PromotionStatus.Enabled,
+			"TestType",
+			null,
+			false,
+			0,
+			1,
+			null,
+			0M,
+			0M,
+			0M,
+			"{}",
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			"Creator",
+			utcDateTime.AddDays(-15),
+			null,
+			utcDateTime.AddDays(-15),
+			0M,
+			null,
+			0,
+			null,
+			Guid.NewGuid());
+
+		_ = fakePromotionRepository.GetCurrentPromotionSnapshotAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<CancellationToken>())
+			.Returns(promotion);
+
+		var eventId = Guid.NewGuid();
+		_ = fakeSerialNumberGenerator.GenerateAsync(Arg.Any<CancellationToken>())
+			.Returns(eventId);
+
+		_ = fakeQueryPromotionTypeGroupService
+			.QueryAsync(Arg.Any<PromotionTypeGroupsQuery>())
+			.Returns(new[]
+			{
+				new PromotionTypeGroup
+				{
+					Name = "Test_Type",
+					Types = Array.Empty<PromotionType>(),
+					Trans = new Translation()
+				}
+			}.ToAsyncEnumerable());
+
+		var expectedSnapshot = new PromotionSnapshot(
+			command.PromotionId,
+			command.Name,
+			promotion.BrandId,
+			command.EventDuring.From,
+			command.EventDuring.To,
+			promotion.Status,
+			command.PromotionType,
+			null,
+			command.IsAutoSent,
+			promotion.BonusAmountLimit,
+			1,
+			promotion.GameType,
+			promotion.Percentage,
+			0M,
+			promotion.TurnoverMultiple,
+			promotion.CampaignDetail,
+			promotion.Content,
+			promotion.Localization,
+			promotion.DesktopBanner,
+			promotion.MobileBanner,
+			promotion.SubSubject,
+			promotion.Terms,
+			promotion.CreatedByUsername,
+			promotion.CreatedOn,
+			command.Modifier,
+			utcDateTime,
+			promotion.AmountUsed,
+			promotion.AmountUsedSnapshotId,
+			promotion.DisplayOrder,
+			promotion.VipLevelId,
+			eventId);
+
 		await sut.ExecuteAsync(command);
 
-		_ = fakePromotionRepository.Received(1)
-			.UpdatePromotionMainInfoAsync(
+		_ = fakePromotionRepository
+			.Received(1)
+			.CreatePromotionEventAsync(
+				Arg.Is(eventId),
 				Arg.Is(command.PromotionId),
-				Arg.Any<UpdatePromotionMainInfo>(),
-				Arg.Is(command.Modifier));
+				Arg.Is(PromotionEventAction.UpdateMainInfo),
+				Arg.Any<JsonDocument>(),
+				Arg.Is(command.Modifier),
+				Arg.Any<CancellationToken>());
+
+		_ = fakePromotionRepository.Received(1)
+			.UpdatePromotionSnapshotAsync(
+				Arg.Is(expectedSnapshot),
+				Arg.Is(eventId),
+				Arg.Is(utcDateTime),
+				Arg.Any<CancellationToken>());
 	}
 
 	[TestMethod]

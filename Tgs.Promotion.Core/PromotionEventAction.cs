@@ -3,6 +3,7 @@
 public enum PromotionEventAction
 {
 	CreateMainInfo,
+	UpdateMainInfo,
 	ChangeStatus,
-	UpdateContent
+	UpdateContent,
 }
