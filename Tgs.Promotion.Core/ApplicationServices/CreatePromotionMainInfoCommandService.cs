@@ -74,7 +74,7 @@ internal class CreatePromotionMainInfoCommandService : IGetService<CreatePromoti
 			UpdatedByUsername: null,
 			AmountUsed: 0M,
 			AmountUsedSnapshotId:null,
-			DisplayOrder: 0,
+			DisplayOrder: 1,
 			VipLevelId:null,
 			SnapshotEventId: eventId);
 
