@@ -320,7 +320,7 @@ public class PromotionRepository : IPromotionRepository
 				promotionRow.Percentage,
 				promotionRow.TotalAmountLimit,
 				promotionRow.TurnoverMultiple,
-				promotionRow.CampaignDetail,
+				JsonDocument.Parse(promotionRow.CampaignDetail),
 				promotionRow.Content,
 				promotionRow.Localization,
 				promotionRow.DesktopBanner,
@@ -910,7 +910,7 @@ public class PromotionRepository : IPromotionRepository
 			dbSnapshot.Percentage = snapshot.Percentage;
 			dbSnapshot.TotalAmountLimit = snapshot.TotalAmountLimit;
 			dbSnapshot.TurnoverMultiple = snapshot.TurnoverMultiple;
-			dbSnapshot.CampaignDetail = snapshot.CampaignDetail;
+			dbSnapshot.CampaignDetail = JsonSerializer.Serialize(snapshot.CampaignDetail, _SerializerOptions);
 			dbSnapshot.Content = snapshot.Content;
 			dbSnapshot.Localization = snapshot.Localization;
 			dbSnapshot.DesktopBanner = snapshot.DesktopBanner;

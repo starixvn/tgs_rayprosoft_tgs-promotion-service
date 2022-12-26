@@ -6,4 +6,5 @@ public enum PromotionEventAction
 	UpdateMainInfo,
 	ChangeStatus,
 	UpdateContent,
+	UpdateRule
 }

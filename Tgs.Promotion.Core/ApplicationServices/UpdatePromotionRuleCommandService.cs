@@ -1,20 +1,39 @@
-﻿using Tgs.ServiceUtility;
+﻿using System.Text.Json;
+using Json.Patch;
+using Tgs.SerialNumberGenerator;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
 internal class UpdatePromotionRuleCommandService : ICommandService<UpdatePromotionRuleCommand>
 {
+	private readonly ISystemClock _systemClock;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly IPromotionRepository _promotionRepository;
 	private readonly PromotionSerializer _promotionSerializer;
 
-	public UpdatePromotionRuleCommandService(IPromotionRepository promotionRepository, PromotionSerializer promotionSerializer)
+	public UpdatePromotionRuleCommandService(
+		ISystemClock systemClock,
+		ISerialNumberGenerator serialNumberGenerator,
+		IPromotionRepository promotionRepository, 
+		PromotionSerializer promotionSerializer)
 	{
+		_systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 		_promotionSerializer = promotionSerializer ?? throw new ArgumentNullException(nameof(promotionSerializer));
 	}
 
 	public async ValueTask ExecuteAsync(UpdatePromotionRuleCommand command, CancellationToken cancellationToken = default)
 	{
+		var snapshot = await _promotionRepository.GetCurrentPromotionSnapshotAsync(
+				command.PromotionId, 
+				cancellationToken)
+			.ConfigureAwait(false);
+
+		if (snapshot is null)
+			return;
+
 		if (command.GameType is not null)
 		{
 			var settings = _promotionSerializer.Deserialize<GameProviderSettings>(command.CampaignDetail);
@@ -25,16 +44,40 @@ internal class UpdatePromotionRuleCommandService : ICommandService<UpdatePromoti
 					.ConfigureAwait(false);
 		}
 
-		await _promotionRepository.SetPromotionRuleAsync(
-			command.PromotionId,
-			new PromotionRule(
-				command.CampaignDetail,
-				command.BonusAmountLimit,
-				command.Percentage,
-				command.TurnoverMultiple,
-				command.GameType,
-				Array.Empty<int>()),
-			command.Modifier,
-			cancellationToken).ConfigureAwait(false);
+		var eventId = await _serialNumberGenerator
+			.GenerateAsync(cancellationToken)
+			.ConfigureAwait(false);
+
+		var currentTime = _systemClock.UtcNow.UtcDateTime;
+
+		var updateData = snapshot with
+		{
+			CampaignDetail = command.CampaignDetail,
+			BonusAmountLimit = command.BonusAmountLimit,
+			Percentage = command.Percentage,
+			TurnoverMultiple = command.TurnoverMultiple,
+			GameType = (short?) command.GameType,
+			UpdatedByUsername = command.Modifier,
+			UpdatedOn = currentTime,
+			SnapshotEventId = eventId
+		};
+
+		var changeSets = snapshot.CreatePatch(updateData, PromotionEventSourceUtility.SerializerOptions);
+
+		await _promotionRepository.CreatePromotionEventAsync(
+				eventId,
+				snapshot.Id,
+				PromotionEventAction.UpdateRule,
+				JsonSerializer.SerializeToDocument(changeSets),
+				command.Modifier,
+				cancellationToken)
+			.ConfigureAwait(false);
+
+		await _promotionRepository.UpdatePromotionSnapshotAsync(
+				updateData,
+				eventId,
+				currentTime,
+				cancellationToken)
+			.ConfigureAwait(false);
 	}
 }

@@ -61,7 +61,7 @@ internal class CreatePromotionMainInfoCommandService : IGetService<CreatePromoti
 			Percentage: 0M,
 			TotalAmountLimit: command.PromotionLimitAmount ?? 0M,
 			TurnoverMultiple: 0M,
-			CampaignDetail: "{}",
+			CampaignDetail: JsonDocument.Parse("{}"),
 			Content: null,
 			Localization: null,
 			DesktopBanner: null,

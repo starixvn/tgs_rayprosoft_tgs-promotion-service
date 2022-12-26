@@ -1,4 +1,6 @@
-﻿namespace Tgs.Promotion;
+﻿using System.Text.Json;
+
+namespace Tgs.Promotion;
 
 public record PromotionSnapshot(
 	Guid Id,
@@ -16,7 +18,7 @@ public record PromotionSnapshot(
 	decimal Percentage,
 	decimal TotalAmountLimit,
 	decimal TurnoverMultiple,
-	string CampaignDetail,
+	JsonDocument CampaignDetail,
 	string? Content,
 	string? Localization,
 	string? DesktopBanner,
