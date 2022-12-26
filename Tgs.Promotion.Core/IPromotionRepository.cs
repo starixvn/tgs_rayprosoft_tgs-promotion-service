@@ -32,15 +32,13 @@ public interface IPromotionRepository
 		string? modifier,
 		CancellationToken cancellationToken = default);
 
-	ValueTask UpdatePromotionSnapshotAsync(
-		PromotionSnapshot snapshot,
-		Guid snapshotId,
-		DateTime updatedOn,
-		CancellationToken cancellationToken = default);
-
 	ValueTask<bool> ExistsAsync(Expression<Func<PromotionRow, bool>> predicate);
 
 	ValueTask<PromotionDistributePlanInfo?> FindPromotionDistributePlanAsync(Guid planId, CancellationToken cancellationToken = default);
+
+	ValueTask<PromotionSnapshot?> GetCurrentPromotionSnapshotAsync(
+		Guid promotionId,
+		CancellationToken cancellationToken = default);
 
 	ValueTask<PromotionRow?> GetPromotionAsync(
 		Expression<Func<PromotionRow, bool>> predicate,
@@ -98,6 +96,11 @@ public interface IPromotionRepository
 
 	ValueTask UpdatePromotionsAsync(PromotionRow[] promotions);
 
+	ValueTask UpdatePromotionSnapshotAsync(
+																											PromotionSnapshot snapshot,
+		Guid snapshotId,
+		DateTime updatedOn,
+		CancellationToken cancellationToken = default);
 	ValueTask UpdatePromotionUsedAmountAsync(
 		Guid promotionId,
 		decimal totalAmount,

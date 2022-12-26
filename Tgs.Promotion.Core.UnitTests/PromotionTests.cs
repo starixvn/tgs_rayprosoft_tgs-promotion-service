@@ -428,22 +428,119 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Set_Promotion_Status()
 	{
+		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+		
+		var sut = new SetPromotionStatusCommandService(
+			fakeSystemClock, 
+			fakeSerialNumberGenerator, 
+			fakePromotionRepository);
 
-		var sut = new SetPromotionStatusCommandService(fakePromotionRepository);
+		var currentTime = DateTimeOffset.UtcNow;
+		_ = fakeSystemClock.UtcNow.Returns(currentTime);
+
+		var utcDateTime = currentTime.UtcDateTime;
+
+		var eventId = Guid.NewGuid();
+		_ = fakeSerialNumberGenerator.GenerateAsync(Arg.Any<CancellationToken>())
+			.Returns(eventId);
 
 		var command = new SetPromotionStatusCommand(
 			Guid.NewGuid(),
 			PromotionStatus.Enabled,
 			"ModifyUser");
 
+		var promotion = new PromotionSnapshot(
+			command.PromotionId,
+			"TestPromotion",
+			Guid.NewGuid(),
+			utcDateTime.AddDays(-10),
+			utcDateTime.AddDays(1),
+			PromotionStatus.Disabled,
+			"TestType",
+			null,
+			true,
+			0,
+			1,
+			null,
+			0M,
+			0M,
+			0M,
+			"{}",
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			"Creator",
+			utcDateTime.AddDays(-15),
+			null,
+			utcDateTime.AddDays(-15),
+			0M,
+			null,
+			0,
+			null,
+			Guid.NewGuid());
+
+		_ = fakePromotionRepository.GetCurrentPromotionSnapshotAsync(
+				Arg.Is(command.PromotionId),
+			Arg.Any<CancellationToken>())
+			.Returns(promotion);
+		
+		var expectedSnapshot = new PromotionSnapshot(
+			command.PromotionId,
+			promotion.Name,
+			promotion.BrandId,
+			promotion.From,
+			promotion.To,
+			PromotionStatus.Enabled,
+			promotion.PromotionType,
+			promotion.SettlementIntervalType,
+			promotion.AutoSentPlayerBonus,
+			promotion.BonusAmountLimit,
+			promotion.Unlimited,
+			promotion.GameType,
+			promotion.Percentage,
+			promotion.TotalAmountLimit,
+			promotion.TurnoverMultiple,
+			promotion.CampaignDetail,
+			promotion.Content,
+			promotion.Localization,
+			promotion.DesktopBanner,
+			promotion.MobileBanner,
+			promotion.SubSubject,
+			promotion.Terms,
+			promotion.CreatedByUsername,
+			promotion.CreatedOn,
+			command.Modifier,
+			utcDateTime,
+			promotion.AmountUsed,
+			promotion.AmountUsedSnapshotId,
+			promotion.DisplayOrder,
+			promotion.VipLevelId,
+			eventId);
+
+
 		await sut.ExecuteAsync(command);
 
-		_ = fakePromotionRepository.Received(1)
-			.SetPromotionStatusAsync(
+		_ = fakePromotionRepository
+			.Received(1)
+			.CreatePromotionEventAsync(
+				Arg.Is(eventId),
 				Arg.Is(command.PromotionId),
-				Arg.Is(command.Status),
-				Arg.Is(command.Modifier));
+				Arg.Is(PromotionEventAction.ChangeStatus),
+				Arg.Any<JsonDocument>(),
+				Arg.Is(command.Modifier),
+				Arg.Any<CancellationToken>());
+
+		_ = fakePromotionRepository.Received(1)
+			.UpdatePromotionSnapshotAsync(
+				Arg.Is(expectedSnapshot),
+				Arg.Is(eventId),
+				Arg.Is(utcDateTime),
+				Arg.Any<CancellationToken>());
 	}
 
 	[TestMethod]

@@ -293,6 +293,51 @@ public class PromotionRepository : IPromotionRepository
 				plan.ConditionHash))
 			.SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
+	public async ValueTask<PromotionSnapshot?> GetCurrentPromotionSnapshotAsync(
+		Guid promotionId, 
+		CancellationToken cancellationToken = default)
+	{
+		var promotionRow = await _dbContext.PromotionRows.FindAsync(
+				new object[] { promotionId },
+				cancellationToken)
+			.ConfigureAwait(false);
+
+		return promotionRow is null
+			? null 
+			: new PromotionSnapshot(
+				promotionRow.Id,
+				promotionRow.Name,
+				promotionRow.BrandId,
+				promotionRow.From,
+				promotionRow.To,
+				(PromotionStatus)promotionRow.Status,
+				promotionRow.PromotionType,
+				promotionRow.SettlementIntervalType,
+				promotionRow.AutoSentPlayerBonus,
+				promotionRow.BonusAmountLimit,
+				promotionRow.Unlimited,
+				promotionRow.GameType,
+				promotionRow.Percentage,
+				promotionRow.TotalAmountLimit,
+				promotionRow.TurnoverMultiple,
+				promotionRow.CampaignDetail,
+				promotionRow.Content,
+				promotionRow.Localization,
+				promotionRow.DesktopBanner,
+				promotionRow.MobileBanner,
+				promotionRow.SubSubject,
+				promotionRow.Terms,
+				promotionRow.CreatedByUsername,
+				promotionRow.CreatedOn,
+				promotionRow.UpdatedByUsername,
+				promotionRow.UpdatedOn,
+				promotionRow.AmountUsed,
+				promotionRow.AmountUsedSnapshotId,
+				promotionRow.DisplayOrder,
+				promotionRow.VipLevelId,
+				promotionRow.SnapshotEventId);
+	}
+
 	public async ValueTask<PromotionRow?> GetPromotionAsync(
 		Expression<Func<PromotionRow, bool>> predicate,
 		Func<IQueryable<PromotionRow>, IQueryable<PromotionRow>>? preQuery)
