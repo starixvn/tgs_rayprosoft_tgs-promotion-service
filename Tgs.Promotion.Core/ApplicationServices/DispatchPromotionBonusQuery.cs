@@ -1,6 +1,6 @@
-﻿namespace Tgs.Promotion.Models.PromotionDispatch;
+﻿namespace Tgs.Promotion.ApplicationServices;
 
-public class DispatchPromotionBonusRequest
+public class DispatchPromotionBonusQuery
 {
 	public Guid OperatorUserId { get; set; }
 

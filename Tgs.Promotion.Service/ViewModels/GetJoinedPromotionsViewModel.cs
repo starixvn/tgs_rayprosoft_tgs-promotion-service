@@ -1,6 +1,8 @@
-﻿namespace Tgs.Promotion.Models.Promotion;
+﻿using Tgs.Promotion.Models;
 
-public class GetJoinedPromotionsRequest : PageableRequest
+namespace Tgs.Promotion.Service.ViewModels;
+
+public class GetJoinedPromotionsViewModel : PageableRequest
 {
 	public DateTimeOffset From { get; init; }
 

@@ -1,16 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tgs.Promotion.Models;
-using Tgs.Promotion.Models.Promotion;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-public class ChangePromotionStatusHandler : IGetService<ChangePromotionStatusRequest, MessageResponse>
+public class ChangePromotionStatusQueryService : IGetService<ChangePromotionStatusQuery, MessageResponse>
 {
 	private readonly IPromotionRepository _promotionFactory;
 	private readonly ITgsService<Domain.Entities.PromotionRow> _promotionService;
 
-	public ChangePromotionStatusHandler(
+	public ChangePromotionStatusQueryService(
 		ITgsService<Domain.Entities.PromotionRow> promotionService,
 		IPromotionRepository promotionFactory)
 	{
@@ -21,7 +20,7 @@ public class ChangePromotionStatusHandler : IGetService<ChangePromotionStatusReq
 	}
 
 	public async ValueTask<MessageResponse> GetAsync(
-		ChangePromotionStatusRequest request,
+		ChangePromotionStatusQuery request,
 		CancellationToken cancellationToken)
 	{
 		var promotion = await _promotionService.GetQueries().FirstOrDefaultAsync(q => q.Id == request.Id, cancellationToken);

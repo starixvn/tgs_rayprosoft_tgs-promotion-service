@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion.Models.PromotionDispatch;
+﻿namespace Tgs.Promotion.ApplicationServices;
 
 public class DispatchPlayer
 {

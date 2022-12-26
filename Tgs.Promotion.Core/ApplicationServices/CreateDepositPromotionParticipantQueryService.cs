@@ -1,21 +1,20 @@
 ﻿using Microsoft.Extensions.Logging;
 using Tgs.Promotion.Models;
-using Tgs.Promotion.Models.Promotion;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
 public class
-	CreateDepositPromotionParticipantHandler : IGetService<CreateDepositPromotionParticipantRequest, MessageResponse>
+	CreateDepositPromotionParticipantQueryService : IGetService<CreateDepositPromotionParticipantQuery, MessageResponse>
 {
-	private readonly ILogger<CreatePromotionParticipantHandler> _logger;
+	private readonly ILogger<CreateDepositPromotionParticipantQueryService> _logger;
 	private readonly IPromotionParticipantRepository _promotionParticipantRepository;
 	private readonly IPromotionRepository _promotionRepository;
 
-	public CreateDepositPromotionParticipantHandler(
+	public CreateDepositPromotionParticipantQueryService(
 		IPromotionRepository promotionRepository,
 		IPromotionParticipantRepository promotionParticipantRepository,
-		ILogger<CreatePromotionParticipantHandler> logger)
+		ILogger<CreateDepositPromotionParticipantQueryService> logger)
 	{
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
@@ -26,7 +25,7 @@ public class
 	}
 
 	public async ValueTask<MessageResponse> GetAsync(
-		CreateDepositPromotionParticipantRequest request,
+		CreateDepositPromotionParticipantQuery request,
 		CancellationToken cancellationToken)
 	{
 		var promotion = await _promotionRepository
