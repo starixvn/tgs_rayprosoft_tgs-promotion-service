@@ -66,10 +66,12 @@ public class PromotionTests
 			AutoSentPlayerBonus: true,
 			BonusAmountLimit: 0M,
 			Unlimited: 0,
+			GameType: null,
 			Percentage: 0M,
 			TotalAmountLimit: 0M,
 			TurnoverMultiple: 0M,
 			CampaignDetail: "{}",
+			Content: null,
 			Localization: null,
 			DesktopBanner: null,
 			MobileBanner: null,
@@ -78,8 +80,12 @@ public class PromotionTests
 			CreatedOn: utcDateTime,
 			CreatedByUsername: "ModifyUser",
 			UpdatedOn: utcDateTime,
-			UpdatedByUsername: null
-		);
+			UpdatedByUsername: null,
+			AmountUsed: 0M,
+			AmountUsedSnapshotId: null,
+			DisplayOrder: 0,
+			VipLevelId: null,
+			SnapshotEventId: eventId);
 
 		var sut = new CreatePromotionMainInfoCommandService(
 			fakeSerialNumberGenerator, 

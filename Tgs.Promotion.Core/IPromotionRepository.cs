@@ -35,7 +35,7 @@ public interface IPromotionRepository
 	ValueTask UpdatePromotionSnapshotAsync(
 		PromotionSnapshot snapshot,
 		Guid snapshotId,
-		DateTime createdOn,
+		DateTime updatedOn,
 		CancellationToken cancellationToken = default);
 
 	ValueTask<bool> ExistsAsync(Expression<Func<PromotionRow, bool>> predicate);

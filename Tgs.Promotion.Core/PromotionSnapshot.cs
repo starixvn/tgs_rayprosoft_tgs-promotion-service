@@ -1,6 +1,7 @@
 ﻿namespace Tgs.Promotion;
 
-public record PromotionSnapshot(Guid Id,
+public record PromotionSnapshot(
+	Guid Id,
 	string Name,
 	Guid BrandId,
 	DateTime From,
@@ -11,10 +12,12 @@ public record PromotionSnapshot(Guid Id,
 	bool AutoSentPlayerBonus,
 	decimal BonusAmountLimit,
 	short Unlimited,
+	short? GameType,
 	decimal Percentage,
 	decimal TotalAmountLimit,
 	decimal TurnoverMultiple,
 	string CampaignDetail,
+	string? Content,
 	string? Localization,
 	string? DesktopBanner,
 	string? MobileBanner,
@@ -23,4 +26,9 @@ public record PromotionSnapshot(Guid Id,
 	string? CreatedByUsername,
 	DateTime CreatedOn,
 	string? UpdatedByUsername,
-	DateTime UpdatedOn);
+	DateTime UpdatedOn,
+	decimal AmountUsed,
+	Guid? AmountUsedSnapshotId,
+	int DisplayOrder,
+	Guid? VipLevelId,
+	Guid? SnapshotEventId);

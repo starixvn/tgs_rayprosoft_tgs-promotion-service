@@ -57,10 +57,12 @@ internal class CreatePromotionMainInfoCommandService : IGetService<CreatePromoti
 			AutoSentPlayerBonus: command.IsAutoSent,
 			BonusAmountLimit: 0M,
 			Unlimited: command.PromotionLimitAmount is null ? (short)1 : (short)0,
+			GameType: null,
 			Percentage: 0M,
 			TotalAmountLimit: command.PromotionLimitAmount ?? 0M,
 			TurnoverMultiple: 0M,
 			CampaignDetail: "{}",
+			Content: null,
 			Localization: null,
 			DesktopBanner: null,
 			MobileBanner: null,
@@ -69,7 +71,12 @@ internal class CreatePromotionMainInfoCommandService : IGetService<CreatePromoti
 			CreatedOn: currentTime,
 			CreatedByUsername: command.Modifier,
 			UpdatedOn: currentTime,
-			UpdatedByUsername: null);
+			UpdatedByUsername: null,
+			AmountUsed: 0M,
+			AmountUsedSnapshotId:null,
+			DisplayOrder: 0,
+			VipLevelId:null,
+			SnapshotEventId: eventId);
 
 		var changeSets = new JsonPatch(
 				PatchOperation.Add(

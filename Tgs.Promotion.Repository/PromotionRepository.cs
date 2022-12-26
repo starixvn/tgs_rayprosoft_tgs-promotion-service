@@ -839,7 +839,7 @@ public class PromotionRepository : IPromotionRepository
 	public async ValueTask UpdatePromotionSnapshotAsync(
 		PromotionSnapshot snapshot,
 		Guid snapshotId,
-		DateTime createdOn,
+		DateTime updatedOn,
 		CancellationToken cancellationToken = default)
 	{
 		var dbSnapshot = await _dbContext.PromotionRows
@@ -861,10 +861,12 @@ public class PromotionRepository : IPromotionRepository
 			dbSnapshot.AutoSentPlayerBonus = snapshot.AutoSentPlayerBonus;
 			dbSnapshot.BonusAmountLimit = snapshot.BonusAmountLimit;
 			dbSnapshot.Unlimited = snapshot.Unlimited;
+			dbSnapshot.GameType = snapshot.GameType;
 			dbSnapshot.Percentage = snapshot.Percentage;
 			dbSnapshot.TotalAmountLimit = snapshot.TotalAmountLimit;
 			dbSnapshot.TurnoverMultiple = snapshot.TurnoverMultiple;
 			dbSnapshot.CampaignDetail = snapshot.CampaignDetail;
+			dbSnapshot.Content = snapshot.Content;
 			dbSnapshot.Localization = snapshot.Localization;
 			dbSnapshot.DesktopBanner = snapshot.DesktopBanner;
 			dbSnapshot.MobileBanner = snapshot.MobileBanner;
@@ -875,6 +877,10 @@ public class PromotionRepository : IPromotionRepository
 			dbSnapshot.UpdatedByUsername = snapshot.UpdatedByUsername;
 			dbSnapshot.UpdatedOn = snapshot.UpdatedOn;
 			dbSnapshot.SnapshotEventId = snapshotId;
+			dbSnapshot.AmountUsed = snapshot.AmountUsed;
+			dbSnapshot.AmountUsedSnapshotId = snapshot.AmountUsedSnapshotId;
+			dbSnapshot.DisplayOrder = snapshot.DisplayOrder;
+			dbSnapshot.VipLevelId = snapshot.VipLevelId;
 		}
 
 		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
