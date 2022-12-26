@@ -81,7 +81,7 @@ internal class CreatePromotionMainInfoCommandService : IGetService<CreatePromoti
 		var changeSets = new JsonPatch(
 				PatchOperation.Add(
 				JsonPointer.Create<PromotionSnapshot>(o => o),
-				JsonSerializer.SerializeToNode(promotionSnapshot, PromotionUtility.SerializerOptions)))
+				JsonSerializer.SerializeToNode(promotionSnapshot, PromotionEventSourceUtility.SerializerOptions)))
 			.ToJsonDocument();
 
 		await _promotionRepository.CreatePromotionEventAsync(

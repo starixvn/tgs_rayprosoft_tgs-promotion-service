@@ -46,7 +46,7 @@ internal class SetPromotionStatusCommandService : ICommandService<SetPromotionSt
 			SnapshotEventId = eventId
 		};
 
-		var changeSets = snapshot.CreatePatch(updateData, PromotionUtility.SerializerOptions);
+		var changeSets = snapshot.CreatePatch(updateData, PromotionEventSourceUtility.SerializerOptions);
 
 		await _promotionRepository.CreatePromotionEventAsync(
 				eventId,
