@@ -2,20 +2,19 @@
 using Tgs.CashService.Client;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
-using Tgs.Promotion.Models.PromotionDispatch;
 using Tgs.Service.PlayerBuckets;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-public class DispatchPromotionBonusHandler : IGetService<DispatchPromotionBonusRequest, MessageResponse>
+public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionBonusQuery, MessageResponse>
 {
 	private readonly ICashServiceClient _cashServiceClient;
 	private readonly IPlayerBucketClient _playerBucketClient;
 	private readonly IPromotionBonusRepository _promotionBonusService;
 	private readonly ITransactionRepository _transactionRepository;
 
-	public DispatchPromotionBonusHandler(
+	public DispatchPromotionBonusQueryService(
 		IPromotionBonusRepository promotionBonusService,
 		ICashServiceClient cashServiceClient,
 		ITransactionRepository transactionRepository,
@@ -30,7 +29,7 @@ public class DispatchPromotionBonusHandler : IGetService<DispatchPromotionBonusR
 	}
 
 	public async ValueTask<MessageResponse> GetAsync(
-		DispatchPromotionBonusRequest request,
+		DispatchPromotionBonusQuery request,
 		CancellationToken cancellationToken)
 	{
 		var playerCodes = request.Players.Select(x => x.PlayerCode).ToArray();

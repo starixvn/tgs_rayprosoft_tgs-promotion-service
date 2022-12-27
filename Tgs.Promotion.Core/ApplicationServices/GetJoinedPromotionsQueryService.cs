@@ -6,16 +6,16 @@ using Tgs.ServiceUtility;
 namespace Tgs.Promotion.ApplicationServices;
 
 public class
-	GetPlayerOperationsQueryHandler : IGetService<GetJoinedPromotionsRequest, PagedResponse<JoinedPromotionModel>>
+	GetJoinedPromotionsQueryService : IGetService<GetJoinedPromotionsQuery, PagedResponse<JoinedPromotionModel>>
 {
 	private readonly IPromotionParticipantRepository _service;
 
-	public GetPlayerOperationsQueryHandler(IPromotionParticipantRepository service)
+	public GetJoinedPromotionsQueryService(IPromotionParticipantRepository service)
 	{
 		_service = service;
 	}
 
-	public async ValueTask<PagedResponse<JoinedPromotionModel>> GetAsync(GetJoinedPromotionsRequest request,
+	public async ValueTask<PagedResponse<JoinedPromotionModel>> GetAsync(GetJoinedPromotionsQuery request,
 		CancellationToken cancellationToken) =>
 		await _service.GetPromotionParticipantQueries(q => q.Where(p =>
 				p.CreatedOn >= request.From && p.CreatedOn <= request.To && p.PlayerCode == request.PlayerCode))

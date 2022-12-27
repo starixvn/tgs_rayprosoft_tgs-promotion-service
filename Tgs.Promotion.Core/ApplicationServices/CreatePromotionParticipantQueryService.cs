@@ -3,27 +3,26 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Tgs.MessageQueue;
 using Tgs.Promotion.Models;
-using Tgs.Promotion.Models.Promotion;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-public class CreatePromotionParticipantHandler : IGetService<CreatePromotionParticipantRequest, MessageResponse>
+public class CreatePromotionParticipantQueryService : IGetService<CreatePromotionParticipantQuery, MessageResponse>
 {
-	private readonly ILogger<CreatePromotionParticipantHandler> _logger;
+	private readonly ILogger<CreatePromotionParticipantQueryService> _logger;
 	private readonly IMessageSender _messageSender;
 	private readonly IPromotionJoinLockRepository _promotionJoinLockRepository;
 	private readonly IPromotionParticipantRepository _promotionParticipantRepository;
 	private readonly IPromotionRepository _promotionRepository;
 	private readonly IPromotionTypeRepository _promotionType;
 
-	public CreatePromotionParticipantHandler(
+	public CreatePromotionParticipantQueryService(
 		IPromotionRepository promotionRepository,
 		IPromotionParticipantRepository promotionParticipantRepository,
 		IPromotionTypeRepository promotionType,
 		IPromotionJoinLockRepository promotionJoinLockRepository,
 		IMessageSender messageSender,
-		ILogger<CreatePromotionParticipantHandler> logger)
+		ILogger<CreatePromotionParticipantQueryService> logger)
 	{
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
@@ -40,7 +39,7 @@ public class CreatePromotionParticipantHandler : IGetService<CreatePromotionPart
 	}
 
 	public async ValueTask<MessageResponse> GetAsync(
-		CreatePromotionParticipantRequest request,
+		CreatePromotionParticipantQuery request,
 		CancellationToken cancellationToken)
 	{
 		var promotion = await _promotionRepository
