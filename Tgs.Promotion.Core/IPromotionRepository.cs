@@ -97,10 +97,11 @@ public interface IPromotionRepository
 	ValueTask UpdatePromotionsAsync(PromotionRow[] promotions);
 
 	ValueTask UpdatePromotionSnapshotAsync(
-																											PromotionSnapshot snapshot,
+		PromotionSnapshot snapshot,
 		Guid snapshotId,
 		DateTime updatedOn,
 		CancellationToken cancellationToken = default);
+
 	ValueTask UpdatePromotionUsedAmountAsync(
 		Guid promotionId,
 		decimal totalAmount,

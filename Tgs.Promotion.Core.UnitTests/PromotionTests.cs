@@ -999,27 +999,6 @@ public class PromotionTests
 	}
 
 	[TestMethod]
-	public async Task Update_Promotion_Used_AmountAsync()
-	{
-		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
-
-		var sut = new UpdatePromotionUsedAmountCommandService(fakePromotionRepository);
-
-		var command = new UpdatePromotionUsedAmountCommand(
-			Guid.NewGuid(),
-			10000M,
-			Guid.NewGuid());
-
-		await sut.ExecuteAsync(command);
-
-		_ = fakePromotionRepository.Received(1)
-			.UpdatePromotionUsedAmountAsync(
-				Arg.Is(command.PromotionId),
-				Arg.Is(command.TotalAmount),
-				Arg.Is(command.SnapshotId));
-	}
-
-	[TestMethod]
 	public async Task Update_Promotion_VipLevels()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
@@ -1041,7 +1020,317 @@ public class PromotionTests
 	}
 
 	[TestMethod]
-	public async Task 根據PromotionType取得PromotionMainInfoAsync()
+	public async Task 不更新PromotionUsedAmount當要更新的AmountUsedSnapshotId較Snapshot的AmountUsedSnapshotId為舊()
+	{
+		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new UpdatePromotionUsedAmountCommandService(fakeSystemClock, fakeSerialNumberGenerator, fakePromotionRepository);
+
+		var command = new UpdatePromotionUsedAmountCommand(
+			Guid.NewGuid(),
+			10000M,
+			Guid.Parse("01854c81-5489-0000-0001-07e620dd98d5")
+			);
+
+		var currentTime = DateTimeOffset.UtcNow;
+		_ = fakeSystemClock.UtcNow.Returns(currentTime);
+
+		var utcDateTime = currentTime.UtcDateTime;
+
+		var promotion = new PromotionSnapshot(
+			command.PromotionId,
+			"TestPromotion",
+			Guid.NewGuid(),
+			utcDateTime.AddDays(-15),
+			utcDateTime.AddDays(-10),
+			PromotionStatus.Enabled,
+			"TestType",
+			null,
+			false,
+			0,
+			1,
+			null,
+			0M,
+			0M,
+			0M,
+			JsonDocument.Parse("{}"),
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			"Creator",
+			utcDateTime.AddDays(-15),
+			null,
+			utcDateTime.AddDays(-15),
+			2000M,
+			Guid.Parse("01854deb-6f98-0000-0001-07e620dd98d5"),
+			0,
+			null,
+			Guid.NewGuid());
+
+		_ = fakePromotionRepository.GetCurrentPromotionSnapshotAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<CancellationToken>())
+			.Returns(promotion);
+
+		var eventId = Guid.NewGuid();
+		_ = fakeSerialNumberGenerator.GenerateAsync(Arg.Any<CancellationToken>())
+			.Returns(eventId);
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository
+			.DidNotReceive()
+			.CreatePromotionEventAsync(
+				Arg.Is(eventId),
+				Arg.Is(command.PromotionId),
+				Arg.Is(PromotionEventAction.UpdateTotalUsedAmount),
+				Arg.Any<JsonDocument>(),
+				Arg.Is((string?)null),
+				Arg.Any<CancellationToken>());
+
+		_ = fakePromotionRepository
+			.DidNotReceive()
+			.UpdatePromotionSnapshotAsync(
+				Arg.Any<PromotionSnapshot>(),
+				Arg.Is(eventId),
+				Arg.Is(utcDateTime),
+				Arg.Any<CancellationToken>());
+	}
+
+	[TestMethod]
+	public async Task 更新PromotionUsedAmount當Snapshot的EventId為null()
+	{
+		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new UpdatePromotionUsedAmountCommandService(fakeSystemClock, fakeSerialNumberGenerator, fakePromotionRepository);
+
+		var command = new UpdatePromotionUsedAmountCommand(
+			Guid.NewGuid(),
+			10000M,
+			Guid.NewGuid());
+
+		var currentTime = DateTimeOffset.UtcNow;
+		_ = fakeSystemClock.UtcNow.Returns(currentTime);
+
+		var utcDateTime = currentTime.UtcDateTime;
+
+		var promotion = new PromotionSnapshot(
+			command.PromotionId,
+			"TestPromotion",
+			Guid.NewGuid(),
+			utcDateTime.AddDays(-15),
+			utcDateTime.AddDays(-10),
+			PromotionStatus.Enabled,
+			"TestType",
+			null,
+			false,
+			0,
+			1,
+			null,
+			0M,
+			0M,
+			0M,
+			JsonDocument.Parse("{}"),
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			"Creator",
+			utcDateTime.AddDays(-15),
+			null,
+			utcDateTime.AddDays(-15),
+			0M,
+			null,
+			0,
+			null,
+			Guid.NewGuid());
+
+		_ = fakePromotionRepository.GetCurrentPromotionSnapshotAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<CancellationToken>())
+			.Returns(promotion);
+
+		var eventId = Guid.NewGuid();
+		_ = fakeSerialNumberGenerator.GenerateAsync(Arg.Any<CancellationToken>())
+			.Returns(eventId);
+
+		var expectedSnapshot = new PromotionSnapshot(
+			command.PromotionId,
+			promotion.Name,
+			promotion.BrandId,
+			promotion.From,
+			promotion.To,
+			promotion.Status,
+			promotion.PromotionType,
+			promotion.SettlementIntervalType,
+			promotion.AutoSentPlayerBonus,
+			promotion.BonusAmountLimit,
+			promotion.Unlimited,
+			promotion.GameType,
+			promotion.Percentage,
+			promotion.TotalAmountLimit,
+			promotion.TurnoverMultiple,
+			promotion.CampaignDetail,
+			promotion.Content,
+			promotion.Localization,
+			promotion.DesktopBanner,
+			promotion.MobileBanner,
+			promotion.SubSubject,
+			promotion.Terms,
+			promotion.CreatedByUsername,
+			promotion.CreatedOn,
+			promotion.UpdatedByUsername,
+			promotion.UpdatedOn,
+			command.TotalAmount,
+			command.SnapshotId,
+			promotion.DisplayOrder,
+			promotion.VipLevelId,
+			eventId);
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.CreatePromotionEventAsync(
+				Arg.Is(eventId),
+				Arg.Is(command.PromotionId),
+				Arg.Is(PromotionEventAction.UpdateTotalUsedAmount),
+				Arg.Any<JsonDocument>(),
+				Arg.Is((string?)null),
+				Arg.Any<CancellationToken>());
+
+		_ = fakePromotionRepository.Received(1)
+			.UpdatePromotionSnapshotAsync(
+				Arg.Is(expectedSnapshot),
+				Arg.Is(eventId),
+				Arg.Is(utcDateTime),
+				Arg.Any<CancellationToken>());
+	}
+
+	[TestMethod]
+	public async Task 更新PromotionUsedAmount當要更新的AmountUsedSnapshotId較Snapshot的AmountUsedSnapshotId為新()
+	{
+		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new UpdatePromotionUsedAmountCommandService(fakeSystemClock, fakeSerialNumberGenerator, fakePromotionRepository);
+
+		var command = new UpdatePromotionUsedAmountCommand(
+			Guid.NewGuid(),
+			10000M,
+			Guid.Parse("01854deb-6f98-0000-0001-07e620dd98d5"));
+
+		var currentTime = DateTimeOffset.UtcNow;
+		_ = fakeSystemClock.UtcNow.Returns(currentTime);
+
+		var utcDateTime = currentTime.UtcDateTime;
+
+		var promotion = new PromotionSnapshot(
+			command.PromotionId,
+			"TestPromotion",
+			Guid.NewGuid(),
+			utcDateTime.AddDays(-15),
+			utcDateTime.AddDays(-10),
+			PromotionStatus.Enabled,
+			"TestType",
+			null,
+			false,
+			0,
+			1,
+			null,
+			0M,
+			0M,
+			0M,
+			JsonDocument.Parse("{}"),
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			"Creator",
+			utcDateTime.AddDays(-15),
+			null,
+			utcDateTime.AddDays(-15),
+			0M,
+			Guid.Parse("01854c81-5489-0000-0001-07e620dd98d5"),
+			0,
+			null,
+			Guid.NewGuid());
+
+		_ = fakePromotionRepository.GetCurrentPromotionSnapshotAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<CancellationToken>())
+			.Returns(promotion);
+
+		var eventId = Guid.NewGuid();
+		_ = fakeSerialNumberGenerator.GenerateAsync(Arg.Any<CancellationToken>())
+			.Returns(eventId);
+		
+		var expectedSnapshot = new PromotionSnapshot(
+			command.PromotionId,
+			promotion.Name,
+			promotion.BrandId,
+			promotion.From,
+			promotion.To,
+			promotion.Status,
+			promotion.PromotionType,
+			promotion.SettlementIntervalType,
+			promotion.AutoSentPlayerBonus,
+			promotion.BonusAmountLimit,
+			promotion.Unlimited,
+			promotion.GameType,
+			promotion.Percentage,
+			promotion.TotalAmountLimit,
+			promotion.TurnoverMultiple,
+			promotion.CampaignDetail,
+			promotion.Content,
+			promotion.Localization,
+			promotion.DesktopBanner,
+			promotion.MobileBanner,
+			promotion.SubSubject,
+			promotion.Terms,
+			promotion.CreatedByUsername,
+			promotion.CreatedOn,
+			promotion.UpdatedByUsername,
+			promotion.UpdatedOn,
+			command.TotalAmount,
+			command.SnapshotId,
+			promotion.DisplayOrder,
+			promotion.VipLevelId,
+			eventId);
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.CreatePromotionEventAsync(
+				Arg.Is(eventId),
+				Arg.Is(command.PromotionId),
+				Arg.Is(PromotionEventAction.UpdateTotalUsedAmount),
+				Arg.Any<JsonDocument>(),
+				Arg.Is((string?)null),
+				Arg.Any<CancellationToken>());
+
+		_ = fakePromotionRepository.Received(1)
+			.UpdatePromotionSnapshotAsync(
+				Arg.Is(expectedSnapshot),
+				Arg.Is(eventId),
+				Arg.Is(utcDateTime),
+				Arg.Any<CancellationToken>());
+	}
+	[TestMethod]
+	public async Task 根據PromotionType取得PromotionMainInfo()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 
