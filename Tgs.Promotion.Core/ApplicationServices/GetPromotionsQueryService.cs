@@ -7,19 +7,19 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-public class GetPromotionsQueryHandler : IGetService<GetPromotionsRequest,
+public class GetPromotionsQueryService : IGetService<GetPromotionsQuery,
 	PagedResponse<PromotionModel>>
 {
 	private readonly IPromotionRepository _service;
 
-	public GetPromotionsQueryHandler(
+	public GetPromotionsQueryService(
 		IPromotionRepository service)
 	{
 		_service = service;
 	}
 
 	public async ValueTask<PagedResponse<PromotionModel>> GetAsync(
-		GetPromotionsRequest request,
+		GetPromotionsQuery request,
 		CancellationToken cancellationToken) =>
 		await _service.GetPromotionQueries()
 			.Where(x => x.BrandId == request.BrandId)

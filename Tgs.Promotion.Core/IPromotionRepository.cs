@@ -1,15 +1,11 @@
 ﻿using System.Linq.Expressions;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Models;
-using Tgs.Promotion.Models.Promotion;
 
 namespace Tgs.Promotion;
 
 public interface IPromotionRepository
 {
 	ValueTask ChangePromotionStatusAsync(PromotionRow promotion);
-
-	ValueTask<Guid> CreatePromotionAsync(CreatePromotionRequest request, PromotionType promotionTypeModel);
 
 	ValueTask<Guid> CreatePromotionAsync(CreatePromotionMainInfo createInfo, string modifier, CancellationToken cancellationToken = default);
 
@@ -71,8 +67,6 @@ public interface IPromotionRepository
 	ValueTask SetPromotionVipLevelsAsync(Guid promotionId, IEnumerable<int> vipLevels, string modifier, CancellationToken cancellationToken = default);
 
 	ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount);
-
-	ValueTask UpdatePromotionAsync(PromotionRow promotion, UpdatePromotionRequest request);
 
 	ValueTask UpdatePromotionDistributeAsync(
 		Guid distributeId,

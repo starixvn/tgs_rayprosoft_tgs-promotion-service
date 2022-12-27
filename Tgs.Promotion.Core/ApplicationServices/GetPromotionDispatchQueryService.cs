@@ -8,14 +8,14 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class GetPromotionDispatchQueryHandler : IGetService<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>>
+internal class GetPromotionDispatchQueryService : IGetService<GetPromotionDispatchesQuery, PagedResponse<PromotionDispatchModel>>
 {
 	private readonly IPromotionBonusRepository _promotionBonusService;
 	private readonly IPromotionDistributionRepository _promotionDistributionRepository;
 	private readonly ISettingsRepository _settingRepository;
 	private readonly IPlayerRepository _tgsPlayerService;
 
-	public GetPromotionDispatchQueryHandler(
+	public GetPromotionDispatchQueryService(
 		IPromotionBonusRepository promotionBonusService,
 		IPromotionDistributionRepository promotionDistributionRepository,
 		IPlayerRepository tgsPlayerService,
@@ -28,7 +28,7 @@ internal class GetPromotionDispatchQueryHandler : IGetService<GetPromotionDispat
 	}
 
 	public async ValueTask<PagedResponse<PromotionDispatchModel>> GetAsync(
-		GetPromotionDispatchesRequest request,
+		GetPromotionDispatchesQuery request,
 		CancellationToken cancellationToken)
 	{
 		var promotionsJson = await _settingRepository

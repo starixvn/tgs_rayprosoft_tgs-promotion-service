@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.PromotionDispatch;
 using Tgs.ServiceUtility;
@@ -13,14 +14,14 @@ public class PromotionDispatchController : ControllerBase
 	[HttpPost]
 	[Description("Dispatch promotion")]
 	public ValueTask<MessageResponse> DispatchPromotionsAsync(
-		[FromServices] IGetService<DispatchPromotionBonusRequest, MessageResponse> getService,
-		[FromBody] DispatchPromotionBonusRequest request) =>
+		[FromServices] IGetService<DispatchPromotionBonusQuery, MessageResponse> getService,
+		[FromBody] DispatchPromotionBonusQuery request) =>
 		getService.GetAsync(request);
 
 	[HttpGet]
 	[Description("Get promotion dispatches")]
 	public ValueTask<PagedResponse<PromotionDispatchModel>> GetPromotionsAsync(
-		[FromServices] IGetService<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>> getService,
-		[FromQuery] GetPromotionDispatchesRequest request) =>
+		[FromServices] IGetService<GetPromotionDispatchesQuery, PagedResponse<PromotionDispatchModel>> getService,
+		[FromQuery] GetPromotionDispatchesQuery request) =>
 		getService.GetAsync(request);
 }

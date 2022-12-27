@@ -16,14 +16,14 @@ public class PromotionController : ControllerBase
 	[HttpPost("{promotionId}/depositAddPlayer/{playerCode}", Name = "AddPlayerToDepositPromotion")]
 	[Description("Add player to deposit promotion")]
 	public ValueTask<MessageResponse> AddPlayerToDepositPromotionAsync(
-		[FromServices] IGetService<CreateDepositPromotionParticipantRequest, MessageResponse> getService,
+		[FromServices] IGetService<CreateDepositPromotionParticipantQuery, MessageResponse> getService,
 		Guid promotionId, string playerCode)
 		=> getService.GetAsync(new(promotionId, playerCode));
 
 	[HttpPost("{promotionId}/addPlayer/{playerCode}", Name = "AddPlayerToPromotion")]
 	[Description("Add player to promotion")]
 	public ValueTask<MessageResponse> AddPlayerToPromotionAsync(
-		[FromServices] IGetService<CreatePromotionParticipantRequest, MessageResponse> getService,
+		[FromServices] IGetService<CreatePromotionParticipantQuery, MessageResponse> getService,
 		Guid promotionId, string playerCode)
 		=> getService.GetAsync(new(promotionId, playerCode));
 
@@ -58,10 +58,10 @@ public class PromotionController : ControllerBase
 
 	[HttpPut("{promotionId}/{status}", Name = "ChangePromotionStatus")]
 	[Description("Change promotion status")]
-	public ValueTask<MessageResponse> ChangePromotionStatusAsync(
-		[FromServices] IGetService<ChangePromotionStatusRequest, MessageResponse> getService,
+	public async ValueTask<MessageResponse> ChangePromotionStatusAsync(
+		[FromServices] IGetService<ChangePromotionStatusQuery, MessageResponse> getService,
 		Guid promotionId, PromotionStatus status)
-		=> getService.GetAsync(new(promotionId, status));
+		=> await getService.GetAsync(new(promotionId, status));
 
 	[HttpGet("{promotionId}/check/{brandId}/{playerCode}/{amount}", Name = "CheckCanJoinPromotion")]
 	public async Task<bool> CheckCanJoinPromotionAsync(
@@ -91,13 +91,6 @@ public class PromotionController : ControllerBase
 			playerCode,
 			promotionId));
 
-	[HttpPost(Name = "CreatePromotion")]
-	[Description("Create a promotion")]
-	public ValueTask<MessageResponse> CreatePromotionAsync(
-		[FromServices] IGetService<CreatePromotionRequest, MessageResponse> getService,
-		CreatePromotionRequest request) =>
-		getService.GetAsync(request);
-
 	[HttpPut("deposit/{playerCode}", Name = "TagDeposit")]
 	[HttpPut("deposit/{playerCode}/{promotionId?}", Name = "TagDepositWithPromotion")]
 	[Description("Tag player deposit")]
@@ -114,22 +107,36 @@ public class PromotionController : ControllerBase
 	[HttpGet("joined")]
 	[Description("Get joined promotions")]
 	public ValueTask<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
-		[FromServices] IGetService<GetJoinedPromotionsRequest, PagedResponse<JoinedPromotionModel>> getService,
-		[FromQuery] GetJoinedPromotionsRequest request)
-		=> getService.GetAsync(request);
+		[FromServices] IGetService<GetJoinedPromotionsQuery, PagedResponse<JoinedPromotionModel>> getService,
+		[FromQuery] GetJoinedPromotionsViewModel request)
+	{
+		var query = new GetJoinedPromotionsQuery
+		{
+			From = request.From,
+			To = request.To,
+			PlayerCode= request.PlayerCode,
+			Page = request.Page,
+			Rows = request.Rows,
+			SortBy= request.SortBy,
+			OrderBy = request.OrderBy,
+			ShowAll = request.ShowAll,
+		};
+
+		return getService.GetAsync(query);
+	}
 
 	[HttpGet("names", Name = "GetPromotionNamesByIds")]
 	[Description("Get promotion names by ids")]
 	public ValueTask<PromotionNameModel[]> GetPromotionNamesByIdsAsync(
 		[FromServices] IQueryService<GetPromotionNamesQuery, PromotionNameModel> queryService,
-		[FromQuery] GetPromotionNamesQuery query)
-		=> queryService.QueryAsync(query).ToArrayAsync();
+		[FromQuery] GetPromotionNamesViewModel query)
+		=> queryService.QueryAsync(new(query.PromotionIds)).ToArrayAsync();
 
 	[HttpGet]
 	[Description("Get promotions")]
 	public ValueTask<PagedResponse<PromotionModel>> GetPromotionsAsync(
-		[FromServices] IGetService<GetPromotionsRequest, PagedResponse<PromotionModel>> getService,
-		[FromQuery] GetPromotionsRequest request)
+		[FromServices] IGetService<GetPromotionsQuery, PagedResponse<PromotionModel>> getService,
+		[FromQuery] GetPromotionsQuery request)
 		=> getService.GetAsync(request);
 
 	/// <summary>
@@ -186,16 +193,5 @@ public class PromotionController : ControllerBase
 		var command = new RevertPromotionAmountCommand(promotionId, amount);
 
 		await revertService.ExecuteAsync(command).ConfigureAwait(false);
-	}
-
-	[HttpPut("update/{id}", Name = "UpdatePromotion")]
-	[Description("Update a promotion")]
-	public ValueTask<MessageResponse> UpdatePromotionAsync(
-		[FromServices] IGetService<UpdatePromotionRequest, MessageResponse> getService,
-		Guid id, UpdatePromotionRequest request)
-	{
-		request.Id = id;
-
-		return getService.GetAsync(request);
 	}
 }

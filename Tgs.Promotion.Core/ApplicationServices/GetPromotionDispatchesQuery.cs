@@ -1,6 +1,8 @@
-﻿namespace Tgs.Promotion.Models.PromotionDispatch;
+﻿using Tgs.Promotion.Models;
 
-public class GetPromotionDispatchesRequest : PageableRequest
+namespace Tgs.Promotion.ApplicationServices;
+
+public class GetPromotionDispatchesQuery : PageableRequest
 {
 	public Guid BrandId { get; set; }
 

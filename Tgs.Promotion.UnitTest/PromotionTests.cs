@@ -10,10 +10,13 @@ using MockQueryable.Moq;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.CashService.Client;
+using Tgs.MessageQueue;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.Promotion;
+using Tgs.Service.PlayerBuckets;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.UnitTest;
@@ -28,9 +31,9 @@ public class PromotionTests
 		var promotionServiceMock = new Mock<IPromotionRepository>();
 
 		var promotionsQueryHandlerMock =
-			new GetPromotionsQueryHandler(promotionServiceMock.Object);
+			new GetPromotionsQueryService(promotionServiceMock.Object);
 
-		var request = new GetPromotionsRequest
+		var request = new GetPromotionsQuery
 		{
 			BrandId = Guid.NewGuid(),
 			Page = 1,
@@ -73,9 +76,9 @@ public class PromotionTests
 		var promotionServiceMock = new Mock<IPromotionRepository>();
 
 		var promotionsQueryHandlerMock =
-			new GetPromotionsQueryHandler(promotionServiceMock.Object);
+			new GetPromotionsQueryService(promotionServiceMock.Object);
 
-		var request = new GetPromotionsRequest
+		var request = new GetPromotionsQuery
 		{
 			BrandId = Guid.NewGuid(),
 			Page = 1,
@@ -285,6 +288,202 @@ public class PromotionTests
 			It.IsAny<bool>()), Times.Once());
 	}
 
+	[Test]
+	public void Can_Create_Deposit_Participant()
+	{
+		var fakePromotionRepository = new Mock<IPromotionRepository>();
+		var fakePromotionParticipantRepository = new Mock<IPromotionParticipantRepository>();
+
+		_ = fakePromotionRepository
+			.Setup(x => x.GetPromotionByIdAsync(It.IsAny<Guid>()))
+			.ReturnsAsync(new PromotionRow());
+
+		var sut = new CreateDepositPromotionParticipantQueryService(fakePromotionRepository.Object, fakePromotionParticipantRepository.Object, NullLogger<CreateDepositPromotionParticipantQueryService>.Instance);
+
+		var query = new CreateDepositPromotionParticipantQuery(Guid.NewGuid(),"playerCode");
+
+		_ = sut.GetAsync(query, default);
+
+		fakePromotionParticipantRepository.Verify(x => x.CreatePromotionParticipantAsync(It.IsAny<Guid>(),
+			It.IsAny<string>()), Times.Once());
+	}
+
+	[Test]
+	public void Can_Create_Participant()
+	{
+		var fakePromotionRepository = new Mock<IPromotionRepository>();
+		var fakePromotionParticipantRepository = new Mock<IPromotionParticipantRepository>();
+		var fakePromotionTypeRepository = new Mock<IPromotionTypeRepository>();
+		var fakePromotionJoinLockRepository = new Mock<IPromotionJoinLockRepository>();
+		var fakeMessageSender = new Mock<IMessageSender>();
+
+		_ = fakePromotionRepository
+			.Setup(x => x.GetPromotionByIdAsync(It.IsAny<Guid>()))
+			.ReturnsAsync(new PromotionRow
+			{
+				Status = (short)PromotionStatus.Enabled,
+				From = DateTime.Now.AddDays(-1),
+				To= DateTime.Now.AddDays(1),
+				PromotionType = "test"
+			});
+
+		_ = fakePromotionTypeRepository
+			.Setup(x => x.IsDepositTypeAsync(It.IsAny<string>()))
+			.ReturnsAsync(false);
+
+		_ = fakePromotionJoinLockRepository
+			.Setup(x => x.SetWhenNotExistsAsync(It.IsAny<string>(), It.IsAny<Guid>()))
+			.ReturnsAsync(true);
+
+		var sut = new CreatePromotionParticipantQueryService(
+			fakePromotionRepository.Object, 
+			fakePromotionParticipantRepository.Object,
+			fakePromotionTypeRepository.Object,
+			fakePromotionJoinLockRepository.Object,
+			fakeMessageSender.Object,
+			NullLogger<CreatePromotionParticipantQueryService>.Instance);
+
+		var query = new CreatePromotionParticipantQuery(Guid.NewGuid(), "playerCode");
+
+		_ = sut.GetAsync(query, default);
+
+		fakePromotionParticipantRepository.Verify(x => x.CreatePromotionParticipantAsync(It.IsAny<Guid>(),
+			It.IsAny<string>()), Times.Once());
+	}
+
+	[Test]
+	public void Can_Dispatch_Promotions()
+	{
+		var fakePromotionBonusRepository = new Mock<IPromotionBonusRepository>();
+		var fakeCashServiceClient = new Mock<ICashServiceClient>();
+		var fakeTransactionRepository = new Mock<ITransactionRepository>();
+		var fakePlayerBucketClient = new Mock<IPlayerBucketClient>();
+
+		var list = CreatePromotionPlayerFixture()
+			.CreateMany<PromotionPlayer>(20)
+			.AsQueryable()
+			.BuildMock();
+
+		_ = fakePromotionBonusRepository
+			.Setup(x => x.GetPromotionBonusPlayersQueries(It.IsAny<Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>?>(), It.IsAny<bool>()))
+			.Returns(list);
+
+		_ = fakeCashServiceClient
+			.Setup(x => x.PromotionAsync(
+				It.IsAny<Guid>(), 
+				It.IsAny<decimal>(), 
+				It.IsAny<string?>(), 
+				It.IsAny<string?>(),
+				It.IsAny<Guid?>(),
+				default))
+			.ReturnsAsync(new TransactionResponse{TransactionId= Guid.NewGuid()});
+
+		var sut = new DispatchPromotionBonusQueryService(
+			fakePromotionBonusRepository.Object,
+			fakeCashServiceClient.Object,
+			fakeTransactionRepository.Object,
+			fakePlayerBucketClient.Object);
+
+		var query = new DispatchPromotionBonusQuery
+		{
+			Players = list.Select(x => new DispatchPlayer
+			{
+				PlayerCode= x.PlayerCode,
+				PromotionBonusId= x.PromotionBonusId,
+			}).ToArray()
+		};
+
+		_ = sut.GetAsync(query, default);
+
+		fakePlayerBucketClient.Verify(x => x.CreateBucketAsync(
+			It.IsAny<string>(),
+			It.IsAny<decimal>(), 
+			It.IsAny<BucketType>(), 
+			It.IsAny<string?>(),default), Times.Exactly(20));
+
+		fakePromotionBonusRepository.Verify(x => x.UpdatePromotionBonusPlayersAsync(
+			It.IsAny<PromotionPlayer[]>()), Times.Once());
+
+		fakeTransactionRepository.Verify(x => x.CreateTransactionPromotionsAsync(
+			It.IsAny<TransactionPromotion[]>()), Times.Once());
+	}
+
+	[Test]
+	public async Task Can_Get_Joined_Promotions()
+	{
+		var fakePromotionParticipantRepository = new Mock<IPromotionParticipantRepository>();
+
+		var list = CreatePromotionParticipantFixture()
+			.CreateMany<PromotionParticipant>(20)
+			.AsQueryable()
+			.BuildMock();
+
+		_ = fakePromotionParticipantRepository
+			.Setup(x => x.GetPromotionParticipantQueries(It.IsAny<Func<IQueryable<PromotionParticipant>, IQueryable<PromotionParticipant>>?>(), It.IsAny<bool>()))
+			.Returns(list);
+
+		var sut = new GetJoinedPromotionsQueryService(
+			fakePromotionParticipantRepository.Object);
+
+		var query = new GetJoinedPromotionsQuery
+		{
+			PlayerCode = list.First().PlayerCode!
+		};
+
+		var response = await sut.GetAsync(query, default);
+
+		Assert.IsTrue(response.Items.Length > 0);
+	}
+
+	[Test]
+	public async Task Can_Get_Distribution_List()
+	{
+		var fakePromotionBonusRepository = new Mock<IPromotionBonusRepository>();
+		var fakePromotionDistributionRepository = new Mock<IPromotionDistributionRepository>();
+		var fakeSettingsRepository = new Mock<ISettingsRepository>();
+		var fakePlayerRepository = new Mock<IPlayerRepository>();
+
+		var brandId = Guid.NewGuid();
+
+		var promotionDistributes = CreatePromotionDistributionFixture()
+			.CreateMany<PromotionDistribute>(20)
+			.AsQueryable()
+			.BuildMock();
+
+		var promotionPlayers = CreatePromotionPlayerFixture()
+			.CreateMany<PromotionPlayer>(20)
+			.AsQueryable()
+			.BuildMock();
+
+		_ = fakeSettingsRepository
+			.Setup(x => x.GetSettingAsync(It.IsAny<Expression<Func<Setting, bool>>>(),It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>?>()))
+			.ReturnsAsync(new Setting{Value= "[{\"Name\":\"test\",\"Types\":[{\"Name\":\"tt\",\"SettlementIntervalType\":\"Weekly\",\"Trans\": {\"En\": \"test\",\"Zh\":\"測試\"}}]}]" });
+
+		_ = fakePromotionDistributionRepository
+			.Setup(x => x.GetPromotionDistributionQueries(It.IsAny<Func<IQueryable<PromotionDistribute>, IQueryable<PromotionDistribute>>?>(), default))
+			.Returns(promotionDistributes);
+
+		_ = fakePromotionBonusRepository
+			.Setup(x => x.GetPromotionBonusPlayersQueries(It.IsAny<Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>?>(), default))
+			.Returns(promotionPlayers);
+
+		var sut = new GetPromotionDispatchQueryService(
+			fakePromotionBonusRepository.Object,
+			fakePromotionDistributionRepository.Object,
+			fakePlayerRepository.Object,
+			fakeSettingsRepository.Object);
+
+		var query = new GetPromotionDispatchesQuery
+		{
+			BrandId = brandId
+		};
+
+		var response = await sut.GetAsync(query, default);
+
+		Assert.IsTrue(response.Valid);
+	}
+
+
 	private static Fixture CreatePromotionFixture()
 	{
 		var fixture = new Fixture();
@@ -301,6 +500,53 @@ public class PromotionTests
 			.With(s => s.PromotionBonus, Array.Empty<PromotionBonus>())
 			.With(s => s.TransactionPromotions, Array.Empty<TransactionPromotion>())
 			.With(s => s.VipLevel, new VipLevel { }));
+		fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+		return fixture;
+	}
+
+	private static Fixture CreatePromotionPlayerFixture()
+	{
+		var fixture = new Fixture();
+
+		fixture.Customize<PromotionPlayer>(u => u
+			.With(s => s.PlayerCodeNavigation, CreatePlayerFixture().Create<Player>())
+			.With(s => s.PromotionBonus, new PromotionBonus())
+			.With(s => s.SentOn, (DateTime?)null));
+		fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+		return fixture;
+	}
+
+	private static Fixture CreatePromotionParticipantFixture()
+	{
+		var fixture = new Fixture();
+
+		fixture.Customize<PromotionParticipant>(u => u
+			.With(s => s.PlayerCodeNavigation, CreatePlayerFixture().Create<Player>())
+			.With(s => s.Promotion, new PromotionRow{ PromotionType = "test"}));
+		fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+		return fixture;
+	}
+
+	private static Fixture CreatePlayerFixture()
+	{
+		var fixture = new Fixture();
+
+		fixture.Customize<Player>(u => u
+			.With(s => s.Birthdate, new DateOnly()));
+		fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+		return fixture;
+	}
+
+	private static Fixture CreatePromotionDistributionFixture()
+	{
+		var fixture = new Fixture();
+
+		fixture.Customize<PromotionDistribute>(u => u
+			.With(s => s.Promotion, CreatePromotionFixture().Create<PromotionRow>()));
 		fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
 		return fixture;
