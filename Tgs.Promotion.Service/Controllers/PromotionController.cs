@@ -59,9 +59,20 @@ public class PromotionController : ControllerBase
 	[HttpPut("{promotionId}/{status}", Name = "ChangePromotionStatus")]
 	[Description("Change promotion status")]
 	public async ValueTask<MessageResponse> ChangePromotionStatusAsync(
-		[FromServices] IGetService<ChangePromotionStatusQuery, MessageResponse> getService,
-		Guid promotionId, PromotionStatus status)
-		=> await getService.GetAsync(new(promotionId, status));
+		[FromServices] ICommandService<SetPromotionStatusCommand> updateService,
+		Guid promotionId, 
+		PromotionStatus status)
+	{
+		var command = new SetPromotionStatusCommand(
+			promotionId,
+			status,
+			string.Empty);
+
+		await updateService.ExecuteAsync(command, HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		return new() { Valid = true };
+	}
 
 	[HttpGet("{promotionId}/check/{brandId}/{playerCode}/{amount}", Name = "CheckCanJoinPromotion")]
 	public async Task<bool> CheckCanJoinPromotionAsync(
