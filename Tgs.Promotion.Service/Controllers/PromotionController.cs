@@ -39,16 +39,20 @@ public class PromotionController : ControllerBase
 		return untagService.ExecuteAsync(command, HttpContext.RequestAborted);
 	}
 
+	[Obsolete("過時, 改用 PromotionManagement 相關 api")]
 	[HttpPut("changeorder", Name = "ChangeOrder")]
 	[Description("Change promotions display order")]
 	public async Task<MessageResponse> ChangeOrderAsync(
-		[FromServices] ICommandService<ChangeOrderCommand> commandService,
+		[FromServices] ICommandService<ChangePromotionOrdersCommand> commandService,
 		ChangeOrderRequest request)
 	{
-		var command = new ChangeOrderCommand
-		{
-			Orders = request.Orders
-		};
+		var orders = request.Orders
+			.Select(po => new PromotionOrder(po.Id, po.DisplayOrder))
+			.ToArray();
+
+		var command = new ChangePromotionOrdersCommand(
+			orders,
+			string.Empty);
 
 		await commandService.ExecuteAsync(command).ConfigureAwait(false);
 

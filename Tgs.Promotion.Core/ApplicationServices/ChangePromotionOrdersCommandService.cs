@@ -4,18 +4,18 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class ChangeOrderCommandService : ICommandService<ChangeOrderCommand>
+internal class ChangePromotionOrdersCommandService : ICommandService<ChangePromotionOrdersCommand>
 {
 	private readonly TgsContext _tgsRepository;
 
-	public ChangeOrderCommandService(TgsContext tgsRepository)
+	public ChangePromotionOrdersCommandService(TgsContext tgsRepository)
 	{
 		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 	}
 
-	public async ValueTask ExecuteAsync(ChangeOrderCommand command, CancellationToken cancellationToken = default)
+	public async ValueTask ExecuteAsync(ChangePromotionOrdersCommand command, CancellationToken cancellationToken = default)
 	{
-		var ids = command.Orders.Select(q => q.Id);
+		var ids = command.Orders.Select(p => p.PromotionId);
 
 		var promotions = await _tgsRepository.PromotionRows
 			.AsQueryable()
@@ -25,11 +25,11 @@ internal class ChangeOrderCommandService : ICommandService<ChangeOrderCommand>
 
 		promotions.ForEach(p =>
 		{
-			var item = command.Orders.FirstOrDefault(x => x.Id == p.Id);
+			var item = command.Orders.FirstOrDefault(x => x.PromotionId == p.Id);
 
 			if (item != null)
 			{
-				p.DisplayOrder = item.DisplayOrder;
+				p.DisplayOrder = item.Order;
 			}
 		});
 
