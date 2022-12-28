@@ -14,21 +14,6 @@ public class PromotionClient : IPromotionClient
 		_client = client ?? throw new ArgumentNullException(nameof(client));
 	}
 
-	public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
-	{
-		var httpRequest = new HttpRequestMessage(HttpMethod.Put, "/api/promotion/changeorder")
-		{
-			Content =
-				new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
-		};
-		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
-
-		_ = response.EnsureSuccessStatusCode();
-
-		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
-	}
-
 	public async Task<bool> CheckCanJoinDepositPromotionAsync(
 		Guid brandId, string playerCode,
 		Guid promotionId, decimal amount)

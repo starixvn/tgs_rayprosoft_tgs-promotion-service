@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.ComponentModel;
+using System.Text.Json;
 using Google.Protobuf;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.MessageQueue;
@@ -13,6 +14,23 @@ namespace Tgs.Promotion.Service.Controllers;
 [ApiController]
 public class PromotionManagementController : ControllerBase
 {
+	[HttpPut("orders", Name = "ChangePromotionOrders")]
+	[Description("Change display order of promotions ")]
+	public ValueTask ChangePromotionOrdersAsync(
+		[FromServices] ICommandService<ChangePromotionOrdersCommand> commandService,
+		[FromBody] PromotionOrdersViewModel promotionOrdersViewModel)
+	{
+		var orders = promotionOrdersViewModel.Orders
+			.Select(p => new PromotionOrder(p.PromotionId, p.Order))
+			.ToArray();
+
+		var command = new ChangePromotionOrdersCommand(
+			orders,
+			promotionOrdersViewModel.Modifier);
+
+		return commandService.ExecuteAsync(command, HttpContext.RequestAborted);
+	}
+
 	[HttpPut("{brandId}", Name = "CreatePromotionMainInfo")]
 	public ValueTask<Guid> CreatePromotionAsync(
 		[FromServices] IGetService<CreatePromotionMainInfoCommand, Guid> createService,
