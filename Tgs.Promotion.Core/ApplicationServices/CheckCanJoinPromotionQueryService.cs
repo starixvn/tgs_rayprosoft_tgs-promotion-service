@@ -1,4 +1,6 @@
 ﻿using System.Text.Json;
+using Json.Patch;
+using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
@@ -6,12 +8,18 @@ namespace Tgs.Promotion.ApplicationServices;
 internal class CheckCanJoinPromotionQueryService : IGetService<CheckCanJoinPromotionQuery, bool>
 {
 	private readonly IPromotionCheckerFactory _promotionCheckerFactory;
+	private readonly ISystemClock _systemClock;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly IPromotionRepository _promotionRepository;
 
 	public CheckCanJoinPromotionQueryService(
+		ISystemClock systemClock,
+		ISerialNumberGenerator serialNumberGenerator,
 		IPromotionRepository promotionRepository,
 		IPromotionCheckerFactory promotionCheckerFactory)
 	{
+		_systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 		_promotionCheckerFactory = promotionCheckerFactory ??
 			throw new ArgumentNullException(nameof(promotionCheckerFactory));
@@ -21,14 +29,14 @@ internal class CheckCanJoinPromotionQueryService : IGetService<CheckCanJoinPromo
 		CheckCanJoinPromotionQuery query,
 		CancellationToken cancellationToken = default)
 	{
-		var promotionData = await _promotionRepository.GetPromotionByIdAsync(query.PromotionId);
+		var snapshot = await _promotionRepository
+			.GetCurrentPromotionSnapshotAsync(query.PromotionId, cancellationToken)
+			.ConfigureAwait(false);
 
-		if (promotionData?.BrandId != query.BrandId)
-		{
+		if (snapshot is null || snapshot.BrandId != query.BrandId)
 			return false;
-		}
 
-		var checker = _promotionCheckerFactory.GetPromotionChecker(promotionData.PromotionType);
+		var checker = _promotionCheckerFactory.GetPromotionChecker(snapshot.PromotionType);
 
 		var isAllowed = await checker
 			.CheckJoinAsync(
@@ -38,31 +46,61 @@ internal class CheckCanJoinPromotionQueryService : IGetService<CheckCanJoinPromo
 					query.PlayerCode,
 					query.Amount),
 				new PromotionMainInfo(
-					promotionData.Id,
-					promotionData.BrandId,
-					promotionData.Name,
-					(promotionData.From, promotionData.To),
-					promotionData.PromotionType,
-					promotionData.TotalAmountLimit,
-					promotionData.AutoSentPlayerBonus),
+					snapshot.Id,
+					snapshot.BrandId,
+					snapshot.Name,
+					(snapshot.From, snapshot.To),
+					snapshot.PromotionType,
+					snapshot.TotalAmountLimit,
+					snapshot.AutoSentPlayerBonus),
 				new PromotionRule(
-					JsonDocument.Parse(promotionData.CampaignDetail),
-					promotionData.BonusAmountLimit,
-					promotionData.Percentage,
-					promotionData.TurnoverMultiple,
-					(GameType?)promotionData.GameType,
-					Array.Empty<int>()
-					))
+					snapshot.CampaignDetail,
+					snapshot.BonusAmountLimit,
+					snapshot.Percentage,
+					snapshot.TurnoverMultiple,
+					snapshot.GameType,
+					Array.Empty<int>()))
 			.ConfigureAwait(false);
+
 		if (!isAllowed)
-		{
 			return false;
-		}
 
-		var amount = promotionData.Percentage * query.Amount / 100M;
-		amount = amount > promotionData.BonusAmountLimit ? promotionData.BonusAmountLimit : amount;
+		if (snapshot.Unlimited == 0 && snapshot.AmountUsed >= snapshot.TotalAmountLimit)
+			return false;
+		
+		var amount = snapshot.Percentage * query.Amount / 100M;
+		amount = amount > snapshot.BonusAmountLimit ? snapshot.BonusAmountLimit : amount;
 
-		return await _promotionRepository.UpdatePromotionAmountAsync(query.PromotionId, amount)
+		var eventId = await _serialNumberGenerator
+			.GenerateAsync(cancellationToken)
 			.ConfigureAwait(false);
+
+		var currentTime = _systemClock.UtcNow.UtcDateTime;
+
+		var updateData = snapshot with
+		{
+			AmountUsed = snapshot.AmountUsed + amount,
+			SnapshotEventId = eventId
+		};
+
+		var changeSets = snapshot.CreatePatch(updateData, PromotionEventSourceUtility.SerializerOptions);
+
+		await _promotionRepository.CreatePromotionEventAsync(
+				eventId,
+				snapshot.Id,
+				PromotionEventAction.UpdateTotalUsedAmount,
+				JsonSerializer.SerializeToDocument(changeSets),
+				null,
+				cancellationToken)
+			.ConfigureAwait(false);
+
+		await _promotionRepository.UpdatePromotionSnapshotAsync(
+				updateData,
+				eventId,
+				currentTime,
+				cancellationToken)
+			.ConfigureAwait(false);
+
+		return true;
 	}
 }
