@@ -323,32 +323,123 @@ public class PromotionTests
 	}
 
 	[Test]
-	public async Task Can_Revert_Promotion()
+	public async Task Can_Revert_Promotion_Amount()
 	{
+		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 
 		var sut = new RevertPromotionAmountCommandService(
-			fakePromotionRepository,
-			NullLogger<RevertPromotionAmountCommandService>.Instance);
+			fakeSystemClock,
+			fakeSerialNumberGenerator,
+			fakePromotionRepository);
 
 		var command = new RevertPromotionAmountCommand(Guid.NewGuid(), 1000M);
 
 		var percentage = 10M;
 		var bonusAmountLimit = 500M;
 
-		_ = fakePromotionRepository.GetPromotionByIdAsync(command.PromotionId).Returns(
-			new PromotionRow
-			{
-				Percentage = percentage,
-				BonusAmountLimit = bonusAmountLimit
-			});
+		var currentTime = DateTimeOffset.UtcNow;
+		_ = fakeSystemClock.UtcNow.Returns(currentTime);
+
+		var utcDateTime = currentTime.UtcDateTime;
+
+		var promotion = new PromotionSnapshot(
+			command.PromotionId,
+			"TestPromotion",
+			Guid.NewGuid(),
+			utcDateTime.AddDays(-15),
+			utcDateTime.AddDays(-10),
+			PromotionStatus.Enabled,
+			"TestPromotionType",
+			null,
+			false,
+			bonusAmountLimit,
+			1,
+			null,
+			percentage,
+			0M,
+			0M,
+			JsonDocument.Parse("{}"),
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			"Creator",
+			utcDateTime.AddDays(-15),
+			null,
+			utcDateTime.AddDays(-15),
+			2000M,
+			null,
+			0,
+			null,
+			Guid.NewGuid());
+
+		_ = fakePromotionRepository.GetCurrentPromotionSnapshotAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<CancellationToken>())
+			.Returns(promotion);
 
 		var amount = command.Amount * percentage / 100M;
+
+		var eventId = Guid.NewGuid();
+		_ = fakeSerialNumberGenerator.GenerateAsync(Arg.Any<CancellationToken>())
+			.Returns(eventId);
+
+		var expectedSnapshot = new PromotionSnapshot(
+			command.PromotionId,
+			promotion.Name,
+			promotion.BrandId,
+			promotion.From,
+			promotion.To,
+			promotion.Status,
+			promotion.PromotionType,
+			promotion.SettlementIntervalType,
+			promotion.AutoSentPlayerBonus,
+			promotion.BonusAmountLimit,
+			promotion.Unlimited,
+			promotion.GameType,
+			promotion.Percentage,
+			promotion.TotalAmountLimit,
+			promotion.TurnoverMultiple,
+			promotion.CampaignDetail,
+			promotion.Content,
+			promotion.Localization,
+			promotion.DesktopBanner,
+			promotion.MobileBanner,
+			promotion.SubSubject,
+			promotion.Terms,
+			promotion.CreatedByUsername,
+			promotion.CreatedOn,
+			promotion.UpdatedByUsername,
+			promotion.UpdatedOn,
+			promotion.AmountUsed - amount,
+			promotion.AmountUsedSnapshotId,
+			promotion.DisplayOrder,
+			promotion.VipLevelId,
+			eventId);
+
 		await sut.ExecuteAsync(command);
 
 		_ = fakePromotionRepository
 			.Received(1)
-			.RevertPromotionAmountAsync(Arg.Is(command.PromotionId), Arg.Is(amount));
+			.CreatePromotionEventAsync(
+				Arg.Is(eventId),
+				Arg.Is(command.PromotionId),
+				Arg.Is(PromotionEventAction.RevertTotalUsedAmount),
+				Arg.Any<JsonDocument>(),
+				Arg.Is((string?)null),
+				Arg.Any<CancellationToken>());
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.UpdatePromotionSnapshotAsync(
+				Arg.Is(expectedSnapshot),
+				Arg.Is(eventId),
+				Arg.Is(utcDateTime),
+				Arg.Any<CancellationToken>());
 	}
 
 	[Test]

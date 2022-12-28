@@ -7,5 +7,6 @@ public enum PromotionEventAction
 	ChangeStatus,
 	UpdateContent,
 	UpdateRule,
-	UpdateTotalUsedAmount
+	UpdateTotalUsedAmount,
+	RevertTotalUsedAmount
 }
