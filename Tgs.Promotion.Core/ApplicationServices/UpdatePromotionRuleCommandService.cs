@@ -56,7 +56,7 @@ internal class UpdatePromotionRuleCommandService : ICommandService<UpdatePromoti
 			BonusAmountLimit = command.BonusAmountLimit,
 			Percentage = command.Percentage,
 			TurnoverMultiple = command.TurnoverMultiple,
-			GameType = (short?) command.GameType,
+			GameType = command.GameType,
 			UpdatedByUsername = command.Modifier,
 			UpdatedOn = currentTime,
 			SnapshotEventId = eventId

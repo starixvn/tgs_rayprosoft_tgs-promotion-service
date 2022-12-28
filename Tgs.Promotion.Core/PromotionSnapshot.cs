@@ -14,7 +14,7 @@ public record PromotionSnapshot(
 	bool AutoSentPlayerBonus,
 	decimal BonusAmountLimit,
 	short Unlimited,
-	short? GameType,
+	GameType? GameType,
 	decimal Percentage,
 	decimal TotalAmountLimit,
 	decimal TurnoverMultiple,

@@ -266,7 +266,7 @@ public class PromotionRepository : IPromotionRepository
 				promotionRow.AutoSentPlayerBonus,
 				promotionRow.BonusAmountLimit,
 				promotionRow.Unlimited,
-				promotionRow.GameType,
+				(GameType?)promotionRow.GameType,
 				promotionRow.Percentage,
 				promotionRow.TotalAmountLimit,
 				promotionRow.TurnoverMultiple,
@@ -800,7 +800,7 @@ public class PromotionRepository : IPromotionRepository
 			dbSnapshot.AutoSentPlayerBonus = snapshot.AutoSentPlayerBonus;
 			dbSnapshot.BonusAmountLimit = snapshot.BonusAmountLimit;
 			dbSnapshot.Unlimited = snapshot.Unlimited;
-			dbSnapshot.GameType = snapshot.GameType;
+			dbSnapshot.GameType = (short?)snapshot.GameType;
 			dbSnapshot.Percentage = snapshot.Percentage;
 			dbSnapshot.TotalAmountLimit = snapshot.TotalAmountLimit;
 			dbSnapshot.TurnoverMultiple = snapshot.TurnoverMultiple;
