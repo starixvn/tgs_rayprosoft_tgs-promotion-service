@@ -34,12 +34,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Tgs.Promotion.Common\Tgs.Promotion.Common.csproj">
-			<PrivateAssets>All</PrivateAssets>
-		</ProjectReference>
-	</ItemGroup>
-
-	<ItemGroup>
 		<Protobuf Include="Protos\promotion.proto" GrpcServices="None" />
 	</ItemGroup>
 
