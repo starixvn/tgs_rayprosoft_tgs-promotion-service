@@ -1,5 +1,5 @@
 ﻿namespace Tgs.Promotion.ApplicationServices;
 
-public record EventDetailQuery(
+public record GetEventDetailQuery(
 	Guid PromotionId,
 	Guid EventId);

@@ -1,20 +1,19 @@
-﻿using System.Text.Json;
-using Tgs.ServiceUtility;
+﻿using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class EventDetailQueryService : IGetService<EventDetailQuery, EventInfo?>
+internal class GetEventDetailQueryService : IGetService<GetEventDetailQuery, EventInfo?>
 {
 	private readonly IPromotionRepository _promotionRepository;
 
-	public EventDetailQueryService(
+	public GetEventDetailQueryService(
 		IPromotionRepository promotionRepository)
 	{
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 	}
 
 	public ValueTask<EventInfo?> GetAsync(
-		EventDetailQuery query,
+		GetEventDetailQuery query,
 		CancellationToken cancellationToken = default)
 		=> _promotionRepository.GetEventDetailAsync(
 			query.PromotionId,

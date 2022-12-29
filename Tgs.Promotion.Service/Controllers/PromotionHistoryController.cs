@@ -11,12 +11,12 @@ public class PromotionHistoryController : ControllerBase
 {
 	[HttpGet("detail/{promotionId}/{eventId}", Name = "GetEventDetail")]
 	public async ValueTask<EventDetailViewModel?> GetEventDetailAsync(
-		[FromServices] IGetService<EventDetailQuery, EventInfo?> getService,
+		[FromServices] IGetService<GetEventDetailQuery, EventInfo?> getService,
 		Guid promotionId,
 		Guid eventId)
 	{
 		var eventInfo = await getService.GetAsync(
-				new EventDetailQuery(promotionId, eventId),
+				new GetEventDetailQuery(promotionId, eventId),
 				HttpContext.RequestAborted)
 			.ConfigureAwait(false);
 

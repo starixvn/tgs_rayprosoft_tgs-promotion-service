@@ -1354,9 +1354,9 @@ public class PromotionTests
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 
-		var sut = new EventDetailQueryService(fakePromotionRepository);
+		var sut = new GetEventDetailQueryService(fakePromotionRepository);
 
-		var query = new EventDetailQuery(
+		var query = new GetEventDetailQuery(
 			Guid.NewGuid(),
 			Guid.NewGuid());
 
