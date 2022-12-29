@@ -8,6 +8,5 @@ public enum PromotionEventAction
 	UpdateContent,
 	UpdateRule,
 	UpdateTotalUsedAmount,
-	RevertTotalUsedAmount,
 	ChangeDisplayOrder
 }

@@ -428,7 +428,7 @@ public class PromotionTests
 			.CreatePromotionEventAsync(
 				Arg.Is(eventId),
 				Arg.Is(command.PromotionId),
-				Arg.Is(PromotionEventAction.RevertTotalUsedAmount),
+				Arg.Is(PromotionEventAction.UpdateTotalUsedAmount),
 				Arg.Any<JsonDocument>(),
 				Arg.Is((string?)null),
 				Arg.Any<CancellationToken>());

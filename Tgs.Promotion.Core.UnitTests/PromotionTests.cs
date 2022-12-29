@@ -1329,6 +1329,7 @@ public class PromotionTests
 				Arg.Is(utcDateTime),
 				Arg.Any<CancellationToken>());
 	}
+
 	[TestMethod]
 	public async Task 根據PromotionType取得PromotionMainInfo()
 	{

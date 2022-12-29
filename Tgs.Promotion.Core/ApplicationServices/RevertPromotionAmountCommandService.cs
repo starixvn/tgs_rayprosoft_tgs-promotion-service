@@ -53,7 +53,7 @@ internal class RevertPromotionAmountCommandService : ICommandService<RevertPromo
 		await _promotionRepository.CreatePromotionEventAsync(
 				eventId,
 				snapshot.Id,
-				PromotionEventAction.RevertTotalUsedAmount,
+				PromotionEventAction.UpdateTotalUsedAmount,
 				JsonSerializer.SerializeToDocument(changeSets),
 				null,
 				cancellationToken)
