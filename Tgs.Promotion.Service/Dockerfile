@@ -1,16 +1,18 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 ARG BuildConfiguration=Release
 WORKDIR /src
 COPY ["nuget.config", "."]
 COPY ["Tgs.Promotion.Service/Tgs.Promotion.Service.csproj", "Tgs.Promotion.Service/"]
-COPY ["Tgs.Promotion.Domain/Tgs.Promotion.Domain.csproj", "Tgs.Promotion.Domain/"]
+COPY ["Tgs.Promotion.Cache/Tgs.Promotion.Cache.csproj", "Tgs.Promotion.Cache/"]
 COPY ["Tgs.Promotion.Core/Tgs.Promotion.Core.csproj", "Tgs.Promotion.Core/"]
+COPY ["Tgs.Promotion.Common/Tgs.Promotion.Common.csproj", "Tgs.Promotion.Common/"]
+COPY ["Tgs.Promotion.Domain/Tgs.Promotion.Domain.csproj", "Tgs.Promotion.Domain/"]
 COPY ["Tgs.Promotion.Repository/Tgs.Promotion.Repository.csproj", "Tgs.Promotion.Repository/"]
 RUN dotnet restore "Tgs.Promotion.Service/Tgs.Promotion.Service.csproj"
 COPY . .
@@ -19,7 +21,7 @@ RUN dotnet build "Tgs.Promotion.Service.csproj" -c $BuildConfiguration -o /app/b
 
 FROM build AS publish
 ARG BuildConfiguration
-RUN dotnet publish "Tgs.Promotion.Service.csproj" -c $BuildConfiguration -o /app/publish
+RUN dotnet publish "Tgs.Promotion.Service.csproj" -c $BuildConfiguration -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
