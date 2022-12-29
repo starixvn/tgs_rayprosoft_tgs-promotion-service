@@ -24,4 +24,24 @@ public class PromotionHistoryController : ControllerBase
 			? null 
 			: new EventDetailViewModel { ChangeSets = eventInfo.ChangeSets };
 	}
+
+	[HttpGet("{promotionId}", Name = "QueryEventsByPromotionId")]
+	public IAsyncEnumerable<EventViewModel> QueryEventsByPromotionIdAsync(
+		[FromServices] IQueryService<GetEventsQuery, EventInfo> queryService,
+		Guid promotionId)
+	{
+		var query = new GetEventsQuery(promotionId);
+
+		return queryService.QueryAsync(
+				query,
+				HttpContext.RequestAborted)
+			.Select(evt => new EventViewModel
+			{
+				EventId = evt.EventId,
+				PromotionId = evt.PromotionId,
+				Action = evt.Action,
+				CreatedOn = evt.CreatedOn,
+				Modifier = evt.Modifier
+			});
+	}
 }

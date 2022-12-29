@@ -6,4 +6,8 @@ public interface IPromotionHistoryClient
 		Guid promotionId,
 		Guid eventId, 
 		CancellationToken cancellationToken = default);
+
+	IAsyncEnumerable<PromotionEventInfo> QueryPromotionEventsAsync(
+		Guid promotionId, 
+		CancellationToken cancellationToken = default);
 }

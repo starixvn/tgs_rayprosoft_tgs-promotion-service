@@ -32,4 +32,17 @@ internal class PromotionHistoryClient : IPromotionHistoryClient
 				response.Content.ReadFromJsonAsync<PromotionEventDetailInfo?>(_JsonSerializerOptions, cancellationToken)
 					.ToAsyncEnumerable())
 			.FirstOrDefaultAsync(cancellationToken);
+
+	public IAsyncEnumerable<PromotionEventInfo> QueryPromotionEventsAsync(
+		Guid promotionId,
+		CancellationToken cancellationToken = default)
+		=> _httpClient.GetAsync($"api/promotionHistory/{promotionId}", cancellationToken)
+			.ToAsyncEnumerable()
+			.Do(response => response.EnsureSuccessStatusCode())
+			.SelectMany(response =>
+				response.Content
+					.ReadFromJsonAsync<IEnumerable<PromotionEventInfo>>(_JsonSerializerOptions, cancellationToken)
+					.ToAsyncEnumerable()
+					.Where(arr => arr is not null)
+					.SelectMany(arr => arr!.ToAsyncEnumerable()));
 }

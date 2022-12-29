@@ -1,8 +1,10 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.Tracing;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.Promotion.Extensions;
 using Tgs.SerialNumberGenerator;
 
 namespace Tgs.Promotion.Repository;
@@ -388,6 +390,26 @@ public class PromotionRepository : IPromotionRepository
 				JsonDocument.Parse(p.CampaignDetail),
 				p.DisplayOrder))
 			.ToAsyncEnumerable();
+	}
+
+	public async IAsyncEnumerable<EventInfo> QueryPromotionEventsAsync(
+		Guid promotionId, 
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		var events = await _dbContext.PromotionEventSources
+			.Where(p => p.PromotionId == promotionId 
+				&& p.CreatedOn >= DateTime.UtcNow.AddDays(-90))
+			.ToArrayAsync(cancellationToken)
+			.ConfigureAwait(false);
+
+		foreach (var evt in events)
+			yield return new EventInfo(
+				evt.Id,
+				evt.PromotionId,
+				Enum.Parse<PromotionEventAction>(evt.Action),
+				JsonDocument.Parse(evt.ChangeSets),
+				evt.ModifyUser,
+				evt.CreatedOn);
 	}
 
 	public async IAsyncEnumerable<PromotionMainInfo> QueryPromotionsAsync(

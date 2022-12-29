@@ -8,4 +8,4 @@ public record EventInfo(
 	PromotionEventAction Action,
 	JsonDocument ChangeSets,
 	string? Modifier,
-	DateTime CreateTime);
+	DateTime CreatedOn);

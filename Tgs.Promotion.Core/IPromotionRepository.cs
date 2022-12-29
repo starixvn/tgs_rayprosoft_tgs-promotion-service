@@ -61,6 +61,10 @@ public interface IPromotionRepository
 		Guid brandId, 
 		CancellationToken cancellationToken = default);
 
+	IAsyncEnumerable<EventInfo> QueryPromotionEventsAsync(
+		Guid promotionId,
+		CancellationToken cancellationToken = default);
+
 	IAsyncEnumerable<PromotionMainInfo> QueryPromotionsAsync(
 		Guid brandId,
 		CancellationToken cancellationToken = default);

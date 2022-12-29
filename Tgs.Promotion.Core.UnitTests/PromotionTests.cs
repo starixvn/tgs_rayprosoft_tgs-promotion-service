@@ -1103,6 +1103,25 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task 以PromotionId查詢Events()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new GetEventsQueryService(fakePromotionRepository);
+
+		var query = new GetEventsQuery(
+			Guid.NewGuid());
+
+		_ = await sut.QueryAsync(query).ToArrayAsync();
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.QueryPromotionEventsAsync(
+				Arg.Is(query.PromotionId),
+				Arg.Any<CancellationToken>());
+	}
+
+	[TestMethod]
 	public async Task 更新PromotionUsedAmount當Snapshot的EventId為null()
 	{
 		var fakeSystemClock = Substitute.For<ISystemClock>();
@@ -1327,6 +1346,27 @@ public class PromotionTests
 				Arg.Is(expectedSnapshot),
 				Arg.Is(eventId),
 				Arg.Is(utcDateTime),
+				Arg.Any<CancellationToken>());
+	}
+
+	[TestMethod]
+	public async Task 查詢Event的Detail()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new EventDetailQueryService(fakePromotionRepository);
+
+		var query = new EventDetailQuery(
+			Guid.NewGuid(),
+			Guid.NewGuid());
+
+		_ = await sut.GetAsync(query).ConfigureAwait(false);
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.GetEventDetailAsync(
+				Arg.Is(query.PromotionId),
+				Arg.Is(query.EventId),
 				Arg.Any<CancellationToken>());
 	}
 
@@ -1677,27 +1717,6 @@ public class PromotionTests
 				Arg.Is(expectedSnapshot),
 				Arg.Is(eventId),
 				Arg.Is(utcDateTime),
-				Arg.Any<CancellationToken>());
-	}
-
-	[TestMethod]
-	public async Task 查詢Event的Detail()
-	{
-		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
-		
-		var sut = new EventDetailQueryService(fakePromotionRepository);
-
-		var query = new EventDetailQuery(
-			Guid.NewGuid(),
-			Guid.NewGuid());
-
-		_ =	await sut.GetAsync(query).ConfigureAwait(false);
-
-		_ = fakePromotionRepository
-			.Received(1)
-			.GetEventDetailAsync(
-				Arg.Is(query.PromotionId),
-				Arg.Is(query.EventId),
 				Arg.Any<CancellationToken>());
 	}
 }
