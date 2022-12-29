@@ -1679,4 +1679,25 @@ public class PromotionTests
 				Arg.Is(utcDateTime),
 				Arg.Any<CancellationToken>());
 	}
+
+	[TestMethod]
+	public async Task 查詢Event的Detail()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+		
+		var sut = new EventDetailQueryService(fakePromotionRepository);
+
+		var query = new EventDetailQuery(
+			Guid.NewGuid(),
+			Guid.NewGuid());
+
+		_ =	await sut.GetAsync(query).ConfigureAwait(false);
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.GetEventDetailAsync(
+				Arg.Is(query.PromotionId),
+				Arg.Is(query.EventId),
+				Arg.Any<CancellationToken>());
+	}
 }

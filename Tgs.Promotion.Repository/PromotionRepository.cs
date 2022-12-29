@@ -217,6 +217,27 @@ public class PromotionRepository : IPromotionRepository
 				promotionRow.SnapshotEventId);
 	}
 
+	public async ValueTask<EventInfo?> GetEventDetailAsync(Guid promotionId,
+		Guid eventId,
+		CancellationToken cancellationToken = default)
+	{
+		var eventSource = await _dbContext.PromotionEventSources
+			.FirstOrDefaultAsync(
+				p => p.Id == eventId && p.PromotionId == promotionId, 
+				cancellationToken)
+			.ConfigureAwait(false);
+
+		return eventSource is null
+			? null
+			: new EventInfo(
+				eventSource.Id,
+				eventSource.PromotionId,
+				Enum.Parse<PromotionEventAction>(eventSource.Action),
+				JsonDocument.Parse(eventSource.ChangeSets),
+				eventSource.ModifyUser,
+				eventSource.CreatedOn);
+	}
+
 	public async ValueTask<PromotionRow?> GetPromotionByIdAsync(Guid promotionId)
 		=> await _promotionService.GetQueries().FirstOrDefaultAsync(x => x.Id == promotionId).ConfigureAwait(false);
 

@@ -1,0 +1,35 @@
+﻿using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace Tgs.Promotion.Clients;
+
+internal class PromotionHistoryClient : IPromotionHistoryClient
+{
+	private readonly HttpClient _httpClient;
+
+	private static readonly JsonSerializerOptions _JsonSerializerOptions = new()
+	{
+		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+		WriteIndented = false,
+		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+	};
+
+	public PromotionHistoryClient(
+		HttpClient httpClient)
+	{
+		_httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+	}
+
+	public ValueTask<PromotionEventDetailInfo?> GetPromotionEventDetailAsync(
+		Guid promotionId,
+		Guid eventId,
+		CancellationToken cancellationToken = default)
+		=> _httpClient.GetAsync($"api/promotionHistory/detail/{promotionId}/{eventId}", cancellationToken)
+			.ToAsyncEnumerable()
+			.Do(response => response.EnsureSuccessStatusCode())
+			.SelectMany(response =>
+				response.Content.ReadFromJsonAsync<PromotionEventDetailInfo?>(_JsonSerializerOptions, cancellationToken)
+					.ToAsyncEnumerable())
+			.FirstOrDefaultAsync(cancellationToken);
+}
