@@ -1,13 +1,8 @@
-﻿using System.Data;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Dapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Models;
 using Tgs.SerialNumberGenerator;
 
 namespace Tgs.Promotion.Repository;
@@ -23,79 +18,17 @@ public class PromotionRepository : IPromotionRepository
 	};
 
 	private readonly TgsContext _dbContext;
-	private readonly ITgsService<GameProvider> _gameProviderService;
 	private readonly ITgsService<PromotionRow> _promotionService;
 	private readonly ISerialNumberGenerator _serialNumberGenerator;
-	private readonly ITgsService<VipLevel> _vipLevelService;
 
 	public PromotionRepository(
 			ITgsService<PromotionRow> promotionService,
-			ITgsService<VipLevel> vipLevelService,
-			ITgsService<GameProvider> gameProviderService,
 			TgsContext dbContext,
 			ISerialNumberGenerator serialNumberGenerator)
 	{
 		_promotionService = promotionService ?? throw new ArgumentNullException(nameof(promotionService));
-		_vipLevelService = vipLevelService ?? throw new ArgumentNullException(nameof(vipLevelService));
-		_gameProviderService = gameProviderService ?? throw new ArgumentNullException(nameof(gameProviderService));
 		_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-	}
-
-	public ValueTask ChangePromotionStatusAsync(PromotionRow promotion)
-		=> _promotionService.UpdateEntityAsync(promotion);
-
-	public async ValueTask<Guid> CreatePromotionAsync(
-		CreatePromotionMainInfo createInfo,
-		string modifier,
-		CancellationToken cancellationToken = default)
-	{
-		var promotionId = await _serialNumberGenerator
-			.GenerateAsync(cancellationToken)
-			.ConfigureAwait(false);
-
-		var promotionsJson = await _dbContext.Settings.Where(x => x.Key == "PromotionTypes").FirstAsync(cancellationToken).ConfigureAwait(false);
-
-		var promotionTypeGroups =
-			JsonSerializer.Deserialize<PromotionTypeGroup[]>(promotionsJson.Value);
-
-		var promotionType = promotionTypeGroups!.SelectMany(x => x.Types)
-			.First(x => x.Name == createInfo.PromotionType);
-
-		var now = DateTime.UtcNow;
-
-		var promotion = new PromotionRow
-		{
-			Id = promotionId,
-			BrandId = createInfo.BrandId,
-			Name = createInfo.Name,
-			From = createInfo.EventDuring.From.ToUniversalTime(),
-			To = createInfo.EventDuring.To.ToUniversalTime(),
-			Status = (short)PromotionStatus.Disabled,
-			AutoSentPlayerBonus = createInfo.IsAutoSent,
-			PromotionType = createInfo.PromotionType,
-			SettlementIntervalType = promotionType.SettlementIntervalType,
-			BonusAmountLimit = 0M,
-			AmountUsed = 0,
-			Unlimited = createInfo.PromotionLimitAmount is null ? (short)1 : (short)0,
-			Percentage = 0M,
-			TotalAmountLimit = createInfo.PromotionLimitAmount ?? 0M,
-			TurnoverMultiple = 0M,
-			CampaignDetail = "{}",
-			CreatedByUsername = modifier,
-			UpdatedByUsername = modifier,
-			CreatedOn = now,
-			UpdatedOn = now
-		};
-
-		_ = await _dbContext.PromotionRows
-			.AddAsync(promotion, cancellationToken)
-			.ConfigureAwait(false);
-		_ = await _dbContext
-			.SaveChangesAsync(cancellationToken)
-			.ConfigureAwait(false);
-
-		return promotionId;
 	}
 
 	public async ValueTask CreatePromotionDistributeAsync(PromotionDistributeInfo createInfo, string? distributor, CancellationToken cancellationToken = default)
@@ -225,10 +158,6 @@ public class PromotionRepository : IPromotionRepository
 		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
 
-	public async ValueTask<bool> ExistsAsync(
-			Expression<Func<PromotionRow, bool>> predicate)
-		=> await _promotionService.GetQueries().AnyAsync(predicate).ConfigureAwait(false);
-
 	public ValueTask<PromotionDistributePlanInfo?> FindPromotionDistributePlanAsync(Guid planId, CancellationToken cancellationToken = default)
 		=> _dbContext.PromotionDistributePlans
 			.FindAsync(new object?[] { planId }, cancellationToken: cancellationToken)
@@ -244,7 +173,7 @@ public class PromotionRepository : IPromotionRepository
 			.SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
 	public async ValueTask<PromotionSnapshot?> GetCurrentPromotionSnapshotAsync(
-		Guid promotionId, 
+		Guid promotionId,
 		CancellationToken cancellationToken = default)
 	{
 		var promotionRow = await _dbContext.PromotionRows.FindAsync(
@@ -253,7 +182,7 @@ public class PromotionRepository : IPromotionRepository
 			.ConfigureAwait(false);
 
 		return promotionRow is null
-			? null 
+			? null
 			: new PromotionSnapshot(
 				promotionRow.Id,
 				promotionRow.Name,
@@ -288,23 +217,12 @@ public class PromotionRepository : IPromotionRepository
 				promotionRow.SnapshotEventId);
 	}
 
-	public async ValueTask<PromotionRow?> GetPromotionAsync(
-		Expression<Func<PromotionRow, bool>> predicate,
-		Func<IQueryable<PromotionRow>, IQueryable<PromotionRow>>? preQuery)
-	{
-		preQuery ??= c => c;
-
-		return await preQuery(_promotionService.GetQueries()).FirstOrDefaultAsync(predicate);
-	}
-
-	public async ValueTask<PromotionRow?> GetPromotionAsync(
-		Expression<Func<PromotionRow, bool>> predicate) =>
-		await _promotionService.GetQueries().FirstOrDefaultAsync(predicate).ConfigureAwait(false);
-
 	public async ValueTask<PromotionRow?> GetPromotionByIdAsync(Guid promotionId)
 		=> await _promotionService.GetQueries().FirstOrDefaultAsync(x => x.Id == promotionId).ConfigureAwait(false);
 
-	public async ValueTask<PromotionContentDetail?> GetPromotionContentAsync(Guid promotionId, CancellationToken cancellationToken = default)
+	public async ValueTask<PromotionContentDetail?> GetPromotionContentAsync(
+		Guid promotionId,
+		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
 			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
@@ -547,48 +465,6 @@ public class PromotionRepository : IPromotionRepository
 				p.TotalAmountLimit,
 				p.AutoSentPlayerBonus));
 
-	public async ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount)
-	{
-		const string sql = "select * from dbo.promotion_revert_amount_used(@promotion_id,@amount)";
-
-		var conn = _dbContext.Database.GetDbConnection();
-		var transaction = _dbContext.Database.CurrentTransaction?.GetDbTransaction();
-
-		return await conn.QueryFirstOrDefaultAsync<bool>(
-				sql,
-				new Dictionary<string, object>
-				{
-					{ "@promotion_id", promotionId },
-					{ "@amount", amount }
-				}, commandType: CommandType.Text, transaction: transaction)
-			.ConfigureAwait(false);
-	}
-
-	public async ValueTask SetPromotionContentAsync(
-		Guid promotionId,
-		PromotionContentDetail content,
-		string modifier,
-		CancellationToken cancellationToken = default)
-	{
-		var promotion = await _dbContext.PromotionRows
-			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
-
-		if (promotion is null)
-			return;
-
-		promotion.SubSubject = content.SubSubject;
-		promotion.DesktopBanner = content.PersonalComputerBanner;
-		promotion.MobileBanner = content.MobileBanner;
-		promotion.Content = content.Content;
-		promotion.Terms = content.Convention;
-		promotion.Localization = JsonSerializer.Serialize(content.Localization, _SerializerOptions);
-		promotion.UpdatedByUsername = modifier;
-		promotion.UpdatedOn = DateTime.UtcNow;
-
-		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-	}
-
 	public async ValueTask SetPromotionGameProvidersAsync(Guid promotionId, IEnumerable<Guid> gameProviderIds, CancellationToken cancellationToken = default)
 	{
 		var gpArray = gameProviderIds.ToArray();
@@ -614,50 +490,6 @@ public class PromotionRepository : IPromotionRepository
 		await _dbContext.PromotionGameProviders
 			.AddRangeAsync(promotionGameProviders)
 			.ConfigureAwait(false);
-
-		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-	}
-
-	public async ValueTask SetPromotionRuleAsync(
-		Guid promotionId,
-		PromotionRule rule,
-		string modifier,
-		CancellationToken cancellationToken = default)
-	{
-		var promotion = await _dbContext.PromotionRows
-			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
-
-		if (promotion is null)
-			return;
-
-		promotion.CampaignDetail = JsonSerializer.Serialize(rule.CampaignDetail, _SerializerOptions);
-		promotion.BonusAmountLimit = rule.BonusAmountLimit;
-		promotion.Percentage = rule.Percentage;
-		promotion.TurnoverMultiple = rule.TurnoverMultiple;
-		promotion.GameType = (short?)rule.GameType;
-		promotion.UpdatedByUsername = modifier;
-		promotion.UpdatedOn = DateTime.UtcNow;
-
-		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-	}
-
-	public async ValueTask SetPromotionStatusAsync(
-		Guid promotionId,
-		PromotionStatus status,
-		string modifier,
-		CancellationToken cancellationToken = default)
-	{
-		var promotion = await _dbContext.PromotionRows
-			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
-
-		if (promotion is null)
-			return;
-
-		promotion.Status = (short)status;
-		promotion.UpdatedByUsername = modifier;
-		promotion.UpdatedOn = DateTime.UtcNow;
 
 		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
@@ -703,23 +535,6 @@ public class PromotionRepository : IPromotionRepository
 			.ConfigureAwait(false);
 	}
 
-	public async ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount)
-	{
-		const string sql = "select * from dbo.promotion_update_amount_used(@promotion_id,@amount)";
-
-		var conn = _dbContext.Database.GetDbConnection();
-		var transaction = _dbContext.Database.CurrentTransaction?.GetDbTransaction();
-
-		return await conn.QueryFirstOrDefaultAsync<bool>(
-				sql,
-				new Dictionary<string, object>
-				{
-					{ "@promotion_id", promotionId },
-					{ "@amount", amount }
-				}, commandType: CommandType.Text, transaction: transaction)
-			.ConfigureAwait(false);
-	}
-
 	public async ValueTask UpdatePromotionDistributeAsync(Guid distributeId, DateTime sentOn, CancellationToken cancellationToken = default)
 	{
 		var distribute = await _dbContext.PromotionDistributes.FindAsync(
@@ -734,42 +549,6 @@ public class PromotionRepository : IPromotionRepository
 		_ = await _dbContext
 			.SaveChangesAsync(cancellationToken)
 			.ConfigureAwait(false);
-	}
-
-	public async ValueTask UpdatePromotionMainInfoAsync(
-		Guid promotionId,
-		UpdatePromotionMainInfo updateInfo,
-		string modifier,
-		CancellationToken cancellationToken = default)
-	{
-		var promotion = await _dbContext.PromotionRows
-			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
-
-		if (promotion is null)
-			return;
-
-		var promotionsJson = await _dbContext.Settings.Where(x => x.Key == "PromotionTypes").FirstAsync(cancellationToken).ConfigureAwait(false);
-
-		var promotionTypeGroups =
-			JsonSerializer.Deserialize<PromotionTypeGroup[]>(promotionsJson.Value);
-
-		var promotionType = promotionTypeGroups!.SelectMany(x => x.Types)
-			.First(x => x.Name == updateInfo.PromotionType);
-
-		promotion.Name = updateInfo.Name;
-		promotion.From = updateInfo.EventDuring.From;
-		promotion.To = updateInfo.EventDuring.To;
-		promotion.PromotionType = updateInfo.PromotionType;
-		promotion.Unlimited = updateInfo.PromotionLimitAmount is null ? (short)1 : (short)0;
-		promotion.TotalAmountLimit = updateInfo.PromotionLimitAmount ?? 0M;
-		promotion.AutoSentPlayerBonus = updateInfo.IsAutoSent;
-		promotion.SettlementIntervalType = promotionType.SettlementIntervalType;
-
-		promotion.UpdatedByUsername = modifier;
-		promotion.UpdatedOn = DateTime.UtcNow;
-
-		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
 
 	public ValueTask UpdatePromotionsAsync(PromotionRow[] promotions) =>
@@ -823,28 +602,5 @@ public class PromotionRepository : IPromotionRepository
 		}
 
 		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-	}
-
-	public async ValueTask UpdatePromotionUsedAmountAsync(
-		Guid promotionId,
-		decimal totalAmount,
-		Guid? snapshotId,
-		CancellationToken cancellationToken = default)
-	{
-		var promotion = await _dbContext.PromotionRows
-			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
-
-		if (promotion is null)
-			return;
-
-		if (promotion.AmountUsedSnapshotId is null
-			|| promotion.AmountUsedSnapshotId.Value.CompareTo(snapshotId) < 0)
-		{
-			promotion.AmountUsed = totalAmount;
-			promotion.AmountUsedSnapshotId = snapshotId;
-
-			_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-		}
 	}
 }

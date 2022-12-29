@@ -1,15 +1,10 @@
-﻿using System.Linq.Expressions;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Tgs.Promotion.Domain.Entities;
 
 namespace Tgs.Promotion;
 
 public interface IPromotionRepository
 {
-	ValueTask ChangePromotionStatusAsync(PromotionRow promotion);
-
-	ValueTask<Guid> CreatePromotionAsync(CreatePromotionMainInfo createInfo, string modifier, CancellationToken cancellationToken = default);
-
 	ValueTask CreatePromotionDistributeAsync(
 		PromotionDistributeInfo createInfo,
 		string? distributor,
@@ -28,17 +23,13 @@ public interface IPromotionRepository
 		string? modifier,
 		CancellationToken cancellationToken = default);
 
-	ValueTask<bool> ExistsAsync(Expression<Func<PromotionRow, bool>> predicate);
-
-	ValueTask<PromotionDistributePlanInfo?> FindPromotionDistributePlanAsync(Guid planId, CancellationToken cancellationToken = default);
+	ValueTask<PromotionDistributePlanInfo?> FindPromotionDistributePlanAsync(
+		Guid planId, 
+		CancellationToken cancellationToken = default);
 
 	ValueTask<PromotionSnapshot?> GetCurrentPromotionSnapshotAsync(
 		Guid promotionId,
 		CancellationToken cancellationToken = default);
-
-	ValueTask<PromotionRow?> GetPromotionAsync(
-		Expression<Func<PromotionRow, bool>> predicate,
-		Func<IQueryable<PromotionRow>, IQueryable<PromotionRow>>? preQuery = null);
 
 	ValueTask<PromotionRow?> GetPromotionByIdAsync(Guid promotionId);
 
@@ -67,26 +58,14 @@ public interface IPromotionRepository
 
 	IAsyncEnumerable<PromotionMainInfo> QueryPromotionsByPromotionTypeAsync(string promotionType, CancellationToken cancellationToken = default);
 
-	ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount);
-
-	ValueTask SetPromotionContentAsync(Guid promotionId, PromotionContentDetail content, string modifier, CancellationToken cancellationToken = default);
-
 	ValueTask SetPromotionGameProvidersAsync(Guid promotionId, IEnumerable<Guid> gameProviderIds, CancellationToken cancellationToken = default);
 
-	ValueTask SetPromotionRuleAsync(Guid promotionId, PromotionRule rule, string modifier, CancellationToken cancellationToken = default);
-
-	ValueTask SetPromotionStatusAsync(Guid promotionId, PromotionStatus status, string modifier, CancellationToken cancellationToken = default);
-
 	ValueTask SetPromotionVipLevelsAsync(Guid promotionId, IEnumerable<int> vipLevels, string modifier, CancellationToken cancellationToken = default);
-
-	ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount);
 
 	ValueTask UpdatePromotionDistributeAsync(
 		Guid distributeId,
 		DateTime sentOn,
 		CancellationToken cancellationToken = default);
-
-	ValueTask UpdatePromotionMainInfoAsync(Guid promotionId, UpdatePromotionMainInfo updateInfo, string modifier, CancellationToken cancellationToken = default);
 
 	ValueTask UpdatePromotionsAsync(PromotionRow[] promotions);
 
@@ -94,11 +73,5 @@ public interface IPromotionRepository
 		PromotionSnapshot snapshot,
 		Guid snapshotId,
 		DateTime updatedOn,
-		CancellationToken cancellationToken = default);
-
-	ValueTask UpdatePromotionUsedAmountAsync(
-		Guid promotionId,
-		decimal totalAmount,
-		Guid? snapshotId,
 		CancellationToken cancellationToken = default);
 }
