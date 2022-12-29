@@ -1343,4 +1343,339 @@ public class PromotionTests
 		_ = fakePromotionRepository.Received(1)
 			.QueryPromotionsByPromotionTypeAsync(Arg.Is(query.PromotionType));
 	}
+
+	[TestMethod]
+	public async Task 變更兩個Promotion的DisplayOrder()
+	{
+		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new ChangePromotionOrdersCommandService(
+			fakeSystemClock,
+			fakeSerialNumberGenerator,
+			fakePromotionRepository);
+
+		var orders = new PromotionOrder[]
+		{
+			new (Guid.NewGuid(), 10),
+			new (Guid.NewGuid(), 3)
+		};
+
+		var command = new ChangePromotionOrdersCommand(
+			orders,
+			"ModifyUser");
+
+		var currentTime = DateTimeOffset.UtcNow;
+		_ = fakeSystemClock.UtcNow.Returns(currentTime);
+
+		var utcDateTime = currentTime.UtcDateTime;
+		var brandId = Guid.NewGuid();
+
+		var promotion1 = new PromotionSnapshot(
+		orders[0].PromotionId,
+		"TestPromotion1",
+		brandId,
+		utcDateTime.AddDays(-10),
+		utcDateTime.AddDays(1),
+		PromotionStatus.Enabled,
+		"TestType",
+		null,
+		true,
+		0,
+		1,
+		null,
+		0M,
+		0M,
+		0M,
+		JsonDocument.Parse("{}"),
+		null,
+		null,
+		null,
+		null,
+		null,
+		null,
+		"Creator",
+		utcDateTime.AddDays(-15),
+		null,
+		utcDateTime.AddDays(-15),
+		0M,
+		null,
+		0,
+		null,
+		Guid.NewGuid());
+
+		var promotion2 = new PromotionSnapshot(
+			orders[1].PromotionId,
+			"TestPromotion2",
+			brandId,
+			utcDateTime.AddDays(-5),
+			utcDateTime.AddDays(2),
+			PromotionStatus.Enabled,
+			"TestType",
+			null,
+			true,
+			0,
+			1,
+			null,
+			0M,
+			0M,
+			0M,
+			JsonDocument.Parse("{}"),
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			"Creator",
+			utcDateTime.AddDays(-5),
+			null,
+			utcDateTime.AddDays(-5),
+			0M,
+			null,
+			0,
+			null,
+			Guid.NewGuid());
+
+		_ = fakePromotionRepository.GetCurrentPromotionSnapshotAsync(
+				Arg.Is(orders[0].PromotionId),
+				Arg.Any<CancellationToken>())
+			.Returns(promotion1);
+
+		_ = fakePromotionRepository.GetCurrentPromotionSnapshotAsync(
+				Arg.Is(orders[1].PromotionId),
+				Arg.Any<CancellationToken>())
+			.Returns(promotion2);
+
+		var eventId1 = Guid.NewGuid();
+		var eventId2 = Guid.NewGuid();
+		_ = fakeSerialNumberGenerator.GenerateAsync(Arg.Any<CancellationToken>())
+			.Returns(eventId1, eventId2);
+
+		var expectedSnapshot1 = new PromotionSnapshot(
+			orders[0].PromotionId,
+			promotion1.Name,
+			promotion1.BrandId,
+			promotion1.From,
+			promotion1.To,
+			promotion1.Status,
+			promotion1.PromotionType,
+			promotion1.SettlementIntervalType,
+			promotion1.AutoSentPlayerBonus,
+			promotion1.BonusAmountLimit,
+			promotion1.Unlimited,
+			promotion1.GameType,
+			promotion1.Percentage,
+			promotion1.TotalAmountLimit,
+			promotion1.TurnoverMultiple,
+			promotion1.CampaignDetail,
+			promotion1.Content,
+			promotion1.Localization,
+			promotion1.DesktopBanner,
+			promotion1.MobileBanner,
+			promotion1.SubSubject,
+			promotion1.Terms,
+			promotion1.CreatedByUsername,
+			promotion1.CreatedOn,
+			command.Modifier,
+			utcDateTime,
+			promotion1.AmountUsed,
+			promotion1.AmountUsedSnapshotId,
+			orders[0].Order,
+			promotion1.VipLevelId,
+			eventId1);
+
+		var expectedSnapshot2 = new PromotionSnapshot(
+			orders[1].PromotionId,
+			promotion2.Name,
+			promotion2.BrandId,
+			promotion2.From,
+			promotion2.To,
+			promotion2.Status,
+			promotion2.PromotionType,
+			promotion2.SettlementIntervalType,
+			promotion2.AutoSentPlayerBonus,
+			promotion2.BonusAmountLimit,
+			promotion2.Unlimited,
+			promotion2.GameType,
+			promotion2.Percentage,
+			promotion2.TotalAmountLimit,
+			promotion2.TurnoverMultiple,
+			promotion2.CampaignDetail,
+			promotion2.Content,
+			promotion2.Localization,
+			promotion2.DesktopBanner,
+			promotion2.MobileBanner,
+			promotion2.SubSubject,
+			promotion2.Terms,
+			promotion2.CreatedByUsername,
+			promotion2.CreatedOn,
+			command.Modifier,
+			utcDateTime,
+			promotion2.AmountUsed,
+			promotion2.AmountUsedSnapshotId,
+			orders[1].Order,
+			promotion2.VipLevelId,
+			eventId2);
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.CreatePromotionEventAsync(
+				Arg.Is(eventId1),
+				Arg.Is(orders[0].PromotionId),
+				Arg.Is(PromotionEventAction.ChangeDisplayOrder),
+				Arg.Any<JsonDocument>(),
+				Arg.Is(command.Modifier),
+				Arg.Any<CancellationToken>());
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.UpdatePromotionSnapshotAsync(
+				Arg.Is(expectedSnapshot1),
+				Arg.Is(eventId1),
+				Arg.Is(utcDateTime),
+				Arg.Any<CancellationToken>());
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.CreatePromotionEventAsync(
+				Arg.Is(eventId2),
+				Arg.Is(orders[1].PromotionId),
+				Arg.Is(PromotionEventAction.ChangeDisplayOrder),
+				Arg.Any<JsonDocument>(),
+				Arg.Is(command.Modifier),
+				Arg.Any<CancellationToken>());
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.UpdatePromotionSnapshotAsync(
+				Arg.Is(expectedSnapshot2),
+				Arg.Is(eventId2),
+				Arg.Is(utcDateTime),
+				Arg.Any<CancellationToken>());
+	}
+
+	[TestMethod]
+	public async Task 變更單一Promotion的DisplayOrder()
+	{
+		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new ChangePromotionOrdersCommandService(
+			fakeSystemClock,
+			fakeSerialNumberGenerator,
+			fakePromotionRepository);
+
+		var orders = new PromotionOrder[]
+		{
+			new (Guid.NewGuid(), 10)
+		};
+
+		var command = new ChangePromotionOrdersCommand(
+			orders,
+			"ModifyUser");
+
+		var currentTime = DateTimeOffset.UtcNow;
+		_ = fakeSystemClock.UtcNow.Returns(currentTime);
+
+		var utcDateTime = currentTime.UtcDateTime;
+
+		var promotion = new PromotionSnapshot(
+			orders[0].PromotionId,
+			"TestPromotion",
+			Guid.NewGuid(),
+			utcDateTime.AddDays(-10),
+			utcDateTime.AddDays(1),
+			PromotionStatus.Disabled,
+			"TestType",
+			null,
+			true,
+			0,
+			1,
+			null,
+			0M,
+			0M,
+			0M,
+			JsonDocument.Parse("{}"),
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			"Creator",
+			utcDateTime.AddDays(-15),
+			null,
+			utcDateTime.AddDays(-15),
+			0M,
+			null,
+			0,
+			null,
+			Guid.NewGuid());
+
+		_ = fakePromotionRepository.GetCurrentPromotionSnapshotAsync(
+				Arg.Is(orders[0].PromotionId),
+				Arg.Any<CancellationToken>())
+			.Returns(promotion);
+
+		var eventId = Guid.NewGuid();
+		_ = fakeSerialNumberGenerator.GenerateAsync(Arg.Any<CancellationToken>())
+			.Returns(eventId);
+
+		var expectedSnapshot = new PromotionSnapshot(
+			orders[0].PromotionId,
+			promotion.Name,
+			promotion.BrandId,
+			promotion.From,
+			promotion.To,
+			promotion.Status,
+			promotion.PromotionType,
+			promotion.SettlementIntervalType,
+			promotion.AutoSentPlayerBonus,
+			promotion.BonusAmountLimit,
+			promotion.Unlimited,
+			promotion.GameType,
+			promotion.Percentage,
+			promotion.TotalAmountLimit,
+			promotion.TurnoverMultiple,
+			promotion.CampaignDetail,
+			promotion.Content,
+			promotion.Localization,
+			promotion.DesktopBanner,
+			promotion.MobileBanner,
+			promotion.SubSubject,
+			promotion.Terms,
+			promotion.CreatedByUsername,
+			promotion.CreatedOn,
+			command.Modifier,
+			utcDateTime,
+			promotion.AmountUsed,
+			promotion.AmountUsedSnapshotId,
+			orders[0].Order,
+			promotion.VipLevelId,
+			eventId);
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.CreatePromotionEventAsync(
+				Arg.Is(eventId),
+				Arg.Is(orders[0].PromotionId),
+				Arg.Is(PromotionEventAction.ChangeDisplayOrder),
+				Arg.Any<JsonDocument>(),
+				Arg.Is(command.Modifier),
+				Arg.Any<CancellationToken>());
+
+		_ = fakePromotionRepository.Received(1)
+			.UpdatePromotionSnapshotAsync(
+				Arg.Is(expectedSnapshot),
+				Arg.Is(eventId),
+				Arg.Is(utcDateTime),
+				Arg.Any<CancellationToken>());
+	}
 }

@@ -1,39 +1,69 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Tgs.Promotion.Domain.Entities;
+﻿using System.Text.Json;
+using Json.Patch;
+using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
 internal class ChangePromotionOrdersCommandService : ICommandService<ChangePromotionOrdersCommand>
 {
-	private readonly TgsContext _tgsRepository;
+	private readonly ISystemClock _systemClock;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
+	private readonly IPromotionRepository _promotionRepository;
 
-	public ChangePromotionOrdersCommandService(TgsContext tgsRepository)
+	public ChangePromotionOrdersCommandService(
+		ISystemClock systemClock,
+		ISerialNumberGenerator serialNumberGenerator,
+		IPromotionRepository promotionRepository)
 	{
-		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+		_systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 	}
 
 	public async ValueTask ExecuteAsync(ChangePromotionOrdersCommand command, CancellationToken cancellationToken = default)
 	{
-		var ids = command.Orders.Select(p => p.PromotionId);
+		var currentTime = _systemClock.UtcNow.UtcDateTime;
 
-		var promotions = await _tgsRepository.PromotionRows
-			.AsQueryable()
-			.Where(q => ids.Contains(q.Id))
-			.ToListAsync(cancellationToken)
-			.ConfigureAwait(false);
-
-		promotions.ForEach(p =>
+		foreach (var order in command.Orders)
 		{
-			var item = command.Orders.FirstOrDefault(x => x.PromotionId == p.Id);
+			var snapshot = await _promotionRepository.GetCurrentPromotionSnapshotAsync(
+					order.PromotionId, 
+					cancellationToken)
+				.ConfigureAwait(false);
 
-			if (item != null)
+			if (snapshot is null)
+				continue;
+
+			var eventId = await _serialNumberGenerator
+				.GenerateAsync(cancellationToken)
+				.ConfigureAwait(false);
+
+			var updateData = snapshot with
 			{
-				p.DisplayOrder = item.Order;
-			}
-		});
+				DisplayOrder = order.Order,
+				UpdatedByUsername = command.Modifier,
+				UpdatedOn = currentTime,
+				SnapshotEventId = eventId
+			};
 
-		_tgsRepository.PromotionRows.UpdateRange(promotions);
-		_ = await _tgsRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+			var changeSets = snapshot.CreatePatch(updateData, PromotionEventSourceUtility.SerializerOptions);
+
+			await _promotionRepository.CreatePromotionEventAsync(
+					eventId,
+					snapshot.Id,
+					PromotionEventAction.ChangeDisplayOrder,
+					JsonSerializer.SerializeToDocument(changeSets),
+					command.Modifier,
+					cancellationToken)
+				.ConfigureAwait(false);
+
+			await _promotionRepository.UpdatePromotionSnapshotAsync(
+					updateData,
+					eventId,
+					currentTime,
+					cancellationToken)
+				.ConfigureAwait(false);
+		}
 	}
 }

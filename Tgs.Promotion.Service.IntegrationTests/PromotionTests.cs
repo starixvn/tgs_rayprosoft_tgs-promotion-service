@@ -3,7 +3,6 @@ using ExpectedObjects;
 using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
 using Tgs.MessageQueue;
