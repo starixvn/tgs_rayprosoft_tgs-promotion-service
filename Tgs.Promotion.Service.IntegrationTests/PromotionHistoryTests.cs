@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Runtime.InteropServices.JavaScript;
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Domain.Entities;
@@ -118,28 +119,40 @@ public class PromotionHistoryTests
 
 		var promotionId = Guid.NewGuid();
 		var eventId = Guid.NewGuid();
-		
-		var expectedChangeSets = new StubChangeSet[] { new("replace", "/status", "Disabled") };
+
+		var currentTime = DateTime.UtcNow;
+		var changeSets = """[{"op": "replace", "path": "/status", "value": "Disabled"}]""";
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
-
+		
 		_ = await dbContext.PromotionEventSources.AddAsync(new PromotionEventSource
 		{
 			Id = eventId,
 			PromotionId = promotionId,
 			Action = PromotionEventAction.ChangeStatus.ToString(),
-			ChangeSets = JsonSerializer.Serialize(expectedChangeSets, jsonSerializerOptions),
-			CreatedOn = DateTime.UtcNow
+			ChangeSets = JsonSerializer.Serialize(changeSets, jsonSerializerOptions),
+			CreatedOn = currentTime,
+			ModifyUser = "Modifier1"
 		});
-
+		
 		_ = await dbContext.SaveChangesAsync();
+
+		var expected = new PromotionEventDetailInfo
+		{
+			EventId = eventId,
+			PromotionId = promotionId,
+			Action = Clients.PromotionEventAction.ChangeStatus,
+			ChangeSets = JsonDocument.Parse(changeSets),
+			CreatedOn = currentTime,
+			Modifier = "Modifier1"
+		};
 
 		var actual = await sut.GetPromotionEventDetailAsync(
 			promotionId, eventId);
 
 		Assert.IsNotNull(actual);
-		CollectionAssert.AreEquivalent(
-			expectedChangeSets, 
-			actual.ChangeSets.Deserialize <StubChangeSet[]>(jsonSerializerOptions));
+		Assert.AreEqual(expected.EventId, actual.EventId);
+		Assert.AreEqual(expected.Action, actual.Action);
+
 	}
 }

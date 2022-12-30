@@ -1,6 +1,6 @@
 ﻿namespace Tgs.Promotion.Clients;
 
-public record PromotionEventInfo
+public record PromotionEventMainInfo
 {
 	public Guid EventId { get; init; }
 

@@ -22,7 +22,15 @@ public class PromotionHistoryController : ControllerBase
 
 		return eventInfo is null
 			? null 
-			: new EventDetailViewModel { ChangeSets = eventInfo.ChangeSets };
+			: new EventDetailViewModel
+			{
+				EventId = eventInfo.EventId,
+				PromotionId = eventInfo.PromotionId,
+				Action = eventInfo.Action,
+				CreatedOn = eventInfo.CreatedOn,
+				ChangeSets = eventInfo.ChangeSets,
+				Modifier = eventInfo.Modifier
+			};
 	}
 
 	[HttpGet("{promotionId}", Name = "QueryEventsByPromotionId")]
