@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Domain.Entities;
@@ -153,6 +152,5 @@ public class PromotionHistoryTests
 		Assert.IsNotNull(actual);
 		Assert.AreEqual(expected.EventId, actual.EventId);
 		Assert.AreEqual(expected.Action, actual.Action);
-
 	}
 }
