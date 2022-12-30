@@ -30,7 +30,7 @@ public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionB
 
 	public async ValueTask<MessageResponse> GetAsync(
 		DispatchPromotionBonusQuery request,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken = default)
 	{
 		var playerCodes = request.Players.Select(x => x.PlayerCode).ToArray();
 		var promotionBonusIds = request.Players.Select(x => x.PromotionBonusId).ToArray();
@@ -68,12 +68,16 @@ public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionB
 			promotionPlayer.SentOn = DateTime.UtcNow;
 		}
 
-		_ = await Task.WhenAll(playerBuckets.Select(pb => Task.Run(async () => await _playerBucketClient.CreateBucketAsync(
-			pb.PlayerCode,
-			pb.BucketAmount,
-			pb.BucketType,
-			pb.PromotionId.ToString(),
-			cancellationToken).ConfigureAwait(false)))).ConfigureAwait(false);
+		foreach (var playerBucket in playerBuckets)
+		{
+			_ = await _playerBucketClient.CreateBucketAsync(
+					playerBucket.PlayerCode,
+					playerBucket.BucketAmount,
+					playerBucket.BucketType,
+					playerBucket.PromotionId.ToString(),
+					cancellationToken)
+				.ConfigureAwait(false);
+		}
 
 		await _promotionBonusService.UpdatePromotionBonusPlayersAsync(players);
 
