@@ -2,6 +2,11 @@
 
 public interface IPromotionServiceClient
 {
+	ValueTask ChangePromotionOrdersAsync(
+		IEnumerable<PromotionOrder> orders,
+		string modifier,
+		CancellationToken cancellationToken = default);
+
 	ValueTask<Guid> CreatePromotionAsync(
 		Guid brandId,
 		CreatePromotionMainInfo createInfo,
@@ -36,13 +41,13 @@ public interface IPromotionServiceClient
 
 	IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, string playerCode, CancellationToken cancellationToken = default);
 
+	IAsyncEnumerable<PromotionMainInfo> ListPromotionsByPromotionTypeAsync(string promotionType, CancellationToken cancellationToken = default);
+
 	IAsyncEnumerable<Guid> QueryPromotionIdsAsync(
 		Guid brandId,
 		string promotionName,
 		string? promotionType,
 		CancellationToken cancellationToken = default);
-
-	IAsyncEnumerable<PromotionMainInfo> ListPromotionsByPromotionTypeAsync(string promotionType, CancellationToken cancellationToken = default);
 
 	ValueTask SetPromotionContentAsync(
 		Guid promotionId,

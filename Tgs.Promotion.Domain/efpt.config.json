@@ -58,6 +58,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "dbo.promotion_event_source",
+         "ObjectType": 0
+      },
+      {
          "Name": "dbo.promotion_game_providers",
          "ObjectType": 0
       },
@@ -98,7 +102,7 @@
          "ObjectType": 0
       }
    ],
-   "UiHint": "tgs-local",
+   "UiHint": "Tgs",
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": false,
    "UseDbContextSplitting": true,

@@ -40,7 +40,17 @@ public static class ServiceCollectionExtensions
 				c.BaseAddress = options.Url;
 			})
 			.Services
+			.AddHttpClient<PromotionHistoryClient>((sp, c) =>
+			{
+				var options = sp.GetRequiredService<IOptions<PromotionOptions>>().Value;
+
+				c.BaseAddress = options.Url;
+			})
+			.Services
 			.AddTransient<IPromotionClient>(sp => sp.GetRequiredService<PromotionClient>())
 			.AddTransient<IPromotionBonusClient>(sp => sp.GetRequiredService<PromotionBonusClient>())
-			.AddTransient<IPromotionDispatchClient>(sp => sp.GetRequiredService<PromotionDispatchClient>());
+			.AddTransient<IPromotionDispatchClient>(sp => 
+				sp.GetRequiredService<PromotionDispatchClient>())
+			.AddTransient<IPromotionHistoryClient>(sp =>
+				sp.GetRequiredService<PromotionHistoryClient>());
 }

@@ -1,0 +1,36 @@
+﻿using System.Text.Json;
+
+namespace Tgs.Promotion;
+
+public record PromotionSnapshot(
+	Guid Id,
+	string Name,
+	Guid BrandId,
+	DateTime From,
+	DateTime To,
+	PromotionStatus Status,
+	string PromotionType,
+	string? SettlementIntervalType,
+	bool AutoSentPlayerBonus,
+	decimal BonusAmountLimit,
+	short Unlimited,
+	GameType? GameType,
+	decimal Percentage,
+	decimal TotalAmountLimit,
+	decimal TurnoverMultiple,
+	JsonDocument CampaignDetail,
+	string? Content,
+	string? Localization,
+	string? DesktopBanner,
+	string? MobileBanner,
+	string? SubSubject,
+	string? Terms,
+	string? CreatedByUsername,
+	DateTime CreatedOn,
+	string? UpdatedByUsername,
+	DateTime UpdatedOn,
+	decimal AmountUsed,
+	Guid? AmountUsedSnapshotId,
+	int DisplayOrder,
+	Guid? VipLevelId,
+	Guid? SnapshotEventId);

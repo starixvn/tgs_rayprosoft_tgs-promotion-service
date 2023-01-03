@@ -26,6 +26,28 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		_httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 	}
 
+	public async ValueTask ChangePromotionOrdersAsync(IEnumerable<PromotionOrder> orders, string modifier,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new
+		{
+			Orders = orders,
+			Modifier = modifier
+		};
+
+		var requestContent = new StringContent(
+			JsonSerializer.Serialize(request, _JsonSerializerOptions),
+			Encoding.UTF8,
+			"application/json");
+
+		var response = await _httpClient.PutAsync(
+			$"/api/promotion-mgr/orders",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+	}
+
 	public async ValueTask<Guid> CreatePromotionAsync(
 		Guid brandId,
 		CreatePromotionMainInfo createInfo,

@@ -12,9 +12,9 @@ using Tgs.Promotion.Service.ViewModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.ConfigureAppConfiguration((_, builder) => builder
+builder.Configuration
 	.AddJsonFile("/config/appsettings.json", true)
-	.AddEnvironmentVariables());
+	.AddEnvironmentVariables();
 
 builder.Logging
 	.AddOpenTelemetry(options =>
@@ -23,9 +23,9 @@ builder.Logging
 		options.ParseStateValues = true;
 		_ = options.AddFluentdForwardExporter(fluentOptions =>
 		{
-			var nodeIp = builder.Configuration.GetValue<string>("NODE_IP");
+			var nodeIp = builder.Configuration.GetValue<string>("NODE_IP")!;
 			fluentOptions.Host = nodeIp;
-			fluentOptions.Tag = builder.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
+			fluentOptions.Tag = builder.Configuration.GetValue<string>("OTEL_SERVICE_NAME")!;
 			fluentOptions.UseMessagePack();
 		});
 	});
@@ -76,13 +76,15 @@ builder.Services
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
 
-		options.BaseUrl = config.GetValue<Uri>("Promotion:CashBaseUrl");
+		options.BaseUrl = config.GetValue<Uri>("Promotion:CashBaseUrl")!;
 	})
 	.AddBrandServiceClient((options, _) =>
-		options.BrandCertificateBaseUrl = builder.Configuration.GetValue<Uri>("Promotion:BrandServiceBaseUrl"))
+		options.BrandCertificateBaseUrl = builder.Configuration.GetValue<Uri>("Promotion:BrandServiceBaseUrl")!)
 	.AddPlayerServiceClient((options, _) =>
-		options.BaseUrl = builder.Configuration.GetValue<Uri>("Promotion:PlayerServiceBaseUrl"))
-	.AddPlayerBucketClient();
+		options.BaseUrl = builder.Configuration.GetValue<Uri>("Promotion:PlayerServiceBaseUrl")!)
+	.AddPlayerBucketClient(httpClientBuilder => httpClientBuilder
+		.ConfigureHttpClient(httpClient => 
+			httpClient.BaseAddress = builder.Configuration.GetValue<Uri>("Promotion:PlayerBucketBaseUrl")));
 
 builder.Services
 	.AddSingleton<NoopCampaingDetailProcessor>()
@@ -118,10 +120,8 @@ builder.Services
 
 builder.Services
 	.AddControllers()
-	.AddJsonOptions(jsonOptions =>
-	{
-		jsonOptions.JsonSerializerOptions.Converters.Add(new PromotionRuleViewModelJsonConverter());
-	});
+	.AddJsonOptions(jsonOptions 
+		=> jsonOptions.JsonSerializerOptions.Converters.Add(new PromotionRuleViewModelJsonConverter()));
 builder.Services
 	.AddSwaggerGen();
 

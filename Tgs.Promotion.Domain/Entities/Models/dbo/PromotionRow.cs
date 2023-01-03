@@ -48,6 +48,7 @@ namespace Tgs.Promotion.Domain.Entities
         public string CampaignDetail { get; set; } = null!;
         public int DisplayOrder { get; set; }
         public Guid? AmountUsedSnapshotId { get; set; }
+        public Guid? SnapshotEventId { get; set; }
 
         public virtual VipLevel? VipLevel { get; set; }
         public virtual ICollection<PromotionBonus> PromotionBonus { get; set; }

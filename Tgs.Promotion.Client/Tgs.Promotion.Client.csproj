@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>1.0.37</Version>
+		<Version>1.0.38</Version>
 		<RootNamespace>Tgs.Promotion.Clients</RootNamespace>
 		<Authors>Raypro</Authors>
 		<PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-promotion-service</PackageProjectUrl>
@@ -17,8 +17,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Google.Protobuf" Version="3.21.9" />
-		<PackageReference Include="Grpc.Tools" Version="2.50.0">
+		<PackageReference Include="Google.Protobuf" Version="3.21.12" />
+		<PackageReference Include="Grpc.Tools" Version="2.51.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -38,6 +38,7 @@
 			<PrivateAssets>All</PrivateAssets>
 		</ProjectReference>
 	</ItemGroup>
+
 
 	<ItemGroup>
 		<Protobuf Include="Protos\promotion.proto" GrpcServices="None" />
