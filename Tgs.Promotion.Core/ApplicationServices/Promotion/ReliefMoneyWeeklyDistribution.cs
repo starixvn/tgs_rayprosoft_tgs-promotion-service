@@ -196,7 +196,7 @@ internal class ReliefMoneyWeeklyDistribution : IDistribution
 				PromotionType = x.PromotionBonus.PromotionType,
 				BucketAmount = x.BonusAmount * x.PromotionBonus.TurnoverMultiple,
 				BonusAmount = x.BonusAmount,
-				Description = "promotion relief money daily"
+				Description = "promotion relief money weekly"
 			})
 			.ToArray();
 
