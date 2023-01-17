@@ -38,15 +38,15 @@ public class CreatePromotionBonusWeeklyHandler
 			0,
 			timeSpan);
 
-		var previousMonday = now.AddDays(-7).GetMonday();
-		var previousSunday = now.AddDays(-7).GetSunday();
+		var weekFrom = now.AddDays(-7).GetMonday();
+		var weekTo = now.AddDays(-7).GetSunday();
 
 		if (request.From != null && request.To != null)
 		{
 			var resultFrom = new DateTimeOffset(request.From.Value.ToDateTime(TimeOnly.MinValue), timeSpan);
 			var resultTo = new DateTimeOffset(request.To.Value.ToDateTime(TimeOnly.MinValue), timeSpan);
 
-			previousMonday = new(resultFrom.Year,
+			weekFrom = new(resultFrom.Year,
 				resultFrom.Month,
 				resultFrom.Day,
 				0,
@@ -54,7 +54,7 @@ public class CreatePromotionBonusWeeklyHandler
 				0,
 				resultFrom.Offset);
 
-			previousSunday = new(resultTo.Year,
+			weekTo = new(resultTo.Year,
 				resultTo.Month,
 				resultTo.Day,
 				0,
@@ -69,19 +69,19 @@ public class CreatePromotionBonusWeeklyHandler
 			.Where(x => x.Status == (short)PromotionStatus.Enabled)
 			.Where(x => x.SettlementIntervalType == "Weekly")
 			.Where(x => brandIds.Contains(x.BrandId))
-			.Where(x => x.From >= previousMonday.UtcDateTime && x.From <= previousSunday.UtcDateTime ||
-				x.To >= previousMonday.UtcDateTime && x.To <= previousSunday.UtcDateTime ||
-				x.From < previousMonday.UtcDateTime && x.To > previousSunday.UtcDateTime
+			.Where(x => x.From >= weekFrom.UtcDateTime && x.From <= weekTo.UtcDateTime ||
+				x.To >= weekFrom.UtcDateTime && x.To <= weekTo.UtcDateTime ||
+				x.From < weekFrom.UtcDateTime && x.To > weekTo.UtcDateTime
 			)
-			.Where(x => !x.PromotionBonus.Any(pb => pb.PromotionId == x.Id && pb.From == (x.From > previousMonday.UtcDateTime ? x.From : previousMonday.UtcDateTime) &&
-				pb.To == (x.To < previousSunday.UtcDateTime ? x.To : previousSunday.UtcDateTime)))
+			.Where(x => !x.PromotionBonus.Any(pb => pb.PromotionId == x.Id && pb.From == (x.From > weekFrom.UtcDateTime ? x.From : weekFrom.UtcDateTime) &&
+				pb.To == (x.To < weekTo.UtcDateTime ? x.To : weekTo.UtcDateTime)))
 			.ToArrayAsync(cancellationToken);
 
 		await promotions.ToAsyncEnumerable()
 				.ForEachAwaitAsync(async x =>
 				{
-					var from = x.From > previousMonday ? x.From : previousMonday;
-					var to = x.To < previousSunday ? x.To : previousSunday;
+					var from = x.From > weekFrom ? x.From : weekFrom;
+					var to = x.To < weekTo ? x.To : weekTo;
 
 					var distributionService = _distributionFunc.Invoke(x.PromotionType);
 					var distribution = distributionService.SetPromotion(x, from, to);

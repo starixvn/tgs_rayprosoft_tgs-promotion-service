@@ -1,23 +1,17 @@
 ﻿using System;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using MockQueryable.Moq;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
-using Tgs.CashService.Client;
 using Tgs.Promotion.ApplicationServices.Promotion;
 using Tgs.Promotion.ApplicationServices.Promotion.Workers;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Extensions;
 using Tgs.Promotion.Models.PromotionBonus;
 using Tgs.SerialNumberGenerator;
-using Tgs.Service.PlayerBuckets;
 
 namespace Tgs.Promotion.UnitTest;
 
@@ -97,27 +91,22 @@ public class PromotionReliefMoneyDailyDistributionTests
 	}
 
 	[Test]
-	public async Task Check_Player_Auto_Join_With_True()
+	public async Task Can_Distribute_Daily_Promotions_With_Plus7_Time_Zone()
 	{
-		
-		var distributionTaskQueueMock = Substitute.For<IDistributionTaskQueue>();
-		var promotionBonusRepositoryMock = Substitute.For<IPromotionBonusRepository>();
 		var promotionRepositoryMock = Substitute.For<IPromotionRepository>();
-		var serialNumberGeneratorMock = Substitute.For<ISerialNumberGenerator>();
-		var tgsContextMock = Substitute.For<TgsContext>();
+		var funcDistributionMock = Substitute.For<Func<string, IDistribution>>();
+		var brandServiceClientMock = Substitute.For<IBrandServiceClient>();
 
-		var reliefMoneyDailyDistributionMock =
-			new ReliefMoneyDailyDistribution(
-				distributionTaskQueueMock,
+		var promotionsQueryHandlerMock =
+			new CreatePromotionBonusDailyQueryHandler(
 				promotionRepositoryMock,
-				promotionBonusRepositoryMock,
-				serialNumberGeneratorMock,
-				tgsContextMock);
+				brandServiceClientMock,
+				funcDistributionMock);
 
 		var brandId = Guid.NewGuid();
 		var playerCode = "player1";
 		var promotionId = Guid.NewGuid();
-		var nowDateTime = DateTimeOffset.UtcNow.ToOffset(new(8, 0, 0));
+		var nowDateTime = DateTimeOffset.UtcNow.ToOffset(new(7, 0, 0));
 		var now = new DateTimeOffset(nowDateTime.Year,
 			nowDateTime.Month,
 			nowDateTime.Day,
@@ -153,7 +142,7 @@ public class PromotionReliefMoneyDailyDistributionTests
 							CreatedOn = previousDay.UtcDateTime
 						}
 					},
-					CampaignDetail = "{\"playerAutoJoin\": true}"
+					PromotionBonus = Array.Empty<PromotionBonus>()
 				}
 			}
 			.AsQueryable()
@@ -161,154 +150,17 @@ public class PromotionReliefMoneyDailyDistributionTests
 
 		_ = promotionRepositoryMock.GetPromotionQueries().Returns(promotions);
 
-		var reportDate = new DateTimeOffset(previousDay.Year,
-			previousDay.Month,
-			previousDay.Day,
-			0,
-			0,
-			0,
-			previousDay.Offset);
+		_ = brandServiceClientMock.GetBrandIdsByTimeSpanMinutesAsync(Arg.Any<int>()).Returns(new Guid[]
+		{
+			brandId
+		}.ToAsyncEnumerable());
 
-		var gameAggregates = new PlayerGameRebateAggregate[]
-			{
-				new()
-				{
-					PlayerCode = playerCode,
-					BrandId = brandId,
-					ReportDate = reportDate.UtcDateTime,
-					WinLoss = 100,
-					GameType = (short)GameType.Slot
-				}
-			}.AsQueryable()
-			.BuildMock();
+		var request = new CreatePromotionBonusDailyRequest { TimeSpanMinutes = 420 };
 
-		var promotionVipLevels = Array.Empty<PromotionVipLevel>().AsQueryable();
-		var mockPromotionVipLevelSet = GetDbSet(promotionVipLevels);
-		tgsContextMock.PromotionVipLevels.Returns(mockPromotionVipLevelSet.Object);
+		_ = await promotionsQueryHandlerMock.GetAsync(request, default);
 
-		var promotionGameProviders = Array.Empty<PromotionGameProvider>().AsQueryable();
-		var mockPromotionGameProviderSet = GetDbSet(promotionGameProviders);
-		tgsContextMock.PromotionGameProviders.Returns(mockPromotionGameProviderSet.Object);
-
-		var playerGameAggregates = gameAggregates.AsQueryable();
-		var mockPlayerGameAggregateSet = GetDbSet(playerGameAggregates);
-		tgsContextMock.PlayerGameRebateAggregates.Returns(mockPlayerGameAggregateSet.Object);
-
-		var brandGames = Array.Empty<BrandGame>().AsQueryable();
-		var mockBrandGameSet = GetDbSet(brandGames);
-		tgsContextMock.BrandGames.Returns(mockBrandGameSet.Object);
-
-		var promotionParticipants = Array.Empty<PromotionParticipant>().AsQueryable();
-		var mockPromotionParticipantSet = GetDbSet(promotionParticipants);
-		tgsContextMock.PromotionParticipants.Returns(mockPromotionParticipantSet.Object);
-
-		_ = reliefMoneyDailyDistributionMock.SetPromotion(promotions.First(), previousDay, previousDay);
-		_ = await reliefMoneyDailyDistributionMock.SetConditionDataAsync(default);
-
-		_ = tgsContextMock.Received(0).PromotionParticipants;
-	}
-
-	[Test]
-	public async Task Check_Player_Auto_Join_With_None()
-	{
-		var distributionTaskQueueMock = Substitute.For<IDistributionTaskQueue>();
-		var promotionBonusRepositoryMock = Substitute.For<IPromotionBonusRepository>();
-		var promotionRepositoryMock = Substitute.For<IPromotionRepository>();
-		var serialNumberGeneratorMock = Substitute.For<ISerialNumberGenerator>();
-		var tgsContextMock = Substitute.For<TgsContext>();
-
-		var reliefMoneyDailyDistributionMock =
-			new ReliefMoneyDailyDistribution(
-				distributionTaskQueueMock,
-				promotionRepositoryMock,
-				promotionBonusRepositoryMock,
-				serialNumberGeneratorMock,
-				tgsContextMock);
-
-		var brandId = Guid.NewGuid();
-		var playerCode = "player1";
-		var promotionId = Guid.NewGuid();
-		var nowDateTime = DateTimeOffset.UtcNow.ToOffset(new(8, 0, 0));
-		var now = new DateTimeOffset(nowDateTime.Year,
-			nowDateTime.Month,
-			nowDateTime.Day,
-			0,
-			0,
-			0,
-			nowDateTime.Offset);
-
-		var previousDay = now.AddDays(-1);
-
-		var promotions = new PromotionRow[]
-			{
-				new()
-				{
-					Id = promotionId,
-					BrandId = brandId,
-					From = previousDay.UtcDateTime,
-					To = previousDay.UtcDateTime,
-					SettlementIntervalType = "Daily",
-					PromotionType = "ReliefMoneyDaily",
-					Percentage = 10,
-					BonusAmountLimit = 100,
-					Unlimited = 1,
-					TotalAmountLimit = 1000,
-					Status = (short)PromotionStatus.Enabled,
-					GameType = (short?)GameType.Slot,
-					AutoSentPlayerBonus = true,
-					PromotionParticipants = new[]
-					{
-						new PromotionParticipant
-						{
-							PlayerCode = playerCode,
-							CreatedOn = previousDay.UtcDateTime
-						}
-					},
-					CampaignDetail = "{}"
-				}
-			}
-			.AsQueryable()
-			.BuildMock();
-
-		_ = promotionRepositoryMock.GetPromotionQueries().Returns(promotions);
-
-		var gameAggregates = new PlayerGameRebateAggregate[]
-			{
-				new()
-				{
-					PlayerCode = playerCode,
-					BrandId = brandId,
-					ReportDate = previousDay.UtcDateTime,
-					WinLoss = 100,
-					GameType = (short)GameType.Slot
-				}
-			}.AsQueryable()
-			.BuildMock();
-
-		var promotionVipLevels = Array.Empty<PromotionVipLevel>().AsQueryable();
-		var mockPromotionVipLevelSet = GetDbSet(promotionVipLevels);
-		tgsContextMock.PromotionVipLevels.Returns(mockPromotionVipLevelSet.Object);
-
-		var promotionGameProviders = Array.Empty<PromotionGameProvider>().AsQueryable();
-		var mockPromotionGameProviderSet = GetDbSet(promotionGameProviders);
-		tgsContextMock.PromotionGameProviders.Returns(mockPromotionGameProviderSet.Object);
-
-		var playerGameAggregates = gameAggregates.AsQueryable();
-		var mockPlayerGameAggregateSet = GetDbSet(playerGameAggregates);
-		tgsContextMock.PlayerGameRebateAggregates.Returns(mockPlayerGameAggregateSet.Object);
-
-		var brandGames = Array.Empty<BrandGame>().AsQueryable();
-		var mockBrandGameSet = GetDbSet(brandGames);
-		tgsContextMock.BrandGames.Returns(mockBrandGameSet.Object);
-
-		var promotionParticipants = Array.Empty<PromotionParticipant>().AsQueryable();
-		var mockPromotionParticipantSet = GetDbSet(promotionParticipants);
-		tgsContextMock.PromotionParticipants.Returns(mockPromotionParticipantSet.Object);
-
-		_ = reliefMoneyDailyDistributionMock.SetPromotion(promotions.First(), previousDay, previousDay);
-		_ = await reliefMoneyDailyDistributionMock.SetConditionDataAsync(default);
-
-		_ = tgsContextMock.Received(1).PromotionParticipants;
+		_ = funcDistributionMock.Received(1)
+			.Invoke(Arg.Is("ReliefMoneyDaily"));
 	}
 
 	[Test]
@@ -424,22 +276,26 @@ public class PromotionReliefMoneyDailyDistributionTests
 	}
 
 	[Test]
-	public async Task Can_Distribute_Daily_Promotions_With_Plus7_Time_Zone()
+	public async Task Check_Player_Auto_Join_With_None()
 	{
+		var distributionTaskQueueMock = Substitute.For<IDistributionTaskQueue>();
+		var promotionBonusRepositoryMock = Substitute.For<IPromotionBonusRepository>();
 		var promotionRepositoryMock = Substitute.For<IPromotionRepository>();
-		var funcDistributionMock = Substitute.For<Func<string, IDistribution>>();
-		var brandServiceClientMock = Substitute.For<IBrandServiceClient>();
+		var serialNumberGeneratorMock = Substitute.For<ISerialNumberGenerator>();
+		var tgsContextMock = Substitute.For<TgsContext>();
 
-		var promotionsQueryHandlerMock =
-			new CreatePromotionBonusDailyQueryHandler(
+		var reliefMoneyDailyDistributionMock =
+			new ReliefMoneyDailyDistribution(
+				distributionTaskQueueMock,
 				promotionRepositoryMock,
-				brandServiceClientMock,
-				funcDistributionMock);
+				promotionBonusRepositoryMock,
+				serialNumberGeneratorMock,
+				tgsContextMock);
 
 		var brandId = Guid.NewGuid();
 		var playerCode = "player1";
 		var promotionId = Guid.NewGuid();
-		var nowDateTime = DateTimeOffset.UtcNow.ToOffset(new(7, 0, 0));
+		var nowDateTime = DateTimeOffset.UtcNow.ToOffset(new(8, 0, 0));
 		var now = new DateTimeOffset(nowDateTime.Year,
 			nowDateTime.Month,
 			nowDateTime.Day,
@@ -475,7 +331,7 @@ public class PromotionReliefMoneyDailyDistributionTests
 							CreatedOn = previousDay.UtcDateTime
 						}
 					},
-					PromotionBonus = Array.Empty<PromotionBonus>()
+					CampaignDetail = "{}"
 				}
 			}
 			.AsQueryable()
@@ -483,17 +339,154 @@ public class PromotionReliefMoneyDailyDistributionTests
 
 		_ = promotionRepositoryMock.GetPromotionQueries().Returns(promotions);
 
-		_ = brandServiceClientMock.GetBrandIdsByTimeSpanMinutesAsync(Arg.Any<int>()).Returns(new Guid[]
-		{
-			brandId
-		}.ToAsyncEnumerable());
+		var gameAggregates = new PlayerGameRebateAggregate[]
+			{
+				new()
+				{
+					PlayerCode = playerCode,
+					BrandId = brandId,
+					ReportDate = previousDay.UtcDateTime,
+					WinLoss = 100,
+					GameType = (short)GameType.Slot
+				}
+			}.AsQueryable()
+			.BuildMock();
 
-		var request = new CreatePromotionBonusDailyRequest { TimeSpanMinutes = 420 };
+		var promotionVipLevels = Array.Empty<PromotionVipLevel>().AsQueryable();
+		var mockPromotionVipLevelSet = GetDbSet(promotionVipLevels);
+		tgsContextMock.PromotionVipLevels.Returns(mockPromotionVipLevelSet.Object);
 
-		_ = await promotionsQueryHandlerMock.GetAsync(request, default);
+		var promotionGameProviders = Array.Empty<PromotionGameProvider>().AsQueryable();
+		var mockPromotionGameProviderSet = GetDbSet(promotionGameProviders);
+		tgsContextMock.PromotionGameProviders.Returns(mockPromotionGameProviderSet.Object);
 
-		_ = funcDistributionMock.Received(1)
-			.Invoke(Arg.Is("ReliefMoneyDaily"));
+		var playerGameAggregates = gameAggregates.AsQueryable();
+		var mockPlayerGameAggregateSet = GetDbSet(playerGameAggregates);
+		tgsContextMock.PlayerGameRebateAggregates.Returns(mockPlayerGameAggregateSet.Object);
+
+		var brandGames = Array.Empty<BrandGame>().AsQueryable();
+		var mockBrandGameSet = GetDbSet(brandGames);
+		tgsContextMock.BrandGames.Returns(mockBrandGameSet.Object);
+
+		var promotionParticipants = Array.Empty<PromotionParticipant>().AsQueryable();
+		var mockPromotionParticipantSet = GetDbSet(promotionParticipants);
+		tgsContextMock.PromotionParticipants.Returns(mockPromotionParticipantSet.Object);
+
+		_ = reliefMoneyDailyDistributionMock.SetPromotion(promotions.First(), previousDay, previousDay);
+		_ = await reliefMoneyDailyDistributionMock.SetConditionDataAsync(default);
+
+		_ = tgsContextMock.Received(1).PromotionParticipants;
+	}
+
+	[Test]
+	public async Task Check_Player_Auto_Join_With_True()
+	{
+		var distributionTaskQueueMock = Substitute.For<IDistributionTaskQueue>();
+		var promotionBonusRepositoryMock = Substitute.For<IPromotionBonusRepository>();
+		var promotionRepositoryMock = Substitute.For<IPromotionRepository>();
+		var serialNumberGeneratorMock = Substitute.For<ISerialNumberGenerator>();
+		var tgsContextMock = Substitute.For<TgsContext>();
+
+		var reliefMoneyDailyDistributionMock =
+			new ReliefMoneyDailyDistribution(
+				distributionTaskQueueMock,
+				promotionRepositoryMock,
+				promotionBonusRepositoryMock,
+				serialNumberGeneratorMock,
+				tgsContextMock);
+
+		var brandId = Guid.NewGuid();
+		var playerCode = "player1";
+		var promotionId = Guid.NewGuid();
+		var nowDateTime = DateTimeOffset.UtcNow.ToOffset(new(8, 0, 0));
+		var now = new DateTimeOffset(nowDateTime.Year,
+			nowDateTime.Month,
+			nowDateTime.Day,
+			0,
+			0,
+			0,
+			nowDateTime.Offset);
+
+		var previousDay = now.AddDays(-1);
+
+		var promotions = new PromotionRow[]
+			{
+				new()
+				{
+					Id = promotionId,
+					BrandId = brandId,
+					From = previousDay.UtcDateTime,
+					To = previousDay.UtcDateTime,
+					SettlementIntervalType = "Daily",
+					PromotionType = "ReliefMoneyDaily",
+					Percentage = 10,
+					BonusAmountLimit = 100,
+					Unlimited = 1,
+					TotalAmountLimit = 1000,
+					Status = (short)PromotionStatus.Enabled,
+					GameType = (short?)GameType.Slot,
+					AutoSentPlayerBonus = true,
+					PromotionParticipants = new[]
+					{
+						new PromotionParticipant
+						{
+							PlayerCode = playerCode,
+							CreatedOn = previousDay.UtcDateTime
+						}
+					},
+					CampaignDetail = "{\"playerAutoJoin\": true}"
+				}
+			}
+			.AsQueryable()
+			.BuildMock();
+
+		_ = promotionRepositoryMock.GetPromotionQueries().Returns(promotions);
+
+		var reportDate = new DateTimeOffset(previousDay.Year,
+			previousDay.Month,
+			previousDay.Day,
+			0,
+			0,
+			0,
+			previousDay.Offset);
+
+		var gameAggregates = new PlayerGameRebateAggregate[]
+			{
+				new()
+				{
+					PlayerCode = playerCode,
+					BrandId = brandId,
+					ReportDate = reportDate.UtcDateTime,
+					WinLoss = 100,
+					GameType = (short)GameType.Slot
+				}
+			}.AsQueryable()
+			.BuildMock();
+
+		var promotionVipLevels = Array.Empty<PromotionVipLevel>().AsQueryable();
+		var mockPromotionVipLevelSet = GetDbSet(promotionVipLevels);
+		tgsContextMock.PromotionVipLevels.Returns(mockPromotionVipLevelSet.Object);
+
+		var promotionGameProviders = Array.Empty<PromotionGameProvider>().AsQueryable();
+		var mockPromotionGameProviderSet = GetDbSet(promotionGameProviders);
+		tgsContextMock.PromotionGameProviders.Returns(mockPromotionGameProviderSet.Object);
+
+		var playerGameAggregates = gameAggregates.AsQueryable();
+		var mockPlayerGameAggregateSet = GetDbSet(playerGameAggregates);
+		tgsContextMock.PlayerGameRebateAggregates.Returns(mockPlayerGameAggregateSet.Object);
+
+		var brandGames = Array.Empty<BrandGame>().AsQueryable();
+		var mockBrandGameSet = GetDbSet(brandGames);
+		tgsContextMock.BrandGames.Returns(mockBrandGameSet.Object);
+
+		var promotionParticipants = Array.Empty<PromotionParticipant>().AsQueryable();
+		var mockPromotionParticipantSet = GetDbSet(promotionParticipants);
+		tgsContextMock.PromotionParticipants.Returns(mockPromotionParticipantSet.Object);
+
+		_ = reliefMoneyDailyDistributionMock.SetPromotion(promotions.First(), previousDay, previousDay);
+		_ = await reliefMoneyDailyDistributionMock.SetConditionDataAsync(default);
+
+		_ = tgsContextMock.Received(0).PromotionParticipants;
 	}
 
 	private static Mock<DbSet<T>> GetDbSet<T>(IQueryable<T> data) where T : class
