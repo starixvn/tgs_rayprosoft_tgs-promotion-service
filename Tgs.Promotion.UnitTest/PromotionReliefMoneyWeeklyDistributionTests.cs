@@ -7,12 +7,14 @@ using Moq;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
+using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.ApplicationServices.Promotion;
 using Tgs.Promotion.ApplicationServices.Promotion.Workers;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Extensions;
 using Tgs.Promotion.Models.PromotionBonus;
 using Tgs.SerialNumberGenerator;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.UnitTest;
 
@@ -173,13 +175,14 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 		var promotionRepositoryMock = Substitute.For<IPromotionRepository>();
 		var serialNumberGeneratorMock = Substitute.For<ISerialNumberGenerator>();
 		var tgsContextMock = Substitute.For<TgsContext>();
+		var promotionUsedAmountCommandMock = Substitute.For<ICommandService<UpdatePromotionUsedAmountCommand>>();
 
 		var reliefMoneyWeeklyDistributionMock =
 			new ReliefMoneyWeeklyDistribution(
 				distributionTaskQueueMock,
-				promotionRepositoryMock,
 				promotionBonusRepositoryMock,
 				serialNumberGeneratorMock,
+				promotionUsedAmountCommandMock,
 				tgsContextMock);
 
 		var brandId = Guid.NewGuid();
@@ -274,6 +277,9 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 		_ = await reliefMoneyWeeklyDistributionMock.DistributeBonusAsync(default);
 
 		_ = tgsContextMock.Received(1).PromotionParticipants;
+
+		_ = promotionUsedAmountCommandMock.Received(1).ExecuteAsync(Arg.Any<UpdatePromotionUsedAmountCommand>());
+
 		_ = promotionBonusRepositoryMock.Received(1).CreatePromotionBonusAsync(
 			Arg.Is<PromotionBonusModel>(x => x.Players.Any(p => p.BonusAmount == 10)));
 	}
@@ -286,13 +292,14 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 		var promotionRepositoryMock = Substitute.For<IPromotionRepository>();
 		var serialNumberGeneratorMock = Substitute.For<ISerialNumberGenerator>();
 		var tgsContextMock = Substitute.For<TgsContext>();
+		var promotionUsedAmountCommandMock = Substitute.For<ICommandService<UpdatePromotionUsedAmountCommand>>();
 
 		var reliefMoneyWeeklyDistributionMock =
 			new ReliefMoneyWeeklyDistribution(
 				distributionTaskQueueMock,
-				promotionRepositoryMock,
 				promotionBonusRepositoryMock,
 				serialNumberGeneratorMock,
+				promotionUsedAmountCommandMock,
 				tgsContextMock);
 
 		var brandId = Guid.NewGuid();
@@ -390,13 +397,14 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 		var promotionRepositoryMock = Substitute.For<IPromotionRepository>();
 		var serialNumberGeneratorMock = Substitute.For<ISerialNumberGenerator>();
 		var tgsContextMock = Substitute.For<TgsContext>();
+		var promotionUsedAmountCommandMock = Substitute.For<ICommandService<UpdatePromotionUsedAmountCommand>>();
 
 		var reliefMoneyWeeklyDistributionMock =
 			new ReliefMoneyWeeklyDistribution(
 				distributionTaskQueueMock,
-				promotionRepositoryMock,
 				promotionBonusRepositoryMock,
 				serialNumberGeneratorMock,
+				promotionUsedAmountCommandMock,
 				tgsContextMock);
 
 		var brandId = Guid.NewGuid();

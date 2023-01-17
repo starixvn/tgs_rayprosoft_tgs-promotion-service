@@ -8,13 +8,14 @@ using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Extensions;
 using Tgs.Promotion.Models.PromotionBonus;
 using Tgs.SerialNumberGenerator;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices.Promotion;
 
 internal class ReliefMoneyWeeklyDistribution : IDistribution
 {
 	private readonly IPromotionBonusRepository _promotionBonusFactory;
-	private readonly IPromotionRepository _promotionRepository;
+	private readonly ICommandService<UpdatePromotionUsedAmountCommand> _promotionUsedAmountCommand;
 	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly IDistributionTaskQueue _taskQueue;
 	private readonly TgsContext _tgsContext;
@@ -29,15 +30,15 @@ internal class ReliefMoneyWeeklyDistribution : IDistribution
 
 	public ReliefMoneyWeeklyDistribution(
 		IDistributionTaskQueue taskQueue,
-		IPromotionRepository promotionRepository,
 		IPromotionBonusRepository promotionBonusFactory,
 		ISerialNumberGenerator serialNumberGenerator,
+		ICommandService<UpdatePromotionUsedAmountCommand> promotionUsedAmountCommand,
 		TgsContext tgsContext)
 	{
 		_taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
 		_promotionBonusFactory =
 			promotionBonusFactory ?? throw new ArgumentNullException(nameof(promotionBonusFactory));
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+		_promotionUsedAmountCommand = promotionUsedAmountCommand ?? throw new ArgumentNullException(nameof(promotionUsedAmountCommand));
 		_serialNumberGenerator =
 			serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 		_tgsContext = tgsContext ?? throw new ArgumentNullException(nameof(tgsContext));
@@ -172,7 +173,8 @@ internal class ReliefMoneyWeeklyDistribution : IDistribution
 				=> x.PromotionId == _promotionBonusModel!.PromotionId && x.From == _promotionBonusModel.From.UtcDateTime &&
 				x.To == _promotionBonusModel.To.UtcDateTime, cancellationToken))
 		{
-			await _promotionRepository.UpdatePromotionAsync(_promotion!);
+			await _promotionUsedAmountCommand.ExecuteAsync(
+				new UpdatePromotionUsedAmountCommand(_promotion!.Id, _promotion.AmountUsed, null), cancellationToken);
 
 			_ = await _promotionBonusFactory.CreatePromotionBonusAsync(_promotionBonusModel!);
 		}
