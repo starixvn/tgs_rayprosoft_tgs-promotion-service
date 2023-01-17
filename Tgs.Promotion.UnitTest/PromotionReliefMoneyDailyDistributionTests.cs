@@ -134,8 +134,8 @@ public class PromotionReliefMoneyDailyDistributionTests
 				{
 					Id = promotionId,
 					BrandId = brandId,
-					From = previousDay.DateTime,
-					To = previousDay.DateTime,
+					From = previousDay.UtcDateTime,
+					To = previousDay.UtcDateTime,
 					SettlementIntervalType = "Daily",
 					PromotionType = "ReliefMoneyDaily",
 					Percentage = 10,
@@ -150,7 +150,7 @@ public class PromotionReliefMoneyDailyDistributionTests
 						new PromotionParticipant
 						{
 							PlayerCode = playerCode,
-							CreatedOn = previousDay.DateTime
+							CreatedOn = previousDay.UtcDateTime
 						}
 					},
 					CampaignDetail = "{\"playerAutoJoin\": true}"
@@ -175,7 +175,7 @@ public class PromotionReliefMoneyDailyDistributionTests
 				{
 					PlayerCode = playerCode,
 					BrandId = brandId,
-					ReportDate = reportDate.ToUniversalTime().DateTime,
+					ReportDate = reportDate.UtcDateTime,
 					WinLoss = 100,
 					GameType = (short)GameType.Slot
 				}
@@ -245,8 +245,8 @@ public class PromotionReliefMoneyDailyDistributionTests
 				{
 					Id = promotionId,
 					BrandId = brandId,
-					From = previousDay.DateTime,
-					To = previousDay.DateTime,
+					From = previousDay.UtcDateTime,
+					To = previousDay.UtcDateTime,
 					SettlementIntervalType = "Daily",
 					PromotionType = "ReliefMoneyDaily",
 					Percentage = 10,
@@ -261,7 +261,7 @@ public class PromotionReliefMoneyDailyDistributionTests
 						new PromotionParticipant
 						{
 							PlayerCode = playerCode,
-							CreatedOn = previousDay.DateTime
+							CreatedOn = previousDay.UtcDateTime
 						}
 					},
 					CampaignDetail = "{}"
@@ -348,8 +348,8 @@ public class PromotionReliefMoneyDailyDistributionTests
 				{
 					Id = promotionId,
 					BrandId = brandId,
-					From = previousDay.DateTime,
-					To = previousDay.DateTime,
+					From = previousDay.UtcDateTime,
+					To = previousDay.UtcDateTime,
 					SettlementIntervalType = "Daily",
 					PromotionType = "ReliefMoneyDaily",
 					Percentage = 10,
@@ -365,7 +365,7 @@ public class PromotionReliefMoneyDailyDistributionTests
 						{
 							PromotionId = promotionId,
 							PlayerCode = playerCode,
-							CreatedOn = previousDay.DateTime
+							CreatedOn = previousDay.UtcDateTime
 						}
 					},
 					CampaignDetail = "{}"
@@ -448,8 +448,7 @@ public class PromotionReliefMoneyDailyDistributionTests
 			0,
 			nowDateTime.Offset);
 
-		var previousMonday = now.AddDays(-7).GetMonday();
-		var previousSunday = now.AddDays(-7).GetSunday();
+		var previousDay = now.AddDays(-1);
 
 		var promotions = new PromotionRow[]
 			{
@@ -457,8 +456,8 @@ public class PromotionReliefMoneyDailyDistributionTests
 				{
 					Id = promotionId,
 					BrandId = brandId,
-					From = previousMonday.DateTime,
-					To = previousSunday.DateTime,
+					From = previousDay.UtcDateTime,
+					To = previousDay.UtcDateTime,
 					SettlementIntervalType = "Daily",
 					PromotionType = "ReliefMoneyDaily",
 					Percentage = 10,
@@ -473,9 +472,10 @@ public class PromotionReliefMoneyDailyDistributionTests
 						new PromotionParticipant
 						{
 							PlayerCode = playerCode,
-							CreatedOn = previousMonday.DateTime
+							CreatedOn = previousDay.UtcDateTime
 						}
-					}
+					},
+					PromotionBonus = Array.Empty<PromotionBonus>()
 				}
 			}
 			.AsQueryable()

@@ -56,8 +56,8 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 				{
 					Id = promotionId,
 					BrandId = brandId,
-					From = previousMonday.DateTime,
-					To = previousSunday.DateTime,
+					From = previousMonday.UtcDateTime,
+					To = previousSunday.UtcDateTime,
 					SettlementIntervalType = "Weekly",
 					PromotionType = "ReliefMoneyWeekly",
 					Percentage = 10,
@@ -72,7 +72,7 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 						new PromotionParticipant
 						{
 							PlayerCode = playerCode,
-							CreatedOn = previousMonday.DateTime
+							CreatedOn = previousMonday.UtcDateTime
 						}
 					}
 				}
@@ -133,8 +133,8 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 				{
 					Id = promotionId,
 					BrandId = brandId,
-					From = previousMonday.DateTime,
-					To = previousSunday.DateTime,
+					From = previousMonday.UtcDateTime,
+					To = previousSunday.UtcDateTime,
 					SettlementIntervalType = "Weekly",
 					PromotionType = "ReliefMoneyWeekly",
 					Percentage = 10,
@@ -149,7 +149,7 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 						new PromotionParticipant
 						{
 							PlayerCode = playerCode,
-							CreatedOn = previousMonday.DateTime
+							CreatedOn = previousMonday.UtcDateTime
 						}
 					},
 					CampaignDetail = "{\"playerAutoJoin\": true}"
@@ -176,7 +176,7 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 				{
 					PlayerCode = playerCode,
 					BrandId = brandId,
-					ReportDate = reportDate.ToUniversalTime().DateTime,
+					ReportDate = reportDate.UtcDateTime,
 					WinLoss = 100,
 					GameType = (short)GameType.Slot
 				}
@@ -247,8 +247,8 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 				{
 					Id = promotionId,
 					BrandId = brandId,
-					From = previousMonday.DateTime,
-					To = previousSunday.DateTime,
+					From = previousMonday.UtcDateTime,
+					To = previousSunday.UtcDateTime,
 					SettlementIntervalType = "Weekly",
 					PromotionType = "ReliefMoneyWeekly",
 					Percentage = 10,
@@ -263,7 +263,7 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 						new PromotionParticipant
 						{
 							PlayerCode = playerCode,
-							CreatedOn = previousMonday.DateTime
+							CreatedOn = previousMonday.UtcDateTime
 						}
 					},
 					CampaignDetail = "{}"
@@ -351,8 +351,8 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 				{
 					Id = promotionId,
 					BrandId = brandId,
-					From = previousMonday.DateTime,
-					To = previousSunday.DateTime,
+					From = previousMonday.UtcDateTime,
+					To = previousSunday.UtcDateTime,
 					SettlementIntervalType = "Weekly",
 					PromotionType = "ReliefMoneyWeekly",
 					Percentage = 10,
@@ -368,7 +368,7 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 						{
 							PromotionId = promotionId,
 							PlayerCode = playerCode,
-							CreatedOn = previousMonday.DateTime
+							CreatedOn = previousMonday.UtcDateTime
 						}
 					},
 					CampaignDetail = "{}"
@@ -460,8 +460,8 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 				{
 					Id = promotionId,
 					BrandId = brandId,
-					From = previousMonday.DateTime,
-					To = previousSunday.DateTime,
+					From = previousMonday.UtcDateTime,
+					To = previousSunday.UtcDateTime,
 					SettlementIntervalType = "Weekly",
 					PromotionType = "ReliefMoneyWeekly",
 					Percentage = 10,
@@ -476,7 +476,7 @@ public class PromotionReliefMoneyWeeklyDistributionTests
 						new PromotionParticipant
 						{
 							PlayerCode = playerCode,
-							CreatedOn = previousMonday.DateTime
+							CreatedOn = previousMonday.UtcDateTime
 						}
 					}
 				}

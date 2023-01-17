@@ -55,7 +55,7 @@ public static class PromotionCoreExtensions
 					{ "TurnoverRebateWeekly", typeof(TurnoverRebateWeeklyDistribution) },
 					{ "TurnoverRebate", typeof(TurnoverRebateDailyDistribution) },
 					{ "ReliefMoneyMonthly", typeof(ReliefMoneyMonthlyDistribution) },
-					{ "ReliefMoney", typeof(ReliefMoneyDailyDistribution) }
+					{ "ReliefMoneyDaily", typeof(ReliefMoneyDailyDistribution) }
 				}.ToImmutableDictionary();
 
 			_ = distribution.TryGetValue(key, out var distributionType);

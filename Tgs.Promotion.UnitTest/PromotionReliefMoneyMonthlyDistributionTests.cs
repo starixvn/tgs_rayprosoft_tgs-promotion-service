@@ -56,8 +56,8 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 				{
 					Id = promotionId,
 					BrandId = brandId,
-					From = previousFirstDayOfMonth.DateTime,
-					To = previousLastDayOfMonth.DateTime,
+					From = previousFirstDayOfMonth.UtcDateTime,
+					To = previousLastDayOfMonth.UtcDateTime,
 					SettlementIntervalType = "Monthly",
 					PromotionType = "ReliefMoneyMonthly",
 					Percentage = 10,
@@ -72,7 +72,7 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 						new PromotionParticipant
 						{
 							PlayerCode = playerCode,
-							CreatedOn = previousFirstDayOfMonth.DateTime
+							CreatedOn = previousFirstDayOfMonth.UtcDateTime
 						}
 					}
 				}
@@ -133,8 +133,8 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 				{
 					Id = promotionId,
 					BrandId = brandId,
-					From = previousFirstDayOfMonth.DateTime,
-					To = previousLastDayOfMonth.DateTime,
+					From = previousFirstDayOfMonth.UtcDateTime,
+					To = previousLastDayOfMonth.UtcDateTime,
 					SettlementIntervalType = "Monthly",
 					PromotionType = "ReliefMoneyMonthly",
 					Percentage = 10,
@@ -149,7 +149,7 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 						new PromotionParticipant
 						{
 							PlayerCode = playerCode,
-							CreatedOn = previousFirstDayOfMonth.DateTime
+							CreatedOn = previousFirstDayOfMonth.UtcDateTime
 						}
 					},
 					CampaignDetail = "{\"playerAutoJoin\": true}"
@@ -176,7 +176,7 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 				{
 					PlayerCode = playerCode,
 					BrandId = brandId,
-					ReportDate = reportDate.ToUniversalTime().DateTime,
+					ReportDate = reportDate.UtcDateTime,
 					WinLoss = 100,
 					GameType = (short)GameType.Slot
 				}
@@ -248,8 +248,8 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 				{
 					Id = promotionId,
 					BrandId = brandId,
-					From = previousFirstDayOfMonth.DateTime,
-					To = previousLastDayOfMonth.DateTime,
+					From = previousFirstDayOfMonth.UtcDateTime,
+					To = previousLastDayOfMonth.UtcDateTime,
 					SettlementIntervalType = "Monthly",
 					PromotionType = "ReliefMoneyMonthly",
 					Percentage = 10,
@@ -264,7 +264,7 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 						new PromotionParticipant
 						{
 							PlayerCode = playerCode,
-							CreatedOn = previousFirstDayOfMonth.DateTime
+							CreatedOn = previousFirstDayOfMonth.UtcDateTime
 						}
 					},
 					CampaignDetail = "{}"
@@ -291,7 +291,7 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 				{
 					PlayerCode = playerCode,
 					BrandId = brandId,
-					ReportDate = reportDate.ToUniversalTime().DateTime,
+					ReportDate = reportDate.UtcDateTime,
 					WinLoss = 100,
 					GameType = (short)GameType.Slot
 				}
@@ -631,8 +631,8 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 				{
 					Id = promotionId,
 					BrandId = brandId,
-					From = previousFirstDayOfMonth.DateTime,
-					To = previousLastDayOfMonth.DateTime,
+					From = previousFirstDayOfMonth.UtcDateTime,
+					To = previousLastDayOfMonth.UtcDateTime,
 					SettlementIntervalType = "Monthly",
 					PromotionType = "ReliefMoneyMonthly",
 					Percentage = 10,
@@ -647,7 +647,7 @@ public class PromotionReliefMoneyMonthlyDistributionTests
 						new PromotionParticipant
 						{
 							PlayerCode = playerCode,
-							CreatedOn = previousFirstDayOfMonth.DateTime
+							CreatedOn = previousFirstDayOfMonth.UtcDateTime
 						}
 					}
 				}
