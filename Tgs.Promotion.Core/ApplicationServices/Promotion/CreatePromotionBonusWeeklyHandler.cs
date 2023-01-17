@@ -28,7 +28,7 @@ public class CreatePromotionBonusWeeklyHandler
 		CreatePromotionBonusWeeklyRequest request,
 		CancellationToken cancellationToken)
 	{
-		var timeSpan = new TimeSpan(0, request.TimeSpanMinutes, 0);
+		var timeSpan = TimeSpan.FromMinutes(request.TimeSpanMinutes);
 
 		var now = new DateTimeOffset(DateTimeOffset.Now.Year,
 			DateTimeOffset.Now.Month,

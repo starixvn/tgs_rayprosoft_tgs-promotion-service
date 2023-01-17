@@ -27,7 +27,7 @@ public class
 		CreatePromotionBonusDailyRequest request,
 		CancellationToken cancellationToken)
 	{
-		var timeSpan = new TimeSpan(0, request.TimeSpanMinutes, 0);
+		var timeSpan = TimeSpan.FromMinutes(request.TimeSpanMinutes);
 
 		var previousDay = DateTimeOffset.Now.ToOffset(timeSpan).AddDays(-1);
 
