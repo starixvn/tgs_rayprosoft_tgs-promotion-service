@@ -31,5 +31,6 @@ namespace Tgs.Promotion.Domain.Entities
         public decimal BetAmount { get; set; }
         public decimal OriginalTurnover { get; set; }
         public decimal ValidBetAmount { get; set; }
+        public DateTime? ReportDateTime { get; set; }
     }
 }

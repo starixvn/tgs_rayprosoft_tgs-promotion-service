@@ -10,8 +10,6 @@ public class PlayerWinLossMonthly
 
 	public string PlayerCode { get; set; } = default!;
 
-	public DateTimeOffset ReportDate { get; set; }
-
 	public int? VipLevel { get; set; }
 
 	public decimal WinLoss { get; set; }

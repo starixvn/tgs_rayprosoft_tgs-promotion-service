@@ -2,5 +2,7 @@
 
 public class CreatePromotionBonusDailyRequest
 {
-	public string? Date { get; set; }
+	public DateOnly? Date { get; set; }
+
+	public int TimeSpanMinutes { get; set; } = default!;
 }

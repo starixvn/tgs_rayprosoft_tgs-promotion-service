@@ -24,6 +24,26 @@ namespace Tgs.Promotion.Domain.Entities.Configurations
 
             entity.HasIndex(e => new { e.PromotionId, e.From, e.To }, "ix_promotion_bonus_promotion_id_from_to");
 
+            entity.HasIndex(e => new { e.PromotionId, e.From, e.To }, "ux_promotion_bonuses_relief_money_daily")
+                .IsUnique()
+                .HasFilter("(promotion_type = 'ReliefMoneyDaily'::text)");
+
+            entity.HasIndex(e => new { e.PromotionId, e.From, e.To }, "ux_promotion_bonuses_relief_money_monthly")
+                .IsUnique()
+                .HasFilter("(promotion_type = 'ReliefMoneyMonthly'::text)");
+
+            entity.HasIndex(e => new { e.PromotionId, e.From, e.To }, "ux_promotion_bonuses_relief_money_weekly")
+                .IsUnique()
+                .HasFilter("(promotion_type = 'ReliefMoneyWeekly'::text)");
+
+            entity.HasIndex(e => new { e.PromotionId, e.From, e.To }, "ux_promotion_bonuses_turnover_rebate_daily")
+                .IsUnique()
+                .HasFilter("(promotion_type = 'TurnoverRebate'::text)");
+
+            entity.HasIndex(e => new { e.PromotionId, e.From, e.To }, "ux_promotion_bonuses_turnover_rebate_weekly")
+                .IsUnique()
+                .HasFilter("(promotion_type = 'TurnoverRebateWeekly'::text)");
+
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");

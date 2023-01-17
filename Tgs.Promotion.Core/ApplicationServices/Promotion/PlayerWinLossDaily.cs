@@ -10,8 +10,6 @@ public class PlayerWinLossDaily
 
 	public string PlayerCode { get; set; } = default!;
 
-	public DateTimeOffset ReportDate { get; set; }
-
 	public decimal Turnover { get; set; }
 
 	public int? VipLevel { get; set; }

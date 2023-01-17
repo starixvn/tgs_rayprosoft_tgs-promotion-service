@@ -594,8 +594,8 @@ public class PromotionRepository : IPromotionRepository
 			.ConfigureAwait(false);
 	}
 
-	public ValueTask UpdatePromotionsAsync(PromotionRow[] promotions) =>
-			_promotionService.UpdateEntitiesAsync(promotions);
+	public ValueTask UpdatePromotionAsync(PromotionRow promotions) =>
+			_promotionService.UpdateEntityAsync(promotions);
 
 	public async ValueTask UpdatePromotionSnapshotAsync(
 		PromotionSnapshot snapshot,

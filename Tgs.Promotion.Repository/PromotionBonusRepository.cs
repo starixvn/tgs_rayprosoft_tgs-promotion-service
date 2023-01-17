@@ -38,7 +38,7 @@ public class PromotionBonusRepository : IPromotionBonusRepository
 				PlayerCode = x.PlayerCode,
 				PromotionBonusId = model.Id,
 				BonusAmount = x.BonusAmount,
-				SentOn = model.SentOn?.UtcDateTime
+				SentOn = null
 			}).ToHashSet(),
 			Detail = model.Detail
 		}).ToArray();
@@ -59,4 +59,36 @@ public class PromotionBonusRepository : IPromotionBonusRepository
 
 	public ValueTask UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players) =>
 		_promotionPlayerService.UpdateEntitiesAsync(players);
+
+	public async ValueTask<PromotionBonus> CreatePromotionBonusAsync(PromotionBonusModel model)
+	{
+		var bonus = new PromotionBonus
+		{
+			Id = model.Id,
+			BrandId = model.BrandId,
+			PromotionId = model.PromotionId,
+			From = model.From.UtcDateTime,
+			To = model.To.UtcDateTime,
+			PromotionType = model.PromotionType,
+			TotalAmountLimit = model.TotalAmountLimit,
+			GameType = (short?)model.GameType,
+			Percentage = model.Percentage,
+			BonusAmountLimit = model.BonusAmountLimit,
+			TurnoverMultiple = model.TurnoverMultiple,
+			CreatedOn = model.CreatedOn.UtcDateTime,
+			PromotionPlayers = model.Players.Select(x => new PromotionPlayer
+			{
+				PlayerCode = x.PlayerCode,
+				PromotionBonusId = model.Id,
+				BonusAmount = x.BonusAmount,
+				SentOn = null
+			}).ToHashSet(),
+			Detail = model.Detail
+		};
+
+		await _promotionBonusService.CreateEntityAsync(bonus);
+
+		return bonus;
+
+	}
 }

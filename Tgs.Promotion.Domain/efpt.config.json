@@ -102,7 +102,8 @@
          "ObjectType": 0
       }
    ],
-   "UiHint": "Tgs",
+   "UiHint": "tgs",
+   "UncountableWords": null,
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": false,
    "UseDbContextSplitting": true,
@@ -112,9 +113,7 @@
    "UseInflector": true,
    "UseLegacyPluralizer": true,
    "UseManyToManyEntity": true,
-   "UseNoConstructor": true,
    "UseNoDefaultConstructor": false,
-   "UseNoNavigations": false,
    "UseNoObjectFilter": false,
    "UseNodaTime": false,
    "UseNullableReferences": true,

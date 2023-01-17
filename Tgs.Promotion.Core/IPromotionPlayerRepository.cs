@@ -12,4 +12,6 @@ public interface IPromotionPlayerRepository
 	IQueryable<PromotionPlayer> GetPromotionPlayerQueries(
 		Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery = null,
 		bool tracking = false);
+
+	ValueTask SetSentOnAsync(int promotionPlayerId);
 }

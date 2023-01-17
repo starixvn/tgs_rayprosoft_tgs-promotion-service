@@ -92,7 +92,7 @@ public interface IPromotionRepository
 		DateTime sentOn,
 		CancellationToken cancellationToken = default);
 
-	ValueTask UpdatePromotionsAsync(PromotionRow[] promotions);
+	ValueTask UpdatePromotionAsync(PromotionRow promotions);
 
 	ValueTask UpdatePromotionSnapshotAsync(
 		PromotionSnapshot snapshot,

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Tgs.BrandCertificate.Clients;
 using Tgs.Promotion.Extensions;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.PromotionBonus;
@@ -11,33 +12,40 @@ public class CreatePromotionBonusWeeklyHandler
 {
 	private readonly Func<string, IDistribution> _distributionFunc;
 	private readonly IPromotionRepository _promotionRepository;
+	private readonly IBrandServiceClient _brandServiceClient;
 
 	public CreatePromotionBonusWeeklyHandler(
 		IPromotionRepository promotionRepository,
+		IBrandServiceClient brandServiceClient,
 		Func<string, IDistribution> distributionFunc)
 	{
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-		_distributionFunc = distributionFunc;
+		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+		_distributionFunc = distributionFunc ?? throw new ArgumentNullException(nameof(distributionFunc));
 	}
 
 	public async ValueTask<MessageResponse> GetAsync(
 		CreatePromotionBonusWeeklyRequest request,
 		CancellationToken cancellationToken)
 	{
+		var timeSpan = new TimeSpan(0, request.TimeSpanMinutes, 0);
+
 		var now = new DateTimeOffset(DateTimeOffset.Now.Year,
 			DateTimeOffset.Now.Month,
 			DateTimeOffset.Now.Day,
 			0,
 			0,
 			0,
-			new(8, 0, 0));
+			timeSpan);
 
 		var previousMonday = now.AddDays(-7).GetMonday();
 		var previousSunday = now.AddDays(-7).GetSunday();
 
-		if (!string.IsNullOrEmpty(request.From) &&
-			DateTimeOffset.TryParse($"{request.From} 00:00 +08:00", out var resultFrom))
+		if (request.From != null && request.To != null)
 		{
+			var resultFrom = new DateTimeOffset(request.From.Value.ToDateTime(TimeOnly.MinValue), timeSpan);
+			var resultTo = new DateTimeOffset(request.To.Value.ToDateTime(TimeOnly.MinValue), timeSpan);
+
 			previousMonday = new(resultFrom.Year,
 				resultFrom.Month,
 				resultFrom.Day,
@@ -45,11 +53,7 @@ public class CreatePromotionBonusWeeklyHandler
 				0,
 				0,
 				resultFrom.Offset);
-		}
 
-		if (!string.IsNullOrEmpty(request.To) &&
-			DateTimeOffset.TryParse($"{request.To} 00:00 +08:00", out var resultTo))
-		{
 			previousSunday = new(resultTo.Year,
 				resultTo.Month,
 				resultTo.Day,
@@ -59,9 +63,12 @@ public class CreatePromotionBonusWeeklyHandler
 				resultTo.Offset);
 		}
 
+		var brandIds = await _brandServiceClient.GetBrandIdsByTimeSpanMinutesAsync(request.TimeSpanMinutes, cancellationToken).ToArrayAsync(cancellationToken);
+
 		var promotions = await _promotionRepository.GetPromotionQueries()
 			.Where(x => x.Status == (short)PromotionStatus.Enabled)
 			.Where(x => x.SettlementIntervalType == "Weekly")
+			.Where(x => brandIds.Contains(x.BrandId))
 			.Where(x => x.From >= previousMonday.UtcDateTime && x.From <= previousSunday.UtcDateTime ||
 				x.To >= previousMonday.UtcDateTime && x.To <= previousSunday.UtcDateTime ||
 				x.From < previousMonday.UtcDateTime && x.To > previousSunday.UtcDateTime

@@ -2,7 +2,5 @@
 
 public class CreatePromotionBonusMonthlyRequest
 {
-	public string? From { get; set; }
-
-	public string? To { get; set; }
+	public int TimeSpanMinutes { get; set; }
 }
