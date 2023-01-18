@@ -1,3 +1,3 @@
 ﻿namespace Tgs.Promotion.Clients.Models.PromotionBonus;
 
-public record CreatePromotionBonusDailyRequest(string? Date = null);
+public record CreatePromotionBonusDailyRequest(int TimeSpanMinutes, DateOnly? Date = null);

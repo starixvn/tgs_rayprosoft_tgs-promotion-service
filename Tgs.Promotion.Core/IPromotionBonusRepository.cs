@@ -12,4 +12,6 @@ public interface IPromotionBonusRepository
 		bool tracking = false);
 
 	ValueTask UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players);
+
+	ValueTask<PromotionBonus> CreatePromotionBonusAsync(PromotionBonusModel model);
 }

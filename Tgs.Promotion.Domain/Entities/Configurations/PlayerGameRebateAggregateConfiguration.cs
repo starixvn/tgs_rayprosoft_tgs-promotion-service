@@ -50,6 +50,8 @@ namespace Tgs.Promotion.Domain.Entities.Configurations
 
             entity.Property(e => e.ReportDate).HasColumnName("report_date");
 
+            entity.Property(e => e.ReportDateTime).HasColumnName("report_date_time");
+
             entity.Property(e => e.Turnover)
                 .HasPrecision(18, 6)
                 .HasColumnName("turnover");

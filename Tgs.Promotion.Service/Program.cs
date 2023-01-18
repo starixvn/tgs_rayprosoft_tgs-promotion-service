@@ -5,6 +5,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.MessageQueue.Configuration;
 using Tgs.PlayerBucket.Clients.DependencyInjection;
+using Tgs.Promotion.ApplicationServices.Promotion.Workers;
 using Tgs.Promotion.MessageQueue;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Service.MessageQueue;
@@ -124,6 +125,10 @@ builder.Services
 		=> jsonOptions.JsonSerializerOptions.Converters.Add(new PromotionRuleViewModelJsonConverter()));
 builder.Services
 	.AddSwaggerGen();
+
+builder.Services
+	.AddHostedService<DistributionBackground>()
+	.AddSingleton<IDistributionTaskQueue, DistributionTaskQueue>();
 
 var app = builder.Build();
 

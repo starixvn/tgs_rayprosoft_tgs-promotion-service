@@ -31,4 +31,13 @@ public class PromotionPlayerRepository : IPromotionPlayerRepository
 			? preQuery(_promotionPlayerService.GetQueries())
 			: preQuery(_promotionPlayerService.GetQueries()).AsNoTracking();
 	}
+
+	public async ValueTask SetSentOnAsync(int promotionPlayerId)
+	{
+		var promotionPlayer =  await _promotionPlayerService.GetQueries().SingleAsync(x => x.Id == promotionPlayerId);
+
+		promotionPlayer.SentOn = DateTime.UtcNow;
+
+		await _promotionPlayerService.UpdateEntityAsync(promotionPlayer);
+	}
 }

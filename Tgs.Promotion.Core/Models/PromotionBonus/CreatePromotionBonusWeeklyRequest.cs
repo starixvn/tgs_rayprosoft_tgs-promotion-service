@@ -2,7 +2,9 @@
 
 public class CreatePromotionBonusWeeklyRequest
 {
-	public string? From { get; set; }
+	public DateOnly? From { get; set; }
 
-	public string? To { get; set; }
+	public DateOnly? To { get; set; }
+
+	public int TimeSpanMinutes { get; set; }
 }

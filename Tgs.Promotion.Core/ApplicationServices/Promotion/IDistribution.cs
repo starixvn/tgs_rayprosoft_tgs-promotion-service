@@ -10,5 +10,5 @@ public interface IDistribution
 
 	ValueTask<IDistribution> SetConditionDataAsync(CancellationToken cancellationToken);
 
-	IDistribution SetPromotion(PromotionRow promotion, DateTimeOffset? from, DateTimeOffset? to);
+	IDistribution SetPromotion(PromotionRow promotion, DateTimeOffset from, DateTimeOffset to);
 }
