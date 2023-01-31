@@ -123,8 +123,12 @@ builder.Services
 	.AddControllers()
 	.AddJsonOptions(jsonOptions 
 		=> jsonOptions.JsonSerializerOptions.Converters.Add(new PromotionRuleViewModelJsonConverter()));
+
 builder.Services
-	.AddSwaggerGen();
+	.AddDateOnlyTimeOnlyStringConverters();
+
+builder.Services
+	.AddSwaggerGen(c => c.UseDateOnlyTimeOnlyStringConverters());
 
 builder.Services
 	.AddHostedService<DistributionBackground>()
