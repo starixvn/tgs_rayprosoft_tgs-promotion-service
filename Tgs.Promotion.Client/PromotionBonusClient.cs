@@ -34,8 +34,9 @@ public class PromotionBonusClient : IPromotionBonusClient
 		var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionBonus/settleDataDaily")
 		{
 			Content =
-				new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
+				new StringContent(JsonSerializer.Serialize(request, _SerializerOptions), Encoding.UTF8, "application/json")
 		};
+
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
 		_ = response.EnsureSuccessStatusCode();
@@ -52,7 +53,7 @@ public class PromotionBonusClient : IPromotionBonusClient
 		var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionBonus/settleDataMonthly")
 		{
 			Content =
-				new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
+				new StringContent(JsonSerializer.Serialize(request, _SerializerOptions), Encoding.UTF8, "application/json")
 		};
 
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
@@ -71,7 +72,7 @@ public class PromotionBonusClient : IPromotionBonusClient
 		var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/promotionBonus/settleDataWeekly")
 		{
 			Content =
-				new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
+				new StringContent(JsonSerializer.Serialize(request, _SerializerOptions), Encoding.UTF8, "application/json")
 		};
 		var response = await _client.SendAsync(httpRequest).ConfigureAwait(false);
 
