@@ -1,4 +1,7 @@
 ﻿using System.Collections.Immutable;
+using System.Numerics;
+using System.Threading;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.CashService.Client;
 using Tgs.PlayerService.Client;
@@ -276,6 +279,153 @@ public class PromotionDistributeTests
 					x.Action == DistributeAction.Distribute &&
 					x.ChangeSets.RootElement.EnumerateArray().Single().GetProperty("op").GetString() == "add" &&
 					x.ChangeSets.RootElement.EnumerateArray().Single().GetProperty("path").GetString() == "/sentOn"));
+	}
+
+	[TestMethod]
+	public async Task 發放活動優惠如果是自動發放會執行後面發放的程序()
+	{
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
+		var sut = new DistributePromotionBonusCommandService(
+			fakePromotionRepository,
+			fakeServiceCoordinator,
+			fakeCashServiceClient,
+			fakePlayerServiceClient,
+			fakePlayerBucketClient,
+			fakeSerialNumberGenerator);
+
+		var command = new DistributePromotionBonusCommand(
+			 Guid.NewGuid(),
+			 "player1",
+			 100M,
+			 1000M,
+			 null,
+			 "manager");
+
+		var walletId = Guid.NewGuid();
+
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = Guid.NewGuid()
+			});
+
+		_ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = walletId.ToString()
+			}.ToImmutableDictionary());
+
+		_ = fakePromotionRepository.FindPromotionDistributePlanAsync(Arg.Is(command.PlanId))
+			.Returns(new PromotionDistributePlanInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				0));
+
+		_ = fakeServiceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(Arg.Any<GetPromotionMainInfoQuery>())
+			.Returns(new PromotionMainInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				"Ttt",
+				(From: DateTime.Now.AddDays(-1D), To: DateTime.Now.AddDays(1D)),
+				"Test",
+				null,
+				true));
+
+		var distributeId = Guid.NewGuid();
+		_ = fakeSerialNumberGenerator.GenerateAsync()
+			.Returns(distributeId, Guid.NewGuid(), Guid.NewGuid());
+
+		_ = await sut.GetAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.UpdatePromotionDistributeAsync(
+				Arg.Is(distributeId),
+				Arg.Any<DateTime>());
+	}
+
+	[TestMethod]
+	public async Task 發放活動恵時如果遇到流水建立的短暫性失敗依然可以發放成功()
+	{
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
+		var sut = new DistributePromotionBonusCommandService(
+			fakePromotionRepository,
+			fakeServiceCoordinator,
+			fakeCashServiceClient,
+			fakePlayerServiceClient,
+			fakePlayerBucketClient,
+			fakeSerialNumberGenerator);
+
+		var command = new DistributePromotionBonusCommand(
+			 Guid.NewGuid(),
+			 "player1",
+			 100M,
+			 1000M,
+			 null,
+			 "manager");
+
+		var walletId = Guid.NewGuid();
+
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = Guid.NewGuid()
+			});
+
+		_ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = walletId.ToString()
+			}.ToImmutableDictionary());
+
+		_ = fakePromotionRepository.FindPromotionDistributePlanAsync(Arg.Is(command.PlanId))
+			.Returns(new PromotionDistributePlanInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				0));
+
+		_ = fakeServiceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(Arg.Any<GetPromotionMainInfoQuery>())
+			.Returns(new PromotionMainInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				"Ttt",
+				(From: DateTime.Now.AddDays(-1D), To: DateTime.Now.AddDays(1D)),
+				"Test",
+				null,
+				true));
+
+		var distributeId = Guid.NewGuid();
+		_ = fakeSerialNumberGenerator.GenerateAsync()
+			.Returns(distributeId, Guid.NewGuid(), Guid.NewGuid());
+
+		_ = fakePlayerBucketClient.CreateBucketAsync(
+			Arg.Is(command.PlayerCode),
+			Arg.Is(command.NeedTurnover),
+			Arg.Is(BucketType.Promotion),
+			Arg.Is(distributeId.ToString()))
+			.Returns(_ => throw new TimeoutException(), _ => Guid.NewGuid());
+
+		_ = await sut.GetAsync(command);
+
+		_ = fakePromotionRepository.Received(1)
+			.UpdatePromotionDistributeAsync(
+				Arg.Is(distributeId),
+				Arg.Any<DateTime>());
 	}
 
 	[TestMethod]
