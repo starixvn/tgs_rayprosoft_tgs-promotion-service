@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Json.Patch;
 using Json.Pointer;
+using Polly;
 using Tgs.CashService.Client;
 using Tgs.PlayerService.Client;
 using Tgs.SerialNumberGenerator;
@@ -99,12 +100,15 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 
 		if (promotion.IsAutoSent)
 		{
-			_ = await _playerBucketClient.CreateBucketAsync(
-				player.PlayerCode,
-				command.NeedTurnover,
-				BucketType.Promotion,
-				distributeId.ToString(),
-				cancellationToken).ConfigureAwait(false);
+			_ = await Policy.Handle<TimeoutException>()
+				.RetryAsync(1)
+				.ExecuteAsync(async () => await _playerBucketClient.CreateBucketAsync(
+					player.PlayerCode,
+					command.NeedTurnover,
+					BucketType.Promotion,
+					distributeId.ToString(),
+					cancellationToken).ConfigureAwait(false))
+				.ConfigureAwait(false);
 
 			_ = await _cashServiceClient.PromotionAsync(
 				walletId,
