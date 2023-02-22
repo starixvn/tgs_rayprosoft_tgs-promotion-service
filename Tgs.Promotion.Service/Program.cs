@@ -107,6 +107,7 @@ builder.Services
 	.AddNatsGlobPatternExchange("tgs.promotion.register.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.depositreward.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.depositaccumulateroulette.setting")
+	.AddNatsGlobPatternExchange("tgs.promotion.offlineloginreward.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneydaily.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneyweekly.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneymonthly.setting")
