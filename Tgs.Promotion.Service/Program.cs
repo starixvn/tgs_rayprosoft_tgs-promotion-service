@@ -103,13 +103,6 @@ builder.Services
 		.AddHandler<DepositStatusChangedMessageHandler>(
 			"tgs.payment.deposit.status",
 			"tgs.payment.deposit.status"))
-	.AddNatsGlobPatternExchange("tgs.promotion.roulette.setting")
-	.AddNatsGlobPatternExchange("tgs.promotion.register.setting")
-	.AddNatsGlobPatternExchange("tgs.promotion.depositreward.setting")
-	.AddNatsGlobPatternExchange("tgs.promotion.depositaccumulateroulette.setting")
-	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneydaily.setting")
-	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneyweekly.setting")
-	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneymonthly.setting")
 	.AddGlobPatternExchange<TurnoverRebateDailyCampaignDetailProcessor>("tgs.promotion.turnoverrebate.setting")
 	.AddGlobPatternExchange<TurnoverRebateWeeklyCampaignDetailProcessor>("tgs.promotion.turnoverrebateweekly.setting")
 	.AddGlobPatternExchange<DummyCampaignDetailProcessor>("tgs.promotion.dummy.setting")
