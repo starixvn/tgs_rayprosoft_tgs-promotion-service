@@ -107,14 +107,15 @@ builder.Services
 	.AddNatsGlobPatternExchange("tgs.promotion.register.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.depositreward.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.depositaccumulateroulette.setting")
-	.AddNatsGlobPatternExchange("tgs.promotion.offlineloginreward.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneydaily.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneyweekly.setting")
 	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneymonthly.setting")
 	.AddGlobPatternExchange<TurnoverRebateDailyCampaignDetailProcessor>("tgs.promotion.turnoverrebate.setting")
 	.AddGlobPatternExchange<TurnoverRebateWeeklyCampaignDetailProcessor>("tgs.promotion.turnoverrebateweekly.setting")
 	.AddGlobPatternExchange<DummyCampaingDetailProcessor>("tgs.promotion.dummy.setting")
-	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.*.setting")
+	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.firstdeposit.setting")
+	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.dailyfirstdeposit.setting")
+	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.dailyseconddeposit.setting")
 	.AddNatsGlobPatternExchange("*");
 
 builder.Services
