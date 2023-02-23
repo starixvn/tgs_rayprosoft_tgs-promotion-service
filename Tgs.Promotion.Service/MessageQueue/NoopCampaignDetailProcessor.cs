@@ -4,11 +4,11 @@ using Tgs.Promotion.Clients.Protos;
 
 namespace Tgs.Promotion.Service.MessageQueue;
 
-public class NoopCampaingDetailProcessor : IMessageSender
+public class NoopCampaignDetailProcessor : IMessageSender
 {
 	private readonly PromotionSerializer _promotionSerializer;
 
-	public NoopCampaingDetailProcessor(PromotionSerializer promotionSerializer)
+	public NoopCampaignDetailProcessor(PromotionSerializer promotionSerializer)
 	{
 		_promotionSerializer = promotionSerializer ?? throw new ArgumentNullException(nameof(promotionSerializer));
 	}

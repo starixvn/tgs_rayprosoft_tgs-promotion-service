@@ -4,7 +4,7 @@ using Tgs.Promotion.Clients.Protos;
 
 namespace Tgs.Promotion.Service.MessageQueue;
 
-public class DummyCampaingDetailProcessor : IMessageSender
+public class DummyCampaignDetailProcessor : IMessageSender
 {
 	public ValueTask<Answer> AskAsync(string subject, ReadOnlyMemory<byte> data, IEnumerable<MessageHeaderValue> header, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 
