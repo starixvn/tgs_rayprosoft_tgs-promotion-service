@@ -88,8 +88,8 @@ builder.Services
 			httpClient.BaseAddress = builder.Configuration.GetValue<Uri>("Promotion:PlayerBucketBaseUrl")));
 
 builder.Services
-	.AddSingleton<NoopCampaingDetailProcessor>()
-	.AddSingleton<DummyCampaingDetailProcessor>()
+	.AddSingleton<NoopCampaignDetailProcessor>()
+	.AddSingleton<DummyCampaignDetailProcessor>()
 	.AddSingleton<TurnoverRebateDailyCampaignDetailProcessor>()
 	.AddSingleton<TurnoverRebateWeeklyCampaignDetailProcessor>()
 	.AddMessageQueue()
@@ -103,17 +103,12 @@ builder.Services
 		.AddHandler<DepositStatusChangedMessageHandler>(
 			"tgs.payment.deposit.status",
 			"tgs.payment.deposit.status"))
-	.AddNatsGlobPatternExchange("tgs.promotion.roulette.setting")
-	.AddNatsGlobPatternExchange("tgs.promotion.register.setting")
-	.AddNatsGlobPatternExchange("tgs.promotion.depositreward.setting")
-	.AddNatsGlobPatternExchange("tgs.promotion.depositaccumulateroulette.setting")
-	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneydaily.setting")
-	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneyweekly.setting")
-	.AddNatsGlobPatternExchange("tgs.promotion.reliefmoneymonthly.setting")
 	.AddGlobPatternExchange<TurnoverRebateDailyCampaignDetailProcessor>("tgs.promotion.turnoverrebate.setting")
 	.AddGlobPatternExchange<TurnoverRebateWeeklyCampaignDetailProcessor>("tgs.promotion.turnoverrebateweekly.setting")
-	.AddGlobPatternExchange<DummyCampaingDetailProcessor>("tgs.promotion.dummy.setting")
-	.AddGlobPatternExchange<NoopCampaingDetailProcessor>("tgs.promotion.*.setting")
+	.AddGlobPatternExchange<DummyCampaignDetailProcessor>("tgs.promotion.dummy.setting")
+	.AddGlobPatternExchange<NoopCampaignDetailProcessor>("tgs.promotion.firstdeposit.setting")
+	.AddGlobPatternExchange<NoopCampaignDetailProcessor>("tgs.promotion.dailyfirstdeposit.setting")
+	.AddGlobPatternExchange<NoopCampaignDetailProcessor>("tgs.promotion.dailyseconddeposit.setting")
 	.AddNatsGlobPatternExchange("*");
 
 builder.Services

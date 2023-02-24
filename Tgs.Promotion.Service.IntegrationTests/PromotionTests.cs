@@ -555,7 +555,7 @@ public class PromotionTests
 			From = DateTime.Now.AddDays(-10),
 			To = DateTime.Now,
 			Name = "Test Promotion",
-			PromotionType = "TestType",
+			PromotionType = "FirstDeposit",
 			AutoSentPlayerBonus = true,
 			Status = 1,
 			CampaignDetail = "{}"
