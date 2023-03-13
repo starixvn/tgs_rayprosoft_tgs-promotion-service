@@ -45,8 +45,7 @@ internal class UpdatePromotionRuleCommandService : ICommandService<UpdatePromoti
 
 		if (command.CampaignDetail.RootElement.TryGetProperty("vipLevels", out var jsonElement))
 		{
-			var vipLevels = jsonElement.EnumerateArray()
-				.Select(elem => elem.GetInt32()).ToArray();
+			var vipLevels = jsonElement.Deserialize<int[]>() ?? Array.Empty<int>();
 
 			if (vipLevels.Any()) 
 			{
