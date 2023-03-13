@@ -7,50 +7,52 @@ namespace Tgs.Promotion.ApplicationServices;
 
 internal class UpdatePromotionRuleCommandService : ICommandService<UpdatePromotionRuleCommand>
 {
-	private readonly ISystemClock _systemClock;
-	private readonly ISerialNumberGenerator _serialNumberGenerator;
 	private readonly IPromotionRepository _promotionRepository;
-	private readonly PromotionSerializer _promotionSerializer;
+	private readonly ISerialNumberGenerator _serialNumberGenerator;
+	private readonly ISystemClock _systemClock;
 
 	public UpdatePromotionRuleCommandService(
 		ISystemClock systemClock,
 		ISerialNumberGenerator serialNumberGenerator,
-		IPromotionRepository promotionRepository, 
-		PromotionSerializer promotionSerializer)
+		IPromotionRepository promotionRepository)
 	{
 		_systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-		_promotionSerializer = promotionSerializer ?? throw new ArgumentNullException(nameof(promotionSerializer));
 	}
 
 	public async ValueTask ExecuteAsync(UpdatePromotionRuleCommand command, CancellationToken cancellationToken = default)
 	{
 		var snapshot = await _promotionRepository.GetCurrentPromotionSnapshotAsync(
-				command.PromotionId, 
-				cancellationToken)
-			.ConfigureAwait(false);
+			command.PromotionId,
+			cancellationToken).ConfigureAwait(false);
 
 		if (snapshot is null)
 			return;
 
-		var settings = _promotionSerializer.Deserialize<CampaignDetailSettings>(command.CampaignDetail);
-
-		if (settings is not null)
+		if (command.GameType is not null)
 		{
-			if (command.GameType is not null)
+			var settings = command.CampaignDetail.Deserialize<GameProviderSettings>(PromotionUtility.SerializerOptions);
+
+			if (settings is not null)
 			{
 				await _promotionRepository.SetPromotionGameProvidersAsync(
-					command.PromotionId, 
-					settings.GameProviderIds!, 
+					command.PromotionId,
+					settings.GameProviderIds,
 					cancellationToken).ConfigureAwait(false);
 			}
+		}
 
-			if (settings.VipLevels is not null)
+		if (command.CampaignDetail.RootElement.TryGetProperty("vipLevels", out var jsonElement))
+		{
+			var vipLevels = jsonElement.EnumerateArray()
+				.Select(elem => elem.GetInt32()).ToArray();
+
+			if (vipLevels.Any()) 
 			{
 				await _promotionRepository.SetPromotionVipLevelsAsync(
-					command.PromotionId, 
-					settings.VipLevels!,
+					command.PromotionId,
+					vipLevels,
 					command.Modifier,
 					cancellationToken).ConfigureAwait(false);
 			}

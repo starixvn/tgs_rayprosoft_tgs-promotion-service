@@ -21,7 +21,7 @@ public class NoopCampaignDetailProcessor : IMessageSender
 	{
 		var request = CampaignDetailRequest.Parser.ParseFrom(data.Span);
 
-		var settings = _promotionSerializer.Deserialize<CampaignDetailSettings>(request.Settings)!;
+		var settings = _promotionSerializer.Deserialize<GameProviderSettings>(request.Settings)!;
 
 		var response = new CampaignDetailResponse
 		{

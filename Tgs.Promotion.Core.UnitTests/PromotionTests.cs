@@ -377,8 +377,7 @@ public class PromotionTests
 		var sut = new UpdatePromotionRuleCommandService(
 			fakeSystemClock,
 			fakeSerialNumberGenerator,
-			fakePromotionRepository,
-			new PromotionSerializer());
+			fakePromotionRepository);
 
 		var command = new UpdatePromotionRuleCommand(
 			Guid.NewGuid(),
@@ -499,8 +498,7 @@ public class PromotionTests
 		var sut = new UpdatePromotionRuleCommandService(
 			fakeSystemClock,
 			fakeSerialNumberGenerator,
-			fakePromotionRepository,
-			new PromotionSerializer());
+			fakePromotionRepository);
 
 		var command = new UpdatePromotionRuleCommand(
 			Guid.NewGuid(),
@@ -626,8 +624,7 @@ public class PromotionTests
 		var sut = new UpdatePromotionRuleCommandService(
 			fakeSystemClock,
 			fakeSerialNumberGenerator,
-			fakePromotionRepository,
-			new PromotionSerializer());
+			fakePromotionRepository);
 
 		var command = new UpdatePromotionRuleCommand(
 			Guid.NewGuid(),
