@@ -34,14 +34,22 @@ internal class UpdatePromotionRuleCommandService : ICommandService<UpdatePromoti
 		if (snapshot is null)
 			return;
 
-		if (command.GameType is not null)
-		{
-			var settings = _promotionSerializer.Deserialize<GameProviderSettings>(command.CampaignDetail);
+		var settings = _promotionSerializer.Deserialize<CampaignDetailSettings>(command.CampaignDetail);
 
-			if (settings is not null)
+		if (settings is not null)
+		{
+			if (command.GameType is not null)
+			{
 				await _promotionRepository
 					.SetPromotionGameProvidersAsync(command.PromotionId, settings.GameProviderIds, cancellationToken)
 					.ConfigureAwait(false);
+			}
+
+			await _promotionRepository.SetPromotionVipLevelsAsync(
+					command.PromotionId, 
+					settings.VipLevels,
+					command.Modifier,
+					cancellationToken).ConfigureAwait(false);
 		}
 
 		var eventId = await _serialNumberGenerator

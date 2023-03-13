@@ -67,6 +67,7 @@ public interface IPromotionServiceClient
 		string modifier,
 		CancellationToken cancellationToken = default);
 
+	[Obsolete("過時")]
 	ValueTask SetPromotionVipLevelsAsync(
 		Guid promotionId,
 		IEnumerable<int> vipLevels,

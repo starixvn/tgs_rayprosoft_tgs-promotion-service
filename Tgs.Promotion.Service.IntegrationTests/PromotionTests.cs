@@ -697,7 +697,11 @@ public class PromotionTests
 			Test = 111
 		};
 
-		var expected = JsonSerializer.Serialize(rule, new JsonSerializerOptions { WriteIndented = false });
+		var expected = JsonSerializer.Serialize(rule, new JsonSerializerOptions
+		{
+			WriteIndented = false,
+			PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+		});
 
 		_ = fakeMessageSender
 			.RequestAsync(

@@ -382,7 +382,7 @@ public class PromotionTests
 
 		var command = new UpdatePromotionRuleCommand(
 			Guid.NewGuid(),
-			JsonDocument.Parse("{\"playerAutoJoin\": true}"),
+			JsonDocument.Parse("""{"playerAutoJoin": true}"""),
 			0M,
 			0M,
 			2M,
@@ -504,7 +504,7 @@ public class PromotionTests
 
 		var command = new UpdatePromotionRuleCommand(
 			Guid.NewGuid(),
-			JsonDocument.Parse("{\"playerAutoJoin\": true}"),
+			JsonDocument.Parse("""{"playerAutoJoin": true}"""),
 			0M,
 			0M,
 			2M,
@@ -597,6 +597,136 @@ public class PromotionTests
 			.SetPromotionGameProvidersAsync(
 				Arg.Is(command.PromotionId),
 				Arg.Any<IEnumerable<Guid>>());
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.CreatePromotionEventAsync(
+				Arg.Is(eventId),
+				Arg.Is(command.PromotionId),
+				Arg.Is(PromotionEventAction.UpdateRule),
+				Arg.Any<JsonDocument>(),
+				Arg.Is(command.Modifier),
+				Arg.Any<CancellationToken>());
+
+		_ = fakePromotionRepository.Received(1)
+			.UpdatePromotionSnapshotAsync(
+				Arg.Is(expectedSnapshot),
+				Arg.Is(eventId),
+				Arg.Is(utcDateTime),
+				Arg.Any<CancellationToken>());
+	}
+
+	[TestMethod]
+	public async Task Set_Promotion_Rule_With_VipLevels()
+	{
+		var fakeSystemClock = Substitute.For<ISystemClock>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new UpdatePromotionRuleCommandService(
+			fakeSystemClock,
+			fakeSerialNumberGenerator,
+			fakePromotionRepository,
+			new PromotionSerializer());
+
+		var command = new UpdatePromotionRuleCommand(
+			Guid.NewGuid(),
+			JsonDocument.Parse("""{ "vipLevels": [1, 2, 3] }"""),
+			0M,
+			0M,
+			2M,
+			null,
+			"ModifyUser");
+
+	var currentTime = DateTimeOffset.UtcNow;
+		_ = fakeSystemClock.UtcNow.Returns(currentTime);
+
+		var utcDateTime = currentTime.UtcDateTime;
+
+		var promotion = new PromotionSnapshot(
+			command.PromotionId,
+			"TestPromotion",
+			Guid.NewGuid(),
+			utcDateTime.AddDays(-10),
+			utcDateTime.AddDays(1),
+			PromotionStatus.Disabled,
+			"TestType",
+			null,
+			true,
+			0,
+			1,
+			null,
+			0M,
+			0M,
+			0M,
+			JsonDocument.Parse("{}"),
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			"Creator",
+			utcDateTime.AddDays(-15),
+			null,
+			utcDateTime.AddDays(-15),
+			0M,
+			null,
+			0,
+			null,
+			Guid.NewGuid());
+
+		_ = fakePromotionRepository.GetCurrentPromotionSnapshotAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<CancellationToken>())
+			.Returns(promotion);
+
+		var eventId = Guid.NewGuid();
+		_ = fakeSerialNumberGenerator.GenerateAsync(Arg.Any<CancellationToken>())
+			.Returns(eventId);
+
+		var expectedSnapshot = new PromotionSnapshot(
+			command.PromotionId,
+			promotion.Name,
+			promotion.BrandId,
+			promotion.From,
+			promotion.To,
+			promotion.Status,
+			promotion.PromotionType,
+			promotion.SettlementIntervalType,
+			promotion.AutoSentPlayerBonus,
+			command.BonusAmountLimit,
+			promotion.Unlimited,
+			command.GameType,
+			command.Percentage,
+			promotion.TotalAmountLimit,
+			command.TurnoverMultiple,
+			command.CampaignDetail,
+			promotion.Content,
+			promotion.Localization,
+			promotion.DesktopBanner,
+			promotion.MobileBanner,
+			promotion.SubSubject,
+			promotion.Terms,
+			promotion.CreatedByUsername,
+			promotion.CreatedOn,
+			command.Modifier,
+			utcDateTime,
+			promotion.AmountUsed,
+			promotion.AmountUsedSnapshotId,
+			promotion.DisplayOrder,
+			promotion.VipLevelId,
+			eventId);
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakePromotionRepository
+			.Received(1)
+			.SetPromotionVipLevelsAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Is<IEnumerable<int>>(x => x.SequenceEqual(new[] { 1, 2, 3 })),
+				Arg.Any<string>(),
+					Arg.Any<CancellationToken>());
 
 		_ = fakePromotionRepository
 			.Received(1)

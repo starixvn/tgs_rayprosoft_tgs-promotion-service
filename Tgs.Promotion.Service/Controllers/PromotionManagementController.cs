@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Text.Json;
 using Google.Protobuf;
+using JsonCons.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.MessageQueue;
 using Tgs.Promotion.ApplicationServices;
@@ -238,9 +239,13 @@ public class PromotionManagementController : ControllerBase
 
 		var processedResult = CampaignDetailResponse.Parser.ParseFrom(response.Span);
 
+		var campaignDetail = JsonMergePatch.ApplyMergePatch(
+			ruleModel.CampaignDetail.RootElement,
+			JsonDocument.Parse(processedResult.CampaignDetail).RootElement);
+
 		var command = new UpdatePromotionRuleCommand(
 			promotionId,
-			JsonDocument.Parse(processedResult.CampaignDetail),
+			campaignDetail,
 			processedResult.BonusAmountLimit,
 			processedResult.Percentage,
 			processedResult.TurnoverMultiple,
@@ -268,6 +273,7 @@ public class PromotionManagementController : ControllerBase
 		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
 	}
 
+	[Obsolete("改由 UpdatePromotionRule 統一處理, 未來將不再使用")]
 	[HttpPut("vip/{promotionId}", Name = "UpdatePromotionVipLevels")]
 	public ValueTask UpdatePromotionVipLevelsAsync(
 		[FromServices] ICommandService<UpdatePromotionVipLevelsCommand> updateService,
