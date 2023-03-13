@@ -1,8 +1,10 @@
-﻿namespace Tgs.Promotion;
+﻿#nullable enable
+
+namespace Tgs.Promotion;
 public record CampaignDetailSettings(
 	GameType? GameType,
-	IEnumerable<Guid> GameProviderIds,
+	IEnumerable<Guid>? GameProviderIds,
 	decimal BonusAmountLimit,
 	decimal Percentage,
 	decimal TurnoverMultiple,
-	IEnumerable<int> VipLevels);
+	IEnumerable<int>? VipLevels);

@@ -40,16 +40,20 @@ internal class UpdatePromotionRuleCommandService : ICommandService<UpdatePromoti
 		{
 			if (command.GameType is not null)
 			{
-				await _promotionRepository
-					.SetPromotionGameProvidersAsync(command.PromotionId, settings.GameProviderIds, cancellationToken)
-					.ConfigureAwait(false);
+				await _promotionRepository.SetPromotionGameProvidersAsync(
+					command.PromotionId, 
+					settings.GameProviderIds!, 
+					cancellationToken).ConfigureAwait(false);
 			}
 
-			await _promotionRepository.SetPromotionVipLevelsAsync(
+			if (settings.VipLevels is not null)
+			{
+				await _promotionRepository.SetPromotionVipLevelsAsync(
 					command.PromotionId, 
-					settings.VipLevels,
+					settings.VipLevels!,
 					command.Modifier,
 					cancellationToken).ConfigureAwait(false);
+			}
 		}
 
 		var eventId = await _serialNumberGenerator
@@ -78,14 +82,12 @@ internal class UpdatePromotionRuleCommandService : ICommandService<UpdatePromoti
 				PromotionEventAction.UpdateRule,
 				JsonSerializer.SerializeToDocument(changeSets),
 				command.Modifier,
-				cancellationToken)
-			.ConfigureAwait(false);
+				cancellationToken).ConfigureAwait(false);
 
 		await _promotionRepository.UpdatePromotionSnapshotAsync(
 				updateData,
 				eventId,
 				currentTime,
-				cancellationToken)
-			.ConfigureAwait(false);
+				cancellationToken).ConfigureAwait(false);
 	}
 }
