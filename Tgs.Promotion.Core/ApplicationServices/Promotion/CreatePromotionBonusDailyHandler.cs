@@ -57,6 +57,7 @@ public class
 		var promotions = await _promotionRepository.GetPromotionQueries()
 			.Where(x => x.Status == (short)PromotionStatus.Enabled)
 			.Where(x => x.SettlementIntervalType == "Daily")
+			.Where(x => x.PromotionType == "ReliefMoneyDaily")
 			.Where(x => brandIds.Contains(x.BrandId))
 			.Where(x => x.From <= startDate.UtcDateTime && x.To >= startDate.UtcDateTime)
 			.Where(x => !x.PromotionBonus.Any(pb => pb.PromotionId == x.Id && pb.From == (x.From > startDate.UtcDateTime ? x.From : startDate.UtcDateTime) &&

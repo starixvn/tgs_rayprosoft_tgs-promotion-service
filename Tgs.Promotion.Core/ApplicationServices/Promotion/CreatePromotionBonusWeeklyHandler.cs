@@ -68,6 +68,7 @@ public class CreatePromotionBonusWeeklyHandler
 		var promotions = await _promotionRepository.GetPromotionQueries()
 			.Where(x => x.Status == (short)PromotionStatus.Enabled)
 			.Where(x => x.SettlementIntervalType == "Weekly")
+			.Where(x => x.PromotionType == "ReliefMoneyWeekly")
 			.Where(x => brandIds.Contains(x.BrandId))
 			.Where(x => x.From >= weekFrom.UtcDateTime && x.From <= weekTo.UtcDateTime ||
 				x.To >= weekFrom.UtcDateTime && x.To <= weekTo.UtcDateTime ||
