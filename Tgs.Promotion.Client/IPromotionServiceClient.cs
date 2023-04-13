@@ -42,12 +42,20 @@ public interface IPromotionServiceClient
 	IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<PromotionView> ListPromotionsAsync(
-		Guid brandId, 
-		string playerCode, 
+		Guid brandId,
+		string playerCode,
+		CancellationToken cancellationToken = default);
+
+	IAsyncEnumerable<PromotionView> ListPromotionsAsync(
+		Guid brandId,
+		During? eventDuring,
+		string? name,
+		string? promotionType,
+		PromotionStatus? status,
 		CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<PromotionMainInfo> ListPromotionsByPromotionTypeAsync(
-		string promotionType, 
+		string promotionType,
 		CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<Guid> QueryPromotionIdsAsync(

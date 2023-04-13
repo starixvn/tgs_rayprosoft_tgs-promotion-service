@@ -3,7 +3,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Promotion.Domain.Entities;
-using Tgs.Promotion.Extensions;
 using Tgs.SerialNumberGenerator;
 
 namespace Tgs.Promotion.Repository;
@@ -32,7 +31,10 @@ public class PromotionRepository : IPromotionRepository
 		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 	}
 
-	public async ValueTask CreatePromotionDistributeAsync(PromotionDistributeInfo createInfo, string? distributor, CancellationToken cancellationToken = default)
+	public async ValueTask CreatePromotionDistributeAsync(
+		PromotionDistributeInfo createInfo, 
+		string? distributor, 
+		CancellationToken cancellationToken = default)
 	{
 		_ = await _dbContext.PromotionDistributes.AddAsync(new PromotionDistribute
 		{
@@ -55,16 +57,14 @@ public class PromotionRepository : IPromotionRepository
 	}
 
 	public async ValueTask<PromotionDistributePlanInfo> CreatePromotionDistributePlanAsync(
-			Guid promotionId,
+		Guid promotionId,
 		long conditionHash,
 		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
 			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
-
-		if (promotion is null)
-			throw new InvalidOperationException($"Promotion with id {promotionId} not found");
+			.ConfigureAwait(false)
+			?? throw new InvalidOperationException($"Promotion with id {promotionId} not found");
 
 		var plan = await _dbContext.PromotionDistributePlans
 			.SingleOrDefaultAsync(
@@ -159,7 +159,9 @@ public class PromotionRepository : IPromotionRepository
 		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
 
-	public ValueTask<PromotionDistributePlanInfo?> FindPromotionDistributePlanAsync(Guid planId, CancellationToken cancellationToken = default)
+	public ValueTask<PromotionDistributePlanInfo?> FindPromotionDistributePlanAsync(
+		Guid planId,
+		CancellationToken cancellationToken = default)
 		=> _dbContext.PromotionDistributePlans
 			.FindAsync(new object?[] { planId }, cancellationToken: cancellationToken)
 			.AsTask()
@@ -224,7 +226,7 @@ public class PromotionRepository : IPromotionRepository
 	{
 		var eventSource = await _dbContext.PromotionEventSources
 			.FirstOrDefaultAsync(
-				p => p.Id == eventId && p.PromotionId == promotionId, 
+				p => p.Id == eventId && p.PromotionId == promotionId,
 				cancellationToken)
 			.ConfigureAwait(false);
 
@@ -263,7 +265,9 @@ public class PromotionRepository : IPromotionRepository
 					: promotion.Localization));
 	}
 
-	public async ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(Guid promotionId, CancellationToken cancellationToken = default)
+	public async ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(
+		Guid promotionId, 
+		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
 			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
@@ -291,7 +295,9 @@ public class PromotionRepository : IPromotionRepository
 			: preQuery(_promotionService.GetQueries()).AsNoTracking();
 	}
 
-	public async ValueTask<PromotionRule?> GetPromotionRuleAsync(Guid promotionId, CancellationToken cancellationToken = default)
+	public async ValueTask<PromotionRule?> GetPromotionRuleAsync(
+		Guid promotionId, 
+		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
 			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
@@ -315,7 +321,7 @@ public class PromotionRepository : IPromotionRepository
 	}
 
 	public async ValueTask<decimal> GetPromotionUsedAmountAsync(
-		Guid promotionId, 
+		Guid promotionId,
 		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
@@ -341,7 +347,9 @@ public class PromotionRepository : IPromotionRepository
 		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
 
-	public IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, CancellationToken cancellationToken = default)
+	public IAsyncEnumerable<PromotionView> ListPromotionsAsync(
+		Guid brandId, 
+		CancellationToken cancellationToken = default)
 	{
 		var current = DateTime.UtcNow;
 
@@ -402,12 +410,67 @@ public class PromotionRepository : IPromotionRepository
 			.ToAsyncEnumerable();
 	}
 
+	public async IAsyncEnumerable<PromotionView> ListPromotionsByFiltersAsync(
+		Guid brandId,
+		During? during,
+		string? name,
+		string? promotionType,
+		PromotionStatus? status,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default)
+	{
+		var query = _dbContext.PromotionRows.Where(p =>
+			p.BrandId == brandId && p.Status != (short)PromotionStatus.Archived);
+
+		if (during is not null)
+			query = query.Where(p => p.From >= during.From && p.To < during.To);
+
+		if (!string.IsNullOrEmpty(name))
+			query = query.Where(p => p.Name == name);
+
+		if (status is not null)
+			query = query.Where(p => p.Status == (short)status);
+
+		if (!string.IsNullOrEmpty(promotionType))
+			query = query.Where(p => p.PromotionType == promotionType);
+
+		var promotions = await query.ToArrayAsync(cancellationToken).ConfigureAwait(false);
+
+		var promotionVipLevels = _dbContext.PromotionVipLevels
+			.Where(vip => promotions
+				.Select(p => p.Id)
+				.Contains(vip.PromotionId))
+			.ToLookup(
+				vip => vip.PromotionId,
+				vip => vip.Level);
+
+		foreach (var promotion in promotions)
+			yield return new PromotionView(
+				promotion.Id,
+				promotion.Name,
+				(promotion.From, promotion.To),
+				(PromotionStatus)promotion.Status,
+				promotion.PromotionType,
+				promotion.TotalAmountLimit,
+				promotion.AmountUsed,
+				promotionVipLevels[promotion.Id],
+				promotion.SubSubject,
+				promotion.DesktopBanner,
+				promotion.MobileBanner,
+				promotion.Content,
+				promotion.Terms,
+				JsonDocument.Parse(string.IsNullOrWhiteSpace(promotion.Localization)
+					? "{}"
+					: promotion.Localization),
+				JsonDocument.Parse(promotion.CampaignDetail),
+				promotion.DisplayOrder);
+	}
+
 	public async IAsyncEnumerable<EventInfo> QueryPromotionEventsAsync(
-		Guid promotionId, 
+		Guid promotionId,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var events = await _dbContext.PromotionEventSources
-			.Where(p => p.PromotionId == promotionId 
+			.Where(p => p.PromotionId == promotionId
 				&& p.CreatedOn >= DateTime.UtcNow.AddDays(-90))
 			.ToArrayAsync(cancellationToken)
 			.ConfigureAwait(false);
@@ -421,7 +484,6 @@ public class PromotionRepository : IPromotionRepository
 				evt.ModifyUser,
 				evt.CreatedOn);
 	}
-
 	public async IAsyncEnumerable<PromotionMainInfo> QueryPromotionsAsync(
 		Guid brandId,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -490,7 +552,9 @@ public class PromotionRepository : IPromotionRepository
 				promotion.AutoSentPlayerBonus);
 	}
 
-	public IAsyncEnumerable<PromotionMainInfo> QueryPromotionsByPromotionTypeAsync(string promotionType, CancellationToken cancellationToken = default)
+	public IAsyncEnumerable<PromotionMainInfo> QueryPromotionsByPromotionTypeAsync(
+		string promotionType,
+		CancellationToken cancellationToken = default)
 		=> _dbContext.PromotionRows.AsQueryable()
 			.Where(p => p.PromotionType == promotionType
 				&& p.Status == (short)PromotionStatus.Enabled)
@@ -518,7 +582,10 @@ public class PromotionRepository : IPromotionRepository
 				p.TotalAmountLimit,
 				p.AutoSentPlayerBonus));
 
-	public async ValueTask SetPromotionGameProvidersAsync(Guid promotionId, IEnumerable<Guid> gameProviderIds, CancellationToken cancellationToken = default)
+	public async ValueTask SetPromotionGameProvidersAsync(
+		Guid promotionId, 
+		IEnumerable<Guid> gameProviderIds, 
+		CancellationToken cancellationToken = default)
 	{
 		var gpArray = gameProviderIds.ToArray();
 
@@ -588,7 +655,10 @@ public class PromotionRepository : IPromotionRepository
 			.ConfigureAwait(false);
 	}
 
-	public async ValueTask UpdatePromotionDistributeAsync(Guid distributeId, DateTime sentOn, CancellationToken cancellationToken = default)
+	public async ValueTask UpdatePromotionDistributeAsync(
+		Guid distributeId, 
+		DateTime sentOn, 
+		CancellationToken cancellationToken = default)
 	{
 		var distribute = await _dbContext.PromotionDistributes.FindAsync(
 			new object?[] { distributeId },

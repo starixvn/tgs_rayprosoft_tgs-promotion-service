@@ -1390,6 +1390,32 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task 查詢活動列表()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new ListPromotionsByFiltersQueryService(fakePromotionRepository);
+
+		var query = new ListPromotionsByFilters(
+			Guid.NewGuid(),
+			null,
+			null,
+			null,
+			null);
+
+		_ = await sut.QueryAsync(query).ToArrayAsync();
+
+		_ = fakePromotionRepository.Received(1)
+			.ListPromotionsByFiltersAsync(
+				Arg.Is(query.BrandId),
+				Arg.Is(query.EventDuring),
+				Arg.Is(query.Name),
+				Arg.Is(query.PromotionType),
+				Arg.Is(query.Status),
+				Arg.Any<CancellationToken>());
+	}
+
+	[TestMethod]
 	public async Task 根據PromotionType取得PromotionMainInfo()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();

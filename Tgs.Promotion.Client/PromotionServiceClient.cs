@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Web;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Tgs.Promotion.Clients;
 
@@ -244,8 +245,48 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			yield return promotion;
 	}
 
+	public IAsyncEnumerable<PromotionView> ListPromotionsAsync(
+		Guid brandId,
+		During? eventDuring,
+		string? name,
+		string? promotionType,
+		PromotionStatus? status,
+		CancellationToken cancellationToken = default)
+	{
+		var queryStrings = new QueryBuilder();
+		if (!string.IsNullOrEmpty(promotionType))
+			queryStrings.Add("promotionType", promotionType);
+
+		if (!string.IsNullOrEmpty(name))
+			queryStrings.Add("name", name);
+
+		if (eventDuring is not null)
+		{
+			queryStrings.Add("from", eventDuring.Value.From.ToString("o"));
+			queryStrings.Add("to", eventDuring.Value.To.ToString("o"));
+		}
+
+		if (status is not null)
+			queryStrings.Add("status", status.Value.ToString());
+
+		return _httpClient.GetAsync(
+				$"/api/promotionview/{brandId}:filters{queryStrings.ToQueryString().Value}",
+				cancellationToken)
+			.ToAsyncEnumerable()
+			.Do(response => response.EnsureSuccessStatusCode())
+			.SelectMany(response => response.Content
+				.ReadFromJsonAsync<IEnumerable<PromotionView>>(_JsonSerializerOptions, cancellationToken)
+				.ToAsyncEnumerable()
+				.Where(arr => arr is not null)
+				.SelectMany(arr => arr!.ToAsyncEnumerable()))
+			.ToArrayAsync(cancellationToken: cancellationToken)
+			.AsTask()
+			.ToAsyncEnumerable()
+			.SelectMany(arr => arr.ToAsyncEnumerable());
+	}
+
 	public IAsyncEnumerable<PromotionMainInfo> ListPromotionsByPromotionTypeAsync(string promotionType, CancellationToken cancellationToken = default)
-		=> _httpClient.GetAsync(
+			=> _httpClient.GetAsync(
 			$"/api/promotion-mgr/{promotionType}",
 			cancellationToken)
 			.ToAsyncEnumerable()
@@ -287,7 +328,6 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		foreach (var id in promotionIds ?? Array.Empty<Guid>())
 			yield return id;
 	}
-
 	public async ValueTask SetPromotionContentAsync(
 		Guid promotionId,
 		PromotionContent content,

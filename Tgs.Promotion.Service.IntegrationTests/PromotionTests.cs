@@ -73,7 +73,7 @@ public class PromotionTests
 		var createInfo = new Clients.CreatePromotionMainInfo
 		{
 			Name = "Test Promotion",
-			EventDuring = new During(DateTime.Now.AddDays(-10), DateTime.Now),
+			EventDuring = new Clients.During(DateTime.Now.AddDays(-10), DateTime.Now),
 			PromotionType = "TestType",
 			IsAutoSent = true
 		};
@@ -925,7 +925,7 @@ public class PromotionTests
 		var createInfo = new Clients.CreatePromotionMainInfo
 		{
 			Name = "Test Promotion",
-			EventDuring = new During(DateTime.Now.AddDays(-10), DateTime.Now),
+			EventDuring = new Clients.During(DateTime.Now.AddDays(-10), DateTime.Now),
 			PromotionType = "TestType",
 			IsAutoSent = true
 		};
@@ -1057,6 +1057,39 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task 依據PromotionId取得UsedAmount()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		await dbContext.PromotionRows.AddRangeAsync(
+			new PromotionRow
+			{
+				Id = promotionId,
+				Name = "Test Promotion",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now,
+				PromotionType = "TestType",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}",
+				AmountUsed = 10_000m
+			});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.GetPromotionUsedAmountAsync(promotionId);
+
+		Assert.AreEqual(10_000m, actual);
+	}
+
+	[TestMethod]
 	public async Task 依據PromotionType取得PromotionMainInfo()
 	{
 		await using var web = new TestPromotionApplication();
@@ -1099,7 +1132,7 @@ public class PromotionTests
 	}
 
 	[TestMethod]
-	public async Task 依據PromotionId取得UsedAmount()
+	public async Task 查詢活動列表_不會顯示Archived的活動()
 	{
 		await using var web = new TestPromotionApplication();
 
@@ -1107,27 +1140,218 @@ public class PromotionTests
 
 		var sut = new PromotionServiceClient(httpClient);
 
-		var promotionId = Guid.NewGuid();
-		
+		var brandId = Guid.NewGuid();
+
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		await dbContext.PromotionRows.AddRangeAsync(
-			new PromotionRow
-			{
-				Id = promotionId,
-				Name = "Test Promotion",
-				From = DateTime.Now.AddDays(-10D),
-				To = DateTime.Now,
-				PromotionType = "TestType",
-				AutoSentPlayerBonus = true,
-				CampaignDetail = "{}",
-				AmountUsed = 10_000m
-			});
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = Guid.NewGuid(),
+			BrandId = brandId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now.AddDays(1D),
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}",
+			Status = (short)PromotionStatus.Archived
+		});
 
 		_ = await dbContext.SaveChangesAsync();
 
-		var actual = await sut.GetPromotionUsedAmountAsync(promotionId);
+		var actual = await sut.ListPromotionsAsync(
+			brandId,
+			null,
+			null,
+			null,
+			null).ToArrayAsync();
 
-		Assert.AreEqual(10_000m, actual);
+		Assert.AreEqual(0, actual.Length);
+	}
+
+	[TestMethod]
+	public async Task 查詢活動列表_以活動名稱查詢()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var brandId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = Guid.NewGuid(),
+			BrandId = brandId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now.AddDays(1D),
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}"
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.ListPromotionsAsync(
+			brandId,
+			null,
+			"Test Promotion",
+			null,
+			null).ToArrayAsync();
+
+		Assert.AreEqual(1, actual.Length);
+	}
+
+	[TestMethod]
+	public async Task 查詢活動列表_以活動狀態查詢()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var brandId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = Guid.NewGuid(),
+			BrandId = brandId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now.AddDays(1D),
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}",
+			Status = (short)PromotionStatus.Disabled
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.ListPromotionsAsync(
+			brandId,
+			null,
+			null,
+			null,
+			Clients.PromotionStatus.Disabled).ToArrayAsync();
+
+		Assert.AreEqual(1, actual.Length);
+	}
+
+	[TestMethod]
+	public async Task 查詢活動列表_以活動時間查詢()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var brandId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = Guid.NewGuid(),
+			BrandId = brandId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now.AddDays(1D),
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}"
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.ListPromotionsAsync(
+			brandId,
+			(DateTime.Now.AddDays(-11D), DateTime.Now.AddDays(2D)),
+			null,
+			null,
+			null).ToArrayAsync();
+
+		Assert.AreEqual(1, actual.Length);
+	}
+
+	[TestMethod]
+	public async Task 查詢活動列表_以活動類型查詢()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var brandId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = Guid.NewGuid(),
+			BrandId = brandId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now.AddDays(1D),
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}"
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.ListPromotionsAsync(
+			brandId,
+			null,
+			null,
+			"TestType",
+			null).ToArrayAsync();
+
+		Assert.AreEqual(1, actual.Length);
+	}
+
+	[TestMethod]
+	public async Task 查詢活動列表_無其餘查詢條件()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var brandId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = await dbContext.PromotionRows.AddAsync(new PromotionRow
+		{
+			Id = Guid.NewGuid(),
+			BrandId = brandId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now.AddDays(1D),
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}"
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.ListPromotionsAsync(
+			brandId,
+			null,
+			null,
+			null,
+			null).ToArrayAsync();
+
+		Assert.AreEqual(1, actual.Length);
 	}
 }

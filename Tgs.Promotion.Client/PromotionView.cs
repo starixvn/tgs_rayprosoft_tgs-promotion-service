@@ -33,4 +33,6 @@ public record PromotionView
 	public JsonDocument CampaignDetail { get; init; } = default!;
 
 	public int Order { get; init; }
+
+	public PromotionStatus Status { get; init; }
 }

@@ -24,7 +24,7 @@ public interface IPromotionRepository
 		CancellationToken cancellationToken = default);
 
 	ValueTask<PromotionDistributePlanInfo?> FindPromotionDistributePlanAsync(
-		Guid planId, 
+		Guid planId,
 		CancellationToken cancellationToken = default);
 
 	ValueTask<PromotionSnapshot?> GetCurrentPromotionSnapshotAsync(
@@ -38,11 +38,11 @@ public interface IPromotionRepository
 	ValueTask<PromotionRow?> GetPromotionByIdAsync(Guid promotionId);
 
 	ValueTask<PromotionContentDetail?> GetPromotionContentAsync(
-		Guid promotionId, 
+		Guid promotionId,
 		CancellationToken cancellationToken = default);
 
 	ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(
-		Guid promotionId, 
+		Guid promotionId,
 		CancellationToken cancellationToken = default);
 
 	IQueryable<PromotionRow> GetPromotionQueries(
@@ -50,21 +50,31 @@ public interface IPromotionRepository
 		bool tracking = false);
 
 	ValueTask<PromotionRule?> GetPromotionRuleAsync(
-		Guid promotionId, 
+		Guid promotionId,
 		CancellationToken cancellationToken = default);
 
-	ValueTask<decimal> GetPromotionUsedAmountAsync(Guid promotionId, CancellationToken cancellationToken = default);
+	ValueTask<decimal> GetPromotionUsedAmountAsync(
+		Guid promotionId,
+		CancellationToken cancellationToken = default);
 
 	ValueTask InsertPromotionDistributeLogAsync(
-		PromotionDistributeLog log, 
+		PromotionDistributeLog log,
 		CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<PromotionView> ListPromotionsAsync(
-		Guid brandId, 
+		Guid brandId,
 		CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<EventInfo> QueryPromotionEventsAsync(
 		Guid promotionId,
+		CancellationToken cancellationToken = default);
+
+	IAsyncEnumerable<PromotionView> ListPromotionsByFiltersAsync(
+		Guid brandId,
+		During? during,
+		string? name,
+		string? promotionType,
+		PromotionStatus? status,
 		CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<PromotionMainInfo> QueryPromotionsAsync(
@@ -77,16 +87,16 @@ public interface IPromotionRepository
 		CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<PromotionMainInfo> QueryPromotionsByPromotionTypeAsync(
-		string promotionType, 
+		string promotionType,
 		CancellationToken cancellationToken = default);
 
 	ValueTask SetPromotionGameProvidersAsync(
-		Guid promotionId, 
-		IEnumerable<Guid> gameProviderIds, 
+		Guid promotionId,
+		IEnumerable<Guid> gameProviderIds,
 		CancellationToken cancellationToken = default);
 
-	ValueTask SetPromotionVipLevelsAsync(Guid promotionId, 
-		IEnumerable<int> vipLevels, string modifier, 
+	ValueTask SetPromotionVipLevelsAsync(Guid promotionId,
+		IEnumerable<int> vipLevels, string modifier,
 		CancellationToken cancellationToken = default);
 
 	ValueTask UpdatePromotionDistributeAsync(
