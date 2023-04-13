@@ -89,8 +89,6 @@ public interface IPromotionRepository
 		IEnumerable<int> vipLevels, string modifier, 
 		CancellationToken cancellationToken = default);
 
-	ValueTask UpdatePromotionAsync(PromotionRow promotions);
-
 	ValueTask UpdatePromotionDistributeAsync(
 		Guid distributeId,
 		DateTime sentOn,

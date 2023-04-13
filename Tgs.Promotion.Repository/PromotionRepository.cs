@@ -23,9 +23,9 @@ public class PromotionRepository : IPromotionRepository
 	private readonly ISerialNumberGenerator _serialNumberGenerator;
 
 	public PromotionRepository(
-			ITgsService<PromotionRow> promotionService,
-			TgsContext dbContext,
-			ISerialNumberGenerator serialNumberGenerator)
+		ITgsService<PromotionRow> promotionService,
+		TgsContext dbContext,
+		ISerialNumberGenerator serialNumberGenerator)
 	{
 		_promotionService = promotionService ?? throw new ArgumentNullException(nameof(promotionService));
 		_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
@@ -603,9 +603,6 @@ public class PromotionRepository : IPromotionRepository
 			.SaveChangesAsync(cancellationToken)
 			.ConfigureAwait(false);
 	}
-
-	public ValueTask UpdatePromotionAsync(PromotionRow promotions) =>
-			_promotionService.UpdateEntityAsync(promotions);
 
 	public async ValueTask UpdatePromotionSnapshotAsync(
 		PromotionSnapshot snapshot,
