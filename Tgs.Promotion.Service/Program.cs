@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.MessageQueue.Configuration;
@@ -45,9 +46,9 @@ builder.Services
 
 builder.Services
 	.AddProfileViewer()
-	.AddOpenTelemetryTracing(builder => builder
-		.SetResourceBuilder(ResourceBuilder.CreateDefault()
-			.AddEnvironmentVariableDetector())
+	.AddOpenTelemetry()
+	.ConfigureResource(_ => ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
+	.WithTracing(tracerProviderBuilder => tracerProviderBuilder
 		.AddSource("Tgs.*")
 		.AddSource("TGS.*")
 		.AddAspNetCoreInstrumentation()
@@ -55,6 +56,12 @@ builder.Services
 		.AddEntityFrameworkCoreInstrumentation(options => options.SetDbStatementForText = true)
 		.AddProfileViewExporter()
 		.AddOtlpExporter())
+	.WithMetrics(meterProviderBuilder => meterProviderBuilder
+		.AddAspNetCoreInstrumentation()
+		.AddHttpClientInstrumentation()
+		.AddRuntimeInstrumentation()
+		.AddOtlpExporter())
+	.Services
 	.Configure<AspNetCoreInstrumentationOptions>(options => options.Filter =
 		httpContext => !httpContext.Request.Path.HasValue
 			|| !httpContext.Request.Path.StartsWithSegments("/swagger")
@@ -115,12 +122,10 @@ builder.Services
 	.AddHealthChecks();
 
 builder.Services
+	.AddDateOnlyTimeOnlyStringConverters()
 	.AddControllers()
 	.AddJsonOptions(jsonOptions 
 		=> jsonOptions.JsonSerializerOptions.Converters.Add(new PromotionRuleViewModelJsonConverter()));
-
-builder.Services
-	.AddDateOnlyTimeOnlyStringConverters();
 
 builder.Services
 	.AddSwaggerGen(c => c.UseDateOnlyTimeOnlyStringConverters());
