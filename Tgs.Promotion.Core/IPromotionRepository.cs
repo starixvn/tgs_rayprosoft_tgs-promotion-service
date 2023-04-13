@@ -53,6 +53,8 @@ public interface IPromotionRepository
 		Guid promotionId, 
 		CancellationToken cancellationToken = default);
 
+	ValueTask<decimal> GetPromotionUsedAmountAsync(Guid promotionId, CancellationToken cancellationToken = default);
+
 	ValueTask InsertPromotionDistributeLogAsync(
 		PromotionDistributeLog log, 
 		CancellationToken cancellationToken = default);
@@ -87,12 +89,12 @@ public interface IPromotionRepository
 		IEnumerable<int> vipLevels, string modifier, 
 		CancellationToken cancellationToken = default);
 
+	ValueTask UpdatePromotionAsync(PromotionRow promotions);
+
 	ValueTask UpdatePromotionDistributeAsync(
 		Guid distributeId,
 		DateTime sentOn,
 		CancellationToken cancellationToken = default);
-
-	ValueTask UpdatePromotionAsync(PromotionRow promotions);
 
 	ValueTask UpdatePromotionSnapshotAsync(
 		PromotionSnapshot snapshot,

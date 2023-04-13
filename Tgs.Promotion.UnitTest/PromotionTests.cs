@@ -21,7 +21,6 @@ using Tgs.Promotion.Models.Promotion;
 using Tgs.SerialNumberGenerator;
 using Tgs.Service.PlayerBuckets;
 using Tgs.ServiceUtility;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Tgs.Promotion.UnitTest;
 

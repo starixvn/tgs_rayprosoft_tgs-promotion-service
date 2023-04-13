@@ -187,6 +187,20 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			.Select(node => node.Deserialize<TRule>(_JsonSerializerOptions))
 			.FirstOrDefaultAsync(cancellationToken);
 
+	public ValueTask<decimal> GetPromotionUsedAmountAsync(
+		Guid promotionId, 
+		CancellationToken cancellationToken = default) 
+		=> _httpClient
+			.GetAsync(
+				$"/api/promotion-mgr/used/{promotionId}",
+				cancellationToken)
+			.ToAsyncEnumerable()
+			.Do(response => response.EnsureSuccessStatusCode())
+			.SelectMany(response => response.Content
+				.ReadFromJsonAsync<decimal>(_JsonSerializerOptions, cancellationToken)
+				.ToAsyncEnumerable())
+			.FirstOrDefaultAsync(cancellationToken);
+
 	public async IAsyncEnumerable<PromotionView> ListPromotionsAsync(
 		Guid brandId,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -237,7 +251,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			.ToAsyncEnumerable()
 			.Do(response => response.EnsureSuccessStatusCode())
 			.Select(response => response.Content
-				.ReadFromJsonAsync<IEnumerable<PromotionMainInfo>>(_JsonSerializerOptions)
+				.ReadFromJsonAsync<IEnumerable<PromotionMainInfo>>(_JsonSerializerOptions, cancellationToken)
 				.ToAsyncEnumerable()
 				.Where(arr => arr is not null)
 				.Select(arr => arr!.ToAsyncEnumerable())

@@ -281,4 +281,15 @@ public class PromotionManagementController : ControllerBase
 
 		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
 	}
+
+	[HttpGet("used/{promotionId}", Name = "GetPromotionUsedAmount")]
+	public ValueTask<decimal> GetPromotionUsedAmountAsync(
+		[FromServices] IGetService<GetPromotionUsedAmountQuery, decimal> queryService,
+		Guid promotionId)
+	{
+		var query = new GetPromotionUsedAmountQuery(
+			promotionId);
+
+		return queryService.GetAsync(query, HttpContext.RequestAborted);
+	}
 }

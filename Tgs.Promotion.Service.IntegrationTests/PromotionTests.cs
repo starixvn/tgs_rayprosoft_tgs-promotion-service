@@ -1057,7 +1057,7 @@ public class PromotionTests
 	}
 
 	[TestMethod]
-	public async Task 依據PromotionType取得PromotionMainInfoAsync()
+	public async Task 依據PromotionType取得PromotionMainInfo()
 	{
 		await using var web = new TestPromotionApplication();
 
@@ -1096,5 +1096,38 @@ public class PromotionTests
 		var actual = await sut.ListPromotionsByPromotionTypeAsync(promotionType).ToArrayAsync();
 
 		Assert.AreEqual(2, actual.Length);
+	}
+
+	[TestMethod]
+	public async Task 依據PromotionId取得UsedAmount()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionId = Guid.NewGuid();
+		
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		await dbContext.PromotionRows.AddRangeAsync(
+			new PromotionRow
+			{
+				Id = promotionId,
+				Name = "Test Promotion",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now,
+				PromotionType = "TestType",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}",
+				AmountUsed = 10_000m
+			});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.GetPromotionUsedAmountAsync(promotionId);
+
+		Assert.AreEqual(10_000m, actual);
 	}
 }

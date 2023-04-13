@@ -37,11 +37,18 @@ public interface IPromotionServiceClient
 		CancellationToken cancellationToken = default)
 		where TRule : class;
 
+	ValueTask<decimal> GetPromotionUsedAmountAsync(Guid promotionId, CancellationToken cancellationToken = default);
+
 	IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<PromotionView> ListPromotionsAsync(Guid brandId, string playerCode, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<PromotionView> ListPromotionsAsync(
+		Guid brandId, 
+		string playerCode, 
+		CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<PromotionMainInfo> ListPromotionsByPromotionTypeAsync(string promotionType, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<PromotionMainInfo> ListPromotionsByPromotionTypeAsync(
+		string promotionType, 
+		CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<Guid> QueryPromotionIdsAsync(
 		Guid brandId,

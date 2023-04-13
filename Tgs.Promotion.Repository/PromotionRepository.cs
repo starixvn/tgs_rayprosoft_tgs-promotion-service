@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.Tracing;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
@@ -313,6 +312,17 @@ public class PromotionRepository : IPromotionRepository
 			promotion.TurnoverMultiple,
 			(GameType?)promotion.GameType,
 			promotionVipLevels);
+	}
+
+	public async ValueTask<decimal> GetPromotionUsedAmountAsync(
+		Guid promotionId, 
+		CancellationToken cancellationToken = default)
+	{
+		var promotion = await _dbContext.PromotionRows
+			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
+		return promotion?.AmountUsed ?? 0m;
 	}
 
 	public async ValueTask InsertPromotionDistributeLogAsync(PromotionDistributeLog log, CancellationToken cancellationToken = default)
