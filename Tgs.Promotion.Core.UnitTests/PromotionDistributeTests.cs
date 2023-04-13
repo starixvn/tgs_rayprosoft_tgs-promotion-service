@@ -86,7 +86,9 @@ public class PromotionDistributeTests
 				Arg.Is(command.PlayerCode),
 				Arg.Is(command.NeedTurnover),
 				Arg.Is(BucketType.Promotion),
-				Arg.Any<string>());
+				Arg.Any<string>(),
+				Arg.Any<string>(),
+				Arg.Any<CancellationToken>());
 
 		_ = fakeCashServiceClient.Received(1)
 			.PromotionAsync(
@@ -171,7 +173,9 @@ public class PromotionDistributeTests
 				Arg.Is(command.PlayerCode),
 				Arg.Is(command.NeedTurnover),
 				Arg.Is(BucketType.Promotion),
-				Arg.Any<string>());
+				Arg.Any<string>(),
+				Arg.Any<string>(),
+				Arg.Any<CancellationToken>());
 
 		_ = fakeCashServiceClient.Received(1)
 			.PromotionAsync(
@@ -399,7 +403,8 @@ public class PromotionDistributeTests
 				Guid.NewGuid(),
 				0));
 
-		_ = fakeServiceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(Arg.Any<GetPromotionMainInfoQuery>())
+		_ = fakeServiceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(
+				Arg.Any<GetPromotionMainInfoQuery>())
 			.Returns(new PromotionMainInfo(
 				Guid.NewGuid(),
 				Guid.NewGuid(),
@@ -414,10 +419,12 @@ public class PromotionDistributeTests
 			.Returns(distributeId, Guid.NewGuid(), Guid.NewGuid());
 
 		_ = fakePlayerBucketClient.CreateBucketAsync(
-			Arg.Is(command.PlayerCode),
-			Arg.Is(command.NeedTurnover),
-			Arg.Is(BucketType.Promotion),
-			Arg.Is(distributeId.ToString()))
+				Arg.Is(command.PlayerCode),
+				Arg.Is(command.NeedTurnover),
+				Arg.Is(BucketType.Promotion),
+				Arg.Is(distributeId.ToString()),
+				Arg.Any<string>(),
+				Arg.Any<CancellationToken>())
 			.Returns(_ => throw new TimeoutException(), _ => Guid.NewGuid());
 
 		_ = await sut.GetAsync(command);

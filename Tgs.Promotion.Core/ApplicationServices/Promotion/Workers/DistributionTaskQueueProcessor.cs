@@ -75,6 +75,7 @@ public class DistributionTaskQueueProcessor : IDistributionTaskQueueProcessor
 							request.BucketAmount,
 							BucketType.Promotion,
 							request.PromotionPlayerId.ToString(),
+							null,
 							cancellationToken).ConfigureAwait(false));
 
 			var transactionResponse =

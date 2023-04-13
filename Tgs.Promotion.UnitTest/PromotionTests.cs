@@ -103,8 +103,10 @@ public class PromotionTests
 			.AsQueryable()
 			.BuildMock();
 
-		_ = fakePromotionBonusRepository
-			.Setup(x => x.GetPromotionBonusPlayersQueries(It.IsAny<Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>?>(), It.IsAny<bool>()))
+		_ = fakePromotionBonusRepository.Setup(x => 
+				x.GetPromotionBonusPlayersQueries(
+				It.IsAny<Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>?>(), 
+				It.IsAny<bool>()))
 			.Returns(list);
 
 		_ = fakeCashServiceClient
@@ -138,7 +140,9 @@ public class PromotionTests
 			It.IsAny<string>(),
 			It.IsAny<decimal>(),
 			It.IsAny<BucketType>(),
-			It.IsAny<string?>(), default), Times.Exactly(20));
+			It.IsAny<string?>(), 
+			It.IsAny<string>(),
+			It.IsAny<CancellationToken>()), Times.Exactly(20));
 
 		fakePromotionBonusRepository.Verify(x => x.UpdatePromotionBonusPlayersAsync(
 			It.IsAny<PromotionPlayer[]>()), Times.Once());

@@ -35,7 +35,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.0.0" />
     <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.2.1" />
     <PackageReference Include="Tgs.Logging" Version="0.0.19" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.1.7" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>
