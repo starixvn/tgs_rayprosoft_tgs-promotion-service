@@ -17,6 +17,7 @@ public interface IPromotionClient
 
 	Task<PromotionNameModel[]> GetPromotionNamesAsync(GetPromotionNamesRequest request);
 
+	[Obsolete("過時")]
 	Task<PagedResponse<PromotionModel>> GetPromotionsAsync(GetPromotionsRequest request);
 
 	Task<PagedResponse<PromotionModel>> GetValidPromotionsAsync(GetValidPromotionsRequest request);

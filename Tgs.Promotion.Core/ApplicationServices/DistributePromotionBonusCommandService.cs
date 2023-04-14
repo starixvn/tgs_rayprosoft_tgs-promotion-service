@@ -107,6 +107,7 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 					command.NeedTurnover,
 					BucketType.Promotion,
 					distributeId.ToString(),
+					null,
 					cancellationToken).ConfigureAwait(false))
 				.ConfigureAwait(false);
 

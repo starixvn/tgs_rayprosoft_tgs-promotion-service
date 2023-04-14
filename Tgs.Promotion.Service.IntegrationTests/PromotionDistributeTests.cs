@@ -89,7 +89,9 @@ public class PromotionDistributeTests
 				Arg.Is(playerCode),
 				Arg.Is(100M),
 				Arg.Is(BucketType.Promotion),
-				Arg.Any<string>());
+				Arg.Any<string>(),
+				Arg.Any<string>(),
+				Arg.Any<CancellationToken>());
 	}
 
 	[TestMethod]
@@ -171,7 +173,9 @@ public class PromotionDistributeTests
 				Arg.Is(playerCode),
 				Arg.Is(100M),
 				Arg.Is(BucketType.Promotion),
-				Arg.Any<string>());
+				Arg.Any<string>(),
+				Arg.Any<string>(),
+				Arg.Any<CancellationToken>());
 	}
 
 	[TestMethod]

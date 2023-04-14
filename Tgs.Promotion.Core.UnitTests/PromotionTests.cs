@@ -388,7 +388,7 @@ public class PromotionTests
 			2M,
 			null,
 			"ModifyUser");
-		
+
 		var currentTime = DateTimeOffset.UtcNow;
 		_ = fakeSystemClock.UtcNow.Returns(currentTime);
 
@@ -553,7 +553,7 @@ public class PromotionTests
 				Arg.Is(command.PromotionId),
 				Arg.Any<CancellationToken>())
 			.Returns(promotion);
-		
+
 		var eventId = Guid.NewGuid();
 		_ = fakeSerialNumberGenerator.GenerateAsync(Arg.Any<CancellationToken>())
 			.Returns(eventId);
@@ -874,7 +874,7 @@ public class PromotionTests
 		var sut = new UpdatePromotionMainInfoCommandService(
 			fakeSystemClock,
 			fakeSerialNumberGenerator,
-			fakePromotionRepository, 
+			fakePromotionRepository,
 			fakeQueryPromotionTypeGroupService);
 
 		var command = new UpdatePromotionMainInfoCommand(
@@ -890,7 +890,7 @@ public class PromotionTests
 		_ = fakeSystemClock.UtcNow.Returns(currentTime);
 
 		var utcDateTime = currentTime.UtcDateTime;
-		
+
 		var promotion = new PromotionSnapshot(
 			command.PromotionId,
 			"TestPromotion",
@@ -1015,7 +1015,8 @@ public class PromotionTests
 		_ = fakePromotionRepository.Received(1)
 			.SetPromotionVipLevelsAsync(
 				Arg.Is(command.PromotionId),
-				Arg.Is<IEnumerable<int>>(levels => levels.Count() == 2 && levels.First() == 1 && levels.Last() == 2),
+				Arg.Is<IEnumerable<int>>(levels =>
+					levels.Count() == 2 && levels.First() == 1 && levels.Last() == 2),
 				Arg.Is(command.Modifier));
 	}
 
@@ -1117,6 +1118,24 @@ public class PromotionTests
 		_ = fakePromotionRepository
 			.Received(1)
 			.QueryPromotionEventsAsync(
+				Arg.Is(query.PromotionId),
+				Arg.Any<CancellationToken>());
+	}
+
+	[TestMethod]
+	public async Task 以PromotionId查詢UsedAmount()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new GetPromotionUsedAmountQueryService(fakePromotionRepository);
+
+		var query = new GetPromotionUsedAmountQuery(
+			Guid.NewGuid());
+
+		_ = await sut.GetAsync(query);
+
+		_ = fakePromotionRepository.Received(1)
+			.GetPromotionUsedAmountAsync(
 				Arg.Is(query.PromotionId),
 				Arg.Any<CancellationToken>());
 	}
@@ -1295,7 +1314,7 @@ public class PromotionTests
 		var eventId = Guid.NewGuid();
 		_ = fakeSerialNumberGenerator.GenerateAsync(Arg.Any<CancellationToken>())
 			.Returns(eventId);
-		
+
 		var expectedSnapshot = new PromotionSnapshot(
 			command.PromotionId,
 			promotion.Name,
@@ -1367,6 +1386,32 @@ public class PromotionTests
 			.GetEventDetailAsync(
 				Arg.Is(query.PromotionId),
 				Arg.Is(query.EventId),
+				Arg.Any<CancellationToken>());
+	}
+
+	[TestMethod]
+	public async Task 查詢活動列表()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+		var sut = new ListPromotionsByFiltersQueryService(fakePromotionRepository);
+
+		var query = new ListPromotionsByFilters(
+			Guid.NewGuid(),
+			null,
+			null,
+			null,
+			null);
+
+		_ = await sut.QueryAsync(query).ToArrayAsync();
+
+		_ = fakePromotionRepository.Received(1)
+			.ListPromotionsByFiltersAsync(
+				Arg.Is(query.BrandId),
+				Arg.Is(query.EventDuring),
+				Arg.Is(query.Name),
+				Arg.Is(query.PromotionType),
+				Arg.Is(query.Status),
 				Arg.Any<CancellationToken>());
 	}
 

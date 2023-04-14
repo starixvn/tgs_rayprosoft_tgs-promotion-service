@@ -75,6 +75,7 @@ public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionB
 					playerBucket.BucketAmount,
 					playerBucket.BucketType,
 					playerBucket.PromotionId.ToString(),
+					null,
 					cancellationToken)
 				.ConfigureAwait(false);
 		}
