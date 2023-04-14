@@ -147,6 +147,7 @@ public class PromotionController : ControllerBase
 		[FromQuery] GetPromotionNamesViewModel query)
 		=> queryService.QueryAsync(new(query.PromotionIds)).ToArrayAsync();
 
+	[Obsolete("過時, 改用 PromotionManagement 相關 api")]
 	[HttpGet]
 	[Description("Get promotions")]
 	public ValueTask<PagedResponse<PromotionModel>> GetPromotionsAsync(
