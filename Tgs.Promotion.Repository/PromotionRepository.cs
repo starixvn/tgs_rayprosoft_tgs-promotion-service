@@ -433,7 +433,27 @@ public class PromotionRepository : IPromotionRepository
 		if (!string.IsNullOrEmpty(promotionType))
 			query = query.Where(p => p.PromotionType == promotionType);
 
-		var promotions = await query.ToArrayAsync(cancellationToken).ConfigureAwait(false);
+		var promotions = await query.Select(
+			p => new
+			{
+				p.Id,
+				p.Name,
+				p.From,
+				p.To,
+				p.PromotionType,
+				p.Unlimited,
+				p.TotalAmountLimit,
+				p.AmountUsed,
+				p.SubSubject,
+				p.Content,
+				p.DesktopBanner,
+				p.MobileBanner,
+				p.Terms,
+				p.Localization,
+				p.CampaignDetail,
+				p.Status,
+				p.DisplayOrder
+			}).ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
 		var promotionVipLevels = _dbContext.PromotionVipLevels
 			.Where(vip => promotions
@@ -450,7 +470,7 @@ public class PromotionRepository : IPromotionRepository
 				(promotion.From, promotion.To),
 				(PromotionStatus)promotion.Status,
 				promotion.PromotionType,
-				promotion.TotalAmountLimit,
+				promotion.Unlimited == 1 ? null : promotion.TotalAmountLimit,
 				promotion.AmountUsed,
 				promotionVipLevels[promotion.Id],
 				promotion.SubSubject,
