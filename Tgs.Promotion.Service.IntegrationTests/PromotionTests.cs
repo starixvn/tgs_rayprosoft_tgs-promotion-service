@@ -1502,4 +1502,47 @@ public class PromotionTests
 
 		Assert.AreEqual(2, actual.Length);
 	}
+
+	[TestMethod]
+	public async Task 查詢活動列表_若該活動沒有限額則TotalAmountLimit為Null()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var brandId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		await dbContext.PromotionRows.AddRangeAsync(new[]
+		{
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Name = "Test Promotion 1",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now.AddDays(1D),
+				PromotionType = "TestType1",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}",
+				Unlimited = 1,
+				TotalAmountLimit = 0m,
+				Status = (short)PromotionStatus.Enabled
+			}
+		});
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.ListPromotionsAsync(
+			brandId,
+			null,
+			null,
+			null,
+			null).ToArrayAsync();
+
+		Assert.AreEqual(1, actual.Length);
+		Assert.IsNull(actual[0].PromotionLimitAmount);
+	}
 }
