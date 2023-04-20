@@ -1504,7 +1504,7 @@ public class PromotionTests
 	}
 
 	[TestMethod]
-	public async Task 查詢活動列表_若該活動沒有限額則TotalAmountLimit為Null()
+	public async Task 查詢活動列表_若該活動沒有限額則回傳的PromotionLimitAmount為Null()
 	{
 		await using var web = new TestPromotionApplication();
 
