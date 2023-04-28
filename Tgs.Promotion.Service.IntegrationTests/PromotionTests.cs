@@ -1131,6 +1131,75 @@ public class PromotionTests
 		Assert.AreEqual(2, actual.Length);
 	}
 
+	[TestMethod] public async Task 依據PromotionType取得PromotionMainInfo_當活動無限額時_PromotionLimitAmount為Null()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionType = "TestType";
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		await dbContext.PromotionRows.AddRangeAsync(
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				Name = "Test Promotion",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now,
+				PromotionType = "TestType",
+				Unlimited = 1,
+				TotalAmountLimit = 0M,
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}"
+			});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.ListPromotionsByPromotionTypeAsync(promotionType).ToArrayAsync();
+
+		Assert.AreEqual(1, actual.Length);
+		Assert.IsNull(actual[0].PromotionLimitAmount);
+	}
+
+	[TestMethod]
+	public async Task 依據PromotionType取得PromotionMainInfo_當活動有限額時_PromotionLimitAmount為限額值()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var promotionType = "TestType";
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		await dbContext.PromotionRows.AddRangeAsync(
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				Name = "Test Promotion",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now,
+				PromotionType = "TestType",
+				Unlimited = 0,
+				TotalAmountLimit = 1000M,
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}"
+			});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.ListPromotionsByPromotionTypeAsync(promotionType).ToArrayAsync();
+
+		Assert.AreEqual(1, actual.Length);
+		Assert.AreEqual(1000M, actual[0].PromotionLimitAmount);
+	}
+
 	[TestMethod]
 	public async Task 查詢活動列表_不會顯示Archived的活動()
 	{

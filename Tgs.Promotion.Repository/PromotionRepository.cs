@@ -586,6 +586,7 @@ public class PromotionRepository : IPromotionRepository
 				p.From,
 				p.To,
 				p.PromotionType,
+				p.Unlimited,
 				p.TotalAmountLimit,
 				p.AutoSentPlayerBonus
 			})
@@ -599,7 +600,7 @@ public class PromotionRepository : IPromotionRepository
 				p.Name,
 				(p.From, p.To),
 				p.PromotionType,
-				p.TotalAmountLimit,
+				p.Unlimited == 1 ? null : p.TotalAmountLimit,
 				p.AutoSentPlayerBonus));
 
 	public async ValueTask SetPromotionGameProvidersAsync(
