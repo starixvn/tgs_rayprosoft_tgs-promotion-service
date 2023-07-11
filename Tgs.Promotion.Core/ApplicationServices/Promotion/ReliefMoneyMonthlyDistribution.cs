@@ -261,16 +261,18 @@ internal class ReliefMoneyMonthlyDistribution : IDistribution
 				WinLoss = list.Sum(l => l.aggregate.WinLoss)
 			});
 
-		if (CheckIsAutoJoin(_promotion.CampaignDetail))
-		{
-			_playerWinLossMonthly = await playerWinLossMonthly.ToArrayAsync(cancellationToken).ConfigureAwait(false);
-		}
-		else
-		{
-			_playerWinLossMonthly = await playerWinLossMonthly
-				.Join(_tgsContext.PromotionParticipants.Where(pp => pp.PromotionId == _promotion.Id).Where(x =>
-						x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode)
-					.Distinct(), agg => agg.PlayerCode, playerCode => playerCode, (agg, playerCode) => new
+		_playerWinLossMonthly = CheckIsAutoJoin(_promotion.CampaignDetail)
+			? await playerWinLossMonthly.ToArrayAsync(cancellationToken).ConfigureAwait(false)
+			: (IEnumerable<PlayerWinLossMonthly>)await playerWinLossMonthly
+				.Join(
+					_tgsContext.PromotionParticipants
+						.Where(pp => pp.PromotionId == _promotion.Id)
+						.Where(x => x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To)
+						.Select(x => x.PlayerCode)
+						.Distinct(),
+					agg => agg.PlayerCode,
+					playerCode => playerCode,
+					(agg, playerCode) => new
 					{
 						agg.BrandId,
 						agg.PlayerCode,
@@ -289,7 +291,6 @@ internal class ReliefMoneyMonthlyDistribution : IDistribution
 					WinLoss = x.WinLoss
 				})
 				.ToArrayAsync(cancellationToken).ConfigureAwait(false);
-		}
 
 		return this;
 	}

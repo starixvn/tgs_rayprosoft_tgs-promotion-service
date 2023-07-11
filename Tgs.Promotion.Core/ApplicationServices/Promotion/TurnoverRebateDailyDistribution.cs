@@ -259,16 +259,16 @@ internal class TurnoverRebateDailyDistribution : IDistribution
 				Turnover = list.Sum(l => l.aggregate.Turnover)
 			});
 
-		if (CheckIsAutoJoin(_promotion.CampaignDetail))
-		{
-			_playerWinLossDaily = await playerWinLossWeeklies.ToArrayAsync(cancellationToken).ConfigureAwait(false);
-		}
-		else
-		{
-			_playerWinLossDaily = await playerWinLossWeeklies
-				.Join(_tgsContext.PromotionParticipants.Where(pp => pp.PromotionId == _promotion.Id).Where(x =>
-							x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode)
-						.Distinct(), agg => agg.PlayerCode, playerCode => playerCode,
+		_playerWinLossDaily = CheckIsAutoJoin(_promotion.CampaignDetail)
+			? await playerWinLossWeeklies.ToArrayAsync(cancellationToken).ConfigureAwait(false)
+			: (IEnumerable<PlayerTurnoverDaily>)await playerWinLossWeeklies
+				.Join(
+					_tgsContext.PromotionParticipants
+						.Where(pp => pp.PromotionId == _promotion.Id)
+						.Where(x => x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To)
+						.Select(x => x.PlayerCode)
+						.Distinct(), agg => agg.PlayerCode, 
+					playerCode => playerCode,
 					(agg, playerCode) => new
 					{
 						agg.BrandId,
@@ -288,7 +288,6 @@ internal class TurnoverRebateDailyDistribution : IDistribution
 					Turnover = x.Turnover
 				})
 				.ToArrayAsync(cancellationToken).ConfigureAwait(false);
-		}
 
 		return this;
 	}

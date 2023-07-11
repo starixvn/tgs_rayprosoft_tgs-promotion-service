@@ -31,7 +31,8 @@ public static class PromotionCoreExtensions
 			.RegisterPromotionChecker<AlwaysTrueChecker>("Roulette")
 			.RegisterPromotionChecker<AlwaysTrueChecker>("Dummy")
 			.RegisterPromotionChecker<AlwaysTrueChecker>("DepositAccumulateRoulette")
-			.RegisterPromotionChecker<DepositRewardChecker>("DepositReward");
+			.RegisterPromotionChecker<DepositRewardChecker>("DepositReward")
+			.RegisterPromotionChecker<AlwaysTrueChecker>("PromoteDepositChannel");
 
 		_ = services
 			.AddSerialNumberGenerator()
