@@ -19,10 +19,10 @@ public class DistributionTaskQueueProcessor : IDistributionTaskQueueProcessor
 	private readonly ILogger<DistributionTaskQueueProcessor> _logger;
 	private readonly IPlayerBucketClient _playerBucketClient;
 	private readonly IPlayerServiceClient _playerServiceClient;
+	private readonly IPromotionPlayerRepository _promotionPlayerRepository;
 	private readonly IDistributionTaskQueue _taskQueue;
 	private readonly TgsContext _tgsContext;
 	private readonly ITransactionRepository _transactionRepository;
-	private readonly IPromotionPlayerRepository _promotionPlayerRepository;
 
 	public DistributionTaskQueueProcessor(
 		TgsContext tgsContext,
@@ -51,7 +51,7 @@ public class DistributionTaskQueueProcessor : IDistributionTaskQueueProcessor
 		_logger.LogInformation("player promotion distribution request: {request}", request);
 
 		if (await _promotionPlayerRepository.GetPromotionPlayerQueries()
-		    .AnyAsync(x => x.Id == request.PromotionPlayerId && x.SentOn == null, cancellationToken))
+			.AnyAsync(x => x.Id == request.PromotionPlayerId && x.SentOn == null, cancellationToken))
 		{
 			var parentPlayer = await _playerServiceClient
 				.GetPlayerPropertiesAsync(request.PlayerCode, cancellationToken).ConfigureAwait(false);
@@ -78,37 +78,31 @@ public class DistributionTaskQueueProcessor : IDistributionTaskQueueProcessor
 							null,
 							cancellationToken).ConfigureAwait(false));
 
-			var transactionResponse =
-				await Policy.Handle<HttpRequestException>()
-					.WaitAndRetryAsync(
-						3,
-						retryAttempt => TimeSpan.FromSeconds(1),
-						(exception, time, retryCount, context) => _logger.LogError(
-							"promotion daily externalId:{request.PromotionPlayerId} retryCount:{retryCount} Exception:{exception}",
-							request.PromotionPlayerId.ToString(),
-							retryCount,
-							exception))
-					.ExecuteAsync(async () =>
-					{
-						if (!await _tgsContext.Transactions
-								.AnyAsync(
-									x => x.PlayerCode == request.PlayerCode
-										&& x.ExternalTransactionId == request.PromotionPlayerId.ToString(),
-									cancellationToken))
-						{
-							return await _cashServiceClient
-								.PromotionAsync(
-									defaultWalletId,
-									request.BonusAmount,
-									request.Description,
-									request.PromotionPlayerId.ToString(),
-									null,
-									cancellationToken)
-								.ConfigureAwait(false);
-						}
-
-						return null;
-					});
+			var transactionResponse = await Policy.Handle<HttpRequestException>()
+				.WaitAndRetryAsync(
+					3,
+					retryAttempt => TimeSpan.FromSeconds(1),
+					(exception, time, retryCount, context) => _logger.LogError(
+						"promotion daily externalId:{request.PromotionPlayerId} retryCount:{retryCount} Exception:{exception}",
+						request.PromotionPlayerId.ToString(),
+						retryCount,
+						exception))
+				.ExecuteAsync(async () => !await _tgsContext.Transactions
+					.AnyAsync(
+						x => x.PlayerCode == request.PlayerCode
+							&& x.ExternalTransactionId == request.PromotionPlayerId.ToString(),
+						cancellationToken)
+					.ConfigureAwait(false)
+						? await _cashServiceClient
+							.PromotionAsync(
+								defaultWalletId,
+								request.BonusAmount,
+								request.Description,
+								request.PromotionPlayerId.ToString(),
+								null,
+								cancellationToken)
+							.ConfigureAwait(false)
+						: null);
 
 			if (transactionResponse != null)
 			{
@@ -122,8 +116,8 @@ public class DistributionTaskQueueProcessor : IDistributionTaskQueueProcessor
 
 				await _transactionRepository.CreateTransactionPromotionsAsync(new[]
 				{
-				transactionPromotion
-			});
+					transactionPromotion
+				});
 			}
 		}
 	}

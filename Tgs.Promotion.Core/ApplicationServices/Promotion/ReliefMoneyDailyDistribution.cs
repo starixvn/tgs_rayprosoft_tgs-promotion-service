@@ -268,15 +268,14 @@ internal class ReliefMoneyDailyDistribution : IDistribution
 				WinLoss = list.Sum(l => l.aggregate.WinLoss)
 			});
 
-		if (CheckIsAutoJoin(_promotion.CampaignDetail))
-		{
-			_playerWinLossDaily = await playerWinLossDaily.ToArrayAsync(cancellationToken).ConfigureAwait(false);
-		}
-		else
-		{
-			_playerWinLossDaily = await playerWinLossDaily
-				.Join(_tgsContext.PromotionParticipants.Where(pp => pp.PromotionId == _promotion.Id).Where(x =>
-							x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To).Select(x => x.PlayerCode)
+		_playerWinLossDaily = CheckIsAutoJoin(_promotion.CampaignDetail)
+			? await playerWinLossDaily.ToArrayAsync(cancellationToken).ConfigureAwait(false)
+			: (IEnumerable<PlayerWinLossDaily>)await playerWinLossDaily
+				.Join(
+					_tgsContext.PromotionParticipants
+						.Where(pp => pp.PromotionId == _promotion.Id)
+						.Where(x => x.CreatedOn >= _promotion.From && x.CreatedOn <= _promotion.To)
+						.Select(x => x.PlayerCode)
 						.Distinct(), agg => agg.PlayerCode, playerCode => playerCode,
 					(agg, playerCode) => new
 					{
@@ -297,7 +296,6 @@ internal class ReliefMoneyDailyDistribution : IDistribution
 					WinLoss = x.WinLoss
 				})
 				.ToArrayAsync(cancellationToken).ConfigureAwait(false);
-		}
 
 		return this;
 	}
