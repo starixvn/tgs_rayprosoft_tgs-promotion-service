@@ -41,17 +41,13 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 	{
 		var player = await _playerServiceClient.GetPlayerInfoAsync(
 			command.PlayerCode,
-			cancellationToken).ConfigureAwait(false);
-
-		if (player is null)
-			throw new InvalidOperationException($"Player with player code {command.PlayerCode} does not exist");
+			cancellationToken).ConfigureAwait(false) 
+			?? throw new InvalidOperationException($"Player with player code {command.PlayerCode} does not exist");
 
 		var playerProperties = await _playerServiceClient.GetPlayerPropertiesAsync(
 			player.PlayerCode,
-			cancellationToken).ConfigureAwait(false);
-
-		if (playerProperties is null)
-			throw new InvalidOperationException($"Player with player code {command.PlayerCode} does not exist");
+			cancellationToken).ConfigureAwait(false) 
+			?? throw new InvalidOperationException($"Player with player code {command.PlayerCode} does not exist");
 
 		var walletId = Guid.Parse(playerProperties.GetValueOrDefault("DefaultWalletId")!);
 

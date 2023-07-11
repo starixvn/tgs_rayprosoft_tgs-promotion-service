@@ -6,7 +6,7 @@ namespace Tgs.Promotion.Service.ViewModels;
 
 public class PromotionRuleViewModelJsonConverter : JsonConverter<PromotionRuleViewModel>
 {
-	private static readonly JsonSerializerOptions _InternalSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+	private static readonly JsonSerializerOptions _InternalSerializerOptions = new(JsonSerializerDefaults.Web);
 
 	public override PromotionRuleViewModel? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 	{
