@@ -1,8 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Reflection;
 using Tgs.Promotion;
-using Tgs.Promotion.ApplicationServices.Promotion;
-using Tgs.Promotion.ApplicationServices.Promotion.Workers;
 using Tgs.Promotion.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -40,29 +38,6 @@ public static class PromotionCoreExtensions
 			.AddScoped<IPromotionCheckerFactory>(sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(
 				sp,
 				configuration.GetAllRegisterCheckerTypes()));
-
-		_ = services
-			.AddTransient<IDistributionTaskQueueProcessor, DistributionTaskQueueProcessor>()
-			.AddTransient<ReliefMoneyWeeklyDistribution>()
-			.AddTransient<TurnoverRebateWeeklyDistribution>()
-			.AddTransient<TurnoverRebateDailyDistribution>()
-			.AddTransient<ReliefMoneyMonthlyDistribution>()
-			.AddTransient<ReliefMoneyDailyDistribution>()
-			.AddTransient<Func<string, IDistribution>>(serviceProvider => key =>
-			{
-				var distribution = new Dictionary<string, Type>
-				{
-					{ "ReliefMoneyWeekly", typeof(ReliefMoneyWeeklyDistribution) },
-					{ "TurnoverRebateWeekly", typeof(TurnoverRebateWeeklyDistribution) },
-					{ "TurnoverRebate", typeof(TurnoverRebateDailyDistribution) },
-					{ "ReliefMoneyMonthly", typeof(ReliefMoneyMonthlyDistribution) },
-					{ "ReliefMoneyDaily", typeof(ReliefMoneyDailyDistribution) }
-				}.ToImmutableDictionary();
-
-			_ = distribution.TryGetValue(key, out var distributionType);
-
-			return (IDistribution)serviceProvider.GetService(distributionType!)!;
-		});
 
 		_ = services.AddSingleton<ISystemClock, DefaultSystemClock>();
 
