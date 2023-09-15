@@ -6,4 +6,5 @@ public record DistributePromotionBonusCommand(
 	decimal Amount,
 	decimal NeedTurnover,
 	Guid? ReferenceId,
-	string? Distributor);
+	string? Distributor,
+	string? BucketType = null);

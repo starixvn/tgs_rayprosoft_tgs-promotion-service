@@ -9,4 +9,6 @@ public class DistributePromotionBonusViewModel
 	public decimal NeedTurnover { get; init; }
 
 	public Guid? ReferenceId { get; init; }
+
+	public string? BucketType { get; init; }
 }

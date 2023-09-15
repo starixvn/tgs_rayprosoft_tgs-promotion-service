@@ -4,6 +4,7 @@ using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.CashService.Client;
+using Tgs.PlayerBucket.Client;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
@@ -23,7 +24,7 @@ public class PromotionDistributeTests
 		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakePlayerBucketForTypesClient = Substitute.For<IPlayerBucketForTypesClient>();
 		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
 		var sut = new DistributePromotionBonusCommandService(
@@ -31,8 +32,9 @@ public class PromotionDistributeTests
 			fakeServiceCoordinator,
 			fakeCashServiceClient,
 			fakePlayerServiceClient,
-			fakePlayerBucketClient,
-			fakeSerialNumberGenerator);
+			fakePlayerBucketForTypesClient,
+			fakeSerialNumberGenerator
+			);
 
 		var command = new DistributePromotionBonusCommand(
 			 Guid.NewGuid(),
@@ -81,13 +83,14 @@ public class PromotionDistributeTests
 				Arg.Any<PromotionDistributeInfo>(),
 				Arg.Is(command.Distributor));
 
-		_ = fakePlayerBucketClient.Received(1)
-			.CreateBucketAsync(
+		_ = fakePlayerBucketForTypesClient.Received(1)
+			.CreateBucketForBucketTypesAsync(
 				Arg.Is(command.PlayerCode),
 				Arg.Is(command.NeedTurnover),
 				Arg.Is(BucketType.Promotion),
 				Arg.Any<string>(),
 				Arg.Any<string>(),
+				Arg.Any<IEnumerable<string>?>(),
 				Arg.Any<CancellationToken>());
 
 		_ = fakeCashServiceClient.Received(1)
@@ -106,7 +109,7 @@ public class PromotionDistributeTests
 		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakePlayerBucketForTypesClient = Substitute.For<IPlayerBucketForTypesClient>();
 		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
 		var sut = new DistributePromotionBonusCommandService(
@@ -114,7 +117,7 @@ public class PromotionDistributeTests
 			fakeServiceCoordinator,
 			fakeCashServiceClient,
 			fakePlayerServiceClient,
-			fakePlayerBucketClient,
+			fakePlayerBucketForTypesClient,
 			fakeSerialNumberGenerator);
 
 		var command = new DistributePromotionBonusCommand(
@@ -168,13 +171,14 @@ public class PromotionDistributeTests
 						&& x.ReferenceId == command.ReferenceId),
 				Arg.Is(command.Distributor));
 
-		_ = fakePlayerBucketClient.Received(1)
-			.CreateBucketAsync(
+		_ = fakePlayerBucketForTypesClient.Received(1)
+			.CreateBucketForBucketTypesAsync(
 				Arg.Is(command.PlayerCode),
 				Arg.Is(command.NeedTurnover),
 				Arg.Is(BucketType.Promotion),
 				Arg.Any<string>(),
 				Arg.Any<string>(),
+				Arg.Any<IEnumerable<string>?>(),
 				Arg.Any<CancellationToken>());
 
 		_ = fakeCashServiceClient.Received(1)
@@ -193,7 +197,7 @@ public class PromotionDistributeTests
 		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakePlayerBucketForTypesClient = Substitute.For<IPlayerBucketForTypesClient>();
 		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
 		var sut = new DistributePromotionBonusCommandService(
@@ -201,7 +205,7 @@ public class PromotionDistributeTests
 			fakeServiceCoordinator,
 			fakeCashServiceClient,
 			fakePlayerServiceClient,
-			fakePlayerBucketClient,
+			fakePlayerBucketForTypesClient,
 			fakeSerialNumberGenerator);
 
 		var command = new DistributePromotionBonusCommand(
@@ -223,7 +227,7 @@ public class PromotionDistributeTests
 		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakePlayerBucketForTypesClient = Substitute.For<IPlayerBucketForTypesClient>();
 		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
 		var sut = new DistributePromotionBonusCommandService(
@@ -231,7 +235,7 @@ public class PromotionDistributeTests
 			fakeServiceCoordinator,
 			fakeCashServiceClient,
 			fakePlayerServiceClient,
-			fakePlayerBucketClient,
+			fakePlayerBucketForTypesClient,
 			fakeSerialNumberGenerator);
 
 		var command = new DistributePromotionBonusCommand(
@@ -292,7 +296,7 @@ public class PromotionDistributeTests
 		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakePlayerBucketForTypesClient = Substitute.For<IPlayerBucketForTypesClient>();
 		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
 		var sut = new DistributePromotionBonusCommandService(
@@ -300,7 +304,7 @@ public class PromotionDistributeTests
 			fakeServiceCoordinator,
 			fakeCashServiceClient,
 			fakePlayerServiceClient,
-			fakePlayerBucketClient,
+			fakePlayerBucketForTypesClient,
 			fakeSerialNumberGenerator);
 
 		var command = new DistributePromotionBonusCommand(
@@ -362,7 +366,7 @@ public class PromotionDistributeTests
 		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-		var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+		var fakePlayerBucketForTypesClient = Substitute.For<IPlayerBucketForTypesClient>();
 		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
 		var sut = new DistributePromotionBonusCommandService(
@@ -370,7 +374,7 @@ public class PromotionDistributeTests
 			fakeServiceCoordinator,
 			fakeCashServiceClient,
 			fakePlayerServiceClient,
-			fakePlayerBucketClient,
+			fakePlayerBucketForTypesClient,
 			fakeSerialNumberGenerator);
 
 		var command = new DistributePromotionBonusCommand(
@@ -417,15 +421,6 @@ public class PromotionDistributeTests
 		var distributeId = Guid.NewGuid();
 		_ = fakeSerialNumberGenerator.GenerateAsync()
 			.Returns(distributeId, Guid.NewGuid(), Guid.NewGuid());
-
-		_ = fakePlayerBucketClient.CreateBucketAsync(
-				Arg.Is(command.PlayerCode),
-				Arg.Is(command.NeedTurnover),
-				Arg.Is(BucketType.Promotion),
-				Arg.Is(distributeId.ToString()),
-				Arg.Any<string>(),
-				Arg.Any<CancellationToken>())
-			.Returns(_ => throw new TimeoutException(), _ => Guid.NewGuid());
 
 		_ = await sut.GetAsync(command);
 

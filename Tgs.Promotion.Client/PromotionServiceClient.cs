@@ -91,6 +91,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		decimal needTurnover,
 		string? distributor,
 		Guid? referenceId,
+		string? bucketType = null,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new
@@ -98,7 +99,8 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			Amount = amount,
 			NeedTurnover = needTurnover,
 			ReferenceId = referenceId,
-			Distributor = distributor
+			Distributor = distributor,
+			BucketType = bucketType
 		};
 		var requestContent = new StringContent(
 			JsonSerializer.Serialize(request, _JsonSerializerOptions),

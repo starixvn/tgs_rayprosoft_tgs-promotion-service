@@ -28,7 +28,8 @@ public class PromotionDistributeController : ControllerBase
 			request.Amount,
 			request.NeedTurnover,
 			request.ReferenceId,
-			request.Distributor);
+			request.Distributor,
+			request.BucketType);
 
 		return getService.GetAsync(command);
 	}
