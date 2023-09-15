@@ -5,7 +5,6 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.MessageQueue.Configuration;
-using Tgs.PlayerBucket.Clients.DependencyInjection;
 using Tgs.Promotion.MessageQueue;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Service.MessageQueue;
@@ -89,6 +88,7 @@ builder.Services
 		options.BrandCertificateBaseUrl = builder.Configuration.GetValue<Uri>("Promotion:BrandServiceBaseUrl")!)
 	.AddPlayerServiceClient((options, _) =>
 		options.BaseUrl = builder.Configuration.GetValue<Uri>("Promotion:PlayerServiceBaseUrl")!)
+	.AddPlayerBucketTypeClient()
 	.AddPlayerBucketClient(httpClientBuilder => httpClientBuilder
 		.ConfigureHttpClient(httpClient => 
 			httpClient.BaseAddress = builder.Configuration.GetValue<Uri>("Promotion:PlayerBucketBaseUrl")));

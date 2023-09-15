@@ -20,6 +20,7 @@ public interface IPromotionServiceClient
 		decimal needTurnover,
 		string? distributor,
 		Guid? referenceId,
+		string? bucketType = null,
 		CancellationToken cancellationToken = default);
 
 	ValueTask<PromotionContent?> GetPromotionContentAsync(Guid promotionId,
