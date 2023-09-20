@@ -538,7 +538,12 @@ public class PromotionTests
 	[TestMethod]
 	public async Task Set_Old_Promotion_Rule()
 	{
-		await using var web = new TestPromotionApplication();
+		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakeser = Substitute.For<PromotionSerializer>();
+
+		await using var web = new TestPromotionApplication(builder => builder
+			.ConfigureServices(services => services
+				.AddSingleton(fakeMessageSender)));
 
 		var httpClient = web.CreateClient();
 
@@ -593,9 +598,25 @@ public class PromotionTests
 			BonusAmountLimit = 10M,
 			Percentage = 20M,
 			TurnoverMultiple = 30M,
-			Test = 111,
 			GameProviderIds = gameProviders.Select(x => x.Id).ToArray()
 		};
+
+		var expected = fakeser.Serialize(rule);
+
+		_ = fakeMessageSender
+			.RequestAsync(
+				Arg.Is("tgs.promotion.firstdeposit.setting"),
+				Arg.Any<ReadOnlyMemory<byte>>(),
+				Arg.Any<IEnumerable<MessageHeaderValue>>(),
+				Arg.Any<CancellationToken>())
+			.Returns(new CampaignDetailResponse
+			{
+				CampaignDetail = expected,
+				BonusAmountLimit = 10M,
+				Percentage = 20M,
+				TurnoverMultiple = 30M,
+				GameType = rule.GameType.ToString()
+			}.ToByteArray());
 
 		await sut.SetPromotionRuleAsync(promotionId, rule, "ModifyUser");
 
