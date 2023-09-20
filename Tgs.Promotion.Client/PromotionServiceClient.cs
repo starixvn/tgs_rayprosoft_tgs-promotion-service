@@ -91,7 +91,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		decimal needTurnover,
 		string? distributor,
 		Guid? referenceId,
-		IEnumerable<string> bucketTypes,
+		IEnumerable<string>? bucketTypes,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new
