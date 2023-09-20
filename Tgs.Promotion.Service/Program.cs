@@ -94,7 +94,6 @@ builder.Services
 			httpClient.BaseAddress = builder.Configuration.GetValue<Uri>("Promotion:PlayerBucketBaseUrl")));
 
 builder.Services
-	.AddSingleton<NoopCampaignDetailProcessor>()
 	.AddSingleton<DummyCampaignDetailProcessor>()
 	.AddSingleton<TurnoverRebateDailyCampaignDetailProcessor>()
 	.AddSingleton<TurnoverRebateWeeklyCampaignDetailProcessor>()
@@ -112,9 +111,6 @@ builder.Services
 	.AddGlobPatternExchange<TurnoverRebateDailyCampaignDetailProcessor>("tgs.promotion.turnoverrebate.setting")
 	.AddGlobPatternExchange<TurnoverRebateWeeklyCampaignDetailProcessor>("tgs.promotion.turnoverrebateweekly.setting")
 	.AddGlobPatternExchange<DummyCampaignDetailProcessor>("tgs.promotion.dummy.setting")
-	.AddGlobPatternExchange<NoopCampaignDetailProcessor>("tgs.promotion.firstdeposit.setting")
-	.AddGlobPatternExchange<NoopCampaignDetailProcessor>("tgs.promotion.dailyfirstdeposit.setting")
-	.AddGlobPatternExchange<NoopCampaignDetailProcessor>("tgs.promotion.dailyseconddeposit.setting")
 	.AddNatsGlobPatternExchange("*");
 
 builder.Services
