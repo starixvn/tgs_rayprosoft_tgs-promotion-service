@@ -539,7 +539,7 @@ public class PromotionTests
 	public async Task Set_Old_Promotion_Rule()
 	{
 		var fakeMessageSender = Substitute.For<IMessageSender>();
-		var fakeser = Substitute.For<PromotionSerializer>();
+		var fakeSerializer = Substitute.For<PromotionSerializer>();
 
 		await using var web = new TestPromotionApplication(builder => builder
 			.ConfigureServices(services => services
@@ -601,7 +601,7 @@ public class PromotionTests
 			GameProviderIds = gameProviders.Select(x => x.Id).ToArray()
 		};
 
-		var expected = fakeser.Serialize(rule);
+		var expected = fakeSerializer.Serialize(rule);
 
 		_ = fakeMessageSender
 			.RequestAsync(
