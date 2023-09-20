@@ -74,7 +74,8 @@ public class PromotionDistributeTests
 			10M,
 			100M,
 			null,
-			null);
+			null,
+			Array.Empty<string>());
 
 		var record = dbContext.PromotionDistributes.First();
 
@@ -152,7 +153,7 @@ public class PromotionDistributeTests
 
 		_ = await dbContext.SaveChangesAsync();
 
-		var bucketType = "SportsBook";
+		var bucketTypes = new[] { "SportsBook" };
 
 		var actual = await sut.DistributePromotionBonusAsync(
 			planId,
@@ -161,7 +162,7 @@ public class PromotionDistributeTests
 			100M,
 			null,
 			null,
-			bucketType);
+			bucketTypes);
 
 		var record = dbContext.PromotionDistributes.First();
 
@@ -180,7 +181,7 @@ public class PromotionDistributeTests
 				Arg.Is(BucketType.Promotion),
 				Arg.Any<string>(),
 				Arg.Any<string>(),
-				Arg.Is<IEnumerable<string>>(bucketTypes => bucketTypes.SequenceEqual(new[] { bucketType })),
+				Arg.Is<IEnumerable<string>>(x => x.SequenceEqual(bucketTypes)),
 				Arg.Any<CancellationToken>());
 	}
 
@@ -246,7 +247,8 @@ public class PromotionDistributeTests
 			10M,
 			100M,
 			null,
-			referenceId);
+			referenceId,
+			Array.Empty<string>());
 
 		var record = dbContext.PromotionDistributes.First();
 

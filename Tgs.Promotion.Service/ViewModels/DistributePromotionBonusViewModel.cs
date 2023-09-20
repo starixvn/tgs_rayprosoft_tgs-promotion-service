@@ -10,5 +10,5 @@ public class DistributePromotionBonusViewModel
 
 	public Guid? ReferenceId { get; init; }
 
-	public string? BucketType { get; init; }
+	public IEnumerable<string> BucketTypes { get; init; } = Enumerable.Empty<string>();
 }
