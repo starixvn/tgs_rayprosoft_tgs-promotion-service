@@ -7,4 +7,4 @@ public record DistributePromotionBonusCommand(
 	decimal NeedTurnover,
 	Guid? ReferenceId,
 	string? Distributor,
-	string? BucketType = null);
+	IEnumerable<string>? BucketTypes);

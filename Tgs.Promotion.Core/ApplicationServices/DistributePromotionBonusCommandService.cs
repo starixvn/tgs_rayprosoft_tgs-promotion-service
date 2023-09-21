@@ -106,7 +106,7 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 					BucketType.Promotion,
 					distributeId.ToString(),
 					null,
-					command.BucketType == null ? Enumerable.Empty<string>() : new[] { command.BucketType },
+					command.BucketTypes,
 					cancellationToken).ConfigureAwait(false))
 				.ConfigureAwait(false);
 
