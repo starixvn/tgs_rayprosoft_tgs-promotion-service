@@ -82,7 +82,7 @@ public class PromotionViewController : ControllerBase
 			brandId,
 			during,
 			viewModel.Name,
-			viewModel.PromotionType,
+			viewModel.PromotionTypes ?? Array.Empty<string>(),
 			viewModel.Status);
 
 		return queryService.QueryAsync(query, HttpContext.RequestAborted)

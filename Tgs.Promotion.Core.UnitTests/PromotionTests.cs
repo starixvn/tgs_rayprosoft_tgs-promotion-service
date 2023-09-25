@@ -1400,7 +1400,7 @@ public class PromotionTests
 			Guid.NewGuid(),
 			null,
 			null,
-			null,
+			Array.Empty<string>(),
 			null);
 
 		_ = await sut.QueryAsync(query).ToArrayAsync();
@@ -1410,7 +1410,7 @@ public class PromotionTests
 				Arg.Is(query.BrandId),
 				Arg.Is(query.EventDuring),
 				Arg.Is(query.Name),
-				Arg.Is(query.PromotionType),
+				Arg.Is(query.PromotionTypes),
 				Arg.Is(query.Status),
 				Arg.Any<CancellationToken>());
 	}

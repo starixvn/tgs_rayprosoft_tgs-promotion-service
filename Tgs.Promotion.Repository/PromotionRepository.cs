@@ -32,8 +32,8 @@ public class PromotionRepository : IPromotionRepository
 	}
 
 	public async ValueTask CreatePromotionDistributeAsync(
-		PromotionDistributeInfo createInfo, 
-		string? distributor, 
+		PromotionDistributeInfo createInfo,
+		string? distributor,
 		CancellationToken cancellationToken = default)
 	{
 		_ = await _dbContext.PromotionDistributes.AddAsync(new PromotionDistribute
@@ -266,7 +266,7 @@ public class PromotionRepository : IPromotionRepository
 	}
 
 	public async ValueTask<PromotionMainInfo?> GetPromotionMainInfoAsync(
-		Guid promotionId, 
+		Guid promotionId,
 		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
@@ -296,7 +296,7 @@ public class PromotionRepository : IPromotionRepository
 	}
 
 	public async ValueTask<PromotionRule?> GetPromotionRuleAsync(
-		Guid promotionId, 
+		Guid promotionId,
 		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
@@ -348,7 +348,7 @@ public class PromotionRepository : IPromotionRepository
 	}
 
 	public IAsyncEnumerable<PromotionView> ListPromotionsAsync(
-		Guid brandId, 
+		Guid brandId,
 		CancellationToken cancellationToken = default)
 	{
 		var current = DateTime.UtcNow;
@@ -414,10 +414,11 @@ public class PromotionRepository : IPromotionRepository
 		Guid brandId,
 		During? during,
 		string? name,
-		string? promotionType,
+		IEnumerable<string> promotionTypes,
 		PromotionStatus? status,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
+		var types = promotionTypes.ToArray();
 		var query = _dbContext.PromotionRows.Where(p =>
 			p.BrandId == brandId && p.Status != (short)PromotionStatus.Archived);
 
@@ -430,8 +431,8 @@ public class PromotionRepository : IPromotionRepository
 		if (status is not null)
 			query = query.Where(p => p.Status == (short)status);
 
-		if (!string.IsNullOrEmpty(promotionType))
-			query = query.Where(p => p.PromotionType == promotionType);
+		if (types.Length > 0)
+			query = query.Where(p => types.Contains(p.PromotionType));
 
 		var promotions = await query.Select(
 			p => new
@@ -504,6 +505,7 @@ public class PromotionRepository : IPromotionRepository
 				evt.ModifyUser,
 				evt.CreatedOn);
 	}
+
 	public async IAsyncEnumerable<PromotionMainInfo> QueryPromotionsAsync(
 		Guid brandId,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -604,8 +606,8 @@ public class PromotionRepository : IPromotionRepository
 				p.AutoSentPlayerBonus));
 
 	public async ValueTask SetPromotionGameProvidersAsync(
-		Guid promotionId, 
-		IEnumerable<Guid> gameProviderIds, 
+		Guid promotionId,
+		IEnumerable<Guid> gameProviderIds,
 		CancellationToken cancellationToken = default)
 	{
 		var gpArray = gameProviderIds.ToArray();
@@ -677,8 +679,8 @@ public class PromotionRepository : IPromotionRepository
 	}
 
 	public async ValueTask UpdatePromotionDistributeAsync(
-		Guid distributeId, 
-		DateTime sentOn, 
+		Guid distributeId,
+		DateTime sentOn,
 		CancellationToken cancellationToken = default)
 	{
 		var distribute = await _dbContext.PromotionDistributes.FindAsync(
