@@ -73,7 +73,7 @@ public interface IPromotionRepository
 		Guid brandId,
 		During? during,
 		string? name,
-		string? promotionType,
+		IEnumerable<string> promotionTypes,
 		PromotionStatus? status,
 		CancellationToken cancellationToken = default);
 

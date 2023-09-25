@@ -191,8 +191,8 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			.FirstOrDefaultAsync(cancellationToken);
 
 	public ValueTask<decimal> GetPromotionUsedAmountAsync(
-		Guid promotionId, 
-		CancellationToken cancellationToken = default) 
+		Guid promotionId,
+		CancellationToken cancellationToken = default)
 		=> _httpClient
 			.GetAsync(
 				$"/api/promotion-mgr/used/{promotionId}",
@@ -251,13 +251,14 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		Guid brandId,
 		During? eventDuring,
 		string? name,
-		string? promotionType,
+		IEnumerable<string>? promotionTypes,
 		PromotionStatus? status,
 		CancellationToken cancellationToken = default)
 	{
 		var queryStrings = new QueryBuilder();
-		if (!string.IsNullOrEmpty(promotionType))
-			queryStrings.Add("promotionType", promotionType);
+
+		foreach (var type in promotionTypes ?? Array.Empty<string>())
+			queryStrings.Add("promotionType", type);
 
 		if (!string.IsNullOrEmpty(name))
 			queryStrings.Add("name", name);
@@ -330,6 +331,7 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		foreach (var id in promotionIds ?? Array.Empty<Guid>())
 			yield return id;
 	}
+
 	public async ValueTask SetPromotionContentAsync(
 		Guid promotionId,
 		PromotionContent content,

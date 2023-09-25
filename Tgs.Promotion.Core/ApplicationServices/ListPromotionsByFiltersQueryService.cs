@@ -19,7 +19,7 @@ internal class ListPromotionsByFiltersQueryService : IQueryService<ListPromotion
 			query.BrandId,
 			query.EventDuring,
 			query.Name,
-			query.PromotionType,
+			query.PromotionTypes,
 			query.Status,
 			cancellationToken);
 }

@@ -51,7 +51,7 @@ public interface IPromotionServiceClient
 		Guid brandId,
 		During? eventDuring,
 		string? name,
-		string? promotionType,
+		IEnumerable<string>? promotionTypes,
 		PromotionStatus? status,
 		CancellationToken cancellationToken = default);
 

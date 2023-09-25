@@ -1,4 +1,6 @@
-﻿namespace Tgs.Promotion.Service.ViewModels;
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace Tgs.Promotion.Service.ViewModels;
 
 public class ListPromotionByFiltersViewModel
 {
@@ -6,7 +8,8 @@ public class ListPromotionByFiltersViewModel
 
 	public string? Name { get; init; }
 
-	public string? PromotionType { get; init; }
+	[FromQuery(Name = "promotionType")]
+	public IEnumerable<string>? PromotionTypes { get; init; }
 
 	public PromotionStatus? Status { get; init; }
 
