@@ -46,4 +46,8 @@
     <None Include="D:\Users\Phoenix\source\repos\tgs-promotion-service\Tgs.Promotion.Service.IntegrationTests\.editorconfig" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
 </Project>

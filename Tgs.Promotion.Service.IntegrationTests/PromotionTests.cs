@@ -1601,6 +1601,72 @@ public class PromotionTests
 	}
 
 	[TestMethod]
+	public async Task 查詢活動列表_活動名稱只需要片段符合即可以查到()
+	{
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var brandId = Guid.NewGuid();
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		await dbContext.PromotionRows.AddRangeAsync(new[]
+		{
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Name = "Test Promotion abc 1",
+				From = DateTime.Now.AddDays(-10D),
+				To = DateTime.Now.AddDays(1D),
+				PromotionType = "TestType1",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}",
+				Status = (short)PromotionStatus.Enabled
+			},
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Name = "Test Promotion def 2",
+				From = DateTime.Now.AddDays(-30D),
+				To = DateTime.Now.AddDays(10D),
+				PromotionType = "TestType2",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}",
+				Status = (short)PromotionStatus.Disabled
+			},
+			new PromotionRow
+			{
+				Id = Guid.NewGuid(),
+				BrandId = brandId,
+				Name = "Test Promotion ijk 3",
+				From = DateTime.Now.AddDays(-30D),
+				To = DateTime.Now.AddDays(10D),
+				PromotionType = "TestType3",
+				AutoSentPlayerBonus = true,
+				CampaignDetail = "{}",
+				Status = (short)PromotionStatus.Disabled
+			}
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.ListPromotionsAsync(
+			brandId,
+			null,
+			"def",
+			null,
+			null).ToArrayAsync();
+
+		Assert.AreEqual(1, actual.Length);
+		Assert.AreEqual("Test Promotion def 2", actual.First().Name);
+	}
+
+	[TestMethod]
 	public async Task 查詢活動列表_若該活動沒有限額則回傳的PromotionLimitAmount為Null()
 	{
 		await using var web = new TestPromotionApplication();

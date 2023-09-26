@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.SerialNumberGenerator;
 
@@ -426,7 +427,7 @@ public class PromotionRepository : IPromotionRepository
 			query = query.Where(p => p.From >= during.From && p.To < during.To);
 
 		if (!string.IsNullOrEmpty(name))
-			query = query.Where(p => p.Name == name);
+			query = query.Where(p => EF.Functions.ILike(p.Name, $"%{name}%"));
 
 		if (status is not null)
 			query = query.Where(p => p.Status == (short)status);

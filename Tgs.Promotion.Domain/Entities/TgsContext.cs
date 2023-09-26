@@ -8,67 +8,67 @@ using Tgs.Promotion.Domain.Entities.Configurations;
 
 namespace Tgs.Promotion.Domain.Entities
 {
-    public partial class TgsContext : DbContext
-    {
-        public TgsContext()
-        {
-        }
+	public partial class TgsContext : DbContext
+	{
+		public TgsContext()
+		{
+		}
 
-        public TgsContext(DbContextOptions<TgsContext> options)
-            : base(options)
-        {
-        }
+		public TgsContext(DbContextOptions<TgsContext> options)
+			: base(options)
+		{
+		}
 
-        public virtual DbSet<BrandGame> BrandGames { get; set; } = null!;
-        public virtual DbSet<GameProvider> GameProviders { get; set; } = null!;
-        public virtual DbSet<Player> Players { get; set; } = null!;
-        public virtual DbSet<PlayerGameRebateAggregate> PlayerGameRebateAggregates { get; set; } = null!;
-        public virtual DbSet<PlayerVipLevelSeasonPromotion> PlayerVipLevelSeasonPromotions { get; set; } = null!;
-        public virtual DbSet<PlayerVipLevelUpgradePromotion> PlayerVipLevelUpgradePromotions { get; set; } = null!;
-        public virtual DbSet<PromotionBonus> PromotionBonuses { get; set; } = null!;
-        public virtual DbSet<PromotionDistribute> PromotionDistributes { get; set; } = null!;
-        public virtual DbSet<PromotionDistributeLog> PromotionDistributeLogs { get; set; } = null!;
-        public virtual DbSet<PromotionDistributePlan> PromotionDistributePlans { get; set; } = null!;
-        public virtual DbSet<PromotionEventSource> PromotionEventSources { get; set; } = null!;
-        public virtual DbSet<PromotionGameProvider> PromotionGameProviders { get; set; } = null!;
-        public virtual DbSet<PromotionParticipant> PromotionParticipants { get; set; } = null!;
-        public virtual DbSet<PromotionPlayer> PromotionPlayers { get; set; } = null!;
-        public virtual DbSet<PromotionRow> PromotionRows { get; set; } = null!;
-        public virtual DbSet<PromotionVipLevel> PromotionVipLevels { get; set; } = null!;
-        public virtual DbSet<Setting> Settings { get; set; } = null!;
-        public virtual DbSet<Transaction> Transactions { get; set; } = null!;
-        public virtual DbSet<TransactionPromotion> TransactionPromotions { get; set; } = null!;
-        public virtual DbSet<VipLevel> VipLevels { get; set; } = null!;
+		public virtual DbSet<BrandGame> BrandGames { get; set; } = null!;
+		public virtual DbSet<GameProvider> GameProviders { get; set; } = null!;
+		public virtual DbSet<Player> Players { get; set; } = null!;
+		public virtual DbSet<PlayerGameRebateAggregate> PlayerGameRebateAggregates { get; set; } = null!;
+		public virtual DbSet<PlayerVipLevelSeasonPromotion> PlayerVipLevelSeasonPromotions { get; set; } = null!;
+		public virtual DbSet<PlayerVipLevelUpgradePromotion> PlayerVipLevelUpgradePromotions { get; set; } = null!;
+		public virtual DbSet<PromotionBonus> PromotionBonuses { get; set; } = null!;
+		public virtual DbSet<PromotionDistribute> PromotionDistributes { get; set; } = null!;
+		public virtual DbSet<PromotionDistributeLog> PromotionDistributeLogs { get; set; } = null!;
+		public virtual DbSet<PromotionDistributePlan> PromotionDistributePlans { get; set; } = null!;
+		public virtual DbSet<PromotionEventSource> PromotionEventSources { get; set; } = null!;
+		public virtual DbSet<PromotionGameProvider> PromotionGameProviders { get; set; } = null!;
+		public virtual DbSet<PromotionParticipant> PromotionParticipants { get; set; } = null!;
+		public virtual DbSet<PromotionPlayer> PromotionPlayers { get; set; } = null!;
+		public virtual DbSet<PromotionRow> PromotionRows { get; set; } = null!;
+		public virtual DbSet<PromotionVipLevel> PromotionVipLevels { get; set; } = null!;
+		public virtual DbSet<Setting> Settings { get; set; } = null!;
+		public virtual DbSet<Transaction> Transactions { get; set; } = null!;
+		public virtual DbSet<TransactionPromotion> TransactionPromotions { get; set; } = null!;
+		public virtual DbSet<VipLevel> VipLevels { get; set; } = null!;
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.HasPostgresExtension("ltree")
-                .HasPostgresExtension("pg_trgm")
-                .HasPostgresExtension("uuid-ossp");
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			modelBuilder.HasPostgresExtension("ltree")
+				.HasPostgresExtension("pg_trgm")
+				.HasPostgresExtension("uuid-ossp");
 
-            modelBuilder.ApplyConfiguration(new Configurations.BrandGameConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.GameProviderConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PlayerConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PlayerGameRebateAggregateConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PlayerVipLevelSeasonPromotionConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PlayerVipLevelUpgradePromotionConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PromotionBonusConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PromotionDistributeConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PromotionDistributeLogConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PromotionDistributePlanConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PromotionEventSourceConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PromotionGameProviderConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PromotionParticipantConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PromotionPlayerConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PromotionRowConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PromotionVipLevelConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.SettingConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.TransactionConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.TransactionPromotionConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.VipLevelConfiguration());
-            OnModelCreatingPartial(modelBuilder);
-        }
+			modelBuilder.ApplyConfiguration(new Configurations.BrandGameConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.GameProviderConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PlayerConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PlayerGameRebateAggregateConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PlayerVipLevelSeasonPromotionConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PlayerVipLevelUpgradePromotionConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PromotionBonusConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PromotionDistributeConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PromotionDistributeLogConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PromotionDistributePlanConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PromotionEventSourceConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PromotionGameProviderConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PromotionParticipantConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PromotionPlayerConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PromotionRowConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.PromotionVipLevelConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.SettingConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.TransactionConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.TransactionPromotionConfiguration());
+			modelBuilder.ApplyConfiguration(new Configurations.VipLevelConfiguration());
+			OnModelCreatingPartial(modelBuilder);
+		}
 
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-    }
+		partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+	}
 }
