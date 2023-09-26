@@ -7,7 +7,10 @@ namespace Tgs.Promotion.Service.IntegrationTests;
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "EF1001:Internal EF Core API usage.", Justification = "<暫止>")]
 internal class OverrideDbFunctionsInMemoryQueryTranslationPreprocessor : InMemoryQueryTranslationPreprocessor
 {
-	public OverrideDbFunctionsInMemoryQueryTranslationPreprocessor(QueryTranslationPreprocessorDependencies dependencies, QueryCompilationContext queryCompilationContext) : base(dependencies, queryCompilationContext)
+	public OverrideDbFunctionsInMemoryQueryTranslationPreprocessor(
+		QueryTranslationPreprocessorDependencies dependencies,
+		QueryCompilationContext queryCompilationContext)
+		: base(dependencies, queryCompilationContext)
 	{
 	}
 

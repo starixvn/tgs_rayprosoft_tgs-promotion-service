@@ -45,7 +45,7 @@ internal class TestPromotionApplication : WebApplicationFactory<promotion.Progra
 						exporterOptions.Endpoint = new Uri("http://otel.rpgp.cc:4317");
 					}))
 			.AddFakeNatsMessageQueue()
-			.Replace(ServiceDescriptor.Singleton<TgsContext>(sp =>
+			.Replace(ServiceDescriptor.Singleton(sp =>
 			{
 				var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsContext>();
 				_ = dbContextOptionsBuilder
