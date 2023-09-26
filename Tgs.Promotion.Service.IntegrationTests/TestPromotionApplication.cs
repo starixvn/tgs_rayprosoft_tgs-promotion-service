@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -49,7 +51,8 @@ internal class TestPromotionApplication : WebApplicationFactory<promotion.Progra
 				_ = dbContextOptionsBuilder
 					.UseInMemoryDatabase(Guid.NewGuid().ToString())
 					.ConfigureWarnings(x => x.Ignore(
-						InMemoryEventId.TransactionIgnoredWarning));
+						InMemoryEventId.TransactionIgnoredWarning))
+					.ReplaceService<IQueryTranslationPreprocessorFactory, TestInMemoryQueryTranslationPreprocessorFactory>();
 
 				return new TgsContext(dbContextOptionsBuilder.Options);
 			}))
