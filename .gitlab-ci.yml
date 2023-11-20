@@ -65,7 +65,7 @@ push-docker-image:
     - main
   script:
     - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
-    - dotnet build "Tgs.Promotion.Service/Tgs.Promotion.Service.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
+    - docker build -t "$ImageName:$Tag" --build-arg [BuildConfiguration]=$BuildConfiguration -f "Tgs.Promotion.Service/Dockerfile" . --no-cache
     - docker push $ImageName:$Tag
 
 push-k8s-template:
