@@ -1,6 +1,8 @@
-﻿namespace Tgs.Promotion;
+﻿using Microsoft.EntityFrameworkCore;
 
-public interface ITgsService<T>
+namespace Tgs.Promotion;
+
+public interface ITgsService<T> where T : class
 {
 	ValueTask CreateEntitiesAsync(T[] entities);
 
@@ -17,4 +19,6 @@ public interface ITgsService<T>
 	ValueTask UpdateEntitiesAsync(T[] entities);
 
 	ValueTask UpdateEntityAsync(T entity);
+
+	DbSet<T> Instance();
 }

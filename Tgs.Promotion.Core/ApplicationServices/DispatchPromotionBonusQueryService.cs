@@ -63,10 +63,9 @@ public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionB
 			})
 			.ToArray();
 
-		foreach (var promotionPlayer in players)
-		{
-			promotionPlayer.SentOn = DateTime.UtcNow;
-		}
+		var playerIds = players.Select(x => x.Id);
+
+		await _promotionBonusService.UpdatePromotionBonusPlayersAsync(playerIds);
 
 		foreach (var playerBucket in playerBuckets)
 		{
@@ -79,8 +78,6 @@ public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionB
 					cancellationToken)
 				.ConfigureAwait(false);
 		}
-
-		await _promotionBonusService.UpdatePromotionBonusPlayersAsync(players);
 
 		var transactionPromotions = new List<TransactionPromotion>();
 

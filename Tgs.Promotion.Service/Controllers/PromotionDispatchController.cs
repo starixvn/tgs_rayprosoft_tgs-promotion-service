@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.PromotionDispatch;
+using Tgs.Promotion.Workers;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Service.Controllers;
@@ -13,10 +14,18 @@ public class PromotionDispatchController : ControllerBase
 {
 	[HttpPost]
 	[Description("Dispatch promotion")]
-	public ValueTask<MessageResponse> DispatchPromotionsAsync(
+	public async ValueTask<MessageResponse> DispatchPromotionsAsync(
 		[FromServices] IGetService<DispatchPromotionBonusQuery, MessageResponse> getService,
-		[FromBody] DispatchPromotionBonusQuery request) =>
-		getService.GetAsync(request);
+		[FromServices] IPromotionDispatchTaskQueue dispatchQueue,
+		[FromBody] DispatchPromotionBonusQuery request)
+	{
+		await dispatchQueue.QueuePromotionDispatchTaskQueueAsync(async token =>
+		{
+			await getService.GetAsync(request, token);
+		});
+
+		return new MessageResponse { Valid = true };
+	}
 
 	[HttpGet]
 	[Description("Get promotion dispatches")]

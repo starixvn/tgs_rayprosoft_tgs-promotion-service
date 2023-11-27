@@ -49,4 +49,9 @@ internal class TgsService<T> : ITgsService<T> where T : class
 		_ = Repository.Set<T>().Update(entity);
 		_ = await Repository.SaveChangesAsync();
 	}
+
+	public DbSet<T> Instance()
+	{
+		return Repository.Set<T>();
+	}
 }
