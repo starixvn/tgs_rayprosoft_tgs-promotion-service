@@ -58,7 +58,7 @@ public class PromotionBonusRepository : IPromotionBonusRepository
 	}
 
 	public async ValueTask UpdatePromotionBonusPlayersAsync(IEnumerable<int> playerIds) =>
-		await _promotionPlayerService.Instance()
+		await _promotionPlayerService.GetQueries()
 			.Where(x => playerIds.Contains(x.Id))
 			.ExecuteUpdateAsync(s => s.SetProperty(e => e.SentOn, DateTime.UtcNow));
 

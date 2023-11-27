@@ -12,17 +12,19 @@ namespace Tgs.Promotion.Service.Controllers;
 [ApiController]
 public class PromotionDispatchController : ControllerBase
 {
+	private readonly IPromotionDispatchTaskQueue _taskQueue;
+
+	public PromotionDispatchController(IPromotionDispatchTaskQueue taskQueue)
+	{
+		_taskQueue = taskQueue;
+	}
+
 	[HttpPost]
 	[Description("Dispatch promotion")]
 	public async ValueTask<MessageResponse> DispatchPromotionsAsync(
-		[FromServices] IGetService<DispatchPromotionBonusQuery, MessageResponse> getService,
-		[FromServices] IPromotionDispatchTaskQueue dispatchQueue,
-		[FromBody] DispatchPromotionBonusQuery request)
+		[FromBody] PromotionDispatchQueueModel request)
 	{
-		await dispatchQueue.QueuePromotionDispatchTaskQueueAsync(async token =>
-		{
-			await getService.GetAsync(request, token);
-		});
+		await _taskQueue.QueuePromotionDispatchTaskQueueAsync(request);
 
 		return new MessageResponse { Valid = true };
 	}

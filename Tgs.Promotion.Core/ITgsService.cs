@@ -2,7 +2,7 @@
 
 namespace Tgs.Promotion;
 
-public interface ITgsService<T> where T : class
+public interface ITgsService<T>
 {
 	ValueTask CreateEntitiesAsync(T[] entities);
 
@@ -19,6 +19,4 @@ public interface ITgsService<T> where T : class
 	ValueTask UpdateEntitiesAsync(T[] entities);
 
 	ValueTask UpdateEntityAsync(T entity);
-
-	DbSet<T> Instance();
 }

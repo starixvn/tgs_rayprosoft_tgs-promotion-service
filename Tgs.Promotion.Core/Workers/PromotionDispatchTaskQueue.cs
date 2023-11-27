@@ -4,30 +4,30 @@ namespace Tgs.Promotion.Workers;
 
 public interface IPromotionDispatchTaskQueue
 {
-    ValueTask QueuePromotionDispatchTaskQueueAsync(Func<CancellationToken, ValueTask> workItem);
-    ValueTask<Func<CancellationToken, ValueTask>> DequeueAsync(
+    ValueTask QueuePromotionDispatchTaskQueueAsync(PromotionDispatchQueueModel model);
+    ValueTask<PromotionDispatchQueueModel> DequeueAsync(
         CancellationToken cancellationToken);
 }
 
 public class PromotionDispatchTaskQueue : IPromotionDispatchTaskQueue
 {
-    private readonly Channel<Func<CancellationToken, ValueTask>> _queue = Channel
-        .CreateUnbounded<Func<CancellationToken, ValueTask>>(new UnboundedChannelOptions
+    private readonly Channel<PromotionDispatchQueueModel> _queue = Channel
+        .CreateUnbounded<PromotionDispatchQueueModel>(new UnboundedChannelOptions
         {
             SingleReader = true
         });
 
     public async ValueTask QueuePromotionDispatchTaskQueueAsync(
-        Func<CancellationToken, ValueTask> workItem)
+	    PromotionDispatchQueueModel model)
     {
-        if (workItem == null)
+        if (model == null)
         {
-            throw new ArgumentNullException(nameof(workItem));
+            throw new ArgumentNullException(nameof(model));
         }
 
-        await _queue.Writer.WriteAsync(workItem);
+        await _queue.Writer.WriteAsync(model);
     }
-    public async ValueTask<Func<CancellationToken, ValueTask>> DequeueAsync(
+    public async ValueTask<PromotionDispatchQueueModel> DequeueAsync(
         CancellationToken cancellationToken)
     {
         var workItem = await _queue.Reader.ReadAsync(cancellationToken);

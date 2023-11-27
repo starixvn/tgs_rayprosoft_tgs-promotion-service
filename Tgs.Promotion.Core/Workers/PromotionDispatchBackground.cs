@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Models;
+using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Workers;
 
@@ -41,15 +44,25 @@ public class PromotionDispatchBackground : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var workItem = await _taskQueue.DequeueAsync(stoppingToken);
+            var model = await _taskQueue.DequeueAsync(stoppingToken);
 
             try
             {
 	            using var scope = _serviceProvider.CreateScope();
 
-				await workItem(stoppingToken);
-            }
-            catch (Exception ex)
+	            var messageResponse = scope.ServiceProvider.GetRequiredService<IGetService<DispatchPromotionBonusQuery, MessageResponse>>();
+
+	            _ = await messageResponse.GetAsync(new DispatchPromotionBonusQuery
+	            {
+		            OperatorUserId = model.OperatorUserId,
+		            Players = model.Players.Select(x => new DispatchPlayer
+		            {
+			            PlayerCode = x.PlayerCode,
+			            PromotionBonusId = x.PromotionBonusId
+		            }).ToArray()
+	            }, stoppingToken);
+			}
+			catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred executing task work item.");
             }
