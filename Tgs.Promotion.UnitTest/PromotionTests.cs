@@ -14,6 +14,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.CashService.Client;
 using Tgs.MessageQueue;
+using Tgs.PlayerBucket.Client;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
@@ -96,7 +97,7 @@ public class PromotionTests
 		var fakePromotionBonusRepository = new Mock<IPromotionBonusRepository>();
 		var fakeCashServiceClient = new Mock<ICashServiceClient>();
 		var fakeTransactionRepository = new Mock<ITransactionRepository>();
-		var fakePlayerBucketClient = new Mock<IPlayerBucketClient>();
+		var fakePlayerBucketForTypesClient = new Mock<IPlayerBucketForTypesClient>();
 
 		var list = CreatePromotionPlayerFixture()
 			.CreateMany<PromotionPlayer>(20)
@@ -123,7 +124,7 @@ public class PromotionTests
 			fakePromotionBonusRepository.Object,
 			fakeCashServiceClient.Object,
 			fakeTransactionRepository.Object,
-			fakePlayerBucketClient.Object);
+			fakePlayerBucketForTypesClient.Object);
 
 		var query = new DispatchPromotionBonusQuery
 		{
@@ -136,16 +137,17 @@ public class PromotionTests
 
 		_ = sut.GetAsync(query, default);
 
-		fakePlayerBucketClient.Verify(x => x.CreateBucketAsync(
+		fakePlayerBucketForTypesClient.Verify(x => x.CreateBucketForBucketTypesAsync(
 			It.IsAny<string>(),
 			It.IsAny<decimal>(),
 			It.IsAny<BucketType>(),
 			It.IsAny<string?>(), 
 			It.IsAny<string>(),
+			It.IsAny<IEnumerable<string>>(),
 			It.IsAny<CancellationToken>()), Times.Exactly(20));
 
 		fakePromotionBonusRepository.Verify(x => x.UpdatePromotionBonusPlayersAsync(
-			It.IsAny<PromotionPlayer[]>()), Times.Once());
+			It.IsAny<IEnumerable<int>>()), Times.Once());
 
 		fakeTransactionRepository.Verify(x => x.CreateTransactionPromotionsAsync(
 			It.IsAny<TransactionPromotion[]>()), Times.Once());

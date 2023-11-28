@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Service.ViewModels;
+using Tgs.Promotion.Workers;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Service.Controllers;
@@ -50,5 +51,22 @@ public class PromotionDistributeController : ControllerBase
 		var command = new GetOrCreatePromotionDistributePlanCommand(promotionId, conditionHash);
 
 		return getService.GetAsync(command);
+	}
+
+	[HttpPut("{promotionDistributionId}/{playerCode}/manually")]
+	public ValueTask DistributePromotionBonusAsync(
+		[FromServices] IPromotionDistributionTaskQueue taskQueue,
+		Guid promotionDistributionId,
+		string playerCode,
+		[FromBody] DistributePromotionBonusManuallyViewModel request)
+	{
+		var command = new PromotionDistributionQueueModel
+		{
+			PromotionDistributionId = promotionDistributionId,
+			PlayerCode = playerCode,
+			Distributor = request.Distributor
+		};
+
+		return taskQueue.QueuePromotionDistributeTaskQueueAsync(command);
 	}
 }

@@ -747,4 +747,12 @@ public class PromotionRepository : IPromotionRepository
 
 		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
+
+	public async ValueTask<PromotionDistributePlanDetailInfo> FindPromotionDistributePlanDetailAsync(Guid planId,
+		CancellationToken cancellationToken = default)
+	{
+		return await _dbContext.PromotionDistributePlans.Where(x => x.Id == planId)
+			.Select(x => new PromotionDistributePlanDetailInfo(x.Id, x.Detail))
+			.FirstAsync(cancellationToken);
+	}
 }

@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Tgs.CashService.Client;
+using Tgs.PlayerBucket.Client;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
 using Tgs.Service.PlayerBuckets;
@@ -10,7 +12,7 @@ namespace Tgs.Promotion.ApplicationServices;
 public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionBonusQuery, MessageResponse>
 {
 	private readonly ICashServiceClient _cashServiceClient;
-	private readonly IPlayerBucketClient _playerBucketClient;
+	private readonly IPlayerBucketForTypesClient _playerBucketForTypesClient;
 	private readonly IPromotionBonusRepository _promotionBonusService;
 	private readonly ITransactionRepository _transactionRepository;
 
@@ -18,14 +20,14 @@ public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionB
 		IPromotionBonusRepository promotionBonusService,
 		ICashServiceClient cashServiceClient,
 		ITransactionRepository transactionRepository,
-		IPlayerBucketClient playerBucketClient)
+		IPlayerBucketForTypesClient playerBucketForTypesClient)
 	{
 		_promotionBonusService =
 			promotionBonusService ?? throw new ArgumentNullException(nameof(promotionBonusService));
 		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
 		_transactionRepository =
 			transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
-		_playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
+		_playerBucketForTypesClient = playerBucketForTypesClient;
 	}
 
 	public async ValueTask<MessageResponse> GetAsync(
@@ -40,7 +42,8 @@ public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionB
 			.Include(x => x.PromotionBonus)
 			.Where(x => promotionBonusIds.Contains(x.PromotionBonusId))
 			.Where(x => playerCodes.Contains(x.PlayerCode))
-			.Where(x => x.SentOn == null).ToArrayAsync(cancellationToken);
+			.Where(x => x.SentOn == null)
+			.ToArrayAsync(cancellationToken);
 
 		var players = promotionPlayers.Where(x =>
 				request.Players.Any(p => p.PlayerCode == x.PlayerCode && p.PromotionBonusId == x.PromotionBonusId))
@@ -52,14 +55,16 @@ public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionB
 				x.PlayerCodeNavigation.BrandId,
 				x.PlayerCode,
 				x.PlayerCodeNavigation.DefaultWalletId,
-				BucketAmount = x.BucketAmountByManual > 0 ?
-					x.BucketAmountByManual :
-					x.BonusAmount * x.PromotionBonus.TurnoverMultiple,
+				BucketAmount =
+					x.BucketAmountByManual > 0
+						? x.BucketAmountByManual
+						: x.BonusAmount * x.PromotionBonus.TurnoverMultiple,
 				x.BonusAmount,
 				BucketType = BucketType.Promotion,
 				x.PromotionBonus.PromotionId,
 				x.PromotionBonusId,
-				x.PromotionBonus.PromotionType
+				x.PromotionBonus.PromotionType,
+				x.PromotionBonus.Detail
 			})
 			.ToArray();
 
@@ -69,12 +74,17 @@ public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionB
 
 		foreach (var playerBucket in playerBuckets)
 		{
-			_ = await _playerBucketClient.CreateBucketAsync(
+			var bucketTypes = playerBucket.Detail == null
+				? Enumerable.Empty<string>()
+				: JsonSerializer.Deserialize<IEnumerable<string>>(playerBucket.Detail);
+
+			await _playerBucketForTypesClient.CreateBucketForBucketTypesAsync(
 					playerBucket.PlayerCode,
 					playerBucket.BucketAmount,
 					playerBucket.BucketType,
 					playerBucket.PromotionId.ToString(),
 					null,
+					bucketTypes,
 					cancellationToken)
 				.ConfigureAwait(false);
 		}

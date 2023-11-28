@@ -7,6 +7,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Web;
 using Microsoft.AspNetCore.Http.Extensions;
+using Tgs.Promotion.Clients.Models;
 
 namespace Tgs.Promotion.Clients;
 
@@ -116,6 +117,27 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		return await response.Content
 			.ReadFromJsonAsync<Guid>(_JsonSerializerOptions, cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
+	}
+
+	public async ValueTask DistributePromotionBonusManuallyAsync(Guid promotionDistributionId,
+		string playerCode,
+		string? distributor,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new
+		{
+			Distributor = distributor
+		};
+		var requestContent = new StringContent(
+			JsonSerializer.Serialize(request, _JsonSerializerOptions),
+			Encoding.UTF8,
+			"application/json");
+		var response = await _httpClient.PutAsync(
+			$"/api/distribute/{promotionDistributionId}/{playerCode}/manually",
+			requestContent,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
 	}
 
 	public async ValueTask<PromotionContent?> GetPromotionContentAsync(Guid promotionId, CancellationToken cancellationToken = default)
