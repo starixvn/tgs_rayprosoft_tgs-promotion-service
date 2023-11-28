@@ -47,6 +47,15 @@ internal class
 	public async ValueTask ExecuteAsync(DistributePromotionBonusManuallyCommand command,
 		CancellationToken cancellationToken = default)
 	{
+		var promotionDistribution = await _promotionDistributionRepository.GetPromotionDistributionQueries()
+			.FirstOrDefaultAsync(x => x.Id == command.PromotionDistributionId && x.PlayerCode == command.PlayerCode,
+				cancellationToken);
+
+		if (promotionDistribution is not { SentOn: null })
+		{
+			return;
+		}
+
 		var player = await _playerServiceClient.GetPlayerInfoAsync(
 				command.PlayerCode,
 				cancellationToken)
@@ -65,22 +74,6 @@ internal class
 			.ConfigureAwait(false);
 
 		var walletId = Guid.Parse(playerProperties.GetValueOrDefault("DefaultWalletId")!);
-
-		var promotionDistribution = await _promotionDistributionRepository.GetPromotionDistributionQueries()
-			.FirstOrDefaultAsync(x => x.Id == command.PromotionDistributionId && x.PlayerCode == command.PlayerCode,
-				cancellationToken);
-
-		if (promotionDistribution == null)
-		{
-			_logger.LogWarning("Promotion distribution id {PromotionDistributionId} does not exist", command.PromotionDistributionId);
-			
-			return;
-		}
-
-		if (promotionDistribution.SentOn != null)
-		{
-			return;
-		}
 
 		var plan = await _promotionRepository.FindPromotionDistributePlanDetailAsync(
 			promotionDistribution.PlanId!.Value,
