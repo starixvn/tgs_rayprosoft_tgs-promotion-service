@@ -19,17 +19,23 @@ public class PromotionDispatchController : ControllerBase
 		[FromServices] IPromotionDispatchTaskQueue taskQueue,
 		[FromBody] DispatchPromotionBonusViewModel request)
 	{
-		var model = new PromotionDispatchQueueModel
+		foreach (var player in request.Players)
 		{
-			OperatorUserId = request.OperatorUserId,
-			Players = request.Players.Select(x => new DispatchPlayerQueueModel
+			var command = new PromotionDispatchQueueModel
+			{
+				OperatorUserId = request.OperatorUserId,
+				Players = new DispatchPlayerQueueModel[]
 				{
-					PlayerCode = x.PlayerCode, PromotionBonusId = x.PromotionBonusId
-				})
-				.ToArray()
-		};
+					new()
+					{
+						PlayerCode = player.PlayerCode,
+						PromotionBonusId = player.PromotionBonusId
+					}
+				}
+			};
 
-		await taskQueue.QueuePromotionDispatchTaskQueueAsync(model);
+			await taskQueue.QueuePromotionDispatchTaskQueueAsync(command);
+		}
 
 		return new MessageResponse { Valid = true };
 	}
