@@ -57,8 +57,10 @@ public class PromotionBonusRepository : IPromotionBonusRepository
 			: preQuery(_promotionPlayerService.GetQueries()).AsNoTracking();
 	}
 
-	public ValueTask UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players) =>
-		_promotionPlayerService.UpdateEntitiesAsync(players);
+	public async ValueTask UpdatePromotionBonusPlayersAsync(IEnumerable<int> playerIds) =>
+		await _promotionPlayerService.GetQueries()
+			.Where(x => playerIds.Contains(x.Id))
+			.ExecuteUpdateAsync(s => s.SetProperty(e => e.SentOn, DateTime.UtcNow));
 
 	public async ValueTask<PromotionBonus> CreatePromotionBonusAsync(PromotionBonusModel model)
 	{

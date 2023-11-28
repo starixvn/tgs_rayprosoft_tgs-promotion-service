@@ -1,4 +1,7 @@
-﻿namespace Tgs.Promotion.Clients;
+﻿using Tgs.Promotion.Clients.Models;
+using Tgs.Promotion.Clients.Models.PromotionDispatch;
+
+namespace Tgs.Promotion.Clients;
 
 public interface IPromotionServiceClient
 {
@@ -21,6 +24,10 @@ public interface IPromotionServiceClient
 		string? distributor,
 		Guid? referenceId,
 		IEnumerable<string>? bucketTypes = null,
+		CancellationToken cancellationToken = default);
+
+	ValueTask DistributePromotionBonusManuallyAsync(
+		DistributePromotionBonusRequest request,
 		CancellationToken cancellationToken = default);
 
 	ValueTask<PromotionContent?> GetPromotionContentAsync(Guid promotionId,

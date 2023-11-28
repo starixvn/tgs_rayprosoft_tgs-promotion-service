@@ -11,7 +11,7 @@ public interface IPromotionBonusRepository
 			Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery = null,
 		bool tracking = false);
 
-	ValueTask UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players);
+	ValueTask UpdatePromotionBonusPlayersAsync(IEnumerable<int> playerIds);
 
 	ValueTask<PromotionBonus> CreatePromotionBonusAsync(PromotionBonusModel model);
 }

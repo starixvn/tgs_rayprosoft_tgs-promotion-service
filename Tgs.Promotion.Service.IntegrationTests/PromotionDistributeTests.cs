@@ -2,10 +2,12 @@
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using Tgs.CashService.Client;
 using Tgs.PlayerBucket.Client;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.Promotion.Workers;
 using Tgs.Service.PlayerBuckets;
 
 namespace Tgs.Promotion.Service.IntegrationTests;

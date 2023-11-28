@@ -9,6 +9,7 @@ using Tgs.Promotion.MessageQueue;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Service.MessageQueue;
 using Tgs.Promotion.Service.ViewModels;
+using Tgs.Promotion.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -124,6 +125,11 @@ builder.Services
 
 builder.Services
 	.AddSwaggerGen(c => c.UseDateOnlyTimeOnlyStringConverters());
+
+builder.Services.AddHostedService<PromotionDispatchBackground>()
+	.AddHostedService<PromotionDistributionBackground>()
+	.AddSingleton<IPromotionDispatchTaskQueue, PromotionDispatchTaskQueue>()
+	.AddSingleton<IPromotionDistributionTaskQueue, PromotionDistributionTaskQueue>();
 
 var app = builder.Build();
 

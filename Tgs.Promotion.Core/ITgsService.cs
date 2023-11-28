@@ -1,4 +1,6 @@
-﻿namespace Tgs.Promotion;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Tgs.Promotion;
 
 public interface ITgsService<T>
 {

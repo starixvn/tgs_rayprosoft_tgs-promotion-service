@@ -109,4 +109,8 @@ public interface IPromotionRepository
 		Guid snapshotId,
 		DateTime updatedOn,
 		CancellationToken cancellationToken = default);
+
+	ValueTask<PromotionDistributePlanDetailInfo> FindPromotionDistributePlanDetailAsync(
+		Guid planId,
+		CancellationToken cancellationToken = default);
 }
