@@ -53,20 +53,21 @@ public class PromotionDistributeController : ControllerBase
 		return getService.GetAsync(command);
 	}
 
-	[HttpPut("{promotionDistributionId}/{playerCode}/manually")]
-	public ValueTask DistributePromotionBonusAsync(
+	[HttpPut("manually")]
+	public async ValueTask DistributePromotionBonusAsync(
 		[FromServices] IPromotionDistributionTaskQueue taskQueue,
-		Guid promotionDistributionId,
-		string playerCode,
 		[FromBody] DistributePromotionBonusManuallyViewModel request)
 	{
-		var command = new PromotionDistributionQueueModel
+		foreach (var player in request.Players)
 		{
-			PromotionDistributionId = promotionDistributionId,
-			PlayerCode = playerCode,
-			Distributor = request.Distributor
-		};
+			var command = new PromotionDistributionQueueModel
+			{
+				PromotionDistributionId = player.PromotionBonusId,
+				PlayerCode = player.PlayerCode,
+				Distributor = request.Distributor
+			};
 
-		return taskQueue.QueuePromotionDistributeTaskQueueAsync(command);
+			await taskQueue.QueuePromotionDistributeTaskQueueAsync(command);
+		}
 	}
 }

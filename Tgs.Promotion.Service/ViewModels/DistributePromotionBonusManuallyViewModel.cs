@@ -2,6 +2,6 @@
 
 public class DistributePromotionBonusManuallyViewModel
 {
-	public string? Distributor { get; init; }
-	public IEnumerable<string>? BucketTypes { get; init; }
+	public string Distributor { get; set; } = default!;
+	public DistributePlayerManuallyViewModel[] Players { get; set; } = default!;
 }
