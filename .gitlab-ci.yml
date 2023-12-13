@@ -24,7 +24,7 @@ unit-test:
   extends: .unit-test-template
 
 push-nuget:
-  extends: push-nuget-template
+  extends: .push-nuget-template
   script:
     - push_package "Tgs.Promotion.Client"
   artifacts:
