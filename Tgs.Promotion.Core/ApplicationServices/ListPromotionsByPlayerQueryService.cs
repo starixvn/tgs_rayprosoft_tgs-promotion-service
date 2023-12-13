@@ -1,18 +1,17 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
-using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
+using Tgs.VipLevelService.Clients;
 
 namespace Tgs.Promotion.ApplicationServices;
 
 internal class ListPromotionsByPlayerQueryService(
 	IPlayerServiceClient playerServiceClient,
-	IGetService<GetBrandVipLevelMapQuery, IImmutableDictionary<Guid, VipLevelInfo>> getVipMapService,
+	IGetService<GetBrandVipLevelMapQuery, IReadOnlyDictionary<Guid, VipLevelInfo>> getVipMapService,
 	IQueryService<ListPromotionsByBrandQuery, PromotionView> promotionQueryService,
 	IPromotionCheckerFactory promotionCheckerFactory) : IQueryService<ListPromotionsByPlayerQuery, PromotionView>
 {
-	private readonly IGetService<GetBrandVipLevelMapQuery, IImmutableDictionary<Guid, VipLevelInfo>> _getVipMapService = getVipMapService ?? throw new ArgumentNullException(nameof(getVipMapService));
 	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 	private readonly IPromotionCheckerFactory _promotionCheckerFactory = promotionCheckerFactory ?? throw new ArgumentNullException(nameof(promotionCheckerFactory));
 	private readonly IQueryService<ListPromotionsByBrandQuery, PromotionView> _promotionQueryService = promotionQueryService ?? throw new ArgumentNullException(nameof(promotionQueryService));
@@ -28,7 +27,7 @@ internal class ListPromotionsByPlayerQueryService(
 		if (player is null)
 			yield break;
 
-		var vipDict = await _getVipMapService
+		var vipDict = await getVipMapService
 			.GetAsync(new GetBrandVipLevelMapQuery(player.BrandId), cancellationToken)
 			.ConfigureAwait(false);
 

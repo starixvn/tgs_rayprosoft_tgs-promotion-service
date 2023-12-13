@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Tgs.Promotion.Extensions;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.PromotionDispatch;
@@ -60,7 +59,7 @@ internal class GetPromotionDispatchQueryService(
 			.Where(x => x.CreatedOn >= before60Day)
 			.Where(request.From, x => request.From <= x.CreatedOn)
 			.Where(request.To, x => request.To >= x.CreatedOn)
-			.Where(!request.PromotionName.IsNullOrEmpty(), x => x.Promotion.Name == request.PromotionName)
+			.Where(!string.IsNullOrEmpty(request.PromotionName), x => x.Promotion.Name == request.PromotionName)
 			.Where(promotionTypes, x => promotionTypes.Contains(x.Promotion.PromotionType))
 			.Join(_tgsPlayerService.GetPlayerQueries().Where(request.Username, x => x.Username == request.Username),
 				x => x.PlayerCode, p => p.PlayerCode,
@@ -96,7 +95,8 @@ internal class GetPromotionDispatchQueryService(
 			.Where(x => x.PromotionBonus.CreatedOn >= before60Day)
 			.Where(request.From, x => request.From <= x.SentOn)
 			.Where(request.To, x => request.To >= x.SentOn)
-			.Where(!request.PromotionName.IsNullOrEmpty(),
+			.Where(
+				!string.IsNullOrEmpty(request.PromotionName),
 				x => x.PromotionBonus.Promotion.Name == request.PromotionName)
 			.Where(promotionTypes, x => promotionTypes.Contains(x.PromotionBonus.PromotionType))
 			.Join(_tgsPlayerService.GetPlayerQueries().Where(request.Username, x => x.Username == request.Username),

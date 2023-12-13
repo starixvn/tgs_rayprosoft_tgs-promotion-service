@@ -86,8 +86,9 @@ builder.Services
 
 		options.BaseUrl = config.GetValue<Uri>("Promotion:CashBaseUrl")!;
 	})
-	.AddBrandServiceClient((options, _) =>
-		options.BrandCertificateBaseUrl = builder.Configuration.GetValue<Uri>("Promotion:BrandServiceBaseUrl")!)
+	.AddVipLevelServiceClient(httpBuilder => httpBuilder
+		.ConfigureHttpClient(httpClient => httpClient.BaseAddress =
+			builder.Configuration.GetValue<Uri>("Promotion:VipLevelServiceBaseUrl")!))
 	.AddPlayerServiceClient((options, _) =>
 		options.BaseUrl = builder.Configuration.GetValue<Uri>("Promotion:PlayerServiceBaseUrl")!)
 	.AddPlayerBucketTypeClient()
@@ -119,13 +120,9 @@ builder.Services
 	.AddHealthChecks();
 
 builder.Services
-	.AddDateOnlyTimeOnlyStringConverters()
 	.AddControllers()
 	.AddJsonOptions(jsonOptions
 		=> jsonOptions.JsonSerializerOptions.Converters.Add(new PromotionRuleViewModelJsonConverter()));
-
-builder.Services
-	.AddSwaggerGen(c => c.UseDateOnlyTimeOnlyStringConverters());
 
 builder.Services.AddHostedService<PromotionDispatchBackground>()
 	.AddHostedService<PromotionDistributionBackground>()
