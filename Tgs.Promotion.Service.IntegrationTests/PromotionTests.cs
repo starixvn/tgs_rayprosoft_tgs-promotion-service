@@ -4,13 +4,13 @@ using Google.Protobuf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Clients.Protos;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
 using Tgs.SerialNumberGenerator;
+using Tgs.VipLevelService.Clients;
 using Valhalla.MessageQueue;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
@@ -305,12 +305,12 @@ public class PromotionTests
 	public async Task List_Promotions_By_PlayerCode()
 	{
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
-		var fakeBrandService = Substitute.For<IBrandServiceClient>();
+		var fakeVipLevelService = Substitute.For<IVipLevelServiceClient>();
 
 		await using var web = new TestPromotionApplication(builder => builder
 			.ConfigureServices(services => services
 				.AddSingleton(fakePlayerService)
-				.AddSingleton(fakeBrandService)));
+				.AddSingleton(fakeVipLevelService)));
 
 		var httpClient = web.CreateClient();
 
@@ -344,9 +344,29 @@ public class PromotionTests
 				BrandId = brandId
 			});
 
-		_ = fakeBrandService.GetVipLevelInfosAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
-			.Returns(new[] {
-				new VipLevelInfo(playerVipLevelId, 1)
+		_ = fakeVipLevelService.GetBrandAllVipLevelsAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
+			.Returns(new[]
+			{
+				new VipLevelInfo(
+					playerVipLevelId,
+					1,
+					brandId,
+					0M,
+					0M,
+					0M,
+					0M,
+					false,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0,
+					0M)
 			}.ToAsyncEnumerable());
 
 		var actual = await sut.ListPromotionsAsync(brandId, playerCode).ToArrayAsync();

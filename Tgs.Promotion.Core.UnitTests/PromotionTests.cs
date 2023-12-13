@@ -2,12 +2,12 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using NSubstitute;
-using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Models;
 using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;
+using Tgs.VipLevelService.Clients;
 
 namespace Tgs.Promotion.Core.UnitTests;
 
@@ -193,7 +193,7 @@ public class PromotionTests
 	public async Task List_Promotions_By_Player()
 	{
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakeVipLevelMapService = Substitute.For<IGetService<GetBrandVipLevelMapQuery, IImmutableDictionary<Guid, VipLevelInfo>>>();
+		var fakeVipLevelMapService = Substitute.For<IGetService<GetBrandVipLevelMapQuery, IReadOnlyDictionary<Guid, VipLevelInfo>>>();
 		var fakePromotionQueryService = Substitute.For<IQueryService<ListPromotionsByBrandQuery, PromotionView>>();
 		var fakePromotionCheckerFactory = Substitute.For<IPromotionCheckerFactory>();
 
@@ -217,8 +217,27 @@ public class PromotionTests
 		_ = fakeVipLevelMapService.GetAsync(Arg.Any<GetBrandVipLevelMapQuery>())
 			.Returns(new Dictionary<Guid, VipLevelInfo>
 			{
-				[playerVipLevelId] = new VipLevelInfo(playerVipLevelId, 1)
-			}.ToImmutableDictionary());
+				[playerVipLevelId] = new VipLevelInfo(
+					playerVipLevelId,
+					1,
+					query.BrandId,
+					0M,
+					0M,
+					0M,
+					0M,
+					false,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0M,
+					0,
+					0M)
+			}.AsReadOnly());
 
 		_ = fakePromotionQueryService.QueryAsync(Arg.Any<ListPromotionsByBrandQuery>())
 			.Returns(new[]

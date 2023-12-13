@@ -1,20 +1,18 @@
-﻿using System.Collections.Immutable;
-using Tgs.BrandCertificate.Clients;
-using Tgs.ServiceUtility;
+﻿using Tgs.ServiceUtility;
+using Tgs.VipLevelService.Clients;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class GetBrandVipLevelMapQueryService(IBrandServiceClient brandServiceClient) : IGetService<GetBrandVipLevelMapQuery, IImmutableDictionary<Guid, VipLevelInfo>>
+internal class GetBrandVipLevelMapQueryService(IVipLevelServiceClient vipLevelServiceClient)
+	: IGetService<GetBrandVipLevelMapQuery, IReadOnlyDictionary<Guid, VipLevelInfo>>
 {
-	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-
-	public async ValueTask<IImmutableDictionary<Guid, VipLevelInfo>> GetAsync(GetBrandVipLevelMapQuery query, CancellationToken cancellationToken = default)
+	public async ValueTask<IReadOnlyDictionary<Guid, VipLevelInfo>> GetAsync(GetBrandVipLevelMapQuery query, CancellationToken cancellationToken = default)
 	{
-		var dict = await _brandServiceClient
-			.GetVipLevelInfosAsync(query.BrandId, cancellationToken)
-			.ToDictionaryAsync(info => info.Id, cancellationToken: cancellationToken)
+		var dict = await vipLevelServiceClient
+			.GetBrandAllVipLevelsAsync(query.BrandId, cancellationToken)
+			.ToDictionaryAsync(vip => vip.Id, cancellationToken)
 			.ConfigureAwait(false);
 
-		return dict.ToImmutableDictionary();
+		return dict.AsReadOnly();
 	}
 }
