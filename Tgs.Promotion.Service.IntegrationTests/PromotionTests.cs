@@ -889,11 +889,11 @@ public class PromotionTests
 		await sut.TagPlayerDepositAsync(playerCode, promotionId);
 
 		_ = fakeFirstDepositChecker.Received(1)
-			.TagPromotionTypeAsync(Arg.Is(playerCode), Arg.Is(promotionId));
+			.TagPromotionTypeAsync(Arg.Is(playerCode), Arg.Is(promotionId), Arg.Any<CancellationToken>());
 		_ = fakeAccountFirstDepositChecker.Received(1)
-			.TagPromotionTypeAsync(Arg.Is(playerCode), Arg.Is(promotionId));
+			.TagPromotionTypeAsync(Arg.Is(playerCode), Arg.Is(promotionId), Arg.Any<CancellationToken>());
 		_ = fakeDailyFirstDepositChecker.Received(1)
-			.TagPromotionTypeAsync(Arg.Is(playerCode), Arg.Is(promotionId));
+			.TagPromotionTypeAsync(Arg.Is(playerCode), Arg.Is(promotionId), Arg.Any<CancellationToken>());
 	}
 
 	[TestMethod]
@@ -926,11 +926,11 @@ public class PromotionTests
 		await sut.UntagPlayerDepositAsync(playerCode, promotionId);
 
 		_ = fakeFirstDepositChecker.Received(1)
-			.RollbackTagAsync(Arg.Is(playerCode), Arg.Is(promotionId));
+			.RollbackTagAsync(Arg.Is(playerCode), Arg.Is(promotionId), Arg.Any<CancellationToken>());
 		_ = fakeAccountFirstDepositChecker.Received(1)
-			.RollbackTagAsync(Arg.Is(playerCode), Arg.Is(promotionId));
+			.RollbackTagAsync(Arg.Is(playerCode), Arg.Is(promotionId), Arg.Any<CancellationToken>());
 		_ = fakeDailyFirstDepositChecker.Received(1)
-			.RollbackTagAsync(Arg.Is(playerCode), Arg.Is(promotionId));
+			.RollbackTagAsync(Arg.Is(playerCode), Arg.Is(promotionId), Arg.Any<CancellationToken>());
 	}
 
 	[TestMethod]

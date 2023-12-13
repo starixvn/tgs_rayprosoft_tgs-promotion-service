@@ -61,24 +61,24 @@ public class DepositStatusChangedMessageHandler : IMessageHandler
 					.ConfigureAwait(false);
 
 				await _firstDepositChecker
-					.CommitTagAsync(depositForm.PlayerCode, depositForm.PromotionId)
+					.CommitTagAsync(depositForm.PlayerCode, depositForm.PromotionId, cancellationToken)
 					.ConfigureAwait(false);
 
 				if (depositForm.CreatedOn.ToLocalTime().Date == currentDate)
 					await _dailyFirstDepositChecker
-						.CommitTagAsync(depositForm.PlayerCode, depositForm.PromotionId)
+						.CommitTagAsync(depositForm.PlayerCode, depositForm.PromotionId, cancellationToken)
 						.ConfigureAwait(false);
 
 				break;
 
 			case PaymentFlowState.Reject:
 				await _firstDepositChecker
-					.RollbackTagAsync(depositForm.PlayerCode, depositForm.PromotionId)
+					.RollbackTagAsync(depositForm.PlayerCode, depositForm.PromotionId, cancellationToken)
 					.ConfigureAwait(false);
 
 				if (depositForm.CreatedOn.ToLocalTime().Date == currentDate)
 					await _dailyFirstDepositChecker
-						.RollbackTagAsync(depositForm.PlayerCode, depositForm.PromotionId)
+						.RollbackTagAsync(depositForm.PlayerCode, depositForm.PromotionId, cancellationToken)
 						.ConfigureAwait(false);
 				break;
 		}

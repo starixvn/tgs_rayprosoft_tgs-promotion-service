@@ -470,7 +470,8 @@ public class PromotionTests
 			fakeSystemClock,
 			fakeSerialNumberGenerator,
 			fakePromotionRepository,
-			checkerFactory);
+			checkerFactory,
+			new PromotionSerializer());
 
 		var query = new CheckCanJoinPromotionQuery(
 			Guid.NewGuid(),
@@ -523,10 +524,10 @@ public class PromotionTests
 
 		var fakeChecker = Substitute.For<IPromotionChecker>();
 
-		_ = fakeChecker.CheckJoinAsync(
-				Arg.Any<ConditionData>(),
+		_ = fakeChecker.CheckAsync(
+				Arg.Is(query.PlayerCode),
 				Arg.Any<PromotionMainInfo>(),
-				Arg.Any<PromotionRule>())
+				Arg.Any<JsonDocument?>())
 			.Returns(true);
 
 		_ = fakeServiceProvider
@@ -574,8 +575,7 @@ public class PromotionTests
 
 		ClassicAssert.IsTrue(actual);
 
-		_ = fakePromotionRepository
-			.Received(1)
+		_ = fakePromotionRepository.Received(1)
 			.CreatePromotionEventAsync(
 				Arg.Is(eventId),
 				Arg.Is(query.PromotionId),
@@ -611,7 +611,8 @@ public class PromotionTests
 			fakeSystemClock,
 			fakeSerialNumberGenerator,
 			fakePromotionRepository,
-			checkerFactory);
+			checkerFactory,
+			new PromotionSerializer());
 
 		var query = new CheckCanJoinPromotionQuery(
 			Guid.NewGuid(),
@@ -658,16 +659,16 @@ public class PromotionTests
 			Guid.NewGuid());
 
 		_ = fakePromotionRepository.GetCurrentPromotionSnapshotAsync(
-				Arg.Is(query.PromotionId),
-				Arg.Any<CancellationToken>())
+			Arg.Is(query.PromotionId),
+			Arg.Any<CancellationToken>())
 			.Returns(promotion);
 
 		var fakeChecker = Substitute.For<IPromotionChecker>();
 
-		_ = fakeChecker.CheckJoinAsync(
-				Arg.Any<ConditionData>(),
-				Arg.Any<PromotionMainInfo>(),
-				Arg.Any<PromotionRule>())
+		_ = fakeChecker.CheckAsync(
+			Arg.Is(query.PlayerCode),
+			Arg.Any<PromotionMainInfo>(),
+			Arg.Any<JsonDocument?>())
 			.Returns(true);
 
 		_ = fakeServiceProvider
@@ -752,7 +753,8 @@ public class PromotionTests
 			fakeSystemClock,
 			fakeSerialNumberGenerator,
 			fakePromotionRepository,
-			checkerFactory);
+			checkerFactory,
+			new PromotionSerializer());
 
 		var query = new CheckCanJoinPromotionQuery(
 			Guid.NewGuid(),
@@ -799,16 +801,16 @@ public class PromotionTests
 			Guid.NewGuid());
 
 		_ = fakePromotionRepository.GetCurrentPromotionSnapshotAsync(
-				Arg.Is(query.PromotionId),
-				Arg.Any<CancellationToken>())
+			Arg.Is(query.PromotionId),
+			Arg.Any<CancellationToken>())
 			.Returns(promotion);
 
 		var fakeChecker = Substitute.For<IPromotionChecker>();
 
-		_ = fakeChecker.CheckJoinAsync(
-				Arg.Any<ConditionData>(),
-				Arg.Any<PromotionMainInfo>(),
-				Arg.Any<PromotionRule>())
+		_ = fakeChecker.CheckAsync(
+			Arg.Is(query.PlayerCode),
+			Arg.Any<PromotionMainInfo>(),
+			Arg.Any<JsonDocument?>())
 			.Returns(false);
 
 		_ = fakeServiceProvider
@@ -819,8 +821,7 @@ public class PromotionTests
 
 		ClassicAssert.IsFalse(actual);
 
-		_ = fakePromotionRepository
-			.DidNotReceive()
+		_ = fakePromotionRepository.DidNotReceive()
 			.CreatePromotionEventAsync(
 				Arg.Any<Guid>(),
 				Arg.Is(query.PromotionId),
@@ -829,8 +830,7 @@ public class PromotionTests
 				Arg.Any<string?>(),
 				Arg.Any<CancellationToken>());
 
-		_ = fakePromotionRepository
-			.DidNotReceive()
+		_ = fakePromotionRepository.DidNotReceive()
 			.UpdatePromotionSnapshotAsync(
 				Arg.Any<PromotionSnapshot>(),
 				Arg.Any<Guid>(),
@@ -857,7 +857,8 @@ public class PromotionTests
 			fakeSystemClock,
 			fakeSerialNumberGenerator,
 			fakePromotionRepository,
-			checkerFactory);
+			checkerFactory,
+			new PromotionSerializer());
 
 		var query = new CheckCanJoinPromotionQuery(
 			Guid.NewGuid(),
@@ -910,10 +911,10 @@ public class PromotionTests
 
 		var fakeChecker = Substitute.For<IPromotionChecker>();
 
-		_ = fakeChecker.CheckJoinAsync(
-				Arg.Any<ConditionData>(),
-				Arg.Any<PromotionMainInfo>(),
-				Arg.Any<PromotionRule>())
+		_ = fakeChecker.CheckAsync(
+			Arg.Is(query.PlayerCode),
+			Arg.Any<PromotionMainInfo>(),
+			Arg.Any<JsonDocument?>())
 			.Returns(true);
 
 		_ = fakeServiceProvider
@@ -960,7 +961,7 @@ public class PromotionTests
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Any<string>())
 			.Returns(fakePromotionChecker);
 
-		_ = fakePromotionChecker.CheckAsync(Arg.Any<string>(), Arg.Any<PromotionMainInfo>())
+		_ = fakePromotionChecker.CheckAsync(Arg.Any<string>(), Arg.Any<PromotionMainInfo>(), Arg.Any<JsonDocument?>())
 			.Returns(true);
 
 		var testData = new[]

@@ -1,21 +1,39 @@
-﻿namespace Tgs.Promotion.Checkers;
+﻿using System.Text.Json;
 
-internal class DepositRewardChecker(PromotionSerializer promotionSerializer) : IPromotionChecker
+namespace Tgs.Promotion.Checkers;
+
+internal class DepositRewardChecker(
+	PromotionSerializer promotionSerializer,
+	IPromotionRepository promotionRepository) : IPromotionChecker
 {
-	private readonly PromotionSerializer _promotionSerializer = promotionSerializer ?? throw new ArgumentNullException(nameof(promotionSerializer));
-
-	public ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
-		=> ValueTask.FromResult(true);
-
-	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
+	public async ValueTask<bool> CheckAsync(
+		string playerCode,
+		PromotionMainInfo promotion,
+		JsonDocument? extend,
+		CancellationToken cancellationToken = default)
 	{
-		var detail = _promotionSerializer.Deserialize<DepositRewardSetting>(rule.CampaignDetail);
-		return ValueTask.FromResult(detail != null && detail.DepositMinimumLimit <= conditionData.Amount);
+		if (extend is null
+			|| !extend.RootElement.TryGetProperty("depositAmount", out var prop)
+			|| !prop.TryGetDecimal(out var amount))
+			return true;
+
+		var snapshot = await promotionRepository
+			.GetCurrentPromotionSnapshotAsync(promotion.Id, cancellationToken)
+			.ConfigureAwait(false);
+		if (snapshot is null)
+			return false;
+
+		var detail = promotionSerializer.Deserialize<DepositRewardSetting>(snapshot.CampaignDetail);
+
+		return detail is not null && detail.DepositMinimumLimit <= amount;
 	}
 
-	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
+	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId, CancellationToken cancellationToken = default)
+		=> ValueTask.CompletedTask;
 
-	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
+	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId, CancellationToken cancellationToken = default)
+		=> ValueTask.CompletedTask;
 
-	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
+	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId, CancellationToken cancellationToken = default)
+		=> ValueTask.CompletedTask;
 }

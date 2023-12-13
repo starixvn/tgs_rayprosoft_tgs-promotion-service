@@ -9,7 +9,8 @@ internal class CheckCanJoinPromotionQueryService(
 	ISystemClock systemClock,
 	ISerialNumberGenerator serialNumberGenerator,
 	IPromotionRepository promotionRepository,
-	IPromotionCheckerFactory promotionCheckerFactory) : IGetService<CheckCanJoinPromotionQuery, bool>
+	IPromotionCheckerFactory promotionCheckerFactory,
+	PromotionSerializer promotionSerializer) : IGetService<CheckCanJoinPromotionQuery, bool>
 {
 	private readonly IPromotionCheckerFactory _promotionCheckerFactory = promotionCheckerFactory
 		?? throw new ArgumentNullException(nameof(promotionCheckerFactory));
@@ -32,12 +33,8 @@ internal class CheckCanJoinPromotionQueryService(
 		var checker = _promotionCheckerFactory.GetPromotionChecker(snapshot.PromotionType);
 
 		var isAllowed = await checker
-			.CheckJoinAsync(
-				new ConditionData(
-					query.BrandId,
-					query.PromotionId,
-					query.PlayerCode,
-					query.Amount),
+			.CheckAsync(
+				query.PlayerCode,
 				new PromotionMainInfo(
 					snapshot.Id,
 					snapshot.BrandId,
@@ -46,13 +43,12 @@ internal class CheckCanJoinPromotionQueryService(
 					snapshot.PromotionType,
 					snapshot.TotalAmountLimit,
 					snapshot.AutoSentPlayerBonus),
-				new PromotionRule(
-					snapshot.CampaignDetail,
-					snapshot.BonusAmountLimit,
-					snapshot.Percentage,
-					snapshot.TurnoverMultiple,
-					snapshot.GameType,
-					Array.Empty<int>()))
+				JsonDocument.Parse(
+					promotionSerializer.Serialize(new
+					{
+						DepositAmount = query.Amount
+					})),
+				cancellationToken)
 			.ConfigureAwait(false);
 
 		if (!isAllowed)

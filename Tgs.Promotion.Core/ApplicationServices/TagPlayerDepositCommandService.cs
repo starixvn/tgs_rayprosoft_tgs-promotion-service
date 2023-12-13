@@ -21,7 +21,7 @@ internal class TagPlayerDepositCommandService : ICommandService<TagPlayerDeposit
 	{
 		foreach (var checker in _checkers)
 			await checker
-				.TagPromotionTypeAsync(command.PlayerCode, command.PromotionId)
+				.TagPromotionTypeAsync(command.PlayerCode, command.PromotionId, cancellationToken)
 				.ConfigureAwait(false);
 	}
 }

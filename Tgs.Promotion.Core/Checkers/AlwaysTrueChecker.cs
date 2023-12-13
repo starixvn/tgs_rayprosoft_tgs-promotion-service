@@ -1,16 +1,15 @@
-﻿namespace Tgs.Promotion.Checkers;
+﻿using System.Text.Json;
+
+namespace Tgs.Promotion.Checkers;
 
 internal class AlwaysTrueChecker : IPromotionChecker
 {
-	public ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
+	public ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion, JsonDocument? extend, CancellationToken cancellationToken = default)
 		=> ValueTask.FromResult(true);
 
-	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
-		=> CheckAsync(conditionData.PlayerCode, promotion);
+	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
 
-	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
+	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
 
-	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
-
-	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
+	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
 }

@@ -1,4 +1,5 @@
-﻿using Tgs.PlayerService.Client;
+﻿using System.Text.Json;
+using Tgs.PlayerService.Client;
 
 namespace Tgs.Promotion.Checkers;
 
@@ -7,17 +8,21 @@ internal class RegisterChecker(IPlayerServiceClient playerServiceClient, IPromot
 	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 	private readonly IPromotionParticipantRepository _promotionParticipantRepository = promotionParticipantRepository ?? throw new ArgumentNullException(nameof(promotionParticipantRepository));
 
-	public async ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
+	public async ValueTask<bool> CheckAsync(
+		string playerCode,
+		PromotionMainInfo promotion,
+		JsonDocument? extend,
+		CancellationToken cancellationToken = default)
 	{
 		var player = await _playerServiceClient
-			.GetPlayerInfoAsync(playerCode)
+			.GetPlayerInfoAsync(playerCode, cancellationToken)
 			.ConfigureAwait(false);
 
 		if (player is null)
 			return false;
 
 		var playerStatus = await _playerServiceClient
-			.GetPlayerStatusAsync(playerCode)
+			.GetPlayerStatusAsync(playerCode, cancellationToken)
 			.ConfigureAwait(false);
 
 		if (playerStatus is not PlayerService.Client.PlayerStatus.Enabled)
@@ -32,12 +37,9 @@ internal class RegisterChecker(IPlayerServiceClient playerServiceClient, IPromot
 			&& promotion.EventDuring.To >= player.RegisteredOn!.Value;
 	}
 
-	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
-		=> CheckAsync(conditionData.PlayerCode, promotion);
+	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
 
-	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
+	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
 
-	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
-
-	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
+	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
 }
