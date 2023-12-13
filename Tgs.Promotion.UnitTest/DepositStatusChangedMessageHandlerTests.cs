@@ -7,6 +7,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
+using Tgs.Promotion.Checkers;
 using Tgs.Promotion.MessageQueue;
 
 namespace Tgs.Promotion.UnitTest;

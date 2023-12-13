@@ -1,17 +1,12 @@
-﻿namespace Tgs.Promotion;
+﻿namespace Tgs.Promotion.Checkers;
 
-internal class DepositRewardChecker(PromotionSerializer promotionSerializer) : IPromotionChecker
+internal class AlwaysTrueChecker : IPromotionChecker
 {
-	private readonly PromotionSerializer _promotionSerializer = promotionSerializer ?? throw new ArgumentNullException(nameof(promotionSerializer));
-
 	public ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
 		=> ValueTask.FromResult(true);
 
 	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
-	{
-		var detail = _promotionSerializer.Deserialize<DepositRewardSetting>(rule.CampaignDetail);
-		return ValueTask.FromResult(detail != null && detail.DepositMinimumLimit <= conditionData.Amount);
-	}
+		=> CheckAsync(conditionData.PlayerCode, promotion);
 
 	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
 

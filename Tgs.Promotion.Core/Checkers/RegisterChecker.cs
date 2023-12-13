@@ -1,6 +1,6 @@
 ﻿using Tgs.PlayerService.Client;
 
-namespace Tgs.Promotion;
+namespace Tgs.Promotion.Checkers;
 
 internal class RegisterChecker(IPlayerServiceClient playerServiceClient, IPromotionParticipantRepository promotionParticipantRepository) : IPromotionChecker
 {

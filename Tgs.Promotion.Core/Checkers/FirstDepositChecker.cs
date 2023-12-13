@@ -1,6 +1,6 @@
-﻿namespace Tgs.Promotion;
+﻿namespace Tgs.Promotion.Checkers;
 
-internal class FirstJoinPromotionChecker(IPlayerRepository playerService, IPlayerDataRepository playerDataRepository) : IPromotionChecker
+internal class FirstDepositChecker(IPlayerRepository playerService, IPlayerDataRepository playerDataRepository) : IPromotionChecker
 {
 	private readonly IPlayerDataRepository _playerDataRepository = playerDataRepository ?? throw new ArgumentNullException(nameof(playerDataRepository));
 	private readonly IPlayerRepository _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
@@ -8,7 +8,7 @@ internal class FirstJoinPromotionChecker(IPlayerRepository playerService, IPlaye
 	public async ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
 	{
 		var isFirstDepositing = await _playerDataRepository
-			.CheckPlayerFirstJoinPromotionAsync(playerCode)
+			.CheckPlayerFirstDepositingAsync(playerCode)
 			.ConfigureAwait(false);
 
 		if (isFirstDepositing)
@@ -18,39 +18,20 @@ internal class FirstJoinPromotionChecker(IPlayerRepository playerService, IPlaye
 			.GetPlayerByPlayerCodeAsync(playerCode)
 			.ConfigureAwait(false);
 
-		return player is not null && player.FirstPromotionOn == null;
+		return player != null && player.FirstDepositOn == null;
 	}
 
 	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
 		=> CheckAsync(conditionData.PlayerCode, promotion);
 
-	public async ValueTask CommitTagAsync(string playerCode, Guid? promotionId)
-	{
-		if (promotionId is null)
-			return;
-
-		await _playerService
-			.SetFirstPromotionTimeAsync(playerCode, DateTimeOffset.UtcNow)
-			.ConfigureAwait(false);
-
-		await _playerDataRepository
-			.RemovePlayerFirstJoinPromotionAsync(playerCode)
-			.ConfigureAwait(false);
-	}
+	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId)
+			=> _playerDataRepository
+			.RemovePlayerFirstDepositFlagAsync(playerCode);
 
 	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId)
-	{
-		return promotionId is null
-			? ValueTask.CompletedTask
-			: _playerDataRepository
-			.RemovePlayerFirstJoinPromotionAsync(playerCode);
-	}
+		=> _playerDataRepository
+			.RemovePlayerFirstDepositFlagAsync(playerCode);
 
 	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId)
-	{
-		return promotionId == null
-			? ValueTask.CompletedTask
-			: _playerDataRepository
-			.SetPlayerFirstJoinPromotionAsync(playerCode);
-	}
+		=> _playerDataRepository.SetPlayerFirstDepositFlagAsync(playerCode);
 }

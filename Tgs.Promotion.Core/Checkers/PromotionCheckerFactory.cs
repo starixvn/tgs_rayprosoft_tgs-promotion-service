@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion;
+﻿namespace Tgs.Promotion.Checkers;
 
 public class PromotionCheckerFactory(IDictionary<string, Type> checkerTypes, IServiceProvider serviceProvider) : IPromotionCheckerFactory
 {

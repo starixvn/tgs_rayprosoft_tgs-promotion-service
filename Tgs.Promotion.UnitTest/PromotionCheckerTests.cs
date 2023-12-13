@@ -8,6 +8,7 @@ using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Checkers;
 using Tgs.Promotion.Domain.Entities;
 
 namespace Tgs.Promotion.UnitTest;

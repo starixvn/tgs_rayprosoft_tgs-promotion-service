@@ -1,9 +1,9 @@
-﻿namespace Tgs.Promotion;
+﻿namespace Tgs.Promotion.Checkers;
 
-internal class AlwaysTrueChecker : IPromotionChecker
+internal class AlwaysFalseChecker : IPromotionChecker
 {
 	public ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
-		=> ValueTask.FromResult(true);
+		=> ValueTask.FromResult(false);
 
 	public ValueTask<bool> CheckJoinAsync(ConditionData conditionData, PromotionMainInfo promotion, PromotionRule rule)
 		=> CheckAsync(conditionData.PlayerCode, promotion);

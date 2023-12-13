@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using NSubstitute;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Checkers;
 using Tgs.Promotion.Models;
 using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;

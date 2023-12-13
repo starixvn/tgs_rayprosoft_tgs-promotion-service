@@ -1,4 +1,4 @@
-﻿namespace Tgs.Promotion;
+﻿namespace Tgs.Promotion.Checkers;
 
 internal class DailySecondDepositChecker(IPlayerDataRepository playerDataRepository) : IPromotionChecker
 {
