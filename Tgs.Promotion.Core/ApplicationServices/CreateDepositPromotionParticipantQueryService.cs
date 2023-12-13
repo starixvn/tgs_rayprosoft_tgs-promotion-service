@@ -4,25 +4,15 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-public class
-	CreateDepositPromotionParticipantQueryService : IGetService<CreateDepositPromotionParticipantQuery, MessageResponse>
+public class CreateDepositPromotionParticipantQueryService(
+	IPromotionRepository promotionRepository,
+	IPromotionParticipantRepository promotionParticipantRepository,
+	ILogger<CreateDepositPromotionParticipantQueryService> logger) : IGetService<CreateDepositPromotionParticipantQuery, MessageResponse>
 {
-	private readonly ILogger<CreateDepositPromotionParticipantQueryService> _logger;
-	private readonly IPromotionParticipantRepository _promotionParticipantRepository;
-	private readonly IPromotionRepository _promotionRepository;
-
-	public CreateDepositPromotionParticipantQueryService(
-		IPromotionRepository promotionRepository,
-		IPromotionParticipantRepository promotionParticipantRepository,
-		ILogger<CreateDepositPromotionParticipantQueryService> logger)
-	{
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-
-		_promotionParticipantRepository = promotionParticipantRepository ??
+	private readonly ILogger<CreateDepositPromotionParticipantQueryService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	private readonly IPromotionParticipantRepository _promotionParticipantRepository = promotionParticipantRepository ??
 			throw new ArgumentNullException(nameof(promotionParticipantRepository));
-
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public async ValueTask<MessageResponse> GetAsync(
 		CreateDepositPromotionParticipantQuery request,

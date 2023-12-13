@@ -3,15 +3,10 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class PromotionIdsQueryService : IQueryService<PromotionIdsQuery, Guid>
+internal class PromotionIdsQueryService(
+	IPromotionRepository promotionRepository) : IQueryService<PromotionIdsQuery, Guid>
 {
-	private readonly IPromotionRepository _promotionRepository;
-
-	public PromotionIdsQueryService(
-		IPromotionRepository promotionRepository)
-	{
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	}
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public async IAsyncEnumerable<Guid> QueryAsync(
 		PromotionIdsQuery query,

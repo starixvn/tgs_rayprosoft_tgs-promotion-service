@@ -15,7 +15,7 @@ internal class ReplaceDbFunctionsExpressionVisitor : ExpressionVisitor
 			var mi = typeof(DbFunctionsForTest).GetMethod(
 				nameof(DbFunctionsForTest.ILike),
 				BindingFlags.Public | BindingFlags.Static,
-				new[] { typeof(string), typeof(string) })!;
+				[typeof(string), typeof(string)])!;
 
 			var column = Visit(methodCallExpression.Arguments[1])!;
 			var like = Visit(methodCallExpression.Arguments[2])!;

@@ -2,16 +2,11 @@
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class GetOrCreatePromotionDistributePlanCommandService
-	: IGetService<GetOrCreatePromotionDistributePlanCommand, PromotionDistributePlanInfo>
+internal class GetOrCreatePromotionDistributePlanCommandService(
+	IPromotionRepository promotionRepository)
+		: IGetService<GetOrCreatePromotionDistributePlanCommand, PromotionDistributePlanInfo>
 {
-	private readonly IPromotionRepository _promotionRepository;
-
-	public GetOrCreatePromotionDistributePlanCommandService(
-		IPromotionRepository promotionRepository)
-	{
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	}
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public async ValueTask<PromotionDistributePlanInfo> GetAsync(
 		GetOrCreatePromotionDistributePlanCommand command,

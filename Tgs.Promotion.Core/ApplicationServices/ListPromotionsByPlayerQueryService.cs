@@ -6,24 +6,16 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class ListPromotionsByPlayerQueryService : IQueryService<ListPromotionsByPlayerQuery, PromotionView>
+internal class ListPromotionsByPlayerQueryService(
+	IPlayerServiceClient playerServiceClient,
+	IGetService<GetBrandVipLevelMapQuery, IImmutableDictionary<Guid, VipLevelInfo>> getVipMapService,
+	IQueryService<ListPromotionsByBrandQuery, PromotionView> promotionQueryService,
+	IPromotionCheckerFactory promotionCheckerFactory) : IQueryService<ListPromotionsByPlayerQuery, PromotionView>
 {
-	private readonly IGetService<GetBrandVipLevelMapQuery, IImmutableDictionary<Guid, VipLevelInfo>> _getVipMapService;
-	private readonly IPlayerServiceClient _playerServiceClient;
-	private readonly IPromotionCheckerFactory _promotionCheckerFactory;
-	private readonly IQueryService<ListPromotionsByBrandQuery, PromotionView> _promotionQueryService;
-
-	public ListPromotionsByPlayerQueryService(
-		IPlayerServiceClient playerServiceClient,
-		IGetService<GetBrandVipLevelMapQuery, IImmutableDictionary<Guid, VipLevelInfo>> getVipMapService,
-		IQueryService<ListPromotionsByBrandQuery, PromotionView> promotionQueryService,
-		IPromotionCheckerFactory promotionCheckerFactory)
-	{
-		_promotionQueryService = promotionQueryService ?? throw new ArgumentNullException(nameof(promotionQueryService));
-		_promotionCheckerFactory = promotionCheckerFactory ?? throw new ArgumentNullException(nameof(promotionCheckerFactory));
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_getVipMapService = getVipMapService ?? throw new ArgumentNullException(nameof(getVipMapService));
-	}
+	private readonly IGetService<GetBrandVipLevelMapQuery, IImmutableDictionary<Guid, VipLevelInfo>> _getVipMapService = getVipMapService ?? throw new ArgumentNullException(nameof(getVipMapService));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+	private readonly IPromotionCheckerFactory _promotionCheckerFactory = promotionCheckerFactory ?? throw new ArgumentNullException(nameof(promotionCheckerFactory));
+	private readonly IQueryService<ListPromotionsByBrandQuery, PromotionView> _promotionQueryService = promotionQueryService ?? throw new ArgumentNullException(nameof(promotionQueryService));
 
 	public async IAsyncEnumerable<PromotionView> QueryAsync(
 		ListPromotionsByPlayerQuery query,

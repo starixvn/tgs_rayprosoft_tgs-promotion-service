@@ -5,25 +5,18 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class CheckCanJoinPromotionQueryService : IGetService<CheckCanJoinPromotionQuery, bool>
+internal class CheckCanJoinPromotionQueryService(
+	ISystemClock systemClock,
+	ISerialNumberGenerator serialNumberGenerator,
+	IPromotionRepository promotionRepository,
+	IPromotionCheckerFactory promotionCheckerFactory) : IGetService<CheckCanJoinPromotionQuery, bool>
 {
-	private readonly IPromotionCheckerFactory _promotionCheckerFactory;
-	private readonly ISystemClock _systemClock;
-	private readonly ISerialNumberGenerator _serialNumberGenerator;
-	private readonly IPromotionRepository _promotionRepository;
+	private readonly IPromotionCheckerFactory _promotionCheckerFactory = promotionCheckerFactory
+		?? throw new ArgumentNullException(nameof(promotionCheckerFactory));
 
-	public CheckCanJoinPromotionQueryService(
-		ISystemClock systemClock,
-		ISerialNumberGenerator serialNumberGenerator,
-		IPromotionRepository promotionRepository,
-		IPromotionCheckerFactory promotionCheckerFactory)
-	{
-		_systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-		_promotionCheckerFactory = promotionCheckerFactory ??
-			throw new ArgumentNullException(nameof(promotionCheckerFactory));
-	}
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 
 	public async ValueTask<bool> GetAsync(
 		CheckCanJoinPromotionQuery query,
@@ -67,7 +60,7 @@ internal class CheckCanJoinPromotionQueryService : IGetService<CheckCanJoinPromo
 
 		if (snapshot.Unlimited == 0 && snapshot.AmountUsed >= snapshot.TotalAmountLimit)
 			return false;
-		
+
 		var amount = snapshot.Percentage * query.Amount / 100M;
 		amount = amount > snapshot.BonusAmountLimit ? snapshot.BonusAmountLimit : amount;
 

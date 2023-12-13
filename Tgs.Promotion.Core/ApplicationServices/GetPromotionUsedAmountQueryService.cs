@@ -2,15 +2,10 @@
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class GetPromotionUsedAmountQueryService : IGetService<GetPromotionUsedAmountQuery, decimal>
+internal class GetPromotionUsedAmountQueryService(
+	IPromotionRepository promotionRepository) : IGetService<GetPromotionUsedAmountQuery, decimal>
 {
-	private readonly IPromotionRepository _promotionRepository;
-
-	public GetPromotionUsedAmountQueryService(
-		IPromotionRepository promotionRepository)
-	{
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	}
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public ValueTask<decimal> GetAsync(
 		GetPromotionUsedAmountQuery query, 

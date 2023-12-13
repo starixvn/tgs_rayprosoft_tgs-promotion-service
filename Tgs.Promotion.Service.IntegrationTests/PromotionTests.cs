@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Tgs.BrandCertificate.Clients;
-using Tgs.MessageQueue;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Clients.Protos;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
 using Tgs.SerialNumberGenerator;
+using Valhalla.MessageQueue;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
 
@@ -82,17 +82,14 @@ public class PromotionTests
 
 		var promotionTypes = new PromotionTypeGroup[]
 		{
-			new PromotionTypeGroup
-			{
+			new() {
 				Name = "Turnover",
-				Types = new PromotionType[]
-				{
-					new PromotionType
-					{
+				Types = [
+					new() {
 						Name = "TestType",
 						SettlementIntervalType = "Daily"
 					}
-				}
+				]
 			}
 		};
 
@@ -834,7 +831,8 @@ public class PromotionTests
 
 		_ = await dbContext.SaveChangesAsync();
 
-		await sut.SetPromotionVipLevelsAsync(promotionId, new[] { 1, 2 }, "ModifyUser");
+		var vipLevels = new[] { 1, 2 };
+		await sut.SetPromotionVipLevelsAsync(promotionId, vipLevels, "ModifyUser");
 
 		var vipRecords = dbContext.PromotionVipLevels.ToArray();
 
@@ -953,17 +951,14 @@ public class PromotionTests
 
 		var promotionTypes = new PromotionTypeGroup[]
 		{
-			new PromotionTypeGroup
-			{
+			new() {
 				Name = "Turnover",
-				Types = new PromotionType[]
-				{
-					new PromotionType
-					{
+				Types = [
+					new() {
 						Name = "NewType",
 						SettlementIntervalType = "Daily"
 					}
-				}
+				]
 			}
 		};
 
@@ -1235,8 +1230,7 @@ public class PromotionTests
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		await dbContext.PromotionRows.AddRangeAsync(new[]
-		{
+		await dbContext.PromotionRows.AddRangeAsync([
 			new PromotionRow
 			{
 				Id = Guid.NewGuid(),
@@ -1273,7 +1267,7 @@ public class PromotionTests
 				CampaignDetail = "{}",
 				Status = (short)PromotionStatus.Disabled
 			}
-		});
+		]);
 		_ = await dbContext.SaveChangesAsync();
 
 		var actual = await sut.ListPromotionsAsync(
@@ -1299,8 +1293,7 @@ public class PromotionTests
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		await dbContext.PromotionRows.AddRangeAsync(new[]
-		{
+		await dbContext.PromotionRows.AddRangeAsync([
 			new PromotionRow
 			{
 				Id = Guid.NewGuid(),
@@ -1337,7 +1330,7 @@ public class PromotionTests
 				CampaignDetail = "{}",
 				Status = (short)PromotionStatus.Disabled
 			}
-		});
+		]);
 
 		_ = await dbContext.SaveChangesAsync();
 
@@ -1364,8 +1357,7 @@ public class PromotionTests
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		await dbContext.PromotionRows.AddRangeAsync(new[]
-		{
+		await dbContext.PromotionRows.AddRangeAsync([
 			new PromotionRow
 			{
 				Id = Guid.NewGuid(),
@@ -1402,7 +1394,7 @@ public class PromotionTests
 				CampaignDetail = "{}",
 				Status = (short)PromotionStatus.Disabled
 			}
-		});
+		]);
 
 		_ = await dbContext.SaveChangesAsync();
 
@@ -1429,8 +1421,7 @@ public class PromotionTests
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		await dbContext.PromotionRows.AddRangeAsync(new[]
-		{
+		await dbContext.PromotionRows.AddRangeAsync([
 			new PromotionRow
 			{
 				Id = Guid.NewGuid(),
@@ -1453,7 +1444,7 @@ public class PromotionTests
 				AutoSentPlayerBonus = true,
 				CampaignDetail = "{}"
 			}
-		});
+		]);
 
 		_ = await dbContext.SaveChangesAsync();
 
@@ -1480,8 +1471,7 @@ public class PromotionTests
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		await dbContext.PromotionRows.AddRangeAsync(new[]
-		{
+		await dbContext.PromotionRows.AddRangeAsync([
 			new PromotionRow
 			{
 				Id = Guid.NewGuid(),
@@ -1518,7 +1508,7 @@ public class PromotionTests
 				CampaignDetail = "{}",
 				Status = (short)PromotionStatus.Disabled
 			},
-		});
+		]);
 
 		_ = await dbContext.SaveChangesAsync();
 
@@ -1526,7 +1516,7 @@ public class PromotionTests
 			brandId,
 			null,
 			null,
-			new[] { "TestType1" },
+			["TestType1"],
 			null).ToArrayAsync();
 
 		Assert.AreEqual(2, actual.Length);
@@ -1545,8 +1535,7 @@ public class PromotionTests
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		await dbContext.PromotionRows.AddRangeAsync(new[]
-		{
+		await dbContext.PromotionRows.AddRangeAsync([
 			new PromotionRow
 			{
 				Id = Guid.NewGuid(),
@@ -1583,20 +1572,21 @@ public class PromotionTests
 				CampaignDetail = "{}",
 				Status = (short)PromotionStatus.Disabled
 			},
-		});
+		]);
 
 		_ = await dbContext.SaveChangesAsync();
 
+		var promotionTypes = new[] { "TestType1", "TestType2" };
 		var actual = await sut.ListPromotionsAsync(
 			brandId,
 			null,
 			null,
-			new[] { "TestType1", "TestType2" },
+			promotionTypes,
 			null).ToArrayAsync();
 
 		Assert.AreEqual(2, actual.Length);
 		CollectionAssert.AreEquivalent(
-			new[] { "TestType1", "TestType2" },
+			promotionTypes,
 			actual.Select(item => item.PromotionType).Distinct().ToArray());
 	}
 
@@ -1613,8 +1603,7 @@ public class PromotionTests
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		await dbContext.PromotionRows.AddRangeAsync(new[]
-		{
+		await dbContext.PromotionRows.AddRangeAsync([
 			new PromotionRow
 			{
 				Id = Guid.NewGuid(),
@@ -1651,7 +1640,7 @@ public class PromotionTests
 				CampaignDetail = "{}",
 				Status = (short)PromotionStatus.Disabled
 			}
-		});
+		]);
 
 		_ = await dbContext.SaveChangesAsync();
 
@@ -1679,8 +1668,7 @@ public class PromotionTests
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		await dbContext.PromotionRows.AddRangeAsync(new[]
-		{
+		await dbContext.PromotionRows.AddRangeAsync([
 			new PromotionRow
 			{
 				Id = Guid.NewGuid(),
@@ -1695,7 +1683,7 @@ public class PromotionTests
 				TotalAmountLimit = 0m,
 				Status = (short)PromotionStatus.Enabled
 			}
-		});
+		]);
 		_ = await dbContext.SaveChangesAsync();
 
 		var actual = await sut.ListPromotionsAsync(
@@ -1722,8 +1710,7 @@ public class PromotionTests
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
 
-		await dbContext.PromotionRows.AddRangeAsync(new[]
-		{
+		await dbContext.PromotionRows.AddRangeAsync([
 			new PromotionRow
 			{
 				Id = Guid.NewGuid(),
@@ -1757,7 +1744,7 @@ public class PromotionTests
 				AutoSentPlayerBonus = true,
 				CampaignDetail = "{}"
 			},
-		});
+		]);
 
 		_ = await dbContext.SaveChangesAsync();
 

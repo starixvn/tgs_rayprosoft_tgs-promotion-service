@@ -1,17 +1,12 @@
 ﻿using Google.Protobuf;
-using Tgs.MessageQueue;
 using Tgs.Promotion.Clients.Protos;
+using Valhalla.MessageQueue;
 
 namespace Tgs.Promotion.Service.MessageQueue;
 
-public class TurnoverRebateWeeklyCampaignDetailProcessor : IMessageSender
+public class TurnoverRebateWeeklyCampaignDetailProcessor(PromotionSerializer promotionSerializer) : IMessageSender
 {
-	private readonly PromotionSerializer _promotionSerializer;
-
-	public TurnoverRebateWeeklyCampaignDetailProcessor(PromotionSerializer promotionSerializer)
-	{
-		_promotionSerializer = promotionSerializer ?? throw new ArgumentNullException(nameof(promotionSerializer));
-	}
+	private readonly PromotionSerializer _promotionSerializer = promotionSerializer ?? throw new ArgumentNullException(nameof(promotionSerializer));
 
 	public ValueTask<Answer> AskAsync(string subject, ReadOnlyMemory<byte> data, IEnumerable<MessageHeaderValue> header, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 

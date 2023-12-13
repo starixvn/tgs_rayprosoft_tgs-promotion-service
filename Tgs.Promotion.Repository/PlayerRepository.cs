@@ -4,14 +4,9 @@ using Tgs.Promotion.Domain.Entities;
 
 namespace Tgs.Promotion.Repository;
 
-internal class PlayerRepository : IPlayerRepository
+internal class PlayerRepository(TgsContext tgsContext) : IPlayerRepository
 {
-	private readonly TgsContext _tgsContext;
-
-	public PlayerRepository(TgsContext tgsContext)
-	{
-		_tgsContext = tgsContext ?? throw new ArgumentNullException(nameof(tgsContext));
-	}
+	private readonly TgsContext _tgsContext = tgsContext ?? throw new ArgumentNullException(nameof(tgsContext));
 
 	public async ValueTask<bool> ExistsAsync(Expression<Func<Player?, bool>> predicate) =>
 		await _tgsContext.Players.AnyAsync(predicate).ConfigureAwait(false);

@@ -5,18 +5,12 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Cache;
 
-internal class ListCachedPromotionsByBrandQueryService : IQueryService<ListPromotionsByBrandQuery, PromotionView>
+internal class ListCachedPromotionsByBrandQueryService(
+	IQueryService<ListPromotionsByBrandQuery, PromotionView> sourceService,
+	IMemoryCache memoryCache) : IQueryService<ListPromotionsByBrandQuery, PromotionView>
 {
-	private readonly IMemoryCache _memoryCache;
-	private readonly IQueryService<ListPromotionsByBrandQuery, PromotionView> _sourceService;
-
-	public ListCachedPromotionsByBrandQueryService(
-		IQueryService<ListPromotionsByBrandQuery, PromotionView> sourceService,
-		IMemoryCache memoryCache)
-	{
-		_sourceService = sourceService ?? throw new ArgumentNullException(nameof(sourceService));
-		_memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-	}
+	private readonly IMemoryCache _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+	private readonly IQueryService<ListPromotionsByBrandQuery, PromotionView> _sourceService = sourceService ?? throw new ArgumentNullException(nameof(sourceService));
 
 	public async IAsyncEnumerable<PromotionView> QueryAsync(
 		ListPromotionsByBrandQuery query,

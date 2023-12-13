@@ -2,14 +2,9 @@
 
 namespace Tgs.Promotion.Service.IntegrationTests;
 
-internal class TestInMemoryQueryTranslationPreprocessorFactory : IQueryTranslationPreprocessorFactory
+internal class TestInMemoryQueryTranslationPreprocessorFactory(QueryTranslationPreprocessorDependencies dependencies) : IQueryTranslationPreprocessorFactory
 {
-	public QueryTranslationPreprocessorDependencies Dependencies { get; }
-
-	public TestInMemoryQueryTranslationPreprocessorFactory(QueryTranslationPreprocessorDependencies dependencies)
-	{
-		Dependencies = dependencies;
-	}
+	public QueryTranslationPreprocessorDependencies Dependencies { get; } = dependencies;
 
 	public QueryTranslationPreprocessor Create(QueryCompilationContext queryCompilationContext)
 		=> new OverrideDbFunctionsInMemoryQueryTranslationPreprocessor(Dependencies, queryCompilationContext);

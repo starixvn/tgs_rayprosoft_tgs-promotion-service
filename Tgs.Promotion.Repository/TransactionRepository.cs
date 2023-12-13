@@ -2,15 +2,8 @@
 
 namespace Tgs.Promotion.Repository;
 
-internal class TransactionRepository : ITransactionRepository
+internal class TransactionRepository(ITgsService<TransactionPromotion> transactionPromotionService) : ITransactionRepository
 {
-	private readonly ITgsService<TransactionPromotion> _transactionPromotionService;
-
-	public TransactionRepository(ITgsService<TransactionPromotion> transactionPromotionService)
-	{
-		_transactionPromotionService = transactionPromotionService;
-	}
-
 	public ValueTask CreateTransactionPromotionsAsync(TransactionPromotion[] transactionPromotions)
-		=> _transactionPromotionService.CreateEntitiesAsync(transactionPromotions);
+		=> transactionPromotionService.CreateEntitiesAsync(transactionPromotions);
 }

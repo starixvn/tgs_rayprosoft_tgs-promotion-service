@@ -3,14 +3,9 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class PromotionTypeGroupsQueryService : IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup>
+internal class PromotionTypeGroupsQueryService(ISettingsRepository settingsRepository) : IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup>
 {
-	private readonly ISettingsRepository _settingsRepository;
-
-	public PromotionTypeGroupsQueryService(ISettingsRepository settingsRepository)
-	{
-		_settingsRepository = settingsRepository ?? throw new ArgumentNullException(nameof(settingsRepository));
-	}
+	private readonly ISettingsRepository _settingsRepository = settingsRepository ?? throw new ArgumentNullException(nameof(settingsRepository));
 
 	public IAsyncEnumerable<PromotionTypeGroup> QueryAsync(
 		PromotionTypeGroupsQuery query,

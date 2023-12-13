@@ -5,24 +5,16 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class UpdatePromotionRuleCommandService : ICommandService<UpdatePromotionRuleCommand>
+internal class UpdatePromotionRuleCommandService(
+	ISystemClock systemClock,
+	ISerialNumberGenerator serialNumberGenerator,
+	IPromotionRepository promotionRepository,
+	PromotionSerializer promotionSerializer) : ICommandService<UpdatePromotionRuleCommand>
 {
-	private readonly ISystemClock _systemClock;
-	private readonly ISerialNumberGenerator _serialNumberGenerator;
-	private readonly IPromotionRepository _promotionRepository;
-	private readonly PromotionSerializer _promotionSerializer;
-
-	public UpdatePromotionRuleCommandService(
-		ISystemClock systemClock,
-		ISerialNumberGenerator serialNumberGenerator,
-		IPromotionRepository promotionRepository, 
-		PromotionSerializer promotionSerializer)
-	{
-		_systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-		_promotionSerializer = promotionSerializer ?? throw new ArgumentNullException(nameof(promotionSerializer));
-	}
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+	private readonly PromotionSerializer _promotionSerializer = promotionSerializer ?? throw new ArgumentNullException(nameof(promotionSerializer));
 
 	public async ValueTask ExecuteAsync(UpdatePromotionRuleCommand command, CancellationToken cancellationToken = default)
 	{

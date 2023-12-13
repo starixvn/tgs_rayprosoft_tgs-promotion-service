@@ -12,8 +12,8 @@ using MockQueryable.Moq;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.CashService.Client;
-using Tgs.MessageQueue;
 using Tgs.PlayerBucket.Client;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
@@ -22,6 +22,7 @@ using Tgs.Promotion.Models.Promotion;
 using Tgs.SerialNumberGenerator;
 using Tgs.Service.PlayerBuckets;
 using Tgs.ServiceUtility;
+using Valhalla.MessageQueue;
 
 namespace Tgs.Promotion.UnitTest;
 
@@ -104,9 +105,9 @@ public class PromotionTests
 			.AsQueryable()
 			.BuildMock();
 
-		_ = fakePromotionBonusRepository.Setup(x => 
+		_ = fakePromotionBonusRepository.Setup(x =>
 				x.GetPromotionBonusPlayersQueries(
-				It.IsAny<Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>?>(), 
+				It.IsAny<Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>?>(),
 				It.IsAny<bool>()))
 			.Returns(list);
 
@@ -128,11 +129,13 @@ public class PromotionTests
 
 		var query = new DispatchPromotionBonusQuery
 		{
-			Players = list.Select(x => new DispatchPlayer
-			{
-				PlayerCode = x.PlayerCode,
-				PromotionBonusId = x.PromotionBonusId,
-			}).ToArray()
+			Players = [
+				.. list.Select(x => new DispatchPlayer
+				{
+					PlayerCode = x.PlayerCode,
+					PromotionBonusId = x.PromotionBonusId,
+				}),
+			]
 		};
 
 		_ = sut.GetAsync(query, default);
@@ -141,7 +144,7 @@ public class PromotionTests
 			It.IsAny<string>(),
 			It.IsAny<decimal>(),
 			It.IsAny<BucketType>(),
-			It.IsAny<string?>(), 
+			It.IsAny<string?>(),
 			It.IsAny<string>(),
 			It.IsAny<IEnumerable<string>>(),
 			It.IsAny<CancellationToken>()), Times.Exactly(20));
@@ -198,7 +201,7 @@ public class PromotionTests
 
 		var response = await sut.GetAsync(query, default);
 
-		Assert.IsTrue(response.Valid);
+		ClassicAssert.IsTrue(response.Valid);
 	}
 
 	[Test]
@@ -225,7 +228,7 @@ public class PromotionTests
 
 		var response = await sut.GetAsync(query, default);
 
-		Assert.IsTrue(response.Items.Length > 0);
+		ClassicAssert.IsTrue(response.Items.Length > 0);
 	}
 
 	[TestCase(true)]
@@ -271,7 +274,7 @@ public class PromotionTests
 				IQueryable<PromotionRow>>>(),
 			false));
 
-		Assert.AreEqual(result.Items.Length, showAll ? 20 : 10);
+		ClassicAssert.AreEqual(result.Items.Length, showAll ? 20 : 10);
 	}
 
 	[Test]
@@ -324,7 +327,7 @@ public class PromotionTests
 				IQueryable<PromotionRow>>>(),
 			false));
 
-		Assert.AreEqual(result.Items.Length, 9);
+		ClassicAssert.AreEqual(result.Items.Length, 9);
 	}
 
 	[Test]
@@ -516,12 +519,12 @@ public class PromotionTests
 				Arg.Is(query.PromotionId),
 				Arg.Any<CancellationToken>())
 			.Returns(promotion);
-		
+
 		var fakeChecker = Substitute.For<IPromotionChecker>();
 
 		_ = fakeChecker.CheckJoinAsync(
-				Arg.Any<ConditionData>(), 
-				Arg.Any<PromotionMainInfo>(), 
+				Arg.Any<ConditionData>(),
+				Arg.Any<PromotionMainInfo>(),
 				Arg.Any<PromotionRule>())
 			.Returns(true);
 
@@ -568,7 +571,7 @@ public class PromotionTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 
 		_ = fakePromotionRepository
 			.Received(1)
@@ -709,7 +712,7 @@ public class PromotionTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 
 		_ = fakePromotionRepository
 			.Received(1)
@@ -813,7 +816,7 @@ public class PromotionTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 
 		_ = fakePromotionRepository
 			.DidNotReceive()
@@ -918,7 +921,7 @@ public class PromotionTests
 
 		var actual = await sut.GetAsync(query);
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 
 		_ = fakePromotionRepository
 			.DidNotReceive()
@@ -964,17 +967,17 @@ public class PromotionTests
 			new PromotionModel
 			{
 				Id = Guid.NewGuid(),
-				VipLevels = Array.Empty<int>()
+				VipLevels = []
 			},
 			new PromotionModel
 			{
 				Id = Guid.NewGuid(),
-				VipLevels = Array.Empty<int>()
+				VipLevels = []
 			},
 			new PromotionModel
 			{
 				Id = Guid.NewGuid(),
-				VipLevels = Array.Empty<int>()
+				VipLevels = []
 			}
 		};
 

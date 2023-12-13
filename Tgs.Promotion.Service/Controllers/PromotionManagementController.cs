@@ -2,11 +2,11 @@
 using System.Text.Json;
 using Google.Protobuf;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.MessageQueue;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Clients.Protos;
 using Tgs.Promotion.Service.ViewModels;
 using Tgs.ServiceUtility;
+using Valhalla.MessageQueue;
 
 namespace Tgs.Promotion.Service.Controllers;
 

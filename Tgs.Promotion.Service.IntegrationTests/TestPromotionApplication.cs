@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -19,15 +18,8 @@ namespace Tgs.Promotion.Service.IntegrationTests;
 
 extern alias promotion;
 
-internal class TestPromotionApplication : WebApplicationFactory<promotion.Program>
+internal class TestPromotionApplication(Action<IWebHostBuilder>? webHostConfigure = null) : WebApplicationFactory<promotion.Program>
 {
-	private readonly Action<IWebHostBuilder>? _webHostConfigure;
-
-	public TestPromotionApplication(Action<IWebHostBuilder>? webHostConfigure = null)
-	{
-		_webHostConfigure = webHostConfigure;
-	}
-
 	protected override void ConfigureWebHost(IWebHostBuilder builder)
 	{
 		_ = builder
@@ -60,6 +52,6 @@ internal class TestPromotionApplication : WebApplicationFactory<promotion.Progra
 			.AddSingleton(Substitute.For<IPaymentServiceClient>())
 			.AddSingleton(Substitute.For<ICashServiceClient>()));
 
-		_webHostConfigure?.Invoke(builder);
+		webHostConfigure?.Invoke(builder);
 	}
 }

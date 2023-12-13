@@ -6,24 +6,16 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class UpdatePromotionMainInfoCommandService : ICommandService<UpdatePromotionMainInfoCommand>
+internal class UpdatePromotionMainInfoCommandService(
+	ISystemClock systemClock,
+	ISerialNumberGenerator serialNumberGenerator,
+	IPromotionRepository promotionRepository,
+	IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup> queryPromotionTypeGroupService) : ICommandService<UpdatePromotionMainInfoCommand>
 {
-	private readonly ISystemClock _systemClock;
-	private readonly ISerialNumberGenerator _serialNumberGenerator;
-	private readonly IPromotionRepository _promotionRepository;
-	private readonly IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup> _queryPromotionTypeGroupService;
-
-	public UpdatePromotionMainInfoCommandService(
-		ISystemClock systemClock,
-		ISerialNumberGenerator serialNumberGenerator,
-		IPromotionRepository promotionRepository,
-		IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup> queryPromotionTypeGroupService)
-	{
-		_systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-		_queryPromotionTypeGroupService = queryPromotionTypeGroupService;
-	}
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+	private readonly IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup> _queryPromotionTypeGroupService = queryPromotionTypeGroupService;
 
 	public async ValueTask ExecuteAsync(UpdatePromotionMainInfoCommand command, CancellationToken cancellationToken = default)
 	{

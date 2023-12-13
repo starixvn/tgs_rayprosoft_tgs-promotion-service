@@ -4,14 +4,9 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class GetBrandVipLevelMapQueryService : IGetService<GetBrandVipLevelMapQuery, IImmutableDictionary<Guid, VipLevelInfo>>
+internal class GetBrandVipLevelMapQueryService(IBrandServiceClient brandServiceClient) : IGetService<GetBrandVipLevelMapQuery, IImmutableDictionary<Guid, VipLevelInfo>>
 {
-	private readonly IBrandServiceClient _brandServiceClient;
-
-	public GetBrandVipLevelMapQueryService(IBrandServiceClient brandServiceClient)
-	{
-		_brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-	}
+	private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
 
 	public async ValueTask<IImmutableDictionary<Guid, VipLevelInfo>> GetAsync(GetBrandVipLevelMapQuery query, CancellationToken cancellationToken = default)
 	{

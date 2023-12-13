@@ -14,40 +14,25 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class
-	DistributePromotionBonusManuallyCommandService : ICommandService<DistributePromotionBonusManuallyCommand>
+internal class DistributePromotionBonusManuallyCommandService(
+	IPromotionRepository promotionRepository,
+	ICashServiceClient cashServiceClient,
+	IPlayerServiceClient playerServiceClient,
+	IPlayerBucketForTypesClient playerBucketForTypesClient,
+	ISerialNumberGenerator serialNumberGenerator,
+	IPromotionDistributionRepository promotionDistributionRepository,
+	ILogger<DistributePromotionBonusManuallyCommandService> logger) : ICommandService<DistributePromotionBonusManuallyCommand>
 {
-	private readonly ICashServiceClient _cashServiceClient;
-	private readonly IPlayerServiceClient _playerServiceClient;
-	private readonly IPromotionRepository _promotionRepository;
-	private readonly ISerialNumberGenerator _serialNumberGenerator;
-	private readonly IPlayerBucketForTypesClient _playerBucketForTypesClient;
-	private readonly IPromotionDistributionRepository _promotionDistributionRepository;
-	private readonly ILogger<DistributePromotionBonusManuallyCommandService> _logger;
-
-	public DistributePromotionBonusManuallyCommandService(
-		IPromotionRepository promotionRepository,
-		ICashServiceClient cashServiceClient,
-		IPlayerServiceClient playerServiceClient,
-		IPlayerBucketForTypesClient playerBucketForTypesClient,
-		ISerialNumberGenerator serialNumberGenerator,
-		IPromotionDistributionRepository promotionDistributionRepository,
-		ILogger<DistributePromotionBonusManuallyCommandService> logger)
-	{
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_serialNumberGenerator =
+	private readonly ICashServiceClient _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+	private readonly ISerialNumberGenerator _serialNumberGenerator =
 			serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-		_promotionDistributionRepository = promotionDistributionRepository;
-		_logger = logger;
-		_playerBucketForTypesClient = playerBucketForTypesClient;
-	}
 
 	public async ValueTask ExecuteAsync(DistributePromotionBonusManuallyCommand command,
 		CancellationToken cancellationToken = default)
 	{
-		var promotionDistribution = await _promotionDistributionRepository.GetPromotionDistributionQueries()
+		var promotionDistribution = await promotionDistributionRepository.GetPromotionDistributionQueries()
 			.FirstOrDefaultAsync(x => x.Id == command.PromotionDistributionId && x.PlayerCode == command.PlayerCode,
 				cancellationToken);
 
@@ -63,7 +48,7 @@ internal class
 
 		if (player == null)
 		{
-			_logger.LogWarning("Player with player code {PlayerCode} does not exist", command.PlayerCode);
+			logger.LogWarning("Player with player code {PlayerCode} does not exist", command.PlayerCode);
 
 			return;
 		}
@@ -93,7 +78,7 @@ internal class
 
 		await Policy.Handle<TimeoutException>()
 			.RetryAsync(1)
-			.ExecuteAsync(async () => await _playerBucketForTypesClient.CreateBucketForBucketTypesAsync(
+			.ExecuteAsync(async () => await playerBucketForTypesClient.CreateBucketForBucketTypesAsync(
 					promotionDistribution.PlayerCode,
 					promotionDistribution.Bucket,
 					BucketType.Promotion,

@@ -62,16 +62,15 @@ public class PromotionDispatchTests
 		var command = new DispatchPromotionBonusQuery
 		{
 			OperatorUserId = Guid.NewGuid(),
-			Players = new DispatchPlayer[]
-			{
+			Players = [
 				new() { PlayerCode = playerCode, PromotionBonusId = promotionBonusId }
-			}
+			]
 		};
 
 		_ = await sut.GetAsync(command);
 
 		_ = fakePromotionBonusRepository.ReceivedWithAnyArgs(1)
-			.UpdatePromotionBonusPlayersAsync(null);
+			.UpdatePromotionBonusPlayersAsync(null!);
 
 		_ = fakePlayerBucketForTypesClient.ReceivedWithAnyArgs(1)
 			.CreateBucketForBucketTypesAsync(

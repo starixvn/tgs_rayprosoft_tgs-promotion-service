@@ -6,61 +6,54 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.Workers;
 
-public class PromotionDistributionBackground : BackgroundService
+public class PromotionDistributionBackground(IPromotionDistributionTaskQueue taskQueue, ILogger<PromotionDistributionBackground> logger, IServiceProvider serviceProvider) : BackgroundService
 {
-	private readonly IPromotionDistributionTaskQueue _taskQueue;
-	private readonly ILogger<PromotionDistributionBackground> _logger;
-	private readonly IServiceProvider _serviceProvider;
+	private readonly IPromotionDistributionTaskQueue _taskQueue = taskQueue;
+	private readonly ILogger<PromotionDistributionBackground> _logger = logger;
+	private readonly IServiceProvider _serviceProvider = serviceProvider;
 
-	public PromotionDistributionBackground(IPromotionDistributionTaskQueue taskQueue, ILogger<PromotionDistributionBackground> logger, IServiceProvider serviceProvider)
+	public override async Task StopAsync(CancellationToken stoppingToken)
 	{
-		_taskQueue = taskQueue;
-		_logger = logger;
-		_serviceProvider = serviceProvider;
+		_logger.LogInformation("Queued Hosted Service is stopping.");
+
+		await base.StopAsync(stoppingToken);
 	}
 
-    public override async Task StopAsync(CancellationToken stoppingToken)
-    {
-        _logger.LogInformation("Queued Hosted Service is stopping.");
+	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+	{
+		_logger.LogInformation(
+			"Queued Hosted Service is running.{newLine}"
+				+ "{newLine}Tap W to add a work item to the "
+				+ "background queue.{newLine}",
+			Environment.NewLine,
+			Environment.NewLine,
+			Environment.NewLine);
 
-        await base.StopAsync(stoppingToken);
-    }
+		await BackgroundProcessingAsync(stoppingToken);
+	}
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _logger.LogInformation(
-            "Queued Hosted Service is running.{0}" +
-            "{1}Tap W to add a work item to the " +
-            "background queue.{2}",
-            Environment.NewLine,
-            Environment.NewLine,
-            Environment.NewLine);
+	private async Task BackgroundProcessingAsync(CancellationToken stoppingToken)
+	{
+		while (!stoppingToken.IsCancellationRequested)
+		{
+			var model = await _taskQueue.DequeueAsync(stoppingToken);
 
-        await BackgroundProcessingAsync(stoppingToken);
-    }
+			try
+			{
+				using var scope = _serviceProvider.CreateScope();
 
-    private async Task BackgroundProcessingAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            var model = await _taskQueue.DequeueAsync(stoppingToken);
+				var messageResponse = scope.ServiceProvider.GetRequiredService<ICommandService<DistributePromotionBonusManuallyCommand>>();
 
-            try
-            {
-	            using var scope = _serviceProvider.CreateScope();
-
-	            var messageResponse = scope.ServiceProvider.GetRequiredService<ICommandService<DistributePromotionBonusManuallyCommand>>();
-
-	            await messageResponse.ExecuteAsync(
-		            new DistributePromotionBonusManuallyCommand(model.PromotionDistributionId,
-			            model.PlayerCode,
-			            model.Distributor),
-		            stoppingToken);
-            }
+				await messageResponse.ExecuteAsync(
+					new DistributePromotionBonusManuallyCommand(model.PromotionDistributionId,
+						model.PlayerCode,
+						model.Distributor),
+					stoppingToken);
+			}
 			catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred executing task work item.");
-            }
-        }
-    }
+			{
+				_logger.LogError(ex, "Error occurred executing task work item.");
+			}
+		}
+	}
 }

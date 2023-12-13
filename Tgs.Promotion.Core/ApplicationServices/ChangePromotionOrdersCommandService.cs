@@ -5,21 +5,14 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class ChangePromotionOrdersCommandService : ICommandService<ChangePromotionOrdersCommand>
+internal class ChangePromotionOrdersCommandService(
+	ISystemClock systemClock,
+	ISerialNumberGenerator serialNumberGenerator,
+	IPromotionRepository promotionRepository) : ICommandService<ChangePromotionOrdersCommand>
 {
-	private readonly ISystemClock _systemClock;
-	private readonly ISerialNumberGenerator _serialNumberGenerator;
-	private readonly IPromotionRepository _promotionRepository;
-
-	public ChangePromotionOrdersCommandService(
-		ISystemClock systemClock,
-		ISerialNumberGenerator serialNumberGenerator,
-		IPromotionRepository promotionRepository)
-	{
-		_systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	}
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public async ValueTask ExecuteAsync(ChangePromotionOrdersCommand command, CancellationToken cancellationToken = default)
 	{
@@ -28,7 +21,7 @@ internal class ChangePromotionOrdersCommandService : ICommandService<ChangePromo
 		foreach (var order in command.Orders)
 		{
 			var snapshot = await _promotionRepository.GetCurrentPromotionSnapshotAsync(
-					order.PromotionId, 
+					order.PromotionId,
 					cancellationToken)
 				.ConfigureAwait(false);
 

@@ -1,13 +1,8 @@
 ﻿namespace Tgs.Promotion;
 
-internal class DepositRewardChecker : IPromotionChecker
+internal class DepositRewardChecker(PromotionSerializer promotionSerializer) : IPromotionChecker
 {
-	private readonly PromotionSerializer _promotionSerializer;
-
-	public DepositRewardChecker(PromotionSerializer promotionSerializer)
-	{
-		_promotionSerializer = promotionSerializer ?? throw new ArgumentNullException(nameof(promotionSerializer));
-	}
+	private readonly PromotionSerializer _promotionSerializer = promotionSerializer ?? throw new ArgumentNullException(nameof(promotionSerializer));
 
 	public ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
 		=> ValueTask.FromResult(true);

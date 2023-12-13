@@ -2,15 +2,10 @@
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class GetPromotionContentQueryService : IGetService<GetPromotionContentQuery, PromotionContentDetail?>
+internal class GetPromotionContentQueryService(
+	IPromotionRepository promotionRepository) : IGetService<GetPromotionContentQuery, PromotionContentDetail?>
 {
-	private readonly IPromotionRepository _promotionRepository;
-
-	public GetPromotionContentQueryService(
-		IPromotionRepository promotionRepository)
-	{
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	}
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public ValueTask<PromotionContentDetail?> GetAsync(
 		GetPromotionContentQuery query,

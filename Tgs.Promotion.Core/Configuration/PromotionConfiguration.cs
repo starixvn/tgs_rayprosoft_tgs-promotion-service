@@ -3,16 +3,11 @@ using Tgs.CashService.Client;
 
 namespace Tgs.Promotion.Configuration;
 
-public class PromotionConfiguration
+public class PromotionConfiguration(IServiceCollection services)
 {
-	private readonly Dictionary<string, Type> _checkerTypes = new();
+	private readonly Dictionary<string, Type> _checkerTypes = [];
 
-	public IServiceCollection Services { get; }
-
-	public PromotionConfiguration(IServiceCollection services)
-	{
-		Services = services ?? throw new ArgumentNullException(nameof(services));
-	}
+	public IServiceCollection Services { get; } = services ?? throw new ArgumentNullException(nameof(services));
 
 	public PromotionConfiguration AddCashServiceClient(
 		Action<CashServiceClientOptions, IServiceProvider> configure)

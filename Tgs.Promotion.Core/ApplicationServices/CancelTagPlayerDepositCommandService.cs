@@ -8,16 +8,13 @@ internal class CancelTagPlayerDepositCommandService : ICommandService<CancelTagP
 
 	public CancelTagPlayerDepositCommandService(IPromotionCheckerFactory promotionCheckerFactory)
 	{
-		if (promotionCheckerFactory is null)
-		{
-			throw new ArgumentNullException(nameof(promotionCheckerFactory));
-		}
+		ArgumentNullException.ThrowIfNull(promotionCheckerFactory);
 
 		var firstDepositChecker = promotionCheckerFactory.GetPromotionChecker("FirstDeposit");
 		var AccountfirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("AccountFirstDeposit");
 		var dailyFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("DailyFirstDeposit");
 
-		_checkers = new[] { firstDepositChecker, AccountfirstDepositChecker, dailyFirstDepositChecker };
+		_checkers = [firstDepositChecker, AccountfirstDepositChecker, dailyFirstDepositChecker];
 	}
 
 	public async ValueTask ExecuteAsync(CancelTagPlayerDepositCommand command, CancellationToken cancellationToken = default)

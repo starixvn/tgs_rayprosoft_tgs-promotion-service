@@ -3,14 +3,9 @@ using Tgs.Promotion.Domain.Entities;
 
 namespace Tgs.Promotion.Repository;
 
-internal class TgsService<T> : ITgsService<T> where T : class
+internal class TgsService<T>(TgsContext dbContext) : ITgsService<T> where T : class
 {
-	private TgsContext Repository { get; }
-
-	public TgsService(TgsContext dbContext)
-	{
-		Repository = dbContext;
-	}
+	private TgsContext Repository { get; } = dbContext;
 
 	public async ValueTask CreateEntitiesAsync(T[] entities)
 	{

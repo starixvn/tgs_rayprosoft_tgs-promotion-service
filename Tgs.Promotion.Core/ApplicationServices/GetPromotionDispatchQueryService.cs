@@ -8,24 +8,16 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class GetPromotionDispatchQueryService : IGetService<GetPromotionDispatchesQuery, PagedResponse<PromotionDispatchModel>>
+internal class GetPromotionDispatchQueryService(
+	IPromotionBonusRepository promotionBonusService,
+	IPromotionDistributionRepository promotionDistributionRepository,
+	IPlayerRepository tgsPlayerService,
+	ISettingsRepository settingRepository) : IGetService<GetPromotionDispatchesQuery, PagedResponse<PromotionDispatchModel>>
 {
-	private readonly IPromotionBonusRepository _promotionBonusService;
-	private readonly IPromotionDistributionRepository _promotionDistributionRepository;
-	private readonly ISettingsRepository _settingRepository;
-	private readonly IPlayerRepository _tgsPlayerService;
-
-	public GetPromotionDispatchQueryService(
-		IPromotionBonusRepository promotionBonusService,
-		IPromotionDistributionRepository promotionDistributionRepository,
-		IPlayerRepository tgsPlayerService,
-		ISettingsRepository settingRepository)
-	{
-		_promotionBonusService = promotionBonusService;
-		_promotionDistributionRepository = promotionDistributionRepository;
-		_tgsPlayerService = tgsPlayerService;
-		_settingRepository = settingRepository;
-	}
+	private readonly IPromotionBonusRepository _promotionBonusService = promotionBonusService;
+	private readonly IPromotionDistributionRepository _promotionDistributionRepository = promotionDistributionRepository;
+	private readonly ISettingsRepository _settingRepository = settingRepository;
+	private readonly IPlayerRepository _tgsPlayerService = tgsPlayerService;
 
 	public async ValueTask<PagedResponse<PromotionDispatchModel>> GetAsync(
 		GetPromotionDispatchesQuery request,
@@ -37,7 +29,7 @@ internal class GetPromotionDispatchQueryService : IGetService<GetPromotionDispat
 
 		if (promotionsJson is null)
 		{
-			return new(0, Array.Empty<PromotionDispatchModel>())
+			return new(0, [])
 			{
 				Valid = false,
 				Message = "promotion types is not found."
@@ -49,7 +41,7 @@ internal class GetPromotionDispatchQueryService : IGetService<GetPromotionDispat
 
 		if (promotionTypeGroups is null)
 		{
-			return new(0, Array.Empty<PromotionDispatchModel>())
+			return new(0, [])
 			{
 				Valid = false,
 				Message = "promotion group type is not found."
@@ -60,7 +52,7 @@ internal class GetPromotionDispatchQueryService : IGetService<GetPromotionDispat
 
 		var promotionGroup = promotionTypeGroups.FirstOrDefault(x => x.Name == request.PromotionGroup);
 
-		var promotionTypes = promotionGroup?.Types.Select(x => x.Name).ToArray() ?? Array.Empty<string>();
+		var promotionTypes = promotionGroup?.Types.Select(x => x.Name).ToArray() ?? [];
 
 		var promotionDistributes = _promotionDistributionRepository.GetPromotionDistributionQueries()
 			.Include(x => x.Promotion)

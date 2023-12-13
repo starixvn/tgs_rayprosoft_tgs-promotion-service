@@ -5,15 +5,10 @@ using Microsoft.EntityFrameworkCore.Query;
 namespace Tgs.Promotion.Service.IntegrationTests;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "EF1001:Internal EF Core API usage.", Justification = "<暫止>")]
-internal class OverrideDbFunctionsInMemoryQueryTranslationPreprocessor : InMemoryQueryTranslationPreprocessor
+internal class OverrideDbFunctionsInMemoryQueryTranslationPreprocessor(
+	QueryTranslationPreprocessorDependencies dependencies,
+	QueryCompilationContext queryCompilationContext) : InMemoryQueryTranslationPreprocessor(dependencies, queryCompilationContext)
 {
-	public OverrideDbFunctionsInMemoryQueryTranslationPreprocessor(
-		QueryTranslationPreprocessorDependencies dependencies,
-		QueryCompilationContext queryCompilationContext)
-		: base(dependencies, queryCompilationContext)
-	{
-	}
-
 	public override Expression Process(Expression query)
 	{
 		var visitor = new ReplaceDbFunctionsExpressionVisitor();
