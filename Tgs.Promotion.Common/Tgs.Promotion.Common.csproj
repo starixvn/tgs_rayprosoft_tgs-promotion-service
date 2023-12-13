@@ -7,4 +7,23 @@
     <RootNamespace>Tgs.Promotion</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Protos\promotion.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.25.1" />
+    <PackageReference Include="Grpc.Tools" Version="2.60.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\promotion.proto">
+      <GrpcServices>None</GrpcServices>
+    </Protobuf>
+  </ItemGroup>
+
 </Project>

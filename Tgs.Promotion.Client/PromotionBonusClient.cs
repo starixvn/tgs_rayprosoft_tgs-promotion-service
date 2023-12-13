@@ -2,7 +2,6 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using DateOnlyTimeOnly.AspNet.Converters;
 using Tgs.Promotion.Clients.Models;
 using Tgs.Promotion.Clients.Models.PromotionBonus;
 
@@ -19,7 +18,6 @@ public class PromotionBonusClient : IPromotionBonusClient
 		Converters =
 		{
 			new JsonStringEnumConverter(),
-			new DateOnlyJsonConverter()
 		}
 	};
 

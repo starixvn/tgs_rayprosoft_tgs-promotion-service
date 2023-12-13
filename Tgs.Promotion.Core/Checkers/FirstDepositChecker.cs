@@ -25,7 +25,7 @@ internal class FirstDepositChecker(IPlayerRepository playerService, IPlayerDataR
 		=> CheckAsync(conditionData.PlayerCode, promotion);
 
 	public ValueTask CommitTagAsync(string playerCode, Guid? promotionId)
-			=> _playerDataRepository
+		=> _playerDataRepository
 			.RemovePlayerFirstDepositFlagAsync(playerCode);
 
 	public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId)
