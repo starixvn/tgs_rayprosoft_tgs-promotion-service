@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-using Tgs.MessageQueue;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Domain.Entities;
+using Valhalla.MessageQueue;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
 

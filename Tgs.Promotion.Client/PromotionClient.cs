@@ -7,6 +7,11 @@ namespace Tgs.Promotion.Clients;
 
 public class PromotionClient : IPromotionClient
 {
+	private static readonly JsonSerializerOptions _SerializerOptions = new()
+	{
+		PropertyNameCaseInsensitive = true
+	};
+
 	private readonly HttpClient _client;
 
 	public PromotionClient(HttpClient client)
@@ -24,8 +29,9 @@ public class PromotionClient : IPromotionClient
 
 		_ = response.EnsureSuccessStatusCode();
 
-		return JsonSerializer.Deserialize<bool>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+		return JsonSerializer.Deserialize<bool>(
+			await response.Content.ReadAsStringAsync().ConfigureAwait(false),
+			_SerializerOptions)!;
 	}
 
 	public async Task<bool> CheckPromotionJoinedAsync(
@@ -38,8 +44,9 @@ public class PromotionClient : IPromotionClient
 
 		_ = response.EnsureSuccessStatusCode();
 
-		return JsonSerializer.Deserialize<bool>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+		return JsonSerializer.Deserialize<bool>(
+			await response.Content.ReadAsStringAsync().ConfigureAwait(false),
+			_SerializerOptions)!;
 	}
 
 	public async Task<MessageResponse> DepositJoinAsync(Guid promotionId, string playerCode)
@@ -53,13 +60,14 @@ public class PromotionClient : IPromotionClient
 
 		_ = response.EnsureSuccessStatusCode();
 
-		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+		return JsonSerializer.Deserialize<MessageResponse>(
+			await response.Content.ReadAsStringAsync().ConfigureAwait(false),
+			_SerializerOptions)!;
 	}
 
 	public async Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
 		GetJoinedPromotionsRequest request)
-	{		
+	{
 		var path = ClientPath.AppendWithProperties("/api/promotion/joined?", request);
 		var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 
@@ -67,8 +75,9 @@ public class PromotionClient : IPromotionClient
 
 		_ = response.EnsureSuccessStatusCode();
 
-		return JsonSerializer.Deserialize<PagedResponse<JoinedPromotionModel>>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+		return JsonSerializer.Deserialize<PagedResponse<JoinedPromotionModel>>(
+			await response.Content.ReadAsStringAsync().ConfigureAwait(false),
+			_SerializerOptions)!;
 	}
 
 	public async Task<PromotionBonusOfDepositModel[]> GetPromotionBonusOfDepositAsync(
@@ -85,8 +94,9 @@ public class PromotionClient : IPromotionClient
 
 			_ = response.EnsureSuccessStatusCode();
 
-			return JsonSerializer.Deserialize<PromotionBonusOfDepositModel[]>(await response.Content.ReadAsStringAsync(),
-				new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+			return JsonSerializer.Deserialize<PromotionBonusOfDepositModel[]>(
+				await response.Content.ReadAsStringAsync().ConfigureAwait(false),
+				_SerializerOptions)!;
 		}
 
 		return Array.Empty<PromotionBonusOfDepositModel>();
@@ -104,8 +114,9 @@ public class PromotionClient : IPromotionClient
 
 		_ = response.EnsureSuccessStatusCode();
 
-		return JsonSerializer.Deserialize<PromotionNameModel[]>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+		return JsonSerializer.Deserialize<PromotionNameModel[]>(
+			await response.Content.ReadAsStringAsync(),
+			_SerializerOptions)!;
 	}
 
 	public async Task<PagedResponse<PromotionModel>> GetPromotionsAsync(GetPromotionsRequest request)
@@ -117,8 +128,9 @@ public class PromotionClient : IPromotionClient
 
 		_ = response.EnsureSuccessStatusCode();
 
-		return JsonSerializer.Deserialize<PagedResponse<PromotionModel>>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+		return JsonSerializer.Deserialize<PagedResponse<PromotionModel>>(
+			await response.Content.ReadAsStringAsync().ConfigureAwait(false),
+			_SerializerOptions)!;
 	}
 
 	public async Task<PagedResponse<PromotionModel>> GetValidPromotionsAsync(GetValidPromotionsRequest request)
@@ -130,8 +142,9 @@ public class PromotionClient : IPromotionClient
 
 		_ = response.EnsureSuccessStatusCode();
 
-		return JsonSerializer.Deserialize<PagedResponse<PromotionModel>>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+		return JsonSerializer.Deserialize<PagedResponse<PromotionModel>>(
+			await response.Content.ReadAsStringAsync().ConfigureAwait(false),
+			_SerializerOptions)!;
 	}
 
 	public async Task<MessageResponse> JoinAsync(JoinPromotionRequest request)
@@ -145,8 +158,9 @@ public class PromotionClient : IPromotionClient
 
 		_ = response.EnsureSuccessStatusCode();
 
-		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+		return JsonSerializer.Deserialize<MessageResponse>(
+			await response.Content.ReadAsStringAsync().ConfigureAwait(false),
+			_SerializerOptions)!;
 	}
 
 	public async Task RevertPromotionAsync(Guid promotionId, decimal amount)

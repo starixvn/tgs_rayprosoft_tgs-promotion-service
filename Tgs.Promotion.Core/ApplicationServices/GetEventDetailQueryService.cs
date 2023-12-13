@@ -2,15 +2,10 @@
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class GetEventDetailQueryService : IGetService<GetEventDetailQuery, EventInfo?>
+internal class GetEventDetailQueryService(IPromotionRepository promotionRepository)
+	: IGetService<GetEventDetailQuery, EventInfo?>
 {
-	private readonly IPromotionRepository _promotionRepository;
-
-	public GetEventDetailQueryService(
-		IPromotionRepository promotionRepository)
-	{
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	}
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public ValueTask<EventInfo?> GetAsync(
 		GetEventDetailQuery query,

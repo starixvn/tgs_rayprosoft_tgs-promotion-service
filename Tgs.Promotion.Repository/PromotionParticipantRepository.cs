@@ -4,15 +4,10 @@ using Tgs.Promotion.Domain.Entities;
 
 namespace Tgs.Promotion.Repository;
 
-public class PromotionParticipantRepository : IPromotionParticipantRepository
+public class PromotionParticipantRepository(
+	ITgsService<PromotionParticipant> promotionParticipantService) : IPromotionParticipantRepository
 {
-	private readonly ITgsService<PromotionParticipant> _promotionParticipantService;
-
-	public PromotionParticipantRepository(
-		ITgsService<PromotionParticipant> promotionParticipantService)
-	{
-		_promotionParticipantService = promotionParticipantService ?? throw new ArgumentNullException(nameof(promotionParticipantService));
-	}
+	private readonly ITgsService<PromotionParticipant> _promotionParticipantService = promotionParticipantService ?? throw new ArgumentNullException(nameof(promotionParticipantService));
 
 	public async ValueTask CreatePromotionParticipantAsync(Guid promotionId, string playerCode)
 	{

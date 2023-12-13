@@ -7,17 +7,13 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-public class GetPromotionsQueryService : IGetService<GetPromotionsQuery,
+public class GetPromotionsQueryService(
+	IPromotionRepository service) : IGetService<GetPromotionsQuery,
 	PagedResponse<PromotionModel>>
 {
-	private readonly IPromotionRepository _service;
+	private readonly IPromotionRepository _service = service;
 
-	public GetPromotionsQueryService(
-		IPromotionRepository service)
-	{
-		_service = service;
-	}
-
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0305:簡化集合初始化", Justification = "<暫止>")]
 	public async ValueTask<PagedResponse<PromotionModel>> GetAsync(
 		GetPromotionsQuery request,
 		CancellationToken cancellationToken) =>

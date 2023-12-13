@@ -1,42 +1,30 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Tgs.MessageQueue;
 using Tgs.Promotion.Models;
 using Tgs.ServiceUtility;
+using Valhalla.MessageQueue;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-public class CreatePromotionParticipantQueryService : IGetService<CreatePromotionParticipantQuery, MessageResponse>
+public class CreatePromotionParticipantQueryService(
+	IPromotionRepository promotionRepository,
+	IPromotionParticipantRepository promotionParticipantRepository,
+	IPromotionTypeRepository promotionType,
+	IPromotionJoinLockRepository promotionJoinLockRepository,
+	IMessageSender messageSender,
+	ILogger<CreatePromotionParticipantQueryService> logger) : IGetService<CreatePromotionParticipantQuery, MessageResponse>
 {
-	private readonly ILogger<CreatePromotionParticipantQueryService> _logger;
-	private readonly IMessageSender _messageSender;
-	private readonly IPromotionJoinLockRepository _promotionJoinLockRepository;
-	private readonly IPromotionParticipantRepository _promotionParticipantRepository;
-	private readonly IPromotionRepository _promotionRepository;
-	private readonly IPromotionTypeRepository _promotionType;
-
-	public CreatePromotionParticipantQueryService(
-		IPromotionRepository promotionRepository,
-		IPromotionParticipantRepository promotionParticipantRepository,
-		IPromotionTypeRepository promotionType,
-		IPromotionJoinLockRepository promotionJoinLockRepository,
-		IMessageSender messageSender,
-		ILogger<CreatePromotionParticipantQueryService> logger)
-	{
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-
-		_promotionParticipantRepository = promotionParticipantRepository ??
-			throw new ArgumentNullException(nameof(promotionParticipantRepository));
-
-		_promotionType = promotionType ??
-			throw new ArgumentNullException(nameof(promotionType));
-		_promotionJoinLockRepository = promotionJoinLockRepository ??
-			throw new ArgumentNullException(nameof(promotionJoinLockRepository));
-		_messageSender = messageSender ??
+	private readonly ILogger<CreatePromotionParticipantQueryService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	private readonly IMessageSender _messageSender = messageSender ??
 			throw new ArgumentNullException(nameof(messageSender));
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-	}
+	private readonly IPromotionJoinLockRepository _promotionJoinLockRepository = promotionJoinLockRepository ??
+			throw new ArgumentNullException(nameof(promotionJoinLockRepository));
+	private readonly IPromotionParticipantRepository _promotionParticipantRepository = promotionParticipantRepository ??
+			throw new ArgumentNullException(nameof(promotionParticipantRepository));
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+	private readonly IPromotionTypeRepository _promotionType = promotionType ??
+			throw new ArgumentNullException(nameof(promotionType));
 
 	public async ValueTask<MessageResponse> GetAsync(
 		CreatePromotionParticipantQuery request,

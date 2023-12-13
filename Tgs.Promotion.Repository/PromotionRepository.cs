@@ -8,7 +8,10 @@ using Tgs.SerialNumberGenerator;
 
 namespace Tgs.Promotion.Repository;
 
-public class PromotionRepository : IPromotionRepository
+public class PromotionRepository(
+	ITgsService<PromotionRow> promotionService,
+	TgsContext dbContext,
+	ISerialNumberGenerator serialNumberGenerator) : IPromotionRepository
 {
 	private static readonly JsonSerializerOptions _SerializerOptions = new()
 	{
@@ -18,19 +21,9 @@ public class PromotionRepository : IPromotionRepository
 		ReferenceHandler = ReferenceHandler.IgnoreCycles
 	};
 
-	private readonly TgsContext _dbContext;
-	private readonly ITgsService<PromotionRow> _promotionService;
-	private readonly ISerialNumberGenerator _serialNumberGenerator;
-
-	public PromotionRepository(
-		ITgsService<PromotionRow> promotionService,
-		TgsContext dbContext,
-		ISerialNumberGenerator serialNumberGenerator)
-	{
-		_promotionService = promotionService ?? throw new ArgumentNullException(nameof(promotionService));
-		_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-	}
+	private readonly TgsContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+	private readonly ITgsService<PromotionRow> _promotionService = promotionService ?? throw new ArgumentNullException(nameof(promotionService));
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 
 	public async ValueTask CreatePromotionDistributeAsync(
 		PromotionDistributeInfo createInfo,
@@ -63,7 +56,7 @@ public class PromotionRepository : IPromotionRepository
 		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
-			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
+			.FindAsync([promotionId], cancellationToken: cancellationToken)
 			.ConfigureAwait(false)
 			?? throw new InvalidOperationException($"Promotion with id {promotionId} not found");
 
@@ -164,7 +157,7 @@ public class PromotionRepository : IPromotionRepository
 		Guid planId,
 		CancellationToken cancellationToken = default)
 		=> _dbContext.PromotionDistributePlans
-			.FindAsync(new object?[] { planId }, cancellationToken: cancellationToken)
+			.FindAsync([planId], cancellationToken: cancellationToken)
 			.AsTask()
 			.ToAsyncEnumerable()
 			.Where(plan => plan is not null)
@@ -250,7 +243,7 @@ public class PromotionRepository : IPromotionRepository
 		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
-			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
+			.FindAsync([promotionId], cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
 		return promotion is null
@@ -271,7 +264,7 @@ public class PromotionRepository : IPromotionRepository
 		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
-			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
+			.FindAsync([promotionId], cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
 		return promotion is null
@@ -301,7 +294,7 @@ public class PromotionRepository : IPromotionRepository
 		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
-			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
+			.FindAsync([promotionId], cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
 		var promotionVipLevels = await _dbContext.PromotionVipLevels
@@ -326,7 +319,7 @@ public class PromotionRepository : IPromotionRepository
 		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
-			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
+			.FindAsync([promotionId], cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
 		return promotion?.AmountUsed ?? 0m;
@@ -645,7 +638,7 @@ public class PromotionRepository : IPromotionRepository
 		CancellationToken cancellationToken = default)
 	{
 		var promotion = await _dbContext.PromotionRows
-			.FindAsync(new object?[] { promotionId }, cancellationToken: cancellationToken)
+			.FindAsync([promotionId], cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
 		if (promotion is null)
@@ -685,7 +678,7 @@ public class PromotionRepository : IPromotionRepository
 		CancellationToken cancellationToken = default)
 	{
 		var distribute = await _dbContext.PromotionDistributes.FindAsync(
-			new object?[] { distributeId },
+			[distributeId],
 			cancellationToken: cancellationToken).ConfigureAwait(false);
 
 		if (distribute is null)

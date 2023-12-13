@@ -24,8 +24,7 @@ public class PromotionHistoryTests
 		var currentTime = DateTime.UtcNow;
 
 		await dbContext.PromotionEventSources
-			.AddRangeAsync(new[]
-			{
+			.AddRangeAsync([
 				new PromotionEventSource
 				{
 					Id = Guid.Parse("01855bd3-60b3-0000-0001-07e620dd98d5"),
@@ -91,7 +90,7 @@ public class PromotionHistoryTests
 					ModifyUser = "Modifier1",
 					CreatedOn = currentTime.AddMinutes(1)
 				}
-			});
+			]);
 
 		_ = await dbContext.SaveChangesAsync();
 
@@ -123,7 +122,7 @@ public class PromotionHistoryTests
 		var changeSets = """[{"op": "replace", "path": "/status", "value": "Disabled"}]""";
 
 		var dbContext = web.Services.GetRequiredService<TgsContext>();
-		
+
 		_ = await dbContext.PromotionEventSources.AddAsync(new PromotionEventSource
 		{
 			Id = eventId,
@@ -133,7 +132,7 @@ public class PromotionHistoryTests
 			CreatedOn = currentTime,
 			ModifyUser = "Modifier1"
 		});
-		
+
 		_ = await dbContext.SaveChangesAsync();
 
 		var expected = new PromotionEventDetailInfo

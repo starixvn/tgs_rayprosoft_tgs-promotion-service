@@ -1,8 +1,8 @@
 ﻿using Google.Protobuf;
 using Microsoft.Extensions.Logging;
-using Tgs.MessageQueue;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
+using Valhalla.MessageQueue;
 
 namespace Tgs.Promotion.MessageQueue;
 
@@ -20,10 +20,7 @@ public class DepositStatusChangedMessageHandler : IMessageHandler
 		IPlayerRepository playerService,
 		ILogger<DepositStatusChangedMessageHandler> logger)
 	{
-		if (promotionCheckerFactory is null)
-		{
-			throw new ArgumentNullException(nameof(promotionCheckerFactory));
-		}
+		ArgumentNullException.ThrowIfNull(promotionCheckerFactory);
 
 		_paymentServiceClient =
 			paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));

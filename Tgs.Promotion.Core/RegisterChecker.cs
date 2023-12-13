@@ -2,16 +2,10 @@
 
 namespace Tgs.Promotion;
 
-internal class RegisterChecker : IPromotionChecker
+internal class RegisterChecker(IPlayerServiceClient playerServiceClient, IPromotionParticipantRepository promotionParticipantRepository) : IPromotionChecker
 {
-	private readonly IPlayerServiceClient _playerServiceClient;
-	private readonly IPromotionParticipantRepository _promotionParticipantRepository;
-
-	public RegisterChecker(IPlayerServiceClient playerServiceClient, IPromotionParticipantRepository promotionParticipantRepository)
-	{
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_promotionParticipantRepository = promotionParticipantRepository ?? throw new ArgumentNullException(nameof(promotionParticipantRepository));
-	}
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+	private readonly IPromotionParticipantRepository _promotionParticipantRepository = promotionParticipantRepository ?? throw new ArgumentNullException(nameof(promotionParticipantRepository));
 
 	public async ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
 	{

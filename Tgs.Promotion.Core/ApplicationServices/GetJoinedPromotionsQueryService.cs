@@ -6,14 +6,9 @@ using Tgs.ServiceUtility;
 namespace Tgs.Promotion.ApplicationServices;
 
 public class
-	GetJoinedPromotionsQueryService : IGetService<GetJoinedPromotionsQuery, PagedResponse<JoinedPromotionModel>>
+	GetJoinedPromotionsQueryService(IPromotionParticipantRepository service) : IGetService<GetJoinedPromotionsQuery, PagedResponse<JoinedPromotionModel>>
 {
-	private readonly IPromotionParticipantRepository _service;
-
-	public GetJoinedPromotionsQueryService(IPromotionParticipantRepository service)
-	{
-		_service = service;
-	}
+	private readonly IPromotionParticipantRepository _service = service;
 
 	public async ValueTask<PagedResponse<JoinedPromotionModel>> GetAsync(GetJoinedPromotionsQuery request,
 		CancellationToken cancellationToken) =>

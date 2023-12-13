@@ -1,13 +1,8 @@
 ﻿namespace Tgs.Promotion;
 
-internal class DailyFirstDepositChecker : IPromotionChecker
+internal class DailyFirstDepositChecker(IPlayerDataRepository playerDataRepository) : IPromotionChecker
 {
-	private readonly IPlayerDataRepository _playerDataRepository;
-
-	public DailyFirstDepositChecker(IPlayerDataRepository playerDataRepository)
-	{
-		_playerDataRepository = playerDataRepository ?? throw new ArgumentNullException(nameof(playerDataRepository));
-	}
+	private readonly IPlayerDataRepository _playerDataRepository = playerDataRepository ?? throw new ArgumentNullException(nameof(playerDataRepository));
 
 	public ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion)
 		=> _playerDataRepository.CheckPlayerIsDailyFirstDepositAsync(playerCode);

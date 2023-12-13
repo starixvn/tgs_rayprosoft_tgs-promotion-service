@@ -4,14 +4,9 @@ using Tgs.Promotion.Domain.Entities;
 
 namespace Tgs.Promotion.Repository;
 
-public class PromotionPlayerRepository : IPromotionPlayerRepository
+public class PromotionPlayerRepository(ITgsService<PromotionPlayer> promotionPlayerService) : IPromotionPlayerRepository
 {
-	private readonly ITgsService<PromotionPlayer> _promotionPlayerService;
-
-	public PromotionPlayerRepository(ITgsService<PromotionPlayer> promotionPlayerService)
-	{
-		_promotionPlayerService = promotionPlayerService;
-	}
+	private readonly ITgsService<PromotionPlayer> _promotionPlayerService = promotionPlayerService;
 
 	public async ValueTask<PromotionPlayer?> GetPromotionPlayerAsync(
 		Expression<Func<PromotionPlayer?, bool>> predicate,

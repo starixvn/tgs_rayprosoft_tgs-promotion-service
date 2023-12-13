@@ -1,15 +1,9 @@
 ﻿namespace Tgs.Promotion;
 
-public class PromotionCheckerFactory : IPromotionCheckerFactory
+public class PromotionCheckerFactory(IDictionary<string, Type> checkerTypes, IServiceProvider serviceProvider) : IPromotionCheckerFactory
 {
-	private readonly IDictionary<string, Type> _checkerTypes;
-	private readonly IServiceProvider _serviceProvider;
-
-	public PromotionCheckerFactory(IDictionary<string, Type> checkerTypes, IServiceProvider serviceProvider)
-	{
-		_checkerTypes = checkerTypes ?? throw new ArgumentNullException(nameof(checkerTypes));
-		_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-	}
+	private readonly IDictionary<string, Type> _checkerTypes = checkerTypes ?? throw new ArgumentNullException(nameof(checkerTypes));
+	private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
 	public IPromotionChecker GetPromotionChecker(string promotionType)
 	{

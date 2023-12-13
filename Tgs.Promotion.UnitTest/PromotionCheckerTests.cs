@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Domain.Entities;
@@ -51,7 +52,7 @@ public class PromotionCheckerTests
 
 		var actual = await sut.CheckJoinAsync(conditionData, promotion, rule);
 
-		Assert.IsTrue(actual == response);
+		ClassicAssert.IsTrue(actual == response);
 	}
 
 	[Test]
@@ -80,7 +81,7 @@ public class PromotionCheckerTests
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -109,7 +110,7 @@ public class PromotionCheckerTests
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 	}
 
 	[Test]
@@ -139,7 +140,7 @@ public class PromotionCheckerTests
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 	}
 
 	[Test]
@@ -164,7 +165,7 @@ public class PromotionCheckerTests
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -241,7 +242,7 @@ public class PromotionCheckerTests
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -281,7 +282,7 @@ public class PromotionCheckerTests
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -365,7 +366,7 @@ public class PromotionCheckerTests
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]
@@ -461,7 +462,7 @@ public class PromotionCheckerTests
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 	}
 
 	[Test]
@@ -494,7 +495,7 @@ public class PromotionCheckerTests
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
-		Assert.IsFalse(actual);
+		ClassicAssert.IsFalse(actual);
 	}
 
 	[Test]
@@ -526,7 +527,7 @@ public class PromotionCheckerTests
 
 		var actual = await sut.CheckAsync("ThisIsPlayerCode", promotion);
 
-		Assert.IsTrue(actual);
+		ClassicAssert.IsTrue(actual);
 	}
 
 	[Test]

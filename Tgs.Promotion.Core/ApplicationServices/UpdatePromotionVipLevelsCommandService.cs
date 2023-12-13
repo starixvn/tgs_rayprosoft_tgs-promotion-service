@@ -2,14 +2,9 @@
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class UpdatePromotionVipLevelsCommandService : ICommandService<UpdatePromotionVipLevelsCommand>
+internal class UpdatePromotionVipLevelsCommandService(IPromotionRepository promotionRepository) : ICommandService<UpdatePromotionVipLevelsCommand>
 {
-	private readonly IPromotionRepository _promotionRepository;
-
-	public UpdatePromotionVipLevelsCommandService(IPromotionRepository promotionRepository)
-	{
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	}
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public ValueTask ExecuteAsync(
 		UpdatePromotionVipLevelsCommand command,

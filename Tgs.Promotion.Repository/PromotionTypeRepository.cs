@@ -5,14 +5,9 @@ using Tgs.Promotion.Models;
 
 namespace Tgs.Promotion.Repository;
 
-internal class PromotionTypeRepository : IPromotionTypeRepository
+internal class PromotionTypeRepository(TgsContext repository) : IPromotionTypeRepository
 {
-	private readonly TgsContext _repository;
-
-	public PromotionTypeRepository(TgsContext repository)
-	{
-		_repository = repository;
-	}
+	private readonly TgsContext _repository = repository;
 
 	public async ValueTask<bool> IsDepositTypeAsync(string promotionType)
 	{

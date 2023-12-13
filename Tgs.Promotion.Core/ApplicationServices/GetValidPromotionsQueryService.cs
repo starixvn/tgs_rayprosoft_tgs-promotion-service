@@ -4,16 +4,12 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class GetValidPromotionsQueryService : IQueryService<GetValidPromotionsQuery, PromotionModel>
+internal class GetValidPromotionsQueryService(
+	IPromotionRepository promotionRepository) : IQueryService<GetValidPromotionsQuery, PromotionModel>
 {
-	private readonly IPromotionRepository _promotionRepository;
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
-	public GetValidPromotionsQueryService(
-		IPromotionRepository promotionRepository)
-	{
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	}
-
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0305:簡化集合初始化", Justification = "<暫止>")]
 	public IAsyncEnumerable<PromotionModel> QueryAsync(
 		GetValidPromotionsQuery query, CancellationToken cancellationToken = default)
 	{

@@ -4,12 +4,12 @@ using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Tgs.MessageQueue.Configuration;
 using Tgs.Promotion.MessageQueue;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Service.MessageQueue;
 using Tgs.Promotion.Service.ViewModels;
 using Tgs.Promotion.Workers;
+using Valhalla.MessageQueue.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +43,7 @@ builder.Services
 		conifg.GetSection("Opentelemetry:Tracing").Bind(options);
 	});
 
+var excludeExtensions = new[] { "html", "ico", "png", "jpg" };
 builder.Services
 	.AddProfileViewer()
 	.AddOpenTelemetry()
@@ -66,7 +67,7 @@ builder.Services
 			|| !httpContext.Request.Path.StartsWithSegments("/swagger")
 			&& !httpContext.Request.Path.StartsWithSegments("/health")
 			&& !httpContext.Request.Path.StartsWithSegments("/profiler/")
-			&& !new[] { "html", "ico", "png", "jpg" }.Any(
+			&& !excludeExtensions.Any(
 				ext => httpContext.Request.Path.Value.EndsWith($".{ext}")));
 
 builder.Services
@@ -91,7 +92,7 @@ builder.Services
 		options.BaseUrl = builder.Configuration.GetValue<Uri>("Promotion:PlayerServiceBaseUrl")!)
 	.AddPlayerBucketTypeClient()
 	.AddPlayerBucketClient(httpClientBuilder => httpClientBuilder
-		.ConfigureHttpClient(httpClient => 
+		.ConfigureHttpClient(httpClient =>
 			httpClient.BaseAddress = builder.Configuration.GetValue<Uri>("Promotion:PlayerBucketBaseUrl")));
 
 builder.Services
@@ -120,7 +121,7 @@ builder.Services
 builder.Services
 	.AddDateOnlyTimeOnlyStringConverters()
 	.AddControllers()
-	.AddJsonOptions(jsonOptions 
+	.AddJsonOptions(jsonOptions
 		=> jsonOptions.JsonSerializerOptions.Converters.Add(new PromotionRuleViewModelJsonConverter()));
 
 builder.Services

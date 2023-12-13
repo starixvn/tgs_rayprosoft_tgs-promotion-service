@@ -4,15 +4,10 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class GetPromotionNamesQueryService : IQueryService<GetPromotionNamesQuery, PromotionNameModel>
+internal class GetPromotionNamesQueryService(
+	IPromotionRepository promotionRepository) : IQueryService<GetPromotionNamesQuery, PromotionNameModel>
 {
-	private readonly IPromotionRepository _promotionRepository;
-
-	public GetPromotionNamesQueryService(
-		IPromotionRepository promotionRepository)
-	{
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	}
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public IAsyncEnumerable<PromotionNameModel> QueryAsync(
 		GetPromotionNamesQuery query, CancellationToken cancellationToken = default)

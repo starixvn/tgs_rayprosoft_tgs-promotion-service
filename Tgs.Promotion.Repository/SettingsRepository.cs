@@ -7,20 +7,15 @@ using Tgs.Promotion.Models;
 
 namespace Tgs.Promotion.Repository;
 
-internal class SettingsRepository : ISettingsRepository
+internal class SettingsRepository(TgsContext tgsContext) : ISettingsRepository
 {
-	private readonly TgsContext _tgsContext;
-
-	public SettingsRepository(TgsContext tgsContext)
-	{
-		_tgsContext = tgsContext ?? throw new ArgumentNullException(nameof(tgsContext));
-	}
+	private readonly TgsContext _tgsContext = tgsContext ?? throw new ArgumentNullException(nameof(tgsContext));
 
 	public async IAsyncEnumerable<PromotionTypeGroup> GetPromotionTypeGroupsAsync(
 		[EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var promotionSetting = await _tgsContext.Settings
-			.FindAsync(new object?[] { "PromotionTypes" }, cancellationToken: cancellationToken)
+			.FindAsync(["PromotionTypes"], cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
 		var promotionTypeGroups = JsonSerializer.Deserialize<PromotionTypeGroup[]>(promotionSetting!.Value);

@@ -38,7 +38,7 @@ public class PromotionDispatchTests
 						Arg.Any<Func<IQueryable<Setting>, IQueryable<Setting>>?>())
 					.Returns(new Setting { Key = "Key", Value = @"[{""Name"": ""Turnover""}]" });
 
-				var players = new Player[] { new Player { PlayerCode = "playercode" } };
+				var players = new Player[] { new() { PlayerCode = "playercode" } };
 
 				_ = fakePlayerRepository
 					.GetPlayerQueries(Arg.Any<Func<IQueryable<Player>, IQueryable<Player>>?>())

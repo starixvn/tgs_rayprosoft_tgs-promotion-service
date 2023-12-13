@@ -9,26 +9,17 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionBonusQuery, MessageResponse>
+public class DispatchPromotionBonusQueryService(
+	IPromotionBonusRepository promotionBonusService,
+	ICashServiceClient cashServiceClient,
+	ITransactionRepository transactionRepository,
+	IPlayerBucketForTypesClient playerBucketForTypesClient) : IGetService<DispatchPromotionBonusQuery, MessageResponse>
 {
-	private readonly ICashServiceClient _cashServiceClient;
-	private readonly IPlayerBucketForTypesClient _playerBucketForTypesClient;
-	private readonly IPromotionBonusRepository _promotionBonusService;
-	private readonly ITransactionRepository _transactionRepository;
-
-	public DispatchPromotionBonusQueryService(
-		IPromotionBonusRepository promotionBonusService,
-		ICashServiceClient cashServiceClient,
-		ITransactionRepository transactionRepository,
-		IPlayerBucketForTypesClient playerBucketForTypesClient)
-	{
-		_promotionBonusService =
+	private readonly ICashServiceClient _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
+	private readonly IPromotionBonusRepository _promotionBonusService =
 			promotionBonusService ?? throw new ArgumentNullException(nameof(promotionBonusService));
-		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-		_transactionRepository =
+	private readonly ITransactionRepository _transactionRepository =
 			transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
-		_playerBucketForTypesClient = playerBucketForTypesClient;
-	}
 
 	public async ValueTask<MessageResponse> GetAsync(
 		DispatchPromotionBonusQuery request,
@@ -78,7 +69,7 @@ public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionB
 				? Enumerable.Empty<string>()
 				: JsonSerializer.Deserialize<IEnumerable<string>>(playerBucket.Detail);
 
-			await _playerBucketForTypesClient.CreateBucketForBucketTypesAsync(
+			await playerBucketForTypesClient.CreateBucketForBucketTypesAsync(
 					playerBucket.PlayerCode,
 					playerBucket.BucketAmount,
 					playerBucket.BucketType,
@@ -112,7 +103,7 @@ public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionB
 			});
 		}
 
-		await _transactionRepository.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());
+		await _transactionRepository.CreateTransactionPromotionsAsync([.. transactionPromotions]);
 
 		return new MessageResponse { Valid = true };
 	}

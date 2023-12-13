@@ -2,15 +2,10 @@
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class ListPromotionsByFiltersQueryService : IQueryService<ListPromotionsByFilters, PromotionView>
+internal class ListPromotionsByFiltersQueryService(
+	IPromotionRepository promotionRepository) : IQueryService<ListPromotionsByFilters, PromotionView>
 {
-	private readonly IPromotionRepository _promotionRepository;
-
-	public ListPromotionsByFiltersQueryService(
-		IPromotionRepository promotionRepository)
-	{
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	}
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public IAsyncEnumerable<PromotionView> QueryAsync(
 		ListPromotionsByFilters query,

@@ -8,24 +8,16 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class CreatePromotionMainInfoCommandService : IGetService<CreatePromotionMainInfoCommand, Guid>
+internal class CreatePromotionMainInfoCommandService(
+	ISerialNumberGenerator serialNumberGenerator,
+	ISystemClock systemClock,
+	IPromotionRepository promotionRepository,
+	IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup> queryPromotionTypeGroupService) : IGetService<CreatePromotionMainInfoCommand, Guid>
 {
-	private readonly ISerialNumberGenerator _serialNumberGenerator;
-	private readonly ISystemClock _systemClock;
-	private readonly IPromotionRepository _promotionRepository;
-	private readonly IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup> _queryPromotionTypeGroupService;
-
-	public CreatePromotionMainInfoCommandService(
-		ISerialNumberGenerator serialNumberGenerator,
-		ISystemClock systemClock,
-		IPromotionRepository promotionRepository,
-		IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup> queryPromotionTypeGroupService)
-	{
-		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-		_systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-		_queryPromotionTypeGroupService = queryPromotionTypeGroupService ?? throw new ArgumentNullException(nameof(queryPromotionTypeGroupService));
-	}
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+	private readonly IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup> _queryPromotionTypeGroupService = queryPromotionTypeGroupService ?? throw new ArgumentNullException(nameof(queryPromotionTypeGroupService));
 
 	public async ValueTask<Guid> GetAsync(CreatePromotionMainInfoCommand command, CancellationToken cancellationToken = default)
 	{

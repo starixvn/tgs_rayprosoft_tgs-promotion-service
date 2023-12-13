@@ -5,21 +5,14 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class SetPromotionStatusCommandService : ICommandService<SetPromotionStatusCommand>
+internal class SetPromotionStatusCommandService(
+	ISystemClock systemClock,
+	ISerialNumberGenerator serialNumberGenerator,
+	IPromotionRepository promotionRepository) : ICommandService<SetPromotionStatusCommand>
 {
-	private readonly ISystemClock _systemClock;
-	private readonly ISerialNumberGenerator _serialNumberGenerator;
-	private readonly IPromotionRepository _promotionRepository;
-
-	public SetPromotionStatusCommandService(
-		ISystemClock systemClock,
-		ISerialNumberGenerator serialNumberGenerator,
-		IPromotionRepository promotionRepository)
-	{
-		_systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	}
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public async ValueTask ExecuteAsync(SetPromotionStatusCommand command, CancellationToken cancellationToken = default)
 	{

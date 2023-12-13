@@ -6,7 +6,7 @@ public record MessageResponse
 	{
 		Valid = false;
 		Message = string.Empty;
-		Errors = Array.Empty<string>();
+		Errors = [];
 	}
 
 	public bool Valid { get; set; }

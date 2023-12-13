@@ -44,7 +44,7 @@ public class PromotionTests
 				new PromotionTypeGroup
 				{
 					Name = "TestType",
-					Types = Array.Empty<PromotionType>(),
+					Types = [],
 					Trans = new Translation()
 				}
 			}.ToAsyncEnumerable());
@@ -231,7 +231,7 @@ public class PromotionTests
 					"AAA",
 					null,
 					0M,
-					new[]{1 },
+					[1],
 					null,
 					null,
 					null,
@@ -940,7 +940,7 @@ public class PromotionTests
 				new PromotionTypeGroup
 				{
 					Name = "Test_Type",
-					Types = Array.Empty<PromotionType>(),
+					Types = [],
 					Trans = new Translation()
 				}
 			}.ToAsyncEnumerable());
@@ -1005,9 +1005,10 @@ public class PromotionTests
 
 		var sut = new UpdatePromotionVipLevelsCommandService(fakePromotionRepository);
 
+		var vipLevels = new[] { 1, 2 };
 		var command = new UpdatePromotionVipLevelsCommand(
 			Guid.NewGuid(),
-			new[] { 1, 2 },
+			vipLevels,
 			"ModifyUser");
 
 		await sut.ExecuteAsync(command);

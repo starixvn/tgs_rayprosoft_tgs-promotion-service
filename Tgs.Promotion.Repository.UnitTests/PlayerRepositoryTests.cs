@@ -26,10 +26,10 @@ public class PlayerRepositoryTests
 		{
 			PlayerCode = playerCode,
 			DefaultWalletCurrencyCode = "CNY",
-			Password = Array.Empty<byte>(),
-			Salt = Array.Empty<byte>(),
-			WithdrawPassword = Array.Empty<byte>(),
-			WithdrawSalt = Array.Empty<byte>(),
+			Password = [],
+			Salt = [],
+			WithdrawPassword = [],
+			WithdrawSalt = [],
 			Username = "Tester"
 		});
 
@@ -62,10 +62,10 @@ public class PlayerRepositoryTests
 			PlayerCode = playerCode,
 			FirstDepositOn = DateTime.Parse("2021/1/1"),
 			DefaultWalletCurrencyCode = "CNY",
-			Password = Array.Empty<byte>(),
-			Salt = Array.Empty<byte>(),
-			WithdrawPassword = Array.Empty<byte>(),
-			WithdrawSalt = Array.Empty<byte>(),
+			Password = [],
+			Salt = [],
+			WithdrawPassword = [],
+			WithdrawSalt = [],
 			Username = "Tester"
 		});
 

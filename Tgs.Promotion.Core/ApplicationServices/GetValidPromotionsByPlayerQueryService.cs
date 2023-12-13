@@ -4,23 +4,16 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class GetValidPromotionsByPlayerQueryService : IQueryService<GetValidPromotionsByPlayerQuery, PromotionModel>
+internal class GetValidPromotionsByPlayerQueryService(
+	IQueryService<GetValidPromotionsQuery, PromotionModel> promotionQueryService,
+	IPlayerRepository playerService,
+	IPromotionCheckerFactory promotionCheckerFactory) : IQueryService<GetValidPromotionsByPlayerQuery, PromotionModel>
 {
-	private readonly IPlayerRepository _playerService;
-	private readonly IPromotionCheckerFactory _promotionCheckerFactory;
-	private readonly IQueryService<GetValidPromotionsQuery, PromotionModel> _promotionQueryService;
-
-	public GetValidPromotionsByPlayerQueryService(
-		IQueryService<GetValidPromotionsQuery, PromotionModel> promotionQueryService,
-		IPlayerRepository playerService,
-		IPromotionCheckerFactory promotionCheckerFactory)
-	{
-		_promotionQueryService =
-			promotionQueryService ?? throw new ArgumentNullException(nameof(promotionQueryService));
-		_playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
-		_promotionCheckerFactory =
+	private readonly IPlayerRepository _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
+	private readonly IPromotionCheckerFactory _promotionCheckerFactory =
 			promotionCheckerFactory ?? throw new ArgumentNullException(nameof(promotionCheckerFactory));
-	}
+	private readonly IQueryService<GetValidPromotionsQuery, PromotionModel> _promotionQueryService =
+			promotionQueryService ?? throw new ArgumentNullException(nameof(promotionQueryService));
 
 	public async IAsyncEnumerable<PromotionModel> QueryAsync(
 		GetValidPromotionsByPlayerQuery query,

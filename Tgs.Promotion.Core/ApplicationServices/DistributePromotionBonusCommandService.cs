@@ -12,43 +12,31 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
-internal class DistributePromotionBonusCommandService : IGetService<DistributePromotionBonusCommand, Guid>
+internal class DistributePromotionBonusCommandService(
+	IPromotionRepository promotionRepository,
+	IServiceCoordinator serviceCoordinator,
+	ICashServiceClient cashServiceClient,
+	IPlayerServiceClient playerServiceClient,
+	IPlayerBucketForTypesClient layerBucketForTypesClient,
+	ISerialNumberGenerator serialNumberGenerator) : IGetService<DistributePromotionBonusCommand, Guid>
 {
-	private readonly ICashServiceClient _cashServiceClient;
-	private readonly IPlayerServiceClient _playerServiceClient;
-	private readonly IPromotionRepository _promotionRepository;
-	private readonly ISerialNumberGenerator _serialNumberGenerator;
-	private readonly IServiceCoordinator _serviceCoordinator;
-	private readonly IPlayerBucketForTypesClient _playerBucketForTypesClient;
-
-	public DistributePromotionBonusCommandService(
-		IPromotionRepository promotionRepository,
-		IServiceCoordinator serviceCoordinator,
-		ICashServiceClient cashServiceClient,
-		IPlayerServiceClient playerServiceClient,
-		IPlayerBucketForTypesClient layerBucketForTypesClient,
-		ISerialNumberGenerator serialNumberGenerator
-		)
-	{
-		_promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-		_serviceCoordinator = serviceCoordinator ?? throw new ArgumentNullException(nameof(serviceCoordinator));
-		_cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-		_serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-		_playerBucketForTypesClient = layerBucketForTypesClient;
-	}
+	private readonly ICashServiceClient _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
+	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly IServiceCoordinator _serviceCoordinator = serviceCoordinator ?? throw new ArgumentNullException(nameof(serviceCoordinator));
 
 	public async ValueTask<Guid> GetAsync(DistributePromotionBonusCommand command,
 		CancellationToken cancellationToken = default)
 	{
 		var player = await _playerServiceClient.GetPlayerInfoAsync(
 			command.PlayerCode,
-			cancellationToken).ConfigureAwait(false) 
+			cancellationToken).ConfigureAwait(false)
 			?? throw new InvalidOperationException($"Player with player code {command.PlayerCode} does not exist");
 
 		var playerProperties = await _playerServiceClient.GetPlayerPropertiesAsync(
 			player.PlayerCode,
-			cancellationToken).ConfigureAwait(false) 
+			cancellationToken).ConfigureAwait(false)
 			?? throw new InvalidOperationException($"Player with player code {command.PlayerCode} does not exist");
 
 		var walletId = Guid.Parse(playerProperties.GetValueOrDefault("DefaultWalletId")!);
@@ -100,7 +88,7 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 		{
 			await Policy.Handle<TimeoutException>()
 				.RetryAsync(1)
-				.ExecuteAsync(async () => await _playerBucketForTypesClient.CreateBucketForBucketTypesAsync(
+				.ExecuteAsync(async () => await layerBucketForTypesClient.CreateBucketForBucketTypesAsync(
 					player.PlayerCode,
 					command.NeedTurnover,
 					BucketType.Promotion,

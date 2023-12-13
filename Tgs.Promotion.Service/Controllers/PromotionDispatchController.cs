@@ -24,14 +24,13 @@ public class PromotionDispatchController : ControllerBase
 			var command = new PromotionDispatchQueueModel
 			{
 				OperatorUserId = request.OperatorUserId,
-				Players = new DispatchPlayerQueueModel[]
-				{
+				Players = [
 					new()
 					{
 						PlayerCode = player.PlayerCode,
 						PromotionBonusId = player.PromotionBonusId
 					}
-				}
+				]
 			};
 
 			await taskQueue.QueuePromotionDispatchTaskQueueAsync(command);

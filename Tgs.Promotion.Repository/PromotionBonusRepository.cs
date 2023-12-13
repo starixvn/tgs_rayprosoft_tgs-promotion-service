@@ -4,19 +4,10 @@ using Tgs.Promotion.Models.PromotionBonus;
 
 namespace Tgs.Promotion.Repository;
 
-public class PromotionBonusRepository : IPromotionBonusRepository
+public class PromotionBonusRepository(
+	ITgsService<PromotionBonus> promotionBonusService,
+	ITgsService<PromotionPlayer> promotionPlayerService) : IPromotionBonusRepository
 {
-	private readonly ITgsService<PromotionBonus> _promotionBonusService;
-	private readonly ITgsService<PromotionPlayer> _promotionPlayerService;
-
-	public PromotionBonusRepository(
-		ITgsService<PromotionBonus> promotionBonusService,
-		ITgsService<PromotionPlayer> promotionPlayerService)
-	{
-		_promotionBonusService = promotionBonusService;
-		_promotionPlayerService = promotionPlayerService;
-	}
-
 	public async ValueTask<PromotionBonus[]> CreatePromotionBonusAsync(PromotionBonusModel[] models)
 	{
 		var bonus = models.Select(model => new PromotionBonus
@@ -43,7 +34,7 @@ public class PromotionBonusRepository : IPromotionBonusRepository
 			Detail = model.Detail
 		}).ToArray();
 
-		await _promotionBonusService.CreateEntitiesAsync(bonus);
+		await promotionBonusService.CreateEntitiesAsync(bonus);
 
 		return bonus;
 	}
@@ -53,12 +44,12 @@ public class PromotionBonusRepository : IPromotionBonusRepository
 	{
 		preQuery ??= c => c;
 		return tracking
-			? preQuery(_promotionPlayerService.GetQueries())
-			: preQuery(_promotionPlayerService.GetQueries()).AsNoTracking();
+			? preQuery(promotionPlayerService.GetQueries())
+			: preQuery(promotionPlayerService.GetQueries()).AsNoTracking();
 	}
 
 	public async ValueTask UpdatePromotionBonusPlayersAsync(IEnumerable<int> playerIds) =>
-		await _promotionPlayerService.GetQueries()
+		await promotionPlayerService.GetQueries()
 			.Where(x => playerIds.Contains(x.Id))
 			.ExecuteUpdateAsync(s => s.SetProperty(e => e.SentOn, DateTime.UtcNow));
 
@@ -88,7 +79,7 @@ public class PromotionBonusRepository : IPromotionBonusRepository
 			Detail = model.Detail
 		};
 
-		await _promotionBonusService.CreateEntityAsync(bonus);
+		await promotionBonusService.CreateEntityAsync(bonus);
 
 		return bonus;
 

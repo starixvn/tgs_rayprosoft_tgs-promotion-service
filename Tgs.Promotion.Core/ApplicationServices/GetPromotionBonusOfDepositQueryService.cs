@@ -5,17 +5,12 @@ using Tgs.ServiceUtility;
 namespace Tgs.Promotion.ApplicationServices;
 
 internal class
-	GetPromotionBonusOfDepositQueryService : IQueryService<GetPromotionBonusOfDepositQuery,
+	GetPromotionBonusOfDepositQueryService(
+	IPromotionPlayerRepository promotionPlayerRepository) : IQueryService<GetPromotionBonusOfDepositQuery,
 		PromotionBonusOfDepositModel>
 {
-	private readonly IPromotionPlayerRepository _promotionPlayerRepository;
-
-	public GetPromotionBonusOfDepositQueryService(
-		IPromotionPlayerRepository promotionPlayerRepository)
-	{
-		_promotionPlayerRepository = promotionPlayerRepository ??
+	private readonly IPromotionPlayerRepository _promotionPlayerRepository = promotionPlayerRepository ??
 			throw new ArgumentNullException(nameof(promotionPlayerRepository));
-	}
 
 	public IAsyncEnumerable<PromotionBonusOfDepositModel> QueryAsync(
 		GetPromotionBonusOfDepositQuery query, CancellationToken cancellationToken = default)

@@ -7,6 +7,11 @@ namespace Tgs.Promotion.Clients;
 
 public class PromotionDispatchClient : IPromotionDispatchClient
 {
+	private static readonly JsonSerializerOptions _SerializerOptions = new()
+	{
+		PropertyNameCaseInsensitive = true,
+	};
+
 	private readonly HttpClient _client;
 
 	public PromotionDispatchClient(HttpClient client)
@@ -26,8 +31,9 @@ public class PromotionDispatchClient : IPromotionDispatchClient
 
 		_ = response.EnsureSuccessStatusCode();
 
-		return JsonSerializer.Deserialize<MessageResponse>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+		return JsonSerializer.Deserialize<MessageResponse>(
+			await response.Content.ReadAsStringAsync().ConfigureAwait(false),
+			_SerializerOptions)!;
 	}
 
 	public async Task<PagedResponse<PromotionDispatchModel>> GetPromotionDispatchesAsync(
@@ -40,7 +46,8 @@ public class PromotionDispatchClient : IPromotionDispatchClient
 
 		_ = response.EnsureSuccessStatusCode();
 
-		return JsonSerializer.Deserialize<PagedResponse<PromotionDispatchModel>>(await response.Content.ReadAsStringAsync(),
-			new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+		return JsonSerializer.Deserialize<PagedResponse<PromotionDispatchModel>>(
+			await response.Content.ReadAsStringAsync().ConfigureAwait(false),
+			_SerializerOptions)!;
 	}
 }
