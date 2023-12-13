@@ -6,8 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>63075263-2956-4351-81b5-63afa49ac9ac</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-	  <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)"</DockerfileBuildArguments>
-	  <DockerfileTag Condition="$(DockerfileTag) == ''">tgs-promotion-service</DockerfileTag>
+    <ContainerRepository>tgs-promotion-service</ContainerRepository>
   </PropertyGroup>
 
   <ItemGroup>
