@@ -2,8 +2,10 @@
 
 namespace Tgs.Promotion.Checkers;
 
-internal class AlwaysFalseChecker : IPromotionChecker
+internal class AlwaysFalseChecker(string promotionType) : IPromotionChecker
 {
+	public string PromotionType => promotionType;
+
 	public ValueTask<bool> CheckAsync(
 		string playerCode,
 		PromotionMainInfo promotion,

@@ -2,16 +2,16 @@
 
 namespace Tgs.Promotion.Checkers;
 
-internal class DailySecondDepositChecker(IPlayerDataRepository playerDataRepository) : IPromotionChecker
+internal class DailySecondDepositChecker(string promotionType, IPlayerDataRepository playerDataRepository) : IPromotionChecker
 {
-	private readonly IPlayerDataRepository _playerDataRepository = playerDataRepository ?? throw new ArgumentNullException(nameof(playerDataRepository));
+	public string PromotionType => promotionType;
 
 	public async ValueTask<bool> CheckAsync(
 		string playerCode,
 		PromotionMainInfo promotion,
 		JsonDocument? extend,
 		CancellationToken cancellationToken = default)
-		=> !await _playerDataRepository
+		=> !await playerDataRepository
 			.CheckPlayerIsDailyFirstDepositAsync(playerCode)
 			.ConfigureAwait(false);
 

@@ -2,8 +2,10 @@
 
 namespace Tgs.Promotion.Checkers;
 
-internal class AlwaysTrueChecker : IPromotionChecker
+internal class AlwaysTrueChecker(string promotionType) : IPromotionChecker
 {
+	public string PromotionType => promotionType;
+
 	public ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion, JsonDocument? extend, CancellationToken cancellationToken = default)
 		=> ValueTask.FromResult(true);
 

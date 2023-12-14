@@ -23,7 +23,10 @@ public class PromotionCheckerTests
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 		var fakePromotionSerializer = Substitute.For<PromotionSerializer>();
 
-		var sut = new DepositRewardChecker(fakePromotionSerializer, fakePromotionRepository);
+		var sut = new DepositRewardChecker(
+			"Register",
+			fakePromotionSerializer,
+			fakePromotionRepository);
 
 		var brandId = Guid.NewGuid();
 		var promotionId = Guid.NewGuid();
@@ -86,7 +89,7 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstDepositChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstDepositChecker("FirstDeposit", fakePlayerService, fakePlayerDataRepository);
 
 		_ = fakePlayerService
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
@@ -115,7 +118,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstDepositChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstDepositChecker(
+			"FirstDeposit",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		_ = fakePlayerService
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
@@ -144,7 +150,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstJoinPromotionChecker(
+			"FirstDeposit",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		_ = fakePlayerService
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
@@ -173,7 +182,7 @@ public class PromotionCheckerTests
 	{
 		var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new DailyFirstDepositChecker(fakePlayerDataService);
+		var sut = new DailyFirstDepositChecker("DailyFirstDeposit", fakePlayerDataService);
 
 		_ = fakePlayerDataService
 			.CheckPlayerIsDailyFirstDepositAsync(Arg.Any<string>())
@@ -198,7 +207,7 @@ public class PromotionCheckerTests
 	{
 		var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new DailyFirstDepositChecker(fakePlayerDataService);
+		var sut = new DailyFirstDepositChecker("DailyFirstDeposit", fakePlayerDataService);
 
 		await sut.TagPromotionTypeAsync("ThisIsPlayerCode", Guid.NewGuid());
 
@@ -211,7 +220,7 @@ public class PromotionCheckerTests
 	{
 		var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new DailyFirstDepositChecker(fakePlayerDataService);
+		var sut = new DailyFirstDepositChecker("DailyFirstDeposit", fakePlayerDataService);
 
 		await sut.RollbackTagAsync("ThisIsPlayerCode", Guid.NewGuid());
 
@@ -224,7 +233,7 @@ public class PromotionCheckerTests
 	{
 		var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new DailyFirstDepositChecker(fakePlayerDataService);
+		var sut = new DailyFirstDepositChecker("DailyFirstDeposit", fakePlayerDataService);
 
 		await sut.RollbackTagAsync("ThisIsPlayerCode", null);
 
@@ -237,7 +246,7 @@ public class PromotionCheckerTests
 	{
 		var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new DailyFirstDepositChecker(fakePlayerDataService);
+		var sut = new DailyFirstDepositChecker("DailyFirstDeposit", fakePlayerDataService);
 
 		await sut.TagPromotionTypeAsync("ThisIsPlayerCode", null);
 
@@ -250,7 +259,7 @@ public class PromotionCheckerTests
 	{
 		var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new DailySecondDepositChecker(fakePlayerDataService);
+		var sut = new DailySecondDepositChecker("DailySecondDeposit", fakePlayerDataService);
 
 		_ = fakePlayerDataService
 			.CheckPlayerIsDailyFirstDepositAsync(Arg.Any<string>())
@@ -276,7 +285,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstDepositChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstDepositChecker(
+			"FirstDeposit",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		await sut.TagPromotionTypeAsync("ThisIsPlayerCode", null);
 
@@ -290,7 +302,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstDepositChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstDepositChecker(
+			"FirstDeposit",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		_ = fakePlayerService
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
@@ -316,7 +331,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstDepositChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstDepositChecker(
+			"FirstDeposit",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		var playerCode = "ThisIsPlayerCode";
 
@@ -332,7 +350,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstDepositChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstDepositChecker(
+			"FirstDeposit",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		await sut.RollbackTagAsync("ThisIsPlayerCode", null);
 
@@ -346,7 +367,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstJoinPromotionChecker(
+			"FirstDeposit",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		await sut.TagPromotionTypeAsync("ThisIsPlayerCode", Guid.NewGuid());
 
@@ -360,7 +384,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstJoinPromotionChecker(
+			"FirstDeposit",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		await sut.TagPromotionTypeAsync("ThisIsPlayerCode", null);
 
@@ -374,7 +401,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstJoinPromotionChecker(
+			"FirstDeposit",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		_ = fakePlayerService
 			.GetPlayerByPlayerCodeAsync(Arg.Any<string>())
@@ -400,7 +430,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstJoinPromotionChecker(
+			"FirstDeposit",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		var playerCode = "ThisIsPlayerCode";
 
@@ -418,7 +451,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstJoinPromotionChecker(
+			"FirstDeposit",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		await sut.RollbackTagAsync("ThisIsPlayerCode", Guid.NewGuid());
 
@@ -432,7 +468,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstJoinPromotionChecker(
+			"FirstDeposit",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		var playerCode = "ThisIsPlayerCode";
 
@@ -450,7 +489,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 		var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-		var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new FirstJoinPromotionChecker(
+			"FirstDeposit",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		await sut.RollbackTagAsync("ThisIsPlayerCode", null);
 
@@ -464,7 +506,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
 		var fakePlayerDataRepository = Substitute.For<IPromotionParticipantRepository>();
 
-		var sut = new RegisterChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new RegisterChecker(
+			"Register",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		var promotion = new PromotionMainInfo(
 			Guid.NewGuid(),
@@ -496,7 +541,7 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
 		var fakePlayerDataRepository = Substitute.For<IPromotionParticipantRepository>();
 
-		var sut = new RegisterChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new RegisterChecker("Register", fakePlayerService, fakePlayerDataRepository);
 
 		var promotion = new PromotionMainInfo(
 			Guid.NewGuid(),
@@ -529,7 +574,10 @@ public class PromotionCheckerTests
 		var fakePlayerService = Substitute.For<IPlayerServiceClient>();
 		var fakePlayerDataRepository = Substitute.For<IPromotionParticipantRepository>();
 
-		var sut = new RegisterChecker(fakePlayerService, fakePlayerDataRepository);
+		var sut = new RegisterChecker(
+			"Register",
+			fakePlayerService,
+			fakePlayerDataRepository);
 
 		var promotion = new PromotionMainInfo(
 			Guid.NewGuid(),
@@ -558,25 +606,11 @@ public class PromotionCheckerTests
 	[Test]
 	public async Task Tag_Player_Deposit()
 	{
-		var fakeServiceProvider = Substitute.For<IServiceProvider>();
 		var fakePromotionChecker = Substitute.For<IPromotionChecker>();
+		var fakeCheckFactory = Substitute.For<IPromotionCheckerFactory>();
 
-		_ = fakeServiceProvider.GetService(Arg.Any<Type>())
+		_ = fakeCheckFactory.GetPromotionChecker(Arg.Any<string>())
 			.Returns(fakePromotionChecker);
-
-		var fakeCheckFactory = new PromotionCheckerFactory(
-			new Dictionary<string, Type>
-			{
-				["FirstDeposit"] = typeof(object),
-				["AccountFirstDeposit"] = typeof(object),
-				["DailyFirstDeposit"] = typeof(object),
-				["DailySecondDeposit"] = typeof(object),
-				["TurnoverRebate"] = typeof(object),
-				["ReliefMoneyDaily"] = typeof(object),
-				["ReliefMoneyWeekly"] = typeof(object),
-				["ReliefMoneyMonthly"] = typeof(object),
-			},
-			fakeServiceProvider);
 
 		var sut = new TagPlayerDepositCommandService(fakeCheckFactory);
 
@@ -591,25 +625,11 @@ public class PromotionCheckerTests
 	[Test]
 	public async Task Untag_Player_Deposit()
 	{
-		var fakeServiceProvider = Substitute.For<IServiceProvider>();
 		var fakePromotionChecker = Substitute.For<IPromotionChecker>();
+		var fakeCheckFactory = Substitute.For<IPromotionCheckerFactory>();
 
-		_ = fakeServiceProvider.GetService(Arg.Any<Type>())
+		_ = fakeCheckFactory.GetPromotionChecker(Arg.Any<string>())
 			.Returns(fakePromotionChecker);
-
-		var fakeCheckFactory = new PromotionCheckerFactory(
-			new Dictionary<string, Type>
-			{
-				["FirstDeposit"] = typeof(object),
-				["AccountFirstDeposit"] = typeof(object),
-				["DailyFirstDeposit"] = typeof(object),
-				["DailySecondDeposit"] = typeof(object),
-				["TurnoverRebate"] = typeof(object),
-				["ReliefMoneyDaily"] = typeof(object),
-				["ReliefMoneyWeekly"] = typeof(object),
-				["ReliefMoneyMonthly"] = typeof(object),
-			},
-			fakeServiceProvider);
 
 		var sut = new CancelTagPlayerDepositCommandService(fakeCheckFactory);
 

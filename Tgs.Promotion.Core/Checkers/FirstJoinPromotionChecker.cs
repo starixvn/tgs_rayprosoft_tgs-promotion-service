@@ -2,21 +2,23 @@
 
 namespace Tgs.Promotion.Checkers;
 
-internal class FirstJoinPromotionChecker(IPlayerRepository playerService, IPlayerDataRepository playerDataRepository) : IPromotionChecker
+internal class FirstJoinPromotionChecker(
+	string promotionType,
+	IPlayerRepository playerService,
+	IPlayerDataRepository playerDataRepository) : IPromotionChecker
 {
-	private readonly IPlayerDataRepository _playerDataRepository = playerDataRepository ?? throw new ArgumentNullException(nameof(playerDataRepository));
-	private readonly IPlayerRepository _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
+	public string PromotionType => promotionType;
 
 	public async ValueTask<bool> CheckAsync(string playerCode, PromotionMainInfo promotion, JsonDocument? extend, CancellationToken cancellationToken = default)
 	{
-		var isFirstDepositing = await _playerDataRepository
+		var isFirstDepositing = await playerDataRepository
 			.CheckPlayerFirstJoinPromotionAsync(playerCode)
 			.ConfigureAwait(false);
 
 		if (isFirstDepositing)
 			return false;
 
-		var player = await _playerService
+		var player = await playerService
 			.GetPlayerByPlayerCodeAsync(playerCode)
 			.ConfigureAwait(false);
 
@@ -28,12 +30,11 @@ internal class FirstJoinPromotionChecker(IPlayerRepository playerService, IPlaye
 		if (promotionId is null)
 			return;
 
-		await _playerService
+		await playerService
 			.SetFirstPromotionTimeAsync(playerCode, DateTimeOffset.UtcNow)
 			.ConfigureAwait(false);
 
-		await _playerDataRepository
-			.RemovePlayerFirstJoinPromotionAsync(playerCode)
+		await playerDataRepository.RemovePlayerFirstJoinPromotionAsync(playerCode)
 			.ConfigureAwait(false);
 	}
 
@@ -41,15 +42,13 @@ internal class FirstJoinPromotionChecker(IPlayerRepository playerService, IPlaye
 	{
 		return promotionId is null
 			? ValueTask.CompletedTask
-			: _playerDataRepository
-			.RemovePlayerFirstJoinPromotionAsync(playerCode);
+			: playerDataRepository.RemovePlayerFirstJoinPromotionAsync(playerCode);
 	}
 
 	public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId, CancellationToken cancellationToken = default)
 	{
 		return promotionId == null
 			? ValueTask.CompletedTask
-			: _playerDataRepository
-			.SetPlayerFirstJoinPromotionAsync(playerCode);
+			: playerDataRepository.SetPlayerFirstJoinPromotionAsync(playerCode);
 	}
 }

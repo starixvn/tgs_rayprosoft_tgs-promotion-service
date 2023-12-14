@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -7,7 +7,6 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
-using Tgs.Promotion.Checkers;
 using Tgs.Promotion.MessageQueue;
 
 namespace Tgs.Promotion.UnitTest;
@@ -19,20 +18,14 @@ public class DepositStatusChangedMessageHandlerTests
 	public async Task When_Deposit_Form_Approved_Will_Commit_Tag()
 	{
 		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-
-		var fakeServiceProvider = Substitute.For<IServiceProvider>();
 		var fakePromotionChecker = Substitute.For<IPromotionChecker>();
 
-		_ = fakeServiceProvider.GetService(Arg.Any<Type>())
-			.Returns(fakePromotionChecker);
+		var fakeCheckFactory = Substitute.For<IPromotionCheckerFactory>();
 
-		var fakeCheckFactory = new PromotionCheckerFactory(
-			new Dictionary<string, Type>
-			{
-				["FirstDeposit"] = typeof(object),
-				["DailyFirstDeposit"] = typeof(object)
-			},
-			fakeServiceProvider);
+		_ = fakeCheckFactory.GetPromotionChecker(Arg.Is("FirstDeposit"))
+			.Returns(fakePromotionChecker);
+		_ = fakeCheckFactory.GetPromotionChecker(Arg.Is("DailyFirstDeposit"))
+			.Returns(fakePromotionChecker);
 
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 
@@ -70,20 +63,14 @@ public class DepositStatusChangedMessageHandlerTests
 	public async Task When_Deposit_Form_Rejected_Will_Rollback()
 	{
 		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-
-		var fakeServiceProvider = Substitute.For<IServiceProvider>();
 		var fakePromotionChecker = Substitute.For<IPromotionChecker>();
 
-		_ = fakeServiceProvider.GetService(Arg.Any<Type>())
-			.Returns(fakePromotionChecker);
+		var fakeCheckFactory = Substitute.For<IPromotionCheckerFactory>();
 
-		var fakeCheckFactory = new PromotionCheckerFactory(
-			new Dictionary<string, Type>
-			{
-				["FirstDeposit"] = typeof(object),
-				["DailyFirstDeposit"] = typeof(object)
-			},
-			fakeServiceProvider);
+		_ = fakeCheckFactory.GetPromotionChecker(Arg.Is("FirstDeposit"))
+			.Returns(fakePromotionChecker);
+		_ = fakeCheckFactory.GetPromotionChecker(Arg.Is("DailyFirstDeposit"))
+			.Returns(fakePromotionChecker);
 
 		var fakePlayerService = Substitute.For<IPlayerRepository>();
 
@@ -105,12 +92,13 @@ public class DepositStatusChangedMessageHandlerTests
 				Id = Guid.Parse(formEvent.FormId),
 				BrandId = Guid.Parse(formEvent.BrandId),
 				Status = PaymentFlowState.Reject,
-				CreatedOn = DateTimeOffset.UtcNow
+				CreatedOn = DateTimeOffset.UtcNow,
+				PlayerCode = "test1"
 			});
 
 		await sut.HandleAsync(formEvent.ToByteArray());
 
 		_ = fakePromotionChecker.Received(2)
-			.RollbackTagAsync(Arg.Any<string>(), Arg.Any<Guid?>());
+			.RollbackTagAsync(Arg.Any<string>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>());
 	}
 }

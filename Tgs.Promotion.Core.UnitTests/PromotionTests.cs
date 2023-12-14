@@ -263,7 +263,7 @@ public class PromotionTests
 			}.ToAsyncEnumerable());
 
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Any<string>())
-			.Returns(new AlwaysTrueChecker());
+			.Returns(new AlwaysTrueChecker("test"));
 
 		var actual = await sut.QueryAsync(query).ToArrayAsync();
 

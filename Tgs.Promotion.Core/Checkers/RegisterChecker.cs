@@ -3,10 +3,12 @@ using Tgs.PlayerService.Client;
 
 namespace Tgs.Promotion.Checkers;
 
-internal class RegisterChecker(IPlayerServiceClient playerServiceClient, IPromotionParticipantRepository promotionParticipantRepository) : IPromotionChecker
+internal class RegisterChecker(
+	string promotionType,
+	IPlayerServiceClient playerServiceClient,
+	IPromotionParticipantRepository promotionParticipantRepository) : IPromotionChecker
 {
-	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	private readonly IPromotionParticipantRepository _promotionParticipantRepository = promotionParticipantRepository ?? throw new ArgumentNullException(nameof(promotionParticipantRepository));
+	public string PromotionType => promotionType;
 
 	public async ValueTask<bool> CheckAsync(
 		string playerCode,
@@ -14,21 +16,21 @@ internal class RegisterChecker(IPlayerServiceClient playerServiceClient, IPromot
 		JsonDocument? extend,
 		CancellationToken cancellationToken = default)
 	{
-		var player = await _playerServiceClient
+		var player = await playerServiceClient
 			.GetPlayerInfoAsync(playerCode, cancellationToken)
 			.ConfigureAwait(false);
 
 		if (player is null)
 			return false;
 
-		var playerStatus = await _playerServiceClient
+		var playerStatus = await playerServiceClient
 			.GetPlayerStatusAsync(playerCode, cancellationToken)
 			.ConfigureAwait(false);
 
 		if (playerStatus is not PlayerService.Client.PlayerStatus.Enabled)
 			return false;
 
-		var isExists = await _promotionParticipantRepository.ExistsAsync(x
+		var isExists = await promotionParticipantRepository.ExistsAsync(x
 			=> x.PlayerCode == playerCode && x.PromotionId == promotion.Id)
 			.ConfigureAwait(false);
 

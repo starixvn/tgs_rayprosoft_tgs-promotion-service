@@ -3,9 +3,12 @@
 namespace Tgs.Promotion.Checkers;
 
 internal class DepositRewardChecker(
+	string promotionType,
 	PromotionSerializer promotionSerializer,
 	IPromotionRepository promotionRepository) : IPromotionChecker
 {
+	public string PromotionType => promotionType;
+
 	public async ValueTask<bool> CheckAsync(
 		string playerCode,
 		PromotionMainInfo promotion,

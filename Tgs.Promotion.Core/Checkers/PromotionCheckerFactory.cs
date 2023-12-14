@@ -1,14 +1,13 @@
-﻿namespace Tgs.Promotion.Checkers;
+﻿using Microsoft.Extensions.DependencyInjection;
 
-public class PromotionCheckerFactory(IDictionary<string, Type> checkerTypes, IServiceProvider serviceProvider) : IPromotionCheckerFactory
+namespace Tgs.Promotion.Checkers;
+
+public class PromotionCheckerFactory(
+	IDictionary<string, Type> checkerTypes,
+	IServiceProvider serviceProvider) : IPromotionCheckerFactory
 {
-	private readonly IDictionary<string, Type> _checkerTypes = checkerTypes ?? throw new ArgumentNullException(nameof(checkerTypes));
-	private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-
 	public IPromotionChecker GetPromotionChecker(string promotionType)
-	{
-		return _checkerTypes.TryGetValue(promotionType, out var checkerType)
-			? (IPromotionChecker)_serviceProvider.GetService(checkerType!)!
-			: new AlwaysFalseChecker();
-	}
+		=> checkerTypes.TryGetValue(promotionType, out var checkerType)
+			? (IPromotionChecker)ActivatorUtilities.CreateInstance(serviceProvider, checkerType, promotionType)
+			: new AlwaysFalseChecker(promotionType);
 }
