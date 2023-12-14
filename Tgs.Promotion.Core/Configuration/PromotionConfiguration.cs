@@ -76,8 +76,6 @@ public class PromotionConfiguration(IServiceCollection services)
 	public PromotionConfiguration RegisterPromotionChecker<TChecker>(string typeName)
 		where TChecker : class, IPromotionChecker
 	{
-		_ = Services.AddTransient<TChecker>();
-
 		_checkerTypes[typeName] = typeof(TChecker);
 
 		return this;

@@ -60,7 +60,9 @@ internal class GetValidPromotionsByPlayerQueryService(
 					(promotion.From.UtcDateTime, promotion.To.UtcDateTime),
 					promotion.PromotionType,
 					promotion.TotalAmountLimit,
-					promotion.AutoSentPlayerBonus))
+					promotion.AutoSentPlayerBonus),
+				null,
+				cancellationToken)
 				.ConfigureAwait(false))
 			{
 				yield return promotion;

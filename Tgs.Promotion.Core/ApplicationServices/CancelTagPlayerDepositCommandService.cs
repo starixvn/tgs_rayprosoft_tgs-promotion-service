@@ -21,7 +21,7 @@ internal class CancelTagPlayerDepositCommandService : ICommandService<CancelTagP
 	{
 		foreach (var checker in _checkers)
 			await checker
-				.RollbackTagAsync(command.PlayerCode, command.PromotionId)
+				.RollbackTagAsync(command.PlayerCode, command.PromotionId, cancellationToken)
 				.ConfigureAwait(false);
 	}
 }

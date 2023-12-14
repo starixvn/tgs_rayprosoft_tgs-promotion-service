@@ -9,35 +9,25 @@ internal class CheckCanJoinPromotionQueryService(
 	ISystemClock systemClock,
 	ISerialNumberGenerator serialNumberGenerator,
 	IPromotionRepository promotionRepository,
-	IPromotionCheckerFactory promotionCheckerFactory) : IGetService<CheckCanJoinPromotionQuery, bool>
+	IPromotionCheckerFactory promotionCheckerFactory,
+	PromotionSerializer promotionSerializer) : IGetService<CheckCanJoinPromotionQuery, bool>
 {
-	private readonly IPromotionCheckerFactory _promotionCheckerFactory = promotionCheckerFactory
-		?? throw new ArgumentNullException(nameof(promotionCheckerFactory));
-
-	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-
 	public async ValueTask<bool> GetAsync(
 		CheckCanJoinPromotionQuery query,
 		CancellationToken cancellationToken = default)
 	{
-		var snapshot = await _promotionRepository
+		var snapshot = await promotionRepository
 			.GetCurrentPromotionSnapshotAsync(query.PromotionId, cancellationToken)
 			.ConfigureAwait(false);
 
 		if (snapshot is null || snapshot.BrandId != query.BrandId)
 			return false;
 
-		var checker = _promotionCheckerFactory.GetPromotionChecker(snapshot.PromotionType);
+		var checker = promotionCheckerFactory.GetPromotionChecker(snapshot.PromotionType);
 
 		var isAllowed = await checker
-			.CheckJoinAsync(
-				new ConditionData(
-					query.BrandId,
-					query.PromotionId,
-					query.PlayerCode,
-					query.Amount),
+			.CheckAsync(
+				query.PlayerCode,
 				new PromotionMainInfo(
 					snapshot.Id,
 					snapshot.BrandId,
@@ -46,13 +36,12 @@ internal class CheckCanJoinPromotionQueryService(
 					snapshot.PromotionType,
 					snapshot.TotalAmountLimit,
 					snapshot.AutoSentPlayerBonus),
-				new PromotionRule(
-					snapshot.CampaignDetail,
-					snapshot.BonusAmountLimit,
-					snapshot.Percentage,
-					snapshot.TurnoverMultiple,
-					snapshot.GameType,
-					Array.Empty<int>()))
+				JsonDocument.Parse(
+					promotionSerializer.Serialize(new
+					{
+						DepositAmount = query.Amount
+					})),
+				cancellationToken)
 			.ConfigureAwait(false);
 
 		if (!isAllowed)
@@ -64,11 +53,11 @@ internal class CheckCanJoinPromotionQueryService(
 		var amount = snapshot.Percentage * query.Amount / 100M;
 		amount = amount > snapshot.BonusAmountLimit ? snapshot.BonusAmountLimit : amount;
 
-		var eventId = await _serialNumberGenerator
+		var eventId = await serialNumberGenerator
 			.GenerateAsync(cancellationToken)
 			.ConfigureAwait(false);
 
-		var currentTime = _systemClock.UtcNow.UtcDateTime;
+		var currentTime = systemClock.UtcNow.UtcDateTime;
 
 		var updateData = snapshot with
 		{
@@ -78,7 +67,7 @@ internal class CheckCanJoinPromotionQueryService(
 
 		var changeSets = snapshot.CreatePatch(updateData, PromotionEventSourceUtility.SerializerOptions);
 
-		await _promotionRepository.CreatePromotionEventAsync(
+		await promotionRepository.CreatePromotionEventAsync(
 				eventId,
 				snapshot.Id,
 				PromotionEventAction.UpdateTotalUsedAmount,
@@ -87,7 +76,7 @@ internal class CheckCanJoinPromotionQueryService(
 				cancellationToken)
 			.ConfigureAwait(false);
 
-		await _promotionRepository.UpdatePromotionSnapshotAsync(
+		await promotionRepository.UpdatePromotionSnapshotAsync(
 				updateData,
 				eventId,
 				currentTime,

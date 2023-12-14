@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Reflection;
 using Tgs.Promotion;
+using Tgs.Promotion.Checkers;
 using Tgs.Promotion.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection;

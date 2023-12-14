@@ -51,7 +51,9 @@ internal class ListPromotionsByPlayerQueryService(
 					promotion.EventDuring,
 					promotion.PromotionType,
 					promotion.PromotionLimitAmount,
-					true))
+					true),
+				null,
+				cancellationToken)
 				.ConfigureAwait(false))
 				yield return promotion;
 		}

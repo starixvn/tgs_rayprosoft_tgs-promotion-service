@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using NSubstitute;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Checkers;
 using Tgs.Promotion.Models;
 using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;
@@ -262,7 +263,7 @@ public class PromotionTests
 			}.ToAsyncEnumerable());
 
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Any<string>())
-			.Returns(new AlwaysTrueChecker());
+			.Returns(new AlwaysTrueChecker("test"));
 
 		var actual = await sut.QueryAsync(query).ToArrayAsync();
 

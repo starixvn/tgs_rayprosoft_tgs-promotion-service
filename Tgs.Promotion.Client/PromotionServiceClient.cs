@@ -2,13 +2,12 @@
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Web;
-using Microsoft.AspNetCore.Http.Extensions;
 using Tgs.Promotion.Clients.Models;
-using Tgs.Promotion.Clients.Models.PromotionDispatch;
 
 namespace Tgs.Promotion.Clients;
 
@@ -273,26 +272,30 @@ internal class PromotionServiceClient : IPromotionServiceClient
 		PromotionStatus? status,
 		CancellationToken cancellationToken = default)
 	{
-		var queryStrings = new QueryBuilder();
+		var queryStrings = new List<KeyValuePair<string, string>>();
 
 		foreach (var type in promotionTypes ?? Array.Empty<string>())
-			queryStrings.Add("promotionType", type);
+			queryStrings.Add(new KeyValuePair<string, string>("promotionType", type));
 
 		if (!string.IsNullOrEmpty(name))
-			queryStrings.Add("name", name);
+			queryStrings.Add(new KeyValuePair<string, string>("name", name));
 
 		if (eventDuring is not null)
 		{
-			queryStrings.Add("from", eventDuring.Value.From.ToString("o"));
-			queryStrings.Add("to", eventDuring.Value.To.ToString("o"));
+			queryStrings.Add(new KeyValuePair<string, string>("from", eventDuring.Value.From.ToString("o")));
+			queryStrings.Add(new KeyValuePair<string, string>("to", eventDuring.Value.To.ToString("o")));
 		}
 
 		if (status is not null)
-			queryStrings.Add("status", status.Value.ToString());
+			queryStrings.Add(new KeyValuePair<string, string>("status", status.Value.ToString()));
+
+		var queryString = string.Join(
+			'&',
+			queryStrings.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
 
 		return _httpClient.GetAsync(
-				$"/api/promotionview/{brandId}:filters{queryStrings.ToQueryString().Value}",
-				cancellationToken)
+			$"/api/promotionview/{brandId}:filters?{queryString}",
+			cancellationToken)
 			.ToAsyncEnumerable()
 			.Do(response => response.EnsureSuccessStatusCode())
 			.SelectMany(response => response.Content
