@@ -17,7 +17,7 @@ public static class PromotionCoreExtensions
 		var configuration = new PromotionConfiguration(services);
 
 		_ = configuration
-			.RegisterPromotionChecker<FirstDepositChecker>("AccountFirstDeposit")
+			.RegisterPromotionChecker<ExternalServiceChecker>("AccountFirstDeposit")
 			.RegisterPromotionChecker<FirstJoinPromotionChecker>("FirstDeposit")
 			.RegisterPromotionChecker<DailyFirstDepositChecker>("DailyFirstDeposit")
 			.RegisterPromotionChecker<DailySecondDepositChecker>("DailySecondDeposit")
