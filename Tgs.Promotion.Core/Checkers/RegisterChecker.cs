@@ -20,7 +20,7 @@ internal class RegisterChecker(
 			.GetPlayerInfoAsync(playerCode, cancellationToken)
 			.ConfigureAwait(false);
 
-		if (player is null)
+		if (player is null || player.RegisteredOn is null)
 			return false;
 
 		var playerStatus = await playerServiceClient

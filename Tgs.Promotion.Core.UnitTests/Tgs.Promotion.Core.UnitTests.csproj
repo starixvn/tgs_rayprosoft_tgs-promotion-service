@@ -36,4 +36,8 @@
     <None Include="D:\Users\Phoenix\source\repos\tgs-promotion-service\Tgs.Promotion.Core.UnitTests\.editorconfig" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="NSubstitute" />
+  </ItemGroup>
+
 </Project>
