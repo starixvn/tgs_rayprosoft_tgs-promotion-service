@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using OpenTelemetry.Exporter;
-using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -51,7 +50,13 @@ builder.Services
 	.WithTracing(tracerProviderBuilder => tracerProviderBuilder
 		.AddSource("Tgs.*")
 		.AddSource("TGS.*")
-		.AddAspNetCoreInstrumentation()
+		.AddAspNetCoreInstrumentation(options => options.Filter =
+			httpContext => !httpContext.Request.Path.HasValue
+				|| !httpContext.Request.Path.StartsWithSegments("/swagger")
+				&& !httpContext.Request.Path.StartsWithSegments("/health")
+				&& !httpContext.Request.Path.StartsWithSegments("/profiler/")
+				&& !excludeExtensions.Any(
+					ext => httpContext.Request.Path.Value.EndsWith($".{ext}")))
 		.AddHttpClientInstrumentation()
 		.AddEntityFrameworkCoreInstrumentation(options => options.SetDbStatementForText = true)
 		.AddProfileViewExporter()
@@ -60,15 +65,7 @@ builder.Services
 		.AddAspNetCoreInstrumentation()
 		.AddHttpClientInstrumentation()
 		.AddRuntimeInstrumentation()
-		.AddOtlpExporter())
-	.Services
-	.Configure<AspNetCoreInstrumentationOptions>(options => options.Filter =
-		httpContext => !httpContext.Request.Path.HasValue
-			|| !httpContext.Request.Path.StartsWithSegments("/swagger")
-			&& !httpContext.Request.Path.StartsWithSegments("/health")
-			&& !httpContext.Request.Path.StartsWithSegments("/profiler/")
-			&& !excludeExtensions.Any(
-				ext => httpContext.Request.Path.Value.EndsWith($".{ext}")));
+		.AddOtlpExporter());
 
 builder.Services
 	.AddTgsRepository(builder.Configuration.GetConnectionString("Tgs")!)
