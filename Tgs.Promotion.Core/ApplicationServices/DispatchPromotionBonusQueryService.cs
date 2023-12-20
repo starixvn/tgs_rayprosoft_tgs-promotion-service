@@ -65,9 +65,15 @@ public class DispatchPromotionBonusQueryService(
 
 		foreach (var playerBucket in playerBuckets)
 		{
-			var bucketTypes = playerBucket.Detail == null
-				? Enumerable.Empty<string>()
-				: JsonSerializer.Deserialize<IEnumerable<string>>(playerBucket.Detail);
+			var promotionRule = playerBucket.Detail == null
+				? null
+				: JsonSerializer.Deserialize<PromotionCampaignDetailRule>(playerBucket.Detail,
+					new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+			var detail = promotionRule == null
+				? null
+				: JsonSerializer.Deserialize<DetailBucketType?>(promotionRule.CampaignDetail,
+					new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
 			await playerBucketForTypesClient.CreateBucketForBucketTypesAsync(
 					playerBucket.PlayerCode,
@@ -75,7 +81,7 @@ public class DispatchPromotionBonusQueryService(
 					playerBucket.BucketType,
 					playerBucket.PromotionId.ToString(),
 					null,
-					bucketTypes,
+					detail?.BucketTypes,
 					cancellationToken)
 				.ConfigureAwait(false);
 		}

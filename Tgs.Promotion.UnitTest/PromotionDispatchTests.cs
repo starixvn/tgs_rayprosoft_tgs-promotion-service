@@ -39,7 +39,35 @@ public class PromotionDispatchTests
 					BonusAmount = 100M,
 					SentOn = null,
 					PlayerCodeNavigation = new Player(),
-					PromotionBonus = new PromotionBonus()
+					PromotionBonus = new PromotionBonus
+					{
+						Detail = """
+			                                                       {
+			                                                         "id": "018c80c0-2f26-0000-0002-07e7597d893c",
+			                                                         "to": "2023-12-30T16:00:00Z",
+			                                                         "from": "2023-12-18T16:00:00Z",
+			                                                         "name": "jeffersontest",
+			                                                         "status": 0,
+			                                                         "brandId": "4e86719f-243f-46f6-b010-5c758b7285af",
+			                                                         "unlimited": true,
+			                                                         "vipLevels": [
+			                                                           5,
+			                                                           1,
+			                                                           4,
+			                                                           2,
+			                                                           3
+			                                                         ],
+			                                                         "amountUsed": 300,
+			                                                         "percentage": 100,
+			                                                         "promotionType": "DepositReward",
+			                                                         "campaignDetail": "{\"percentage\": 100, \"bucketTypes\": [\"\"], \"bonusAmountLimit\": 100, \"turnoverMultiple\": 10, \"depositMinimumLimit\": 1}",
+			                                                         "bonusAmountLimit": 100,
+			                                                         "totalAmountLimit": 0,
+			                                                         "turnoverMultiple": 10,
+			                                                         "autoSentPlayerBonus": false
+			                                                       }
+			                                                       """
+					}
 				}
 			}.AsQueryable()
 			.BuildMock();
