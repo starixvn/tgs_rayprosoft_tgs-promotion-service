@@ -109,8 +109,8 @@ builder.Services
 			options.Url = configuration.GetConnectionString("Nats")!;
 		})
 		.AddHandler<DepositStatusChangedMessageHandler>(
-			"tgs.payment.deposit.status",
-			"tgs.payment.deposit.status"))
+			"tgs.payment.deposit.status_ex",
+			"tgs.payment.deposit.status_ex"))
 	.AddGlobPatternExchange<TurnoverRebateDailyCampaignDetailProcessor>("tgs.promotion.turnoverrebate.setting")
 	.AddGlobPatternExchange<TurnoverRebateWeeklyCampaignDetailProcessor>("tgs.promotion.turnoverrebateweekly.setting")
 	.AddGlobPatternExchange<DummyCampaignDetailProcessor>("tgs.promotion.dummy.setting")
