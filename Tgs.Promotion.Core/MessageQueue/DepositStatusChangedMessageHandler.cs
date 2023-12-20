@@ -48,7 +48,7 @@ public class DepositStatusChangedMessageHandler : IMessageHandler
 
 		_logger.LogInformation("Current Status: {status}", depositForm.Status);
 
-		if (previousStatus == PaymentFlowState.WaitApprove)
+		if (previousStatus is not PaymentFlowState.WaitApprove)
 			return;
 
 		var currentDate = DateTimeOffset.Now.Date;
