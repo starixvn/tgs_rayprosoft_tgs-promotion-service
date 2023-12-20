@@ -34,21 +34,19 @@ public class DepositStatusChangedMessageHandler : IMessageHandler
 	{
 		_logger.LogInformation("Deposit status change event.");
 
-		var formEvent = FormEvent.Parser.ParseFrom(data.Span);
-
-		if (formEvent == null)
-			return;
+		var formEvent = FormEventEx.Parser.ParseFrom(data.Span);
+		var previousStatus = Enum.Parse<PaymentFlowState>(formEvent.Status);
 
 		_logger.LogInformation("formEvent: ({JsonFormatter.Default.Format(formEvent)})", JsonFormatter.Default.Format(formEvent));
 
-		var depositForm = await _paymentServiceClient
-			.GetDepositFormAsync(
-				Guid.Parse(formEvent.BrandId),
-				Guid.Parse(formEvent.FormId),
-				cancellationToken)
-			.ConfigureAwait(false);
+		var depositForm = await _paymentServiceClient.GetDepositFormAsync(
+			formEvent.FormId,
+			cancellationToken).ConfigureAwait(false);
 
 		if (depositForm == null)
+			return;
+
+		if (previousStatus == depositForm.Status)
 			return;
 
 		var currentDate = DateTimeOffset.Now.Date;
