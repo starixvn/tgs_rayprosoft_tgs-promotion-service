@@ -79,9 +79,15 @@ internal class
 			promotionDistribution.PlanId!.Value,
 			cancellationToken);
 
-		var bucketTypes = plan.Detail == null
-			? Enumerable.Empty<string>()
-			: JsonSerializer.Deserialize<IEnumerable<string>>(plan.Detail);
+		var promotionRule = plan.Detail == null
+			? null
+			: JsonSerializer.Deserialize<PromotionCampaignDetailRule>(plan.Detail,
+				new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+		var detail = promotionRule == null
+			? null
+			: JsonSerializer.Deserialize<DetailBucketType?>(promotionRule.CampaignDetail,
+				new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
 		var now = DateTime.UtcNow;
 
@@ -99,7 +105,7 @@ internal class
 					BucketType.Promotion,
 					promotionDistribution.Id.ToString(),
 					null,
-					bucketTypes,
+					detail?.BucketTypes,
 					cancellationToken)
 				.ConfigureAwait(false))
 			.ConfigureAwait(false);
