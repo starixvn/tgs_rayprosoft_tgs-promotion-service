@@ -52,6 +52,7 @@ public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionB
 		var playerBuckets = players
 			.Select(x => new
 			{
+				x.Id,
 				x.PlayerCodeNavigation.BrandId,
 				x.PlayerCode,
 				x.PlayerCodeNavigation.DefaultWalletId,
@@ -104,7 +105,7 @@ public class DispatchPromotionBonusQueryService : IGetService<DispatchPromotionB
 					promotionPlayer.DefaultWalletId,
 					promotionPlayer.BonusAmount,
 					null,
-					null,
+					promotionPlayer.Id.ToString(),
 					request.OperatorUserId,
 					cancellationToken)
 				.ConfigureAwait(false);
