@@ -89,7 +89,7 @@ public class PromotionDistributionTests
 				Arg.Any<IEnumerable<string>?>(),
 				Arg.Any<CancellationToken>());
 
-		_ = fakePromotionRepository.ReceivedWithAnyArgs().UpdatePromotionDistributeAsync(default, default);
+		_ = fakePromotionRepository.ReceivedWithAnyArgs().UpdatePromotionDistributeAsync(default, default, default);
 
 		_ = fakeCashServiceClient.ReceivedWithAnyArgs(1)
 			.PromotionAsync(default, 0, null, null, null);
@@ -189,7 +189,7 @@ public class PromotionDistributionTests
 				Arg.Any<IEnumerable<string>?>(),
 				Arg.Any<CancellationToken>());
 
-		_ = fakePromotionRepository.ReceivedWithAnyArgs().UpdatePromotionDistributeAsync(default, default);
+		_ = fakePromotionRepository.ReceivedWithAnyArgs().UpdatePromotionDistributeAsync(default, default, default);
 
 		_ = fakeCashServiceClient.ReceivedWithAnyArgs(1)
 			.PromotionAsync(default, 0, null, null, null);

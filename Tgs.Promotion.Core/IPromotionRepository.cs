@@ -102,6 +102,7 @@ public interface IPromotionRepository
 	ValueTask UpdatePromotionDistributeAsync(
 		Guid distributeId,
 		DateTime sentOn,
+		string? distributor,
 		CancellationToken cancellationToken = default);
 
 	ValueTask UpdatePromotionSnapshotAsync(

@@ -126,6 +126,7 @@ internal class DistributePromotionBonusCommandService : IGetService<DistributePr
 			await _promotionRepository.UpdatePromotionDistributeAsync(
 				distributedInfo.Id,
 				distributedInfo.SentOn.Value,
+				command.Distributor,
 				cancellationToken).ConfigureAwait(false);
 
 			await _promotionRepository.InsertPromotionDistributeLogAsync(

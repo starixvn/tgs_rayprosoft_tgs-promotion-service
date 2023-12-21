@@ -682,6 +682,7 @@ public class PromotionRepository : IPromotionRepository
 	public async ValueTask UpdatePromotionDistributeAsync(
 		Guid distributeId,
 		DateTime sentOn,
+		string? distributor,
 		CancellationToken cancellationToken = default)
 	{
 		var distribute = await _dbContext.PromotionDistributes.FindAsync(
@@ -692,6 +693,7 @@ public class PromotionRepository : IPromotionRepository
 			return;
 
 		distribute.SentOn = sentOn.ToUniversalTime();
+		distribute.Distributor = distributor;
 
 		_ = await _dbContext
 			.SaveChangesAsync(cancellationToken)

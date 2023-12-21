@@ -94,6 +94,7 @@ internal class
 		await _promotionRepository.UpdatePromotionDistributeAsync(
 				promotionDistribution.Id,
 				now,
+				command.Distributor,
 				cancellationToken)
 			.ConfigureAwait(false);
 

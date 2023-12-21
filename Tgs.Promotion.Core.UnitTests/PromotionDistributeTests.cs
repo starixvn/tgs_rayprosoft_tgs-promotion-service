@@ -361,7 +361,8 @@ public class PromotionDistributeTests
 		_ = fakePromotionRepository.Received(1)
 			.UpdatePromotionDistributeAsync(
 				Arg.Is(distributeId),
-				Arg.Any<DateTime>());
+				Arg.Any<DateTime>(),
+				Arg.Any<string>());
 	}
 
 	[TestMethod]
@@ -433,7 +434,8 @@ public class PromotionDistributeTests
 		_ = fakePromotionRepository.Received(1)
 			.UpdatePromotionDistributeAsync(
 				Arg.Is(distributeId),
-				Arg.Any<DateTime>());
+				Arg.Any<DateTime>(),
+				Arg.Any<string>());
 	}
 
 	[TestMethod]
