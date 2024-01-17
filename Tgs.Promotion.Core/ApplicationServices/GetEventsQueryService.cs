@@ -8,7 +8,7 @@ internal class GetEventsQueryService(
 	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public IAsyncEnumerable<EventInfo> QueryAsync(
-		GetEventsQuery query, 
+		GetEventsQuery query,
 		CancellationToken cancellationToken = default)
 		=> _promotionRepository.QueryPromotionEventsAsync(
 			query.PromotionId,

@@ -4,11 +4,11 @@ public class DistributePromotionBonusViewModel
 {
 	public decimal Amount { get; init; }
 
+	public IEnumerable<string>? BucketTypes { get; init; }
+
 	public string? Distributor { get; init; }
 
 	public decimal NeedTurnover { get; init; }
 
 	public Guid? ReferenceId { get; init; }
-
-	public IEnumerable<string>? BucketTypes { get; init; }
 }

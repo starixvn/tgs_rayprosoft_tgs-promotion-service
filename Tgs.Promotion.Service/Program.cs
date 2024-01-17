@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
+using NATS.Client.Core;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -94,17 +95,18 @@ builder.Services
 			httpClient.BaseAddress = builder.Configuration.GetValue<Uri>("Promotion:PlayerBucketBaseUrl")));
 
 builder.Services
+	.AddKeyedSingleton(
+		"Nats",
+		(sp, _) => new NatsConnection(NatsOpts.Default with
+		{
+			Url = builder.Configuration.GetConnectionString("Nats")!
+		}))
 	.AddSingleton<DummyCampaignDetailProcessor>()
 	.AddSingleton<TurnoverRebateDailyCampaignDetailProcessor>()
 	.AddSingleton<TurnoverRebateWeeklyCampaignDetailProcessor>()
 	.AddMessageQueue()
 	.AddNatsMessageQueue(config => config
-		.ConfigQueueOptions((options, sp) =>
-		{
-			var configuration = sp.GetRequiredService<IConfiguration>();
-
-			options.Url = configuration.GetConnectionString("Nats")!;
-		})
+		.ConfigureResolveConnection(sp => sp.GetRequiredKeyedService<NatsConnection>("Nats"))
 		.AddHandler<DepositStatusChangedMessageHandler>(
 			"tgs.payment.deposit.status_ex",
 			"tgs.promotion.deposit.status"))

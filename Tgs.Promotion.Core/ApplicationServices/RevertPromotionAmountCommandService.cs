@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Json.Patch;
-using Microsoft.Extensions.Logging;
 using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;
 
@@ -11,9 +10,9 @@ internal class RevertPromotionAmountCommandService(
 	ISerialNumberGenerator serialNumberGenerator,
 	IPromotionRepository promotionRepository) : ICommandService<RevertPromotionAmountCommand>
 {
-	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 
 	public async ValueTask ExecuteAsync(
 		RevertPromotionAmountCommand command,

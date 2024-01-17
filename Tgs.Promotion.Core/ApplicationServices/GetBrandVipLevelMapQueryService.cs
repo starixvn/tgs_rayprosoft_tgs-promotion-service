@@ -1,15 +1,18 @@
 ﻿using Tgs.ServiceUtility;
 using Tgs.VipLevelService.Clients;
+using Tgs.VipLevelService.Common.ViewModels;
 
 namespace Tgs.Promotion.ApplicationServices;
 
 internal class GetBrandVipLevelMapQueryService(IVipLevelServiceClient vipLevelServiceClient)
-	: IGetService<GetBrandVipLevelMapQuery, IReadOnlyDictionary<Guid, VipLevelInfo>>
+	: IGetService<GetBrandVipLevelMapQuery, IReadOnlyDictionary<Guid, VipLevelInfoViewModel>>
 {
-	public async ValueTask<IReadOnlyDictionary<Guid, VipLevelInfo>> GetAsync(GetBrandVipLevelMapQuery query, CancellationToken cancellationToken = default)
+	public async ValueTask<IReadOnlyDictionary<Guid, VipLevelInfoViewModel>> GetAsync(
+		GetBrandVipLevelMapQuery query,
+		CancellationToken cancellationToken = default)
 	{
 		var dict = await vipLevelServiceClient
-			.GetBrandAllVipLevelsAsync(query.BrandId, cancellationToken)
+			.VipLevelQueryAsync(query.BrandId, cancellationToken)
 			.ToDictionaryAsync(vip => vip.Id, cancellationToken)
 			.ConfigureAwait(false);
 

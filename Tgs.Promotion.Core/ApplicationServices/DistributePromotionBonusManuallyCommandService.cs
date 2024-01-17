@@ -23,11 +23,10 @@ internal class DistributePromotionBonusManuallyCommandService(
 	IPromotionDistributionRepository promotionDistributionRepository,
 	ILogger<DistributePromotionBonusManuallyCommandService> logger) : ICommandService<DistributePromotionBonusManuallyCommand>
 {
-	private readonly ICashServiceClient _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	private readonly ISerialNumberGenerator _serialNumberGenerator =
-			serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private static readonly JsonSerializerOptions _SerializerOptions = new()
+	{
+		PropertyNameCaseInsensitive = true
+	};
 
 	public async ValueTask ExecuteAsync(DistributePromotionBonusManuallyCommand command,
 		CancellationToken cancellationToken = default)
@@ -41,7 +40,7 @@ internal class DistributePromotionBonusManuallyCommandService(
 			return;
 		}
 
-		var player = await _playerServiceClient.GetPlayerInfoAsync(
+		var player = await playerServiceClient.GetPlayerInfoAsync(
 				command.PlayerCode,
 				cancellationToken)
 			.ConfigureAwait(false);
@@ -53,30 +52,30 @@ internal class DistributePromotionBonusManuallyCommandService(
 			return;
 		}
 
-		var playerProperties = await _playerServiceClient.GetPlayerPropertiesAsync(
+		var playerProperties = await playerServiceClient.GetPlayerPropertiesAsync(
 				player.PlayerCode,
 				cancellationToken)
 			.ConfigureAwait(false);
 
 		var walletId = Guid.Parse(playerProperties.GetValueOrDefault("DefaultWalletId")!);
 
-		var plan = await _promotionRepository.FindPromotionDistributePlanDetailAsync(
+		var plan = await promotionRepository.FindPromotionDistributePlanDetailAsync(
 			promotionDistribution.PlanId!.Value,
 			cancellationToken);
 
 		var promotionRule = plan.Detail == null
 			? null
 			: JsonSerializer.Deserialize<PromotionCampaignDetailRule>(plan.Detail,
-				new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+				_SerializerOptions);
 
 		var detail = promotionRule == null
 			? null
 			: JsonSerializer.Deserialize<DetailBucketType?>(promotionRule.CampaignDetail,
-				new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+				_SerializerOptions);
 
 		var now = DateTime.UtcNow;
 
-		await _promotionRepository.UpdatePromotionDistributeAsync(
+		await promotionRepository.UpdatePromotionDistributeAsync(
 				promotionDistribution.Id,
 				now,
 				command.Distributor,
@@ -96,7 +95,7 @@ internal class DistributePromotionBonusManuallyCommandService(
 				.ConfigureAwait(false))
 			.ConfigureAwait(false);
 
-		_ = await _cashServiceClient.PromotionAsync(
+		_ = await cashServiceClient.PromotionAsync(
 				walletId,
 				promotionDistribution.BonusAmount,
 				null,
@@ -125,17 +124,17 @@ internal class DistributePromotionBonusManuallyCommandService(
 			JsonSerializer.SerializeToNode(distributeInfo, PromotionUtility.SerializerOptions)));
 
 		var distributeLog = new PromotionDistributeLog(
-			await _serialNumberGenerator
+			await serialNumberGenerator
 				.GenerateAsync(cancellationToken)
 				.ConfigureAwait(false),
 			distributeInfo.Id,
 			DistributeAction.Create,
 			JsonSerializer.SerializeToDocument(jsonCreatePatch));
 
-		await _promotionRepository.InsertPromotionDistributeLogAsync(
+		await promotionRepository.InsertPromotionDistributeLogAsync(
 				distributeLog with
 				{
-					Id = await _serialNumberGenerator
+					Id = await serialNumberGenerator
 						.GenerateAsync(cancellationToken)
 						.ConfigureAwait(false),
 					Action = DistributeAction.Distribute,

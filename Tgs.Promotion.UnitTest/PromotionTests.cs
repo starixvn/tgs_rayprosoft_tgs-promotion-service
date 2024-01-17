@@ -16,7 +16,6 @@ using NUnit.Framework.Legacy;
 using Tgs.CashService.Client;
 using Tgs.PlayerBucket.Client;
 using Tgs.Promotion.ApplicationServices;
-using Tgs.Promotion.Checkers;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.Promotion;

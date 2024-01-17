@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Paging;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Models.Promotion;
 using Tgs.Promotion.Service.ViewModels;
 using Tgs.ServiceUtility;
-using Tgs.Paging;
 
 namespace Tgs.Promotion.Service.Controllers;
 
@@ -64,7 +64,7 @@ public class PromotionController : ControllerBase
 	[Description("Change promotion status")]
 	public async ValueTask<MessageResponse> ChangePromotionStatusAsync(
 		[FromServices] ICommandService<SetPromotionStatusCommand> updateService,
-		Guid promotionId, 
+		Guid promotionId,
 		PromotionStatus status)
 	{
 		var command = new SetPromotionStatusCommand(
@@ -129,10 +129,10 @@ public class PromotionController : ControllerBase
 		{
 			From = request.From,
 			To = request.To,
-			PlayerCode= request.PlayerCode,
+			PlayerCode = request.PlayerCode,
 			Page = request.Page,
 			Rows = request.Rows,
-			SortBy= request.SortBy,
+			SortBy = request.SortBy,
 			OrderBy = request.OrderBy,
 			ShowAll = request.ShowAll,
 		};

@@ -1,14 +1,12 @@
-﻿using System.Collections.Immutable;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using NSubstitute;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.ApplicationServices;
 using Tgs.Promotion.Checkers;
 using Tgs.Promotion.Models;
 using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;
-using Tgs.VipLevelService.Clients;
+using Tgs.VipLevelService.Common.ViewModels;
 
 namespace Tgs.Promotion.Core.UnitTests;
 
@@ -194,7 +192,7 @@ public class PromotionTests
 	public async Task List_Promotions_By_Player()
 	{
 		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-		var fakeVipLevelMapService = Substitute.For<IGetService<GetBrandVipLevelMapQuery, IReadOnlyDictionary<Guid, VipLevelInfo>>>();
+		var fakeVipLevelMapService = Substitute.For<IGetService<GetBrandVipLevelMapQuery, IReadOnlyDictionary<Guid, VipLevelInfoViewModel>>>();
 		var fakePromotionQueryService = Substitute.For<IQueryService<ListPromotionsByBrandQuery, PromotionView>>();
 		var fakePromotionCheckerFactory = Substitute.For<IPromotionCheckerFactory>();
 
@@ -216,9 +214,9 @@ public class PromotionTests
 			});
 
 		_ = fakeVipLevelMapService.GetAsync(Arg.Any<GetBrandVipLevelMapQuery>())
-			.Returns(new Dictionary<Guid, VipLevelInfo>
+			.Returns(new Dictionary<Guid, VipLevelInfoViewModel>
 			{
-				[playerVipLevelId] = new VipLevelInfo(
+				[playerVipLevelId] = new VipLevelInfoViewModel(
 					playerVipLevelId,
 					1,
 					query.BrandId,

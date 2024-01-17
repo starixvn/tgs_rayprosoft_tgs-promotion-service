@@ -11,15 +11,15 @@ internal class UpdatePromotionRuleCommandService(
 	IPromotionRepository promotionRepository,
 	PromotionSerializer promotionSerializer) : ICommandService<UpdatePromotionRuleCommand>
 {
-	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 	private readonly PromotionSerializer _promotionSerializer = promotionSerializer ?? throw new ArgumentNullException(nameof(promotionSerializer));
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 
 	public async ValueTask ExecuteAsync(UpdatePromotionRuleCommand command, CancellationToken cancellationToken = default)
 	{
 		var snapshot = await _promotionRepository.GetCurrentPromotionSnapshotAsync(
-				command.PromotionId, 
+				command.PromotionId,
 				cancellationToken)
 			.ConfigureAwait(false);
 

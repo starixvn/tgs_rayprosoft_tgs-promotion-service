@@ -4,10 +4,10 @@ public interface IPromotionHistoryClient
 {
 	ValueTask<PromotionEventDetailInfo?> GetPromotionEventDetailAsync(
 		Guid promotionId,
-		Guid eventId, 
+		Guid eventId,
 		CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<PromotionEventMainInfo> QueryPromotionEventsAsync(
-		Guid promotionId, 
+		Guid promotionId,
 		CancellationToken cancellationToken = default);
 }

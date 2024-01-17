@@ -28,11 +28,11 @@ public class PromotionListItemViewModel
 
 	public string PromotionType { get; set; } = default!;
 
+	public PromotionStatus Status { get; set; }
+
 	public string? SubSubject { get; set; }
 
 	public decimal UsedAmount { get; set; }
 
 	public IEnumerable<int> VipLevels { get; set; } = Array.Empty<int>();
-
-	public PromotionStatus Status { get; set; }
 }

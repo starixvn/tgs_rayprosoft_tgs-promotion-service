@@ -8,7 +8,7 @@ using Valhalla.MessageQueue;
 
 namespace Tgs.Promotion.MessageQueue;
 
-public class DepositStatusChangedMessageHandler : IMessageHandler
+public class DepositStatusChangedMessageHandler : IMessageHandler<ReadOnlyMemory<byte>>
 {
 	private readonly IPromotionChecker _accountFirstDepositChecker;
 	private readonly IPromotionChecker _dailyFirstDepositChecker;
@@ -34,7 +34,11 @@ public class DepositStatusChangedMessageHandler : IMessageHandler
 		_accountFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("AccountFirstDeposit");
 	}
 
-	public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+	public async ValueTask HandleAsync(
+		string subject,
+		ReadOnlyMemory<byte> data,
+		IEnumerable<MessageHeaderValue>? headerValues,
+		CancellationToken cancellationToken = default)
 	{
 		_logger.LogInformation("Deposit status change event.");
 

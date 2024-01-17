@@ -16,13 +16,18 @@ public class CreatePromotionParticipantQueryService(
 	ILogger<CreatePromotionParticipantQueryService> logger) : IGetService<CreatePromotionParticipantQuery, MessageResponse>
 {
 	private readonly ILogger<CreatePromotionParticipantQueryService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
 	private readonly IMessageSender _messageSender = messageSender ??
 			throw new ArgumentNullException(nameof(messageSender));
+
 	private readonly IPromotionJoinLockRepository _promotionJoinLockRepository = promotionJoinLockRepository ??
 			throw new ArgumentNullException(nameof(promotionJoinLockRepository));
+
 	private readonly IPromotionParticipantRepository _promotionParticipantRepository = promotionParticipantRepository ??
 			throw new ArgumentNullException(nameof(promotionParticipantRepository));
+
 	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+
 	private readonly IPromotionTypeRepository _promotionType = promotionType ??
 			throw new ArgumentNullException(nameof(promotionType));
 
@@ -75,16 +80,18 @@ public class CreatePromotionParticipantQueryService(
 		switch (promotion.PromotionType.ToLower())
 		{
 			case "register":
-				_ = await _messageSender!
-					.RequestAsync("tgs.promotion.register.distribute", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(messageData)), cancellationToken: cancellationToken)
-					.ConfigureAwait(false);
+				_ = await _messageSender!.RequestAsync<ReadOnlyMemory<byte>, ReadOnlyMemory<byte>>(
+						"tgs.promotion.register.distribute",
+						Encoding.UTF8.GetBytes(JsonSerializer.Serialize(messageData)),
+						cancellationToken: cancellationToken).ConfigureAwait(false);
 				break;
 		}
 
 		if (!alreadyJoined)
 		{
-			await _promotionParticipantRepository.CreatePromotionParticipantAsync(request.PromotionId,
-				request.PlayerCode);
+			await _promotionParticipantRepository.CreatePromotionParticipantAsync(
+				request.PromotionId,
+				request.PlayerCode).ConfigureAwait(false);
 		}
 
 		return new MessageResponse { Valid = true };

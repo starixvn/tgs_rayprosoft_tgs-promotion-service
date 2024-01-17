@@ -24,7 +24,7 @@ internal class ExternalServiceChecker(string promotionType, IMessageSender messa
 		if (extend is not null)
 			request.Extend = JsonSerializer.Serialize(extend);
 
-		var responseData = await messageSender.RequestAsync(
+		var responseData = await messageSender.RequestAsync<ReadOnlyMemory<byte>, ReadOnlyMemory<byte>>(
 			string.Format(PromotionCheckConsts.CheckSubjectTemplate, PromotionType.ToLowerInvariant()),
 			request.ToByteArray(),
 			cancellationToken).ConfigureAwait(false);

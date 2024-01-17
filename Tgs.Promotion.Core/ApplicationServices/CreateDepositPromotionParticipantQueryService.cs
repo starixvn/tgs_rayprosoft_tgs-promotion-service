@@ -10,8 +10,10 @@ public class CreateDepositPromotionParticipantQueryService(
 	ILogger<CreateDepositPromotionParticipantQueryService> logger) : IGetService<CreateDepositPromotionParticipantQuery, MessageResponse>
 {
 	private readonly ILogger<CreateDepositPromotionParticipantQueryService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
 	private readonly IPromotionParticipantRepository _promotionParticipantRepository = promotionParticipantRepository ??
 			throw new ArgumentNullException(nameof(promotionParticipantRepository));
+
 	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public async ValueTask<MessageResponse> GetAsync(

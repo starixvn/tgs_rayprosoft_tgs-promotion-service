@@ -49,7 +49,7 @@ public static class ServiceCollectionExtensions
 			.Services
 			.AddTransient<IPromotionClient>(sp => sp.GetRequiredService<PromotionClient>())
 			.AddTransient<IPromotionBonusClient>(sp => sp.GetRequiredService<PromotionBonusClient>())
-			.AddTransient<IPromotionDispatchClient>(sp => 
+			.AddTransient<IPromotionDispatchClient>(sp =>
 				sp.GetRequiredService<PromotionDispatchClient>())
 			.AddTransient<IPromotionHistoryClient>(sp =>
 				sp.GetRequiredService<PromotionHistoryClient>());

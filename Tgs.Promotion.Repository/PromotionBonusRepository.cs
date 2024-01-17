@@ -39,20 +39,6 @@ public class PromotionBonusRepository(
 		return bonus;
 	}
 
-	public IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
-			Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery, bool tracking)
-	{
-		preQuery ??= c => c;
-		return tracking
-			? preQuery(promotionPlayerService.GetQueries())
-			: preQuery(promotionPlayerService.GetQueries()).AsNoTracking();
-	}
-
-	public async ValueTask UpdatePromotionBonusPlayersAsync(IEnumerable<int> playerIds) =>
-		await promotionPlayerService.GetQueries()
-			.Where(x => playerIds.Contains(x.Id))
-			.ExecuteUpdateAsync(s => s.SetProperty(e => e.SentOn, DateTime.UtcNow));
-
 	public async ValueTask<PromotionBonus> CreatePromotionBonusAsync(PromotionBonusModel model)
 	{
 		var bonus = new PromotionBonus
@@ -82,6 +68,19 @@ public class PromotionBonusRepository(
 		await promotionBonusService.CreateEntityAsync(bonus);
 
 		return bonus;
-
 	}
+
+	public IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
+				Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery, bool tracking)
+	{
+		preQuery ??= c => c;
+		return tracking
+			? preQuery(promotionPlayerService.GetQueries())
+			: preQuery(promotionPlayerService.GetQueries()).AsNoTracking();
+	}
+
+	public async ValueTask UpdatePromotionBonusPlayersAsync(IEnumerable<int> playerIds) =>
+		await promotionPlayerService.GetQueries()
+			.Where(x => playerIds.Contains(x.Id))
+			.ExecuteUpdateAsync(s => s.SetProperty(e => e.SentOn, DateTime.UtcNow));
 }

@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Google.Protobuf;
-using NSubstitute;
 using Tgs.Promotion.Checkers;
 using Tgs.Promotion.Clients.Protos;
 using Valhalla.MessageQueue;
@@ -25,7 +24,7 @@ public class ExternalServiceCheckerTests
 		_ = fakeMessageSender.Received(1)
 			.SendAsync(
 				Arg.Is(string.Format(PromotionCheckConsts.CommitSubjectTemplate, sut.PromotionType.ToLowerInvariant())),
-				Arg.Is<ReadOnlyMemory<byte>>(data => CheckOtherActionData(data, promotionId, playerCode)));
+				Arg.Is<byte[]>(data => CheckOtherActionData(data, promotionId, playerCode)));
 	}
 
 	[TestMethod]
@@ -43,7 +42,7 @@ public class ExternalServiceCheckerTests
 		_ = fakeMessageSender.Received(1)
 			.SendAsync(
 				Arg.Is(string.Format(PromotionCheckConsts.RollbackSubjectTemplate, sut.PromotionType.ToLowerInvariant())),
-				Arg.Is<ReadOnlyMemory<byte>>(data => CheckOtherActionData(data, promotionId, playerCode)));
+				Arg.Is<byte[]>(data => CheckOtherActionData(data, promotionId, playerCode)));
 	}
 
 	[TestMethod]
@@ -61,7 +60,7 @@ public class ExternalServiceCheckerTests
 		_ = fakeMessageSender.Received(1)
 			.SendAsync(
 				Arg.Is(string.Format(PromotionCheckConsts.TagSubjectTemplate, sut.PromotionType.ToLowerInvariant())),
-				Arg.Is<ReadOnlyMemory<byte>>(data => CheckOtherActionData(data, promotionId, playerCode)));
+				Arg.Is<byte[]>(data => CheckOtherActionData(data, promotionId, playerCode)));
 	}
 
 	[TestMethod]
@@ -91,7 +90,7 @@ public class ExternalServiceCheckerTests
 			Result = true
 		};
 
-		_ = fakeMessageSender.RequestAsync(
+		_ = fakeMessageSender.RequestAsync<ReadOnlyMemory<byte>, ReadOnlyMemory<byte>>(
 			Arg.Is(string.Format(PromotionCheckConsts.CheckSubjectTemplate, sut.PromotionType.ToLowerInvariant())),
 			Arg.Is<ReadOnlyMemory<byte>>(data => CheckCheckData(data, promotion, playerCode)))
 			.Returns(response.ToByteArray());

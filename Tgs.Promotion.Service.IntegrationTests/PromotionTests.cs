@@ -11,6 +11,7 @@ using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Models;
 using Tgs.SerialNumberGenerator;
 using Tgs.VipLevelService.Clients;
+using Tgs.VipLevelService.Common.ViewModels;
 using Valhalla.MessageQueue;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
@@ -344,10 +345,10 @@ public class PromotionTests
 				BrandId = brandId
 			});
 
-		_ = fakeVipLevelService.GetBrandAllVipLevelsAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
+		_ = fakeVipLevelService.VipLevelQueryAsync(Arg.Is(brandId), Arg.Any<CancellationToken>())
 			.Returns(new[]
 			{
-				new VipLevelInfo(
+				new VipLevelInfoViewModel(
 					playerVipLevelId,
 					1,
 					brandId,
@@ -621,7 +622,7 @@ public class PromotionTests
 		var expected = fakeSerializer.Serialize(rule);
 
 		_ = fakeMessageSender
-			.RequestAsync(
+			.RequestAsync<ReadOnlyMemory<byte>, ReadOnlyMemory<byte>>(
 				Arg.Is("tgs.promotion.firstdeposit.setting"),
 				Arg.Any<ReadOnlyMemory<byte>>(),
 				Arg.Any<IEnumerable<MessageHeaderValue>>(),
@@ -738,7 +739,7 @@ public class PromotionTests
 		var expected = JsonSerializer.Serialize(rule, new JsonSerializerOptions { WriteIndented = false });
 
 		_ = fakeMessageSender
-			.RequestAsync(
+			.RequestAsync<ReadOnlyMemory<byte>, ReadOnlyMemory<byte>>(
 				Arg.Is("tgs.promotion.testtype.setting"),
 				Arg.Any<ReadOnlyMemory<byte>>(),
 				Arg.Any<IEnumerable<MessageHeaderValue>>(),

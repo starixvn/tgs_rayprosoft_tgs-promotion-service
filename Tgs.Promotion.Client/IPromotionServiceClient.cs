@@ -1,5 +1,4 @@
 ﻿using Tgs.Promotion.Clients.Models;
-using Tgs.Promotion.Clients.Models.PromotionDispatch;
 
 namespace Tgs.Promotion.Clients;
 
