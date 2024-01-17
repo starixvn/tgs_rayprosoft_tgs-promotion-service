@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Tgs.Promotion;
+﻿namespace Tgs.Promotion;
 public enum DistributeAction
 {
 	Create,

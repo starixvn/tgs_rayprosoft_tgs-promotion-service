@@ -15,11 +15,10 @@ public class DispatchPromotionBonusQueryService(
 	ITransactionRepository transactionRepository,
 	IPlayerBucketForTypesClient playerBucketForTypesClient) : IGetService<DispatchPromotionBonusQuery, MessageResponse>
 {
-	private readonly ICashServiceClient _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-	private readonly IPromotionBonusRepository _promotionBonusService =
-			promotionBonusService ?? throw new ArgumentNullException(nameof(promotionBonusService));
-	private readonly ITransactionRepository _transactionRepository =
-			transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
+	private static readonly JsonSerializerOptions _SerializerOptions = new()
+	{
+		PropertyNameCaseInsensitive = true
+	};
 
 	public async ValueTask<MessageResponse> GetAsync(
 		DispatchPromotionBonusQuery request,
@@ -28,7 +27,7 @@ public class DispatchPromotionBonusQueryService(
 		var playerCodes = request.Players.Select(x => x.PlayerCode).ToArray();
 		var promotionBonusIds = request.Players.Select(x => x.PromotionBonusId).ToArray();
 
-		var promotionPlayers = await _promotionBonusService.GetPromotionBonusPlayersQueries()
+		var promotionPlayers = await promotionBonusService.GetPromotionBonusPlayersQueries()
 			.Include(x => x.PlayerCodeNavigation)
 			.Include(x => x.PromotionBonus)
 			.Where(x => promotionBonusIds.Contains(x.PromotionBonusId))
@@ -62,19 +61,21 @@ public class DispatchPromotionBonusQueryService(
 
 		var playerIds = players.Select(x => x.Id);
 
-		await _promotionBonusService.UpdatePromotionBonusPlayersAsync(playerIds);
+		await promotionBonusService.UpdatePromotionBonusPlayersAsync(playerIds);
 
 		foreach (var playerBucket in playerBuckets)
 		{
 			var promotionRule = playerBucket.Detail == null
 				? null
-				: JsonSerializer.Deserialize<PromotionCampaignDetailRule>(playerBucket.Detail,
-					new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+				: JsonSerializer.Deserialize<PromotionCampaignDetailRule>(
+					playerBucket.Detail,
+					_SerializerOptions);
 
 			var detail = promotionRule == null
 				? null
-				: JsonSerializer.Deserialize<DetailBucketType?>(promotionRule.CampaignDetail,
-					new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+				: JsonSerializer.Deserialize<DetailBucketType?>(
+					promotionRule.CampaignDetail,
+					_SerializerOptions);
 
 			await playerBucketForTypesClient.CreateBucketForBucketTypesAsync(
 					playerBucket.PlayerCode,
@@ -91,7 +92,7 @@ public class DispatchPromotionBonusQueryService(
 
 		foreach (var promotionPlayer in playerBuckets)
 		{
-			var response = await _cashServiceClient
+			var response = await cashServiceClient
 				.PromotionAsync(
 					promotionPlayer.DefaultWalletId,
 					promotionPlayer.BonusAmount,
@@ -110,7 +111,7 @@ public class DispatchPromotionBonusQueryService(
 			});
 		}
 
-		await _transactionRepository.CreateTransactionPromotionsAsync([.. transactionPromotions]);
+		await transactionRepository.CreateTransactionPromotionsAsync([.. transactionPromotions]);
 
 		return new MessageResponse { Valid = true };
 	}

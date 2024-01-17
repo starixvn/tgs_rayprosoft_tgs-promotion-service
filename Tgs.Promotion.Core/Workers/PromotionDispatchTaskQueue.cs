@@ -4,9 +4,10 @@ namespace Tgs.Promotion.Workers;
 
 public interface IPromotionDispatchTaskQueue
 {
-	ValueTask QueuePromotionDispatchTaskQueueAsync(PromotionDispatchQueueModel model);
 	ValueTask<PromotionDispatchQueueModel> DequeueAsync(
 		CancellationToken cancellationToken);
+
+	ValueTask QueuePromotionDispatchTaskQueueAsync(PromotionDispatchQueueModel model);
 }
 
 public class PromotionDispatchTaskQueue : IPromotionDispatchTaskQueue
@@ -17,18 +18,19 @@ public class PromotionDispatchTaskQueue : IPromotionDispatchTaskQueue
 			SingleReader = true
 		});
 
-	public async ValueTask QueuePromotionDispatchTaskQueueAsync(
-		PromotionDispatchQueueModel model)
-	{
-		ArgumentNullException.ThrowIfNull(model);
-
-		await _queue.Writer.WriteAsync(model);
-	}
 	public async ValueTask<PromotionDispatchQueueModel> DequeueAsync(
 		CancellationToken cancellationToken)
 	{
 		var workItem = await _queue.Reader.ReadAsync(cancellationToken);
 
 		return workItem;
+	}
+
+	public async ValueTask QueuePromotionDispatchTaskQueueAsync(
+			PromotionDispatchQueueModel model)
+	{
+		ArgumentNullException.ThrowIfNull(model);
+
+		await _queue.Writer.WriteAsync(model);
 	}
 }

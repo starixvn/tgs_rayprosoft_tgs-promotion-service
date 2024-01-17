@@ -8,7 +8,7 @@ internal class GetPromotionUsedAmountQueryService(
 	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
 	public ValueTask<decimal> GetAsync(
-		GetPromotionUsedAmountQuery query, 
+		GetPromotionUsedAmountQuery query,
 		CancellationToken cancellationToken = default)
 	{
 		return _promotionRepository.GetPromotionUsedAmountAsync(query.PromotionId, cancellationToken);

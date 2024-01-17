@@ -40,7 +40,7 @@ public class DepositStatusChangedMessageHandlerTests
 			Status = PaymentFlowState.WaitApprove.ToString()
 		};
 
-		await sut.HandleAsync(formEvent.ToByteArray());
+		await sut.HandleAsync("test", formEvent.ToByteArray(), null);
 
 		_ = fakePlayerServiceClient.Received(0)
 			.SetPlayerPropertiesAsync(
@@ -94,7 +94,7 @@ public class DepositStatusChangedMessageHandlerTests
 				PromotionId = promotionId
 			});
 
-		await sut.HandleAsync(formEvent.ToByteArray());
+		await sut.HandleAsync("test", formEvent.ToByteArray(), null);
 
 		_ = fakePlayerServiceClient.Received(0)
 			.SetPlayerPropertiesAsync(
@@ -148,7 +148,7 @@ public class DepositStatusChangedMessageHandlerTests
 				PromotionId = promotionId
 			});
 
-		await sut.HandleAsync(formEvent.ToByteArray());
+		await sut.HandleAsync("test", formEvent.ToByteArray(), null);
 
 		_ = fakeChecker.Received(1)
 			.RollbackTagAsync(Arg.Is(playerCode), Arg.Is((Guid?)null));
@@ -200,7 +200,7 @@ public class DepositStatusChangedMessageHandlerTests
 				PromotionId = promotionId
 			});
 
-		await sut.HandleAsync(formEvent.ToByteArray());
+		await sut.HandleAsync("test", formEvent.ToByteArray(), null);
 
 		_ = fakeChecker.Received(1)
 			.RollbackTagAsync(Arg.Is(playerCode), Arg.Is((Guid?)null));
@@ -252,7 +252,7 @@ public class DepositStatusChangedMessageHandlerTests
 				PromotionId = promotionId
 			});
 
-		await sut.HandleAsync(formEvent.ToByteArray());
+		await sut.HandleAsync("test", formEvent.ToByteArray(), null);
 
 		_ = fakePlayerServiceClient.Received(1)
 			.SetPlayerPropertiesAsync(
@@ -309,7 +309,7 @@ public class DepositStatusChangedMessageHandlerTests
 				PromotionId = promotionId
 			});
 
-		await sut.HandleAsync(formEvent.ToByteArray());
+		await sut.HandleAsync("test", formEvent.ToByteArray(), null);
 
 		_ = fakePlayerServiceClient.Received(1)
 			.SetPlayerPropertiesAsync(

@@ -35,6 +35,24 @@ public class PromotionDistributeController : ControllerBase
 		return getService.GetAsync(command);
 	}
 
+	[HttpPut("manually")]
+	public async ValueTask DistributePromotionBonusAsync(
+			[FromServices] IPromotionDistributionTaskQueue taskQueue,
+			[FromBody] DistributePromotionBonusManuallyViewModel request)
+	{
+		foreach (var player in request.Players)
+		{
+			var command = new PromotionDistributionQueueModel
+			{
+				PromotionDistributionId = player.PromotionBonusId,
+				PlayerCode = player.PlayerCode,
+				Distributor = request.Distributor
+			};
+
+			await taskQueue.QueuePromotionDistributeTaskQueueAsync(command);
+		}
+	}
+
 	/// <summary>
 	/// Get or create distribute plan info
 	/// </summary>
@@ -51,23 +69,5 @@ public class PromotionDistributeController : ControllerBase
 		var command = new GetOrCreatePromotionDistributePlanCommand(promotionId, conditionHash);
 
 		return getService.GetAsync(command);
-	}
-
-	[HttpPut("manually")]
-	public async ValueTask DistributePromotionBonusAsync(
-		[FromServices] IPromotionDistributionTaskQueue taskQueue,
-		[FromBody] DistributePromotionBonusManuallyViewModel request)
-	{
-		foreach (var player in request.Players)
-		{
-			var command = new PromotionDistributionQueueModel
-			{
-				PromotionDistributionId = player.PromotionBonusId,
-				PlayerCode = player.PlayerCode,
-				Distributor = request.Distributor
-			};
-
-			await taskQueue.QueuePromotionDistributeTaskQueueAsync(command);
-		}
 	}
 }

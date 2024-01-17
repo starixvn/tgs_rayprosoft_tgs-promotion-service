@@ -7,11 +7,11 @@ public interface IPromotionBonusRepository
 {
 	ValueTask<PromotionBonus[]> CreatePromotionBonusAsync(PromotionBonusModel[] model);
 
+	ValueTask<PromotionBonus> CreatePromotionBonusAsync(PromotionBonusModel model);
+
 	IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
-			Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery = null,
+				Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery = null,
 		bool tracking = false);
 
 	ValueTask UpdatePromotionBonusPlayersAsync(IEnumerable<int> playerIds);
-
-	ValueTask<PromotionBonus> CreatePromotionBonusAsync(PromotionBonusModel model);
 }

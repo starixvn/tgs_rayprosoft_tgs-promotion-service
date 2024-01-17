@@ -142,6 +142,17 @@ public class PromotionManagementController : ControllerBase
 			};
 	}
 
+	[HttpGet("used/{promotionId}", Name = "GetPromotionUsedAmount")]
+	public ValueTask<decimal> GetPromotionUsedAmountAsync(
+		[FromServices] IGetService<GetPromotionUsedAmountQuery, decimal> queryService,
+		Guid promotionId)
+	{
+		var query = new GetPromotionUsedAmountQuery(
+			promotionId);
+
+		return queryService.GetAsync(query, HttpContext.RequestAborted);
+	}
+
 	[HttpGet("ids/{brandId}/{promotionName}", Name = "QueryPromotionIds")]
 	public IAsyncEnumerable<Guid> QueryPromotionIdsAsync(
 		[FromServices] IQueryService<PromotionIdsQuery, Guid> queryService,
@@ -233,7 +244,7 @@ public class PromotionManagementController : ControllerBase
 		};
 
 		var response = await messageSender
-			.RequestAsync(subject, request.ToByteArray())
+			.RequestAsync<ReadOnlyMemory<byte>, ReadOnlyMemory<byte>>(subject, request.ToByteArray())
 			.ConfigureAwait(false);
 
 		var processedResult = CampaignDetailResponse.Parser.ParseFrom(response.Span);
@@ -280,16 +291,5 @@ public class PromotionManagementController : ControllerBase
 			vipLevelsModel.Modifier);
 
 		return updateService.ExecuteAsync(command, HttpContext.RequestAborted);
-	}
-
-	[HttpGet("used/{promotionId}", Name = "GetPromotionUsedAmount")]
-	public ValueTask<decimal> GetPromotionUsedAmountAsync(
-		[FromServices] IGetService<GetPromotionUsedAmountQuery, decimal> queryService,
-		Guid promotionId)
-	{
-		var query = new GetPromotionUsedAmountQuery(
-			promotionId);
-
-		return queryService.GetAsync(query, HttpContext.RequestAborted);
 	}
 }

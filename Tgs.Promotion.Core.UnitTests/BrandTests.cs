@@ -1,5 +1,4 @@
-﻿using NSubstitute;
-using Tgs.Promotion.ApplicationServices;
+﻿using Tgs.Promotion.ApplicationServices;
 using Tgs.VipLevelService.Clients;
 
 namespace Tgs.Promotion.Core.UnitTests;
@@ -19,6 +18,6 @@ public class BrandTests
 		_ = await sut.GetAsync(query);
 
 		_ = fakeVipLevelServiceClient.Received(1)
-			.GetBrandAllVipLevelsAsync(Arg.Is(query.BrandId));
+			.VipLevelQueryAsync(Arg.Is(query.BrandId));
 	}
 }

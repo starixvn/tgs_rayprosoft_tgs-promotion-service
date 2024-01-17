@@ -9,8 +9,6 @@ namespace Tgs.Promotion.Clients;
 
 public class PromotionBonusClient : IPromotionBonusClient
 {
-	private readonly HttpClient _client;
-
 	private static readonly JsonSerializerOptions _SerializerOptions = new()
 	{
 		PropertyNameCaseInsensitive = true,
@@ -20,6 +18,8 @@ public class PromotionBonusClient : IPromotionBonusClient
 			new JsonStringEnumConverter(),
 		}
 	};
+
+	private readonly HttpClient _client;
 
 	public PromotionBonusClient(HttpClient client)
 	{

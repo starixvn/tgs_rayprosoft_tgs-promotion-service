@@ -21,7 +21,7 @@ public class PromotionHistoryController : ControllerBase
 			.ConfigureAwait(false);
 
 		return eventInfo is null
-			? null 
+			? null
 			: new EventDetailViewModel
 			{
 				EventId = eventInfo.EventId,

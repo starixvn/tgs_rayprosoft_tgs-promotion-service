@@ -8,9 +8,9 @@ namespace Tgs.Promotion.Workers;
 
 public class PromotionDistributionBackground(IPromotionDistributionTaskQueue taskQueue, ILogger<PromotionDistributionBackground> logger, IServiceProvider serviceProvider) : BackgroundService
 {
-	private readonly IPromotionDistributionTaskQueue _taskQueue = taskQueue;
 	private readonly ILogger<PromotionDistributionBackground> _logger = logger;
 	private readonly IServiceProvider _serviceProvider = serviceProvider;
+	private readonly IPromotionDistributionTaskQueue _taskQueue = taskQueue;
 
 	public override async Task StopAsync(CancellationToken stoppingToken)
 	{

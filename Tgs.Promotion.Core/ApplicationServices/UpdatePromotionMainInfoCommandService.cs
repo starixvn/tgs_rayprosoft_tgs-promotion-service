@@ -12,10 +12,10 @@ internal class UpdatePromotionMainInfoCommandService(
 	IPromotionRepository promotionRepository,
 	IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup> queryPromotionTypeGroupService) : ICommandService<UpdatePromotionMainInfoCommand>
 {
-	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 	private readonly IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup> _queryPromotionTypeGroupService = queryPromotionTypeGroupService;
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 
 	public async ValueTask ExecuteAsync(UpdatePromotionMainInfoCommand command, CancellationToken cancellationToken = default)
 	{
@@ -53,7 +53,7 @@ internal class UpdatePromotionMainInfoCommandService(
 		};
 
 		var changeSets = snapshot.CreatePatch(updateData, PromotionEventSourceUtility.SerializerOptions);
-		
+
 		await _promotionRepository.CreatePromotionEventAsync(
 				eventId,
 				snapshot.Id,

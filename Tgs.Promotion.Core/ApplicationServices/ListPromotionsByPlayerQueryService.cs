@@ -2,13 +2,13 @@
 using System.Runtime.CompilerServices;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
-using Tgs.VipLevelService.Clients;
+using Tgs.VipLevelService.Common.ViewModels;
 
 namespace Tgs.Promotion.ApplicationServices;
 
 internal class ListPromotionsByPlayerQueryService(
 	IPlayerServiceClient playerServiceClient,
-	IGetService<GetBrandVipLevelMapQuery, IReadOnlyDictionary<Guid, VipLevelInfo>> getVipMapService,
+	IGetService<GetBrandVipLevelMapQuery, IReadOnlyDictionary<Guid, VipLevelInfoViewModel>> getVipMapService,
 	IQueryService<ListPromotionsByBrandQuery, PromotionView> promotionQueryService,
 	IPromotionCheckerFactory promotionCheckerFactory) : IQueryService<ListPromotionsByPlayerQuery, PromotionView>
 {

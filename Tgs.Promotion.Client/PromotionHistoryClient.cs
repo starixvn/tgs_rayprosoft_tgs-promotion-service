@@ -6,14 +6,14 @@ namespace Tgs.Promotion.Clients;
 
 internal class PromotionHistoryClient : IPromotionHistoryClient
 {
-	private readonly HttpClient _httpClient;
-
 	private static readonly JsonSerializerOptions _JsonSerializerOptions = new()
 	{
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 		WriteIndented = false,
 		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
 	};
+
+	private readonly HttpClient _httpClient;
 
 	public PromotionHistoryClient(
 		HttpClient httpClient)

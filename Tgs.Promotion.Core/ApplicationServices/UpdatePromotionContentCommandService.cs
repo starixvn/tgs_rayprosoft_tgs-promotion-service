@@ -1,8 +1,8 @@
-﻿using System.Text.Json.Serialization;
-using System.Text.Json;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Json.Patch;
 using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;
-using Json.Patch;
 
 namespace Tgs.Promotion.ApplicationServices;
 
@@ -11,10 +11,6 @@ internal class UpdatePromotionContentCommandService(
 	ISerialNumberGenerator serialNumberGenerator,
 	IPromotionRepository promotionRepository) : ICommandService<UpdatePromotionContentCommand>
 {
-	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-
 	private static readonly JsonSerializerOptions _SerializerOptions = new()
 	{
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -22,6 +18,10 @@ internal class UpdatePromotionContentCommandService(
 		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
 		ReferenceHandler = ReferenceHandler.IgnoreCycles
 	};
+
+	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 
 	public async ValueTask ExecuteAsync(UpdatePromotionContentCommand command, CancellationToken cancellationToken = default)
 	{

@@ -2,7 +2,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.SerialNumberGenerator;
 
@@ -11,7 +10,8 @@ namespace Tgs.Promotion.Repository;
 public class PromotionRepository(
 	ITgsService<PromotionRow> promotionService,
 	TgsContext dbContext,
-	ISerialNumberGenerator serialNumberGenerator) : IPromotionRepository
+	ISerialNumberGenerator serialNumberGenerator)
+	: IPromotionRepository
 {
 	private static readonly JsonSerializerOptions _SerializerOptions = new()
 	{
@@ -169,8 +169,16 @@ public class PromotionRepository(
 				plan.ConditionHash))
 			.SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
+	public async ValueTask<PromotionDistributePlanDetailInfo> FindPromotionDistributePlanDetailAsync(Guid planId,
+		CancellationToken cancellationToken = default)
+	{
+		return await _dbContext.PromotionDistributePlans.Where(x => x.Id == planId)
+			.Select(x => new PromotionDistributePlanDetailInfo(x.Id, x.Detail))
+			.FirstAsync(cancellationToken);
+	}
+
 	public async ValueTask<PromotionSnapshot?> GetCurrentPromotionSnapshotAsync(
-		Guid promotionId,
+			Guid promotionId,
 		CancellationToken cancellationToken = default)
 	{
 		var promotionRow = await _dbContext.PromotionRows.FindAsync(
@@ -741,13 +749,5 @@ public class PromotionRepository(
 		}
 
 		_ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-	}
-
-	public async ValueTask<PromotionDistributePlanDetailInfo> FindPromotionDistributePlanDetailAsync(Guid planId,
-		CancellationToken cancellationToken = default)
-	{
-		return await _dbContext.PromotionDistributePlans.Where(x => x.Id == planId)
-			.Select(x => new PromotionDistributePlanDetailInfo(x.Id, x.Detail))
-			.FirstAsync(cancellationToken);
 	}
 }

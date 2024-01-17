@@ -10,9 +10,9 @@ internal class UpdatePromotionUsedAmountCommandService(
 	ISerialNumberGenerator serialNumberGenerator,
 	IPromotionRepository promotionRepository) : ICommandService<UpdatePromotionUsedAmountCommand>
 {
-	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 
 	public async ValueTask ExecuteAsync(UpdatePromotionUsedAmountCommand command, CancellationToken cancellationToken = default)
 	{
@@ -24,9 +24,9 @@ internal class UpdatePromotionUsedAmountCommandService(
 
 		if (snapshot is null)
 			return;
-		
+
 		if (snapshot.AmountUsedSnapshotId is null ||
-		    snapshot.AmountUsedSnapshotId.Value.CompareTo(command.SnapshotId) < 0)
+			snapshot.AmountUsedSnapshotId.Value.CompareTo(command.SnapshotId) < 0)
 		{
 			var eventId = await _serialNumberGenerator
 				.GenerateAsync(cancellationToken)

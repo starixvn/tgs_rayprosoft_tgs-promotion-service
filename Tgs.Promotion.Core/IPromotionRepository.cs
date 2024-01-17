@@ -27,8 +27,12 @@ public interface IPromotionRepository
 		Guid planId,
 		CancellationToken cancellationToken = default);
 
+	ValueTask<PromotionDistributePlanDetailInfo> FindPromotionDistributePlanDetailAsync(
+		Guid planId,
+		CancellationToken cancellationToken = default);
+
 	ValueTask<PromotionSnapshot?> GetCurrentPromotionSnapshotAsync(
-		Guid promotionId,
+			Guid promotionId,
 		CancellationToken cancellationToken = default);
 
 	ValueTask<EventInfo?> GetEventDetailAsync(Guid promotionId,
@@ -65,16 +69,16 @@ public interface IPromotionRepository
 		Guid brandId,
 		CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<EventInfo> QueryPromotionEventsAsync(
-		Guid promotionId,
-		CancellationToken cancellationToken = default);
-
 	IAsyncEnumerable<PromotionView> ListPromotionsByFiltersAsync(
 		Guid brandId,
 		During? during,
 		string? name,
 		IEnumerable<string> promotionTypes,
 		PromotionStatus? status,
+		CancellationToken cancellationToken = default);
+
+	IAsyncEnumerable<EventInfo> QueryPromotionEventsAsync(
+			Guid promotionId,
 		CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<PromotionMainInfo> QueryPromotionsAsync(
@@ -109,9 +113,5 @@ public interface IPromotionRepository
 		PromotionSnapshot snapshot,
 		Guid snapshotId,
 		DateTime updatedOn,
-		CancellationToken cancellationToken = default);
-
-	ValueTask<PromotionDistributePlanDetailInfo> FindPromotionDistributePlanDetailAsync(
-		Guid planId,
 		CancellationToken cancellationToken = default);
 }

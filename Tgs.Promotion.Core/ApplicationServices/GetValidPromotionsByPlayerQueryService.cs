@@ -10,8 +10,10 @@ internal class GetValidPromotionsByPlayerQueryService(
 	IPromotionCheckerFactory promotionCheckerFactory) : IQueryService<GetValidPromotionsByPlayerQuery, PromotionModel>
 {
 	private readonly IPlayerRepository _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
+
 	private readonly IPromotionCheckerFactory _promotionCheckerFactory =
 			promotionCheckerFactory ?? throw new ArgumentNullException(nameof(promotionCheckerFactory));
+
 	private readonly IQueryService<GetValidPromotionsQuery, PromotionModel> _promotionQueryService =
 			promotionQueryService ?? throw new ArgumentNullException(nameof(promotionQueryService));
 

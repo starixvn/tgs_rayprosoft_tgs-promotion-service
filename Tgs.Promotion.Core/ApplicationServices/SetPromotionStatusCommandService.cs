@@ -10,15 +10,15 @@ internal class SetPromotionStatusCommandService(
 	ISerialNumberGenerator serialNumberGenerator,
 	IPromotionRepository promotionRepository) : ICommandService<SetPromotionStatusCommand>
 {
-	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 
 	public async ValueTask ExecuteAsync(SetPromotionStatusCommand command, CancellationToken cancellationToken = default)
 	{
 		var snapshot =
 			await _promotionRepository.GetCurrentPromotionSnapshotAsync(
-					command.PromotionId, 
+					command.PromotionId,
 					cancellationToken)
 				.ConfigureAwait(false);
 
@@ -33,7 +33,7 @@ internal class SetPromotionStatusCommandService(
 
 		var updateData = snapshot with
 		{
-			Status = command.Status, 
+			Status = command.Status,
 			UpdatedByUsername = command.Modifier,
 			UpdatedOn = currentTime,
 			SnapshotEventId = eventId
@@ -51,9 +51,9 @@ internal class SetPromotionStatusCommandService(
 			.ConfigureAwait(false);
 
 		await _promotionRepository.UpdatePromotionSnapshotAsync(
-				updateData, 
-				eventId, 
-				currentTime, 
+				updateData,
+				eventId,
+				currentTime,
 				cancellationToken)
 			.ConfigureAwait(false);
 	}

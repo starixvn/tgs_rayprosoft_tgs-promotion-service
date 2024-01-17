@@ -29,7 +29,7 @@ public class PromotionPlayerRepository(ITgsService<PromotionPlayer> promotionPla
 
 	public async ValueTask SetSentOnAsync(int promotionPlayerId)
 	{
-		var promotionPlayer =  await _promotionPlayerService.GetQueries().SingleAsync(x => x.Id == promotionPlayerId);
+		var promotionPlayer = await _promotionPlayerService.GetQueries().SingleAsync(x => x.Id == promotionPlayerId);
 
 		promotionPlayer.SentOn = DateTime.UtcNow;
 

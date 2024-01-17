@@ -14,10 +14,10 @@ internal class CreatePromotionMainInfoCommandService(
 	IPromotionRepository promotionRepository,
 	IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup> queryPromotionTypeGroupService) : IGetService<CreatePromotionMainInfoCommand, Guid>
 {
-	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 	private readonly IQueryService<PromotionTypeGroupsQuery, PromotionTypeGroup> _queryPromotionTypeGroupService = queryPromotionTypeGroupService ?? throw new ArgumentNullException(nameof(queryPromotionTypeGroupService));
+	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+	private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 
 	public async ValueTask<Guid> GetAsync(CreatePromotionMainInfoCommand command, CancellationToken cancellationToken = default)
 	{
@@ -28,7 +28,7 @@ internal class CreatePromotionMainInfoCommandService(
 			.ConfigureAwait(false);
 
 		var currentTime = _systemClock.UtcNow.UtcDateTime;
-		
+
 		var eventId = await _serialNumberGenerator
 			.GenerateAsync(cancellationToken)
 			.ConfigureAwait(false);
@@ -65,9 +65,9 @@ internal class CreatePromotionMainInfoCommandService(
 			UpdatedOn: currentTime,
 			UpdatedByUsername: null,
 			AmountUsed: 0M,
-			AmountUsedSnapshotId:null,
+			AmountUsedSnapshotId: null,
 			DisplayOrder: 1,
-			VipLevelId:null,
+			VipLevelId: null,
 			SnapshotEventId: eventId);
 
 		var changeSets = new JsonPatch(
