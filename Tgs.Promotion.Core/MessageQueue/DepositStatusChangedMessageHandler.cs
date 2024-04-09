@@ -90,6 +90,10 @@ public class DepositStatusChangedMessageHandler : IMessageHandler<ReadOnlyMemory
 				break;
 
 			case PaymentFlowState.Reject:
+				_logger.LogInformation("Deposit roll back depositFormId: {id}, promotionId:{promotionId}",
+					depositForm.Id,
+					depositForm.PromotionId);
+
 				await _accountFirstDepositChecker.RollbackTagAsync(
 					depositForm.PlayerCode,
 					null,
