@@ -53,7 +53,7 @@ public class DepositStatusChangedMessageHandlerTests
 	}
 
 	[TestMethod]
-	public async Task DepositStatusChangedMessageHandler_如果存款單之前的狀態不是WaitApprove_不會處理()
+	public async Task DepositStatusChangedMessageHandler_如果存款單之前的狀態是Reject不會處理()
 	{
 		var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 		var fakePromotionCheckerFactory = Substitute.For<IPromotionCheckerFactory>();
@@ -78,7 +78,7 @@ public class DepositStatusChangedMessageHandlerTests
 		{
 			BrandId = Guid.NewGuid(),
 			FormId = Guid.NewGuid(),
-			Status = PaymentFlowState.Approved.ToString()
+			Status = PaymentFlowState.Reject.ToString()
 		};
 		var playerCode = "test1";
 		var promotionId = Guid.NewGuid();

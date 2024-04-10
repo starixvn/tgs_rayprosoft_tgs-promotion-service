@@ -47,7 +47,7 @@ public class DepositStatusChangedMessageHandler : IMessageHandler<ReadOnlyMemory
 
 		_logger.LogInformation("formEvent: ({formEvent})", JsonFormatter.Default.Format(formEvent));
 
-		if (previousStatus is not PaymentFlowState.WaitApprove)
+		if (previousStatus is PaymentFlowState.Reject)
 			return;
 
 		var depositForm = await _paymentServiceClient.GetDepositFormAsync(
