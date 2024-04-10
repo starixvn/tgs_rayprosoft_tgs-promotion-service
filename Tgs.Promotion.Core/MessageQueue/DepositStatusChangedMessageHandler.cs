@@ -43,8 +43,12 @@ public class DepositStatusChangedMessageHandler : IMessageHandler<ReadOnlyMemory
 		_logger.LogInformation("Deposit status change event.");
 
 		var formEvent = FormEventEx.Parser.ParseFrom(data.Span);
+		var previousStatus = Enum.Parse<PaymentFlowState>(formEvent.Status);
 
 		_logger.LogInformation("formEvent: ({formEvent})", JsonFormatter.Default.Format(formEvent));
+
+		if (previousStatus is not PaymentFlowState.Reject)
+			return;
 
 		var depositForm = await _paymentServiceClient.GetDepositFormAsync(
 			formEvent.FormId,
