@@ -97,7 +97,7 @@ internal class DistributePromotionBonusCommandService(
 						BucketType.Promotion,
 						distributeId.ToString(),
 						null,
-						command.BucketTypes,
+						command.BucketTypes?.Where(type => !string.IsNullOrEmpty(type)),
 						ct),
 					cancellationToken).ConfigureAwait(false);
 
