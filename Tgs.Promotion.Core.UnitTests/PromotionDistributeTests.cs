@@ -39,7 +39,7 @@ public class PromotionDistributeTests
 			 1000M,
 			 null,
 			 "manager",
-			 Array.Empty<string>());
+			 []);
 
 		var walletId = Guid.NewGuid();
 
@@ -124,7 +124,7 @@ public class PromotionDistributeTests
 			 1000M,
 			 Guid.NewGuid(),
 			 "manager",
-			 Array.Empty<string>());
+			 []);
 
 		var walletId = Guid.NewGuid();
 
@@ -213,7 +213,7 @@ public class PromotionDistributeTests
 			 1000M,
 			 null,
 			 "manager",
-			 Array.Empty<string>());
+			 []);
 
 		_ = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
 			async () => await sut.GetAsync(command));
@@ -244,7 +244,7 @@ public class PromotionDistributeTests
 			 1000M,
 			 null,
 			 "manager",
-			 Array.Empty<string>());
+			 []);
 
 		var walletId = Guid.NewGuid();
 
@@ -353,7 +353,7 @@ public class PromotionDistributeTests
 			 1000M,
 			 null,
 			 "manager",
-			 Array.Empty<string>());
+			 []);
 
 		var walletId = Guid.NewGuid();
 
@@ -426,7 +426,7 @@ public class PromotionDistributeTests
 			 1000M,
 			 null,
 			 "manager",
-			 Array.Empty<string>());
+			 []);
 
 		var walletId = Guid.NewGuid();
 

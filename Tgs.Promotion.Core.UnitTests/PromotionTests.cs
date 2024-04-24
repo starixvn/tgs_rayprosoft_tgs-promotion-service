@@ -1419,7 +1419,7 @@ public class PromotionTests
 			Guid.NewGuid(),
 			null,
 			null,
-			Array.Empty<string>(),
+			[],
 			null);
 
 		_ = await sut.QueryAsync(query).ToArrayAsync();

@@ -34,5 +34,5 @@ public class PromotionListItemViewModel
 
 	public decimal UsedAmount { get; set; }
 
-	public IEnumerable<int> VipLevels { get; set; } = Array.Empty<int>();
+	public IEnumerable<int> VipLevels { get; set; } = [];
 }

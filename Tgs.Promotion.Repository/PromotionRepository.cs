@@ -182,7 +182,7 @@ public class PromotionRepository(
 		CancellationToken cancellationToken = default)
 	{
 		var promotionRow = await _dbContext.PromotionRows.FindAsync(
-				new object[] { promotionId },
+				[promotionId],
 				cancellationToken)
 			.ConfigureAwait(false);
 
@@ -708,7 +708,7 @@ public class PromotionRepository(
 		CancellationToken cancellationToken = default)
 	{
 		var dbSnapshot = await _dbContext.PromotionRows
-							 .FindAsync(new object[] { snapshot.Id }, cancellationToken)
+							 .FindAsync([snapshot.Id], cancellationToken)
 							 .ConfigureAwait(false)
 						 ?? (await _dbContext.PromotionRows
 							 .AddAsync(new PromotionRow { Id = snapshot.Id }, cancellationToken)

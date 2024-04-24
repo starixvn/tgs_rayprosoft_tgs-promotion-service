@@ -11,5 +11,5 @@ internal record StubPromotionRule
 
 	public decimal TurnoverMultiple { get; init; }
 
-	public IEnumerable<int> VipLevels { get; init; } = Array.Empty<int>();
+	public IEnumerable<int> VipLevels { get; init; } = [];
 }
