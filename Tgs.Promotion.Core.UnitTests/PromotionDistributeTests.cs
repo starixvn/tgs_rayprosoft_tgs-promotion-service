@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tgs.CashService.Client;
 using Tgs.PlayerBucket.Client;
 using Tgs.PlayerService.Client;
@@ -466,6 +467,180 @@ public class PromotionDistributeTests
 
 		_ = await sut.GetAsync(command);
 
+		_ = fakePlayerBucketForTypesClient.Received(1)
+			.CreateBucketForBucketTypesAsync(
+				Arg.Any<string>(),
+				Arg.Any<decimal>(),
+				Arg.Any<BucketType>(),
+				Arg.Any<string>(),
+				Arg.Any<string>(),
+				Arg.Any<IEnumerable<string>?>());
+		_ = fakeCashServiceClient.Received(1)
+			.PromotionAsync(
+				Arg.Any<Guid>(),
+				Arg.Any<decimal>(),
+				Arg.Any<string>(),
+				Arg.Any<string>(),
+				Arg.Any<Guid?>());
+		_ = fakePromotionRepository.Received(1)
+			.UpdatePromotionDistributeAsync(
+				Arg.Is(distributeId),
+				Arg.Any<DateTime>(),
+				Arg.Any<string>());
+	}
+
+	[TestMethod]
+	public async Task DistributePromotionBonusCommandService_自動發放時如果流水是0不會進行建立水桶的動作()
+	{
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+		var fakePlayerBucketForTypesClient = Substitute.For<IPlayerBucketForTypesClient>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
+		var sut = new DistributePromotionBonusCommandService(
+			fakePromotionRepository,
+			fakeServiceCoordinator,
+			fakeCashServiceClient,
+			fakePlayerServiceClient,
+			fakePlayerBucketForTypesClient,
+			fakeSerialNumberGenerator);
+
+		var command = new DistributePromotionBonusCommand(
+			 Guid.NewGuid(),
+			 "player1",
+			 100M,
+			 0M,
+			 null,
+			 "manager",
+			 []);
+
+		var walletId = Guid.NewGuid();
+
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = Guid.NewGuid()
+			});
+
+		_ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = walletId.ToString()
+			}.ToImmutableDictionary());
+
+		_ = fakePromotionRepository.FindPromotionDistributePlanAsync(Arg.Is(command.PlanId))
+			.Returns(new PromotionDistributePlanInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				0));
+
+		_ = fakeServiceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(Arg.Any<GetPromotionMainInfoQuery>())
+			.Returns(new PromotionMainInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				"Ttt",
+				(From: DateTime.Now.AddDays(-1D), To: DateTime.Now.AddDays(1D)),
+				"Test",
+				null,
+				true));
+
+		var distributeId = Guid.NewGuid();
+		_ = fakeSerialNumberGenerator.GenerateAsync()
+			.Returns(distributeId, Guid.NewGuid(), Guid.NewGuid());
+
+		_ = await sut.GetAsync(command);
+
+		_ = fakePlayerBucketForTypesClient.DidNotReceive()
+			.CreateBucketForBucketTypesAsync(
+				Arg.Any<string>(),
+				Arg.Any<decimal>(),
+				Arg.Any<BucketType>(),
+				Arg.Any<string>(),
+				Arg.Any<string>(),
+				Arg.Any<IEnumerable<string>?>());
+		_ = fakePromotionRepository.Received(1)
+			.UpdatePromotionDistributeAsync(
+				Arg.Is(distributeId),
+				Arg.Any<DateTime>(),
+				Arg.Any<string>());
+	}
+
+	[TestMethod]
+	public async Task DistributePromotionBonusCommandService_自動發放時如果金額是0不會進行錢包異動()
+	{
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+		var fakeServiceCoordinator = Substitute.For<IServiceCoordinator>();
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+		var fakePlayerBucketForTypesClient = Substitute.For<IPlayerBucketForTypesClient>();
+		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
+		var sut = new DistributePromotionBonusCommandService(
+			fakePromotionRepository,
+			fakeServiceCoordinator,
+			fakeCashServiceClient,
+			fakePlayerServiceClient,
+			fakePlayerBucketForTypesClient,
+			fakeSerialNumberGenerator);
+
+		var command = new DistributePromotionBonusCommand(
+			 Guid.NewGuid(),
+			 "player1",
+			 0M,
+			 1000M,
+			 null,
+			 "manager",
+			 []);
+
+		var walletId = Guid.NewGuid();
+
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = Guid.NewGuid()
+			});
+
+		_ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+			.Returns(new Dictionary<string, string>
+			{
+				["DefaultWalletId"] = walletId.ToString()
+			}.ToImmutableDictionary());
+
+		_ = fakePromotionRepository.FindPromotionDistributePlanAsync(Arg.Is(command.PlanId))
+			.Returns(new PromotionDistributePlanInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				0));
+
+		_ = fakeServiceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(Arg.Any<GetPromotionMainInfoQuery>())
+			.Returns(new PromotionMainInfo(
+				Guid.NewGuid(),
+				Guid.NewGuid(),
+				"Ttt",
+				(From: DateTime.Now.AddDays(-1D), To: DateTime.Now.AddDays(1D)),
+				"Test",
+				null,
+				true));
+
+		var distributeId = Guid.NewGuid();
+		_ = fakeSerialNumberGenerator.GenerateAsync()
+			.Returns(distributeId, Guid.NewGuid(), Guid.NewGuid());
+
+		_ = await sut.GetAsync(command);
+
+		_ = fakeCashServiceClient.DidNotReceive()
+			.PromotionAsync(
+				Arg.Any<Guid>(),
+				Arg.Any<decimal>(),
+				Arg.Any<string>(),
+				Arg.Any<string>(),
+				Arg.Any<Guid?>());
 		_ = fakePromotionRepository.Received(1)
 			.UpdatePromotionDistributeAsync(
 				Arg.Is(distributeId),

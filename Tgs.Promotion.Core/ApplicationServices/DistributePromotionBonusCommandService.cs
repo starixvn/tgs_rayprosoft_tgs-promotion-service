@@ -3,6 +3,7 @@ using System.Text.Json;
 using Json.Patch;
 using Json.Pointer;
 using Polly;
+using Polly.Retry;
 using Tgs.CashService.Client;
 using Tgs.PlayerBucket.Client;
 using Tgs.PlayerService.Client;
@@ -18,39 +19,41 @@ internal class DistributePromotionBonusCommandService(
 	ICashServiceClient cashServiceClient,
 	IPlayerServiceClient playerServiceClient,
 	IPlayerBucketForTypesClient layerBucketForTypesClient,
-	ISerialNumberGenerator serialNumberGenerator) : IGetService<DistributePromotionBonusCommand, Guid>
+	ISerialNumberGenerator serialNumberGenerator)
+	: IGetService<DistributePromotionBonusCommand, Guid>
 {
-	private readonly ICashServiceClient _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-	private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-	private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-	private readonly IServiceCoordinator _serviceCoordinator = serviceCoordinator ?? throw new ArgumentNullException(nameof(serviceCoordinator));
+	private static readonly ResiliencePipeline _CreateBucketPipeline = new ResiliencePipelineBuilder()
+		.AddRetry(new RetryStrategyOptions
+		{
+			ShouldHandle = new PredicateBuilder().Handle<TimeoutException>(),
+			MaxRetryAttempts = 1
+		})
+		.Build();
 
 	public async ValueTask<Guid> GetAsync(DistributePromotionBonusCommand command,
 		CancellationToken cancellationToken = default)
 	{
-		var player = await _playerServiceClient.GetPlayerInfoAsync(
+		var player = await playerServiceClient.GetPlayerInfoAsync(
 			command.PlayerCode,
 			cancellationToken).ConfigureAwait(false)
 			?? throw new InvalidOperationException($"Player with player code {command.PlayerCode} does not exist");
 
-		var playerProperties = await _playerServiceClient.GetPlayerPropertiesAsync(
+		var playerProperties = await playerServiceClient.GetPlayerPropertiesAsync(
 			player.PlayerCode,
 			cancellationToken).ConfigureAwait(false)
 			?? throw new InvalidOperationException($"Player with player code {command.PlayerCode} does not exist");
 
 		var walletId = Guid.Parse(playerProperties.GetValueOrDefault("DefaultWalletId")!);
 
-		var plan = (await _promotionRepository.FindPromotionDistributePlanAsync(
+		var plan = (await promotionRepository.FindPromotionDistributePlanAsync(
 			command.PlanId,
 			cancellationToken).ConfigureAwait(false))!;
 
-		var promotion = (await _serviceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(
+		var promotion = (await serviceCoordinator.GetAsync<GetPromotionMainInfoQuery, PromotionMainInfo?>(
 			new(plan.PromotionId), cancellationToken).ConfigureAwait(false))!;
 
-		var distributeId = await _serialNumberGenerator
-			.GenerateAsync(cancellationToken)
-			.ConfigureAwait(false);
+		var distributeId = await serialNumberGenerator.GenerateAsync(
+			cancellationToken).ConfigureAwait(false);
 
 		var createDistributeInfo = new PromotionDistributeInfo(
 			distributeId,
@@ -63,7 +66,7 @@ internal class DistributePromotionBonusCommandService(
 			command.ReferenceId,
 			null);
 
-		await _promotionRepository.CreatePromotionDistributeAsync(
+		await promotionRepository.CreatePromotionDistributeAsync(
 			createDistributeInfo,
 			command.Distributor,
 			cancellationToken).ConfigureAwait(false);
@@ -73,56 +76,56 @@ internal class DistributePromotionBonusCommandService(
 			JsonSerializer.SerializeToNode(createDistributeInfo, PromotionUtility.SerializerOptions)));
 
 		var distributeLog = new PromotionDistributeLog(
-			await _serialNumberGenerator
+			await serialNumberGenerator
 				.GenerateAsync(cancellationToken)
 				.ConfigureAwait(false),
 			distributeId,
 			DistributeAction.Create,
 			JsonSerializer.SerializeToDocument(jsonCreatePatch));
 
-		await _promotionRepository.InsertPromotionDistributeLogAsync(
+		await promotionRepository.InsertPromotionDistributeLogAsync(
 			distributeLog,
 			cancellationToken).ConfigureAwait(false);
 
 		if (promotion.IsAutoSent)
 		{
-			await Policy.Handle<TimeoutException>()
-				.RetryAsync(1)
-				.ExecuteAsync(async () => await layerBucketForTypesClient.CreateBucketForBucketTypesAsync(
-					player.PlayerCode,
-					command.NeedTurnover,
-					BucketType.Promotion,
+			if (command.NeedTurnover > 0M)
+				await _CreateBucketPipeline.ExecuteAsync(
+					ct => layerBucketForTypesClient.CreateBucketForBucketTypesAsync(
+						player.PlayerCode,
+						command.NeedTurnover,
+						BucketType.Promotion,
+						distributeId.ToString(),
+						null,
+						command.BucketTypes,
+						ct),
+					cancellationToken).ConfigureAwait(false);
+
+			if (command.Amount > 0M)
+				_ = await cashServiceClient.PromotionAsync(
+					walletId,
+					command.Amount,
+					null,
 					distributeId.ToString(),
 					null,
-					command.BucketTypes,
-					cancellationToken).ConfigureAwait(false))
-				.ConfigureAwait(false);
-
-			_ = await _cashServiceClient.PromotionAsync(
-				walletId,
-				command.Amount,
-				null,
-				distributeId.ToString(),
-				null,
-				cancellationToken).ConfigureAwait(false);
+					cancellationToken).ConfigureAwait(false);
 
 			var distributedInfo = createDistributeInfo with
 			{
 				SentOn = DateTime.UtcNow
 			};
 
-			await _promotionRepository.UpdatePromotionDistributeAsync(
+			await promotionRepository.UpdatePromotionDistributeAsync(
 				distributedInfo.Id,
 				distributedInfo.SentOn.Value,
 				command.Distributor,
 				cancellationToken).ConfigureAwait(false);
 
-			await _promotionRepository.InsertPromotionDistributeLogAsync(
+			await promotionRepository.InsertPromotionDistributeLogAsync(
 				distributeLog with
 				{
-					Id = await _serialNumberGenerator
-						.GenerateAsync(cancellationToken)
-						.ConfigureAwait(false),
+					Id = await serialNumberGenerator.GenerateAsync(
+						cancellationToken).ConfigureAwait(false),
 					Action = DistributeAction.Distribute,
 					ChangeSets = JsonSerializer.SerializeToDocument(createDistributeInfo.CreatePatch(
 						distributedInfo,
