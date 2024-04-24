@@ -4,5 +4,5 @@ public class PromotionOrdersViewModel
 {
 	public string Modifier { get; init; } = default!;
 
-	public IEnumerable<OrderViewModel> Orders { get; init; } = Array.Empty<OrderViewModel>();
+	public IEnumerable<OrderViewModel> Orders { get; init; } = [];
 }

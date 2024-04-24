@@ -1028,15 +1028,15 @@ public class PromotionTests
 
 		fixture.Customize<PromotionRow>(u => u
 			.With(s => s.PromotionGameProviders,
-				Array.Empty<PromotionGameProvider>())
+				[])
 			.With(s => s.PromotionVipLevels,
-				Array.Empty<PromotionVipLevel>())
+				[])
 			.With(s => s.PromotionParticipants,
-				Array.Empty<PromotionParticipant>())
+				[])
 			.With(s => s.Localization, "{}")
 			.With(s => s.Status, (short)PromotionStatus.Enabled)
-			.With(s => s.PromotionBonus, Array.Empty<PromotionBonus>())
-			.With(s => s.TransactionPromotions, Array.Empty<TransactionPromotion>())
+			.With(s => s.PromotionBonus, [])
+			.With(s => s.TransactionPromotions, [])
 			.With(s => s.VipLevel, new VipLevel { }));
 		fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 

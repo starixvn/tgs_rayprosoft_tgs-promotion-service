@@ -161,7 +161,7 @@ public class PromotionDistributeTests
 			100M,
 			null,
 			null,
-			Array.Empty<string>());
+			[]);
 
 		var record = dbContext.PromotionDistributes.First();
 
@@ -247,7 +247,7 @@ public class PromotionDistributeTests
 			100M,
 			null,
 			referenceId,
-			Array.Empty<string>());
+			[]);
 
 		var record = dbContext.PromotionDistributes.First();
 

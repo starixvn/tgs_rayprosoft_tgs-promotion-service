@@ -9,7 +9,6 @@ internal class GetValidPromotionsQueryService(
 {
 	private readonly IPromotionRepository _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
 
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0305:簡化集合初始化", Justification = "<暫止>")]
 	public IAsyncEnumerable<PromotionModel> QueryAsync(
 		GetValidPromotionsQuery query, CancellationToken cancellationToken = default)
 	{

@@ -13,7 +13,6 @@ public class GetPromotionsQueryService(
 {
 	private readonly IPromotionRepository _service = service;
 
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0305:簡化集合初始化", Justification = "<暫止>")]
 	public async ValueTask<PagedResponse<PromotionModel>> GetAsync(
 		GetPromotionsQuery request,
 		CancellationToken cancellationToken) =>
