@@ -116,6 +116,8 @@ builder.Services
 	.AddGlobPatternExchange<DummyCampaignDetailProcessor>("tgs.promotion.dummy.setting")
 	.AddNatsGlobPatternExchange("*");
 
+builder.Services.AddSwaggerGen();
+
 builder.Services
 	.AddHealthChecks();
 
