@@ -13,8 +13,9 @@ internal class CancelTagPlayerDepositCommandService : ICommandService<CancelTagP
 		var firstDepositChecker = promotionCheckerFactory.GetPromotionChecker("FirstDeposit");
 		var AccountfirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("AccountFirstDeposit");
 		var dailyFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("DailyFirstDeposit");
+		var depositRewardV2Checker = promotionCheckerFactory.GetPromotionChecker("DepositRewardV2");
 
-		_checkers = [firstDepositChecker, AccountfirstDepositChecker, dailyFirstDepositChecker];
+		_checkers = [firstDepositChecker, AccountfirstDepositChecker, dailyFirstDepositChecker, depositRewardV2Checker];
 	}
 
 	public async ValueTask ExecuteAsync(CancelTagPlayerDepositCommand command, CancellationToken cancellationToken = default)
