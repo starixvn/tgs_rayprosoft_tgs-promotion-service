@@ -636,7 +636,7 @@ public class PromotionCheckerTests
 
 		await sut.ExecuteAsync(command);
 
-		_ = fakePromotionChecker.Received(3)
+		_ = fakePromotionChecker.Received(4)
 			.RollbackTagAsync(Arg.Any<string>(), Arg.Any<Guid?>());
 	}
 }
