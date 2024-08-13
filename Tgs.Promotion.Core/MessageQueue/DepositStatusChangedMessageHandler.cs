@@ -12,6 +12,7 @@ public class DepositStatusChangedMessageHandler : IMessageHandler<ReadOnlyMemory
 {
 	private readonly IPromotionChecker _accountFirstDepositChecker;
 	private readonly IPromotionChecker _dailyFirstDepositChecker;
+	private readonly IPromotionChecker _depositRewardV2DepositChecker;
 	private readonly IPromotionChecker _firstDepositChecker;
 	private readonly ILogger<DepositStatusChangedMessageHandler> _logger;
 	private readonly IPaymentServiceClient _paymentServiceClient;
@@ -32,6 +33,7 @@ public class DepositStatusChangedMessageHandler : IMessageHandler<ReadOnlyMemory
 		_firstDepositChecker = promotionCheckerFactory.GetPromotionChecker("FirstDeposit");
 		_dailyFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("DailyFirstDeposit");
 		_accountFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("AccountFirstDeposit");
+		_depositRewardV2DepositChecker = promotionCheckerFactory.GetPromotionChecker("DepositRewardV2");
 	}
 
 	public async ValueTask HandleAsync(
@@ -76,6 +78,7 @@ public class DepositStatusChangedMessageHandler : IMessageHandler<ReadOnlyMemory
 					depositForm.PlayerCode,
 					null,
 					cancellationToken).ConfigureAwait(false);
+
 				await _firstDepositChecker.CommitTagAsync(
 					depositForm.PlayerCode,
 					depositForm.PromotionId,
@@ -86,6 +89,11 @@ public class DepositStatusChangedMessageHandler : IMessageHandler<ReadOnlyMemory
 						depositForm.PlayerCode,
 						depositForm.PromotionId,
 						cancellationToken).ConfigureAwait(false);
+
+				await _depositRewardV2DepositChecker.CommitTagAsync(
+					depositForm.PlayerCode,
+					depositForm.PromotionId,
+					cancellationToken).ConfigureAwait(false);
 
 				break;
 
@@ -108,6 +116,12 @@ public class DepositStatusChangedMessageHandler : IMessageHandler<ReadOnlyMemory
 						depositForm.PlayerCode,
 						depositForm.PromotionId,
 						cancellationToken).ConfigureAwait(false);
+
+				await _depositRewardV2DepositChecker.RollbackTagAsync(
+					depositForm.PlayerCode,
+					depositForm.PromotionId,
+					cancellationToken).ConfigureAwait(false);
+
 				break;
 		}
 	}

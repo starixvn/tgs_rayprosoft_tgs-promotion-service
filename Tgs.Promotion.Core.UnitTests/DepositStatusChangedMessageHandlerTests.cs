@@ -26,6 +26,8 @@ public class DepositStatusChangedMessageHandlerTests
 			.Returns(fakeChecker);
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DailyFirstDeposit"))
 			.Returns(fakeChecker);
+		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DepositRewardV2"))
+			.Returns(fakeChecker);
 
 		var sut = new DepositStatusChangedMessageHandler(
 			fakePaymentServiceClient,
@@ -66,6 +68,8 @@ public class DepositStatusChangedMessageHandlerTests
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("FirstDeposit"))
 			.Returns(fakeChecker);
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DailyFirstDeposit"))
+			.Returns(fakeChecker);
+		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DepositRewardV2"))
 			.Returns(fakeChecker);
 
 		var sut = new DepositStatusChangedMessageHandler(
@@ -121,6 +125,8 @@ public class DepositStatusChangedMessageHandlerTests
 			.Returns(fakeChecker);
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DailyFirstDeposit"))
 			.Returns(fakeChecker);
+		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DepositRewardV2"))
+			.Returns(fakeChecker);
 
 		var sut = new DepositStatusChangedMessageHandler(
 			fakePaymentServiceClient,
@@ -152,7 +158,7 @@ public class DepositStatusChangedMessageHandlerTests
 
 		_ = fakeChecker.Received(1)
 			.RollbackTagAsync(Arg.Is(playerCode), Arg.Is((Guid?)null));
-		_ = fakeChecker.Received(1)
+		_ = fakeChecker.Received(2)
 			.RollbackTagAsync(
 				Arg.Is(playerCode),
 				Arg.Is(promotionId));
@@ -173,6 +179,8 @@ public class DepositStatusChangedMessageHandlerTests
 			.Returns(fakeChecker);
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DailyFirstDeposit"))
 			.Returns(fakeChecker);
+		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DepositRewardV2"))
+			.Returns(fakeChecker);
 
 		var sut = new DepositStatusChangedMessageHandler(
 			fakePaymentServiceClient,
@@ -204,7 +212,7 @@ public class DepositStatusChangedMessageHandlerTests
 
 		_ = fakeChecker.Received(1)
 			.RollbackTagAsync(Arg.Is(playerCode), Arg.Is((Guid?)null));
-		_ = fakeChecker.Received(2)
+		_ = fakeChecker.Received(3)
 			.RollbackTagAsync(
 				Arg.Is(playerCode),
 				Arg.Is(promotionId));
@@ -224,6 +232,8 @@ public class DepositStatusChangedMessageHandlerTests
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("FirstDeposit"))
 			.Returns(fakeChecker);
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DailyFirstDeposit"))
+			.Returns(fakeChecker);
+		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DepositRewardV2"))
 			.Returns(fakeChecker);
 
 		var sut = new DepositStatusChangedMessageHandler(
@@ -261,7 +271,7 @@ public class DepositStatusChangedMessageHandlerTests
 					dict => dict.ContainsKey(PlayerPropertyName.FirstDepositOn)));
 		_ = fakeChecker.Received(1)
 			.CommitTagAsync(Arg.Is(playerCode), Arg.Is((Guid?)null));
-		_ = fakeChecker.Received(1)
+		_ = fakeChecker.Received(2)
 			.CommitTagAsync(
 				Arg.Is(playerCode),
 				Arg.Is(promotionId));
@@ -281,6 +291,8 @@ public class DepositStatusChangedMessageHandlerTests
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("FirstDeposit"))
 			.Returns(fakeChecker);
 		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DailyFirstDeposit"))
+			.Returns(fakeChecker);
+		_ = fakePromotionCheckerFactory.GetPromotionChecker(Arg.Is("DepositRewardV2"))
 			.Returns(fakeChecker);
 
 		var sut = new DepositStatusChangedMessageHandler(
@@ -318,7 +330,7 @@ public class DepositStatusChangedMessageHandlerTests
 					dict => dict.ContainsKey(PlayerPropertyName.FirstDepositOn)));
 		_ = fakeChecker.Received(1)
 			.CommitTagAsync(Arg.Is(playerCode), Arg.Is((Guid?)null));
-		_ = fakeChecker.Received(2)
+		_ = fakeChecker.Received(3)
 			.CommitTagAsync(
 				Arg.Is(playerCode),
 				Arg.Is(promotionId));
