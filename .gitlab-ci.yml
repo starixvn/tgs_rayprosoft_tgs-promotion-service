@@ -42,7 +42,7 @@ push-k8s-template:
     - push_k8s_template $HelmTemplateFolderName $ImageName $Tag
 
 deploy-dev:
-  extends: .deploy-template
+  extends: .deploy-k8s-template
   variables:
     namespace: dev
     kube_config: KubeConfig_Raypro_dev
@@ -54,6 +54,10 @@ deploy-dev:
     - push-docker-image
     - job: push-k8s-template
       artifacts: true
+  tags:
+    - dev
+    - kubernetes
+    - deploy
   only:
     - main
   when: on_success
@@ -61,7 +65,7 @@ deploy-dev:
     - deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
 
 deploy-staging:
-  extends: .deploy-template
+  extends: .deploy-k8s-template
   variables:
     namespace: staging
     kube_config: KubeConfig_Raypro_staging
@@ -72,6 +76,10 @@ deploy-staging:
     - deploy-dev
     - job: push-k8s-template
       artifacts: true
+  tags:
+    - dev
+    - kubernetes
+    - deploy
   only:
     - main
   when: manual
@@ -79,7 +87,7 @@ deploy-staging:
     - deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
 
 deploy-prod:
-  extends: .deploy-template
+  extends: .deploy-k8s-template
   variables:
     namespace: prod
     kube_config: KubeConfig_Raypro_prod
@@ -90,6 +98,10 @@ deploy-prod:
     - deploy-staging
     - job: push-k8s-template
       artifacts: true
+  tags:
+    - dev
+    - kubernetes
+    - deploy
   only:
     - main
   when: manual
