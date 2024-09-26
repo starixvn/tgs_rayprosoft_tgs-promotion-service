@@ -19,4 +19,9 @@ public class PromotionDispatchConcatModel
 	public DateTimeOffset? SentOn { get; set; }
 
 	public string Username { get; set; } = default!;
+
+	public Guid? ReferenceId { get; set; }
+
+	public string? Detail { get; set; } = default!;
+
 }

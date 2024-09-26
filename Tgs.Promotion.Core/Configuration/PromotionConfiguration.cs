@@ -7,6 +7,8 @@ public class PromotionConfiguration(IServiceCollection services)
 {
 	private readonly Dictionary<string, Type> _checkerTypes = [];
 
+	private readonly Dictionary<string, Type> _detailTypes = [];
+
 	public IServiceCollection Services { get; } = services ?? throw new ArgumentNullException(nameof(services));
 
 	public PromotionConfiguration AddCashServiceClient(
@@ -80,6 +82,16 @@ public class PromotionConfiguration(IServiceCollection services)
 
 		return this;
 	}
+
+	public PromotionConfiguration RegisterPromotionDetail<TDetail>(string typeName)
+		where TDetail : class, IPromotionDetailMessage
+	{
+		_detailTypes[typeName] = typeof(TDetail);
+
+		return this;
+	}
+
+	internal IDictionary<string, Type> GetAllRegisterDetailTypes() => _detailTypes;
 
 	internal IDictionary<string, Type> GetAllRegisterCheckerTypes() => _checkerTypes;
 }

@@ -1,4 +1,6 @@
-﻿namespace Tgs.Promotion.Clients.Models.PromotionDispatch;
+﻿using System.Text.Json;
+
+namespace Tgs.Promotion.Clients.Models.PromotionDispatch;
 
 public class PromotionDispatchModel
 {
@@ -21,4 +23,6 @@ public class PromotionDispatchModel
 	public DateTimeOffset? SentOn { get; set; }
 
 	public string Username { get; set; } = default!;
+
+	public JsonDocument? Detail { get; set; }
 }
