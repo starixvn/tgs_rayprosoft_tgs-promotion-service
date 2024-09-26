@@ -11,18 +11,14 @@ internal class GetPromotionDispatchQueryService(
 	IPromotionBonusRepository promotionBonusService,
 	IPromotionDistributionRepository promotionDistributionRepository,
 	IPlayerRepository tgsPlayerService,
-	ISettingsRepository settingRepository) : IGetService<GetPromotionDispatchesQuery, PagedResponse<PromotionDispatchModel>>
+	ISettingsRepository settingRepository,
+	IPromotionDetailFactory promotionDetailFactory) : IGetService<GetPromotionDispatchesQuery, PagedResponse<PromotionDispatchModel>>
 {
-	private readonly IPromotionBonusRepository _promotionBonusService = promotionBonusService;
-	private readonly IPromotionDistributionRepository _promotionDistributionRepository = promotionDistributionRepository;
-	private readonly ISettingsRepository _settingRepository = settingRepository;
-	private readonly IPlayerRepository _tgsPlayerService = tgsPlayerService;
-
 	public async ValueTask<PagedResponse<PromotionDispatchModel>> GetAsync(
 		GetPromotionDispatchesQuery request,
 		CancellationToken cancellationToken)
 	{
-		var promotionsJson = await _settingRepository
+		var promotionsJson = await settingRepository
 			.GetSettingAsync(x => x.Key == "PromotionTypes")
 			.ConfigureAwait(false);
 
@@ -53,7 +49,7 @@ internal class GetPromotionDispatchQueryService(
 
 		var promotionTypes = promotionGroup?.Types.Select(x => x.Name).ToArray() ?? [];
 
-		var promotionDistributes = _promotionDistributionRepository.GetPromotionDistributionQueries()
+		var promotionDistributes = promotionDistributionRepository.GetPromotionDistributionQueries()
 			.Include(x => x.Promotion)
 			.Where(x => x.BrandId == request.BrandId)
 			.Where(x => x.CreatedOn >= before60Day)
@@ -61,7 +57,7 @@ internal class GetPromotionDispatchQueryService(
 			.Where(request.To, x => request.To >= x.CreatedOn)
 			.Where(!string.IsNullOrEmpty(request.PromotionName), x => x.Promotion.Name == request.PromotionName)
 			.Where(promotionTypes, x => promotionTypes.Contains(x.Promotion.PromotionType))
-			.Join(_tgsPlayerService.GetPlayerQueries().Where(request.Username, x => x.Username == request.Username),
+			.Join(tgsPlayerService.GetPlayerQueries().Where(request.Username, x => x.Username == request.Username),
 				x => x.PlayerCode, p => p.PlayerCode,
 				(x, p) => new
 				{
@@ -73,7 +69,8 @@ internal class GetPromotionDispatchQueryService(
 					x.SentOn,
 					p.Username,
 					p.PlayerCode,
-					x.BonusAmount
+					x.BonusAmount,
+					x.ReferenceId
 				})
 			.Select(x => new PromotionDispatchConcatModel
 			{
@@ -85,10 +82,11 @@ internal class GetPromotionDispatchQueryService(
 				SentOn = x.SentOn,
 				Username = x.Username,
 				PlayerCode = x.PlayerCode,
-				BonusAmount = x.BonusAmount.ToString()
+				BonusAmount = x.BonusAmount.ToString(),
+				ReferenceId = x.ReferenceId
 			});
 
-		var promotionPlayers = _promotionBonusService.GetPromotionBonusPlayersQueries()
+		var promotionPlayers = promotionBonusService.GetPromotionBonusPlayersQueries()
 			.Include(x => x.PromotionBonus)
 			.ThenInclude(x => x.Promotion)
 			.Where(x => x.PromotionBonus.BrandId == request.BrandId)
@@ -99,7 +97,7 @@ internal class GetPromotionDispatchQueryService(
 				!string.IsNullOrEmpty(request.PromotionName),
 				x => x.PromotionBonus.Promotion.Name == request.PromotionName)
 			.Where(promotionTypes, x => promotionTypes.Contains(x.PromotionBonus.PromotionType))
-			.Join(_tgsPlayerService.GetPlayerQueries().Where(request.Username, x => x.Username == request.Username),
+			.Join(tgsPlayerService.GetPlayerQueries().Where(request.Username, x => x.Username == request.Username),
 				x => x.PlayerCode, p => p.PlayerCode,
 				(x, p) => new
 				{
@@ -123,7 +121,8 @@ internal class GetPromotionDispatchQueryService(
 				SentOn = x.SentOn,
 				Username = x.Username,
 				PlayerCode = x.PlayerCode,
-				BonusAmount = x.BonusAmount.ToString()
+				BonusAmount = x.BonusAmount.ToString(),
+				ReferenceId = null
 			});
 
 		promotionDistributes = promotionDistributes.Concat(promotionPlayers)
@@ -137,7 +136,8 @@ internal class GetPromotionDispatchQueryService(
 				Username = x.Username,
 				PlayerCode = x.PlayerCode,
 				SentOn = x.SentOn,
-				BonusAmount = x.BonusAmount
+				BonusAmount = x.BonusAmount,
+				ReferenceId = x.ReferenceId
 			}).AsNoTracking();
 
 		var totalCount = await promotionDistributes.CountAsync(cancellationToken);
@@ -154,6 +154,16 @@ internal class GetPromotionDispatchQueryService(
 			.ToArrayAsync(cancellationToken)
 			.ConfigureAwait(false);
 
+		foreach (var item in items)
+		{
+			item.Detail = item.ReferenceId == null
+				? null
+				: (await promotionDetailFactory.GetPromotionDetail(item.PromotionType)
+					.GetDetailAsync(item.PromotionId, item.ReferenceId.Value, TimeSpan.FromSeconds(10),
+						cancellationToken: cancellationToken))
+				?.Detail;
+		}
+
 		var promotionDispatches = items.Select(x => new PromotionDispatchModel
 		{
 			PromotionBonusId = x.PromotionBonusId,
@@ -166,7 +176,8 @@ internal class GetPromotionDispatchQueryService(
 			Username = x.Username,
 			PlayerCode = x.PlayerCode,
 			SentOn = x.SentOn,
-			BonusAmount = decimal.Parse(x.BonusAmount)
+			BonusAmount = decimal.Parse(x.BonusAmount),
+			Detail = x.Detail == null ? null : JsonDocument.Parse(x.Detail)
 		}).ToArray();
 
 		var promotionDispatchPages =

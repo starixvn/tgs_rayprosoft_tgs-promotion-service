@@ -4,6 +4,7 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using TGS.Core.Infrastructures.Nats;
 using Tgs.Promotion.MessageQueue;
 using Tgs.Promotion.Models;
 using Tgs.Promotion.Service.MessageQueue;
@@ -116,6 +117,7 @@ builder.Services
 	.AddGlobPatternExchange<DummyCampaignDetailProcessor>("tgs.promotion.dummy.setting")
 	.AddNatsGlobPatternExchange("*");
 
+builder.Services.AddNatsMessage(builder.Configuration.GetConnectionString("Nats")!);
 builder.Services.AddSwaggerGen();
 
 builder.Services

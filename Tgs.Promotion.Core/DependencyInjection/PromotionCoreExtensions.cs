@@ -2,6 +2,7 @@
 using Tgs.Promotion;
 using Tgs.Promotion.Checkers;
 using Tgs.Promotion.Configuration;
+using Tgs.Promotion.PromotionDetailMessages;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -31,14 +32,20 @@ public static class PromotionCoreExtensions
 			.RegisterPromotionChecker<AlwaysTrueChecker>("DepositAccumulateRoulette")
 			.RegisterPromotionChecker<DepositRewardChecker>("DepositReward")
 			.RegisterPromotionChecker<AlwaysTrueChecker>("PromoteDepositChannel")
-			.RegisterPromotionChecker<ExternalServiceChecker>("DepositRewardV2");
+			.RegisterPromotionChecker<ExternalServiceChecker>("DepositRewardV2")
+			.RegisterPromotionChecker<ExternalServiceChecker>("Milestone");
+
+		_ = configuration.RegisterPromotionDetail<DetailMessageReply>("Milestone");
 
 		_ = services
 			.AddSerialNumberGenerator()
 			.AddSingleton<PromotionSerializer>()
 			.AddScoped<IPromotionCheckerFactory>(sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(
 				sp,
-				configuration.GetAllRegisterCheckerTypes()));
+				configuration.GetAllRegisterCheckerTypes()))
+			.AddScoped<IPromotionDetailFactory>(sp => ActivatorUtilities.CreateInstance<PromotionDetailFactory>(
+				sp,
+				configuration.GetAllRegisterDetailTypes()));
 
 		_ = services.AddSingleton<ISystemClock, DefaultSystemClock>();
 

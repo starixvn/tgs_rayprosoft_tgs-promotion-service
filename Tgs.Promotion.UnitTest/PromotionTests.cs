@@ -163,6 +163,7 @@ public class PromotionTests
 		var fakePromotionDistributionRepository = new Mock<IPromotionDistributionRepository>();
 		var fakeSettingsRepository = new Mock<ISettingsRepository>();
 		var fakePlayerRepository = new Mock<IPlayerRepository>();
+		var fakePromotionDetailFactory = new Mock<IPromotionDetailFactory>();
 
 		var brandId = Guid.NewGuid();
 
@@ -192,7 +193,8 @@ public class PromotionTests
 			fakePromotionBonusRepository.Object,
 			fakePromotionDistributionRepository.Object,
 			fakePlayerRepository.Object,
-			fakeSettingsRepository.Object);
+			fakeSettingsRepository.Object,
+			fakePromotionDetailFactory.Object);
 
 		var query = new GetPromotionDispatchesQuery
 		{
