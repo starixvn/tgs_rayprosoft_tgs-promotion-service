@@ -1,4 +1,5 @@
 ﻿using Tgs.Promotion.Clients.Models;
+using Tgs.Promotion.Clients.Models.PromotionDistribute;
 
 namespace Tgs.Promotion.Clients;
 
@@ -105,5 +106,14 @@ public interface IPromotionServiceClient
 		Guid promotionId,
 		decimal totalAmount,
 		Guid? snapshotId,
+		CancellationToken cancellationToken = default);
+
+	ValueTask<PromotionDistributeModel?> GetPromotionDistributeByReferenceIdAsync(
+		Guid referenceId, 
+		CancellationToken cancellationToken = default);
+
+	ValueTask<PromotionDistributeDetailModel?> GetPromotionDistributeDetailAsync(
+		Guid promotionId,
+		Guid referenceId,
 		CancellationToken cancellationToken = default);
 }

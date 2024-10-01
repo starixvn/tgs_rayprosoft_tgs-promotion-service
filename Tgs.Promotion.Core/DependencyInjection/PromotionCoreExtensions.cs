@@ -35,7 +35,10 @@ public static class PromotionCoreExtensions
 			.RegisterPromotionChecker<ExternalServiceChecker>("DepositRewardV2")
 			.RegisterPromotionChecker<ExternalServiceChecker>("Milestone");
 
-		_ = configuration.RegisterPromotionDetail<DetailMessageReply>("Milestone");
+		_ = configuration.RegisterPromotionDetail<DetailMessageReply>("Milestone")
+			.RegisterPromotionDetail<DetailMessageReply>("FirstDeposit")
+			.RegisterPromotionDetail<DetailMessageReply>("DailyFirstDeposit")
+			.RegisterPromotionDetail<DetailMessageReply>("DailySecondDeposit");
 
 		_ = services
 			.AddSerialNumberGenerator()

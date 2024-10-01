@@ -7,6 +7,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Web;
 using Tgs.Promotion.Clients.Models;
+using Tgs.Promotion.Clients.Models.PromotionDistribute;
 
 namespace Tgs.Promotion.Clients;
 
@@ -501,5 +502,31 @@ internal class PromotionServiceClient : IPromotionServiceClient
 			cancellationToken).ConfigureAwait(false);
 
 		_ = response.EnsureSuccessStatusCode();
+	}
+
+	public async ValueTask<PromotionDistributeModel?> GetPromotionDistributeByReferenceIdAsync(Guid referenceId,
+		CancellationToken cancellationToken = default)
+	{
+		var response = await _httpClient.GetAsync($"/api/distribute/{referenceId}", cancellationToken)
+			.ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		return JsonSerializer.Deserialize<PromotionDistributeModel>(
+			await response.Content.ReadAsStringAsync(cancellationToken),
+			_JsonSerializerOptions)!;
+	}
+
+	public async ValueTask<PromotionDistributeDetailModel?> GetPromotionDistributeDetailAsync(Guid promotionId, Guid referenceId,
+		CancellationToken cancellationToken = default)
+	{
+		var response = await _httpClient.GetAsync($"/api/distribute/detail/{promotionId}/{referenceId}", cancellationToken)
+			.ConfigureAwait(false);
+
+		_ = response.EnsureSuccessStatusCode();
+
+		return JsonSerializer.Deserialize<PromotionDistributeDetailModel>(
+			await response.Content.ReadAsStringAsync(cancellationToken),
+			_JsonSerializerOptions)!;
 	}
 }
