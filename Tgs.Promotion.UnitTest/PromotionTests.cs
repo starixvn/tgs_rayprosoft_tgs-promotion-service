@@ -456,14 +456,11 @@ public class PromotionTests
 	public async Task Check_Player_Can_Join_Promotion_When_Player_Is_Not_Qualified_Should_Be_False()
 	{
 		var fakeSystemClock = Substitute.For<ISystemClock>();
-		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 
 		var fakeCheckerFactory = Substitute.For<IPromotionCheckerFactory>();
 
 		var sut = new CheckCanJoinPromotionQueryService(
-			fakeSystemClock,
-			fakeSerialNumberGenerator,
 			fakePromotionRepository,
 			fakeCheckerFactory,
 			new PromotionSerializer());
@@ -553,14 +550,11 @@ public class PromotionTests
 	public async Task Check_Player_Can_Join_Promotion_When_Total_Used_Amount_Limit_Is_Reached_Should_Be_False()
 	{
 		var fakeSystemClock = Substitute.For<ISystemClock>();
-		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 
 		var fakeCheckerFactory = Substitute.For<IPromotionCheckerFactory>();
 
 		var sut = new CheckCanJoinPromotionQueryService(
-			fakeSystemClock,
-			fakeSerialNumberGenerator,
 			fakePromotionRepository,
 			fakeCheckerFactory,
 			new PromotionSerializer());
@@ -652,14 +646,11 @@ public class PromotionTests
 	public async Task Check_Player_Can_Join_Promotion_When_Total_Used_Amount_Limit_Not_Reached_Should_Be_True()
 	{
 		var fakeSystemClock = Substitute.For<ISystemClock>();
-		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 
 		var fakeCheckerFactory = Substitute.For<IPromotionCheckerFactory>();
 
 		var sut = new CheckCanJoinPromotionQueryService(
-			fakeSystemClock,
-			fakeSerialNumberGenerator,
 			fakePromotionRepository,
 			fakeCheckerFactory,
 			new PromotionSerializer());
@@ -724,63 +715,9 @@ public class PromotionTests
 		_ = fakeCheckerFactory.GetPromotionChecker(Arg.Is(promotion.PromotionType))
 			.Returns(fakeChecker);
 
-		var eventId = Guid.NewGuid();
-		_ = fakeSerialNumberGenerator.GenerateAsync(Arg.Any<CancellationToken>())
-			.Returns(eventId);
-
-		var expectedSnapshot = new PromotionSnapshot(
-			query.PromotionId,
-			promotion.Name,
-			promotion.BrandId,
-			promotion.From,
-			promotion.To,
-			promotion.Status,
-			promotion.PromotionType,
-			promotion.SettlementIntervalType,
-			promotion.AutoSentPlayerBonus,
-			promotion.BonusAmountLimit,
-			promotion.Unlimited,
-			promotion.GameType,
-			promotion.Percentage,
-			promotion.TotalAmountLimit,
-			promotion.TurnoverMultiple,
-			promotion.CampaignDetail,
-			promotion.Content,
-			promotion.Localization,
-			promotion.DesktopBanner,
-			promotion.MobileBanner,
-			promotion.SubSubject,
-			promotion.Terms,
-			promotion.CreatedByUsername,
-			promotion.CreatedOn,
-			promotion.UpdatedByUsername,
-			promotion.UpdatedOn,
-			2100M,
-			promotion.AmountUsedSnapshotId,
-			promotion.DisplayOrder,
-			promotion.VipLevelId,
-			eventId);
-
 		var actual = await sut.GetAsync(query);
 
 		ClassicAssert.IsTrue(actual);
-
-		_ = fakePromotionRepository
-			.Received(1)
-			.CreatePromotionEventAsync(
-				Arg.Is(eventId),
-				Arg.Is(query.PromotionId),
-				Arg.Is(PromotionEventAction.UpdateTotalUsedAmount),
-				Arg.Any<JsonDocument>(),
-				Arg.Is((string?)null),
-				Arg.Any<CancellationToken>());
-
-		_ = fakePromotionRepository.Received(1)
-			.UpdatePromotionSnapshotAsync(
-				Arg.Is(expectedSnapshot),
-				Arg.Is(eventId),
-				Arg.Is(utcDateTime),
-				Arg.Any<CancellationToken>());
 	}
 
 	[Test]
@@ -793,8 +730,6 @@ public class PromotionTests
 		var fakeCheckerFactory = Substitute.For<IPromotionCheckerFactory>();
 
 		var sut = new CheckCanJoinPromotionQueryService(
-			fakeSystemClock,
-			fakeSerialNumberGenerator,
 			fakePromotionRepository,
 			fakeCheckerFactory,
 			new PromotionSerializer());
@@ -859,62 +794,9 @@ public class PromotionTests
 		_ = fakeCheckerFactory.GetPromotionChecker(Arg.Is(promotion.PromotionType))
 			.Returns(fakeChecker);
 
-		var eventId = Guid.NewGuid();
-		_ = fakeSerialNumberGenerator.GenerateAsync(Arg.Any<CancellationToken>())
-			.Returns(eventId);
-
-		var expectedSnapshot = new PromotionSnapshot(
-			query.PromotionId,
-			promotion.Name,
-			promotion.BrandId,
-			promotion.From,
-			promotion.To,
-			promotion.Status,
-			promotion.PromotionType,
-			promotion.SettlementIntervalType,
-			promotion.AutoSentPlayerBonus,
-			promotion.BonusAmountLimit,
-			promotion.Unlimited,
-			promotion.GameType,
-			promotion.Percentage,
-			promotion.TotalAmountLimit,
-			promotion.TurnoverMultiple,
-			promotion.CampaignDetail,
-			promotion.Content,
-			promotion.Localization,
-			promotion.DesktopBanner,
-			promotion.MobileBanner,
-			promotion.SubSubject,
-			promotion.Terms,
-			promotion.CreatedByUsername,
-			promotion.CreatedOn,
-			promotion.UpdatedByUsername,
-			promotion.UpdatedOn,
-			2100M,
-			promotion.AmountUsedSnapshotId,
-			promotion.DisplayOrder,
-			promotion.VipLevelId,
-			eventId);
-
 		var actual = await sut.GetAsync(query);
 
 		ClassicAssert.IsTrue(actual);
-
-		_ = fakePromotionRepository.Received(1)
-			.CreatePromotionEventAsync(
-				Arg.Is(eventId),
-				Arg.Is(query.PromotionId),
-				Arg.Is(PromotionEventAction.UpdateTotalUsedAmount),
-				Arg.Any<JsonDocument>(),
-				Arg.Is((string?)null),
-				Arg.Any<CancellationToken>());
-
-		_ = fakePromotionRepository.Received(1)
-			.UpdatePromotionSnapshotAsync(
-				Arg.Is(expectedSnapshot),
-				Arg.Is(eventId),
-				Arg.Is(utcDateTime),
-				Arg.Any<CancellationToken>());
 	}
 
 	[Test]
