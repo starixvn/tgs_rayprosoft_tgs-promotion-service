@@ -70,7 +70,7 @@ public class DepositStatusChangedMessageHandler : IMessageHandler<ReadOnlyMemory
 					depositForm.PlayerCode,
 					new Dictionary<PlayerPropertyName, string?>
 					{
-						[PlayerPropertyName.FirstDepositOn] = DateTime.UtcNow.ToString("o")
+						[PlayerPropertyName.Zalo] = DateTime.UtcNow.ToString("o")
 					}.ToImmutableDictionary(),
 					cancellationToken: cancellationToken).ConfigureAwait(false);
 
