@@ -158,7 +158,7 @@ internal class GetPromotionDispatchQueryService(
 		{
 			item.Detail = item.ReferenceId == null
 				? null
-				: (await promotionDetailFactory.GetPromotionDetail(item.PromotionType)
+				: (await promotionDetailFactory.GetDispatchesPromotionDetail(item.PromotionType)
 					.GetDetailAsync(item.PromotionId, item.ReferenceId.Value, TimeSpan.FromSeconds(10),
 						cancellationToken: cancellationToken))
 				?.Detail;
