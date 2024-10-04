@@ -1,13 +1,9 @@
 ﻿using System.Text.Json;
-using Json.Patch;
-using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;
 
 namespace Tgs.Promotion.ApplicationServices;
 
 internal class CheckCanJoinPromotionQueryService(
-	ISystemClock systemClock,
-	ISerialNumberGenerator serialNumberGenerator,
 	IPromotionRepository promotionRepository,
 	IPromotionCheckerFactory promotionCheckerFactory,
 	PromotionSerializer promotionSerializer) : IGetService<CheckCanJoinPromotionQuery, bool>
@@ -47,41 +43,8 @@ internal class CheckCanJoinPromotionQueryService(
 		if (!isAllowed)
 			return false;
 
-		if (snapshot.Unlimited == 0 && snapshot.AmountUsed >= snapshot.TotalAmountLimit)
+		if (snapshot.Unlimited == 0 && snapshot.AmountUsed >= snapshot.TotalAmountLimit && snapshot.TotalAmountLimit > 0M)
 			return false;
-
-		var amount = snapshot.Percentage * query.Amount / 100M;
-		amount = amount > snapshot.BonusAmountLimit ? snapshot.BonusAmountLimit : amount;
-
-		var eventId = await serialNumberGenerator
-			.GenerateAsync(cancellationToken)
-			.ConfigureAwait(false);
-
-		var currentTime = systemClock.UtcNow.UtcDateTime;
-
-		var updateData = snapshot with
-		{
-			AmountUsed = snapshot.AmountUsed + amount,
-			SnapshotEventId = eventId
-		};
-
-		var changeSets = snapshot.CreatePatch(updateData, PromotionEventSourceUtility.SerializerOptions);
-
-		await promotionRepository.CreatePromotionEventAsync(
-				eventId,
-				snapshot.Id,
-				PromotionEventAction.UpdateTotalUsedAmount,
-				JsonSerializer.SerializeToDocument(changeSets),
-				null,
-				cancellationToken)
-			.ConfigureAwait(false);
-
-		await promotionRepository.UpdatePromotionSnapshotAsync(
-				updateData,
-				eventId,
-				currentTime,
-				cancellationToken)
-			.ConfigureAwait(false);
 
 		return true;
 	}

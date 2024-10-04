@@ -13,6 +13,7 @@ using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
 using Tgs.Promotion.Domain.Entities;
 using Tgs.Promotion.Repository;
+using TGS.Core.Infrastructures.Nats;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
 
@@ -48,6 +49,7 @@ internal class TestPromotionApplication(Action<IWebHostBuilder>? webHostConfigur
 
 				return new TgsContext(dbContextOptionsBuilder.Options);
 			}))
+			.AddFakeNatsMessage()
 			.AddSingleton(Substitute.For<IRedisConnectionFactory>())
 			.AddSingleton(Substitute.For<IPaymentServiceClient>())
 			.AddSingleton(Substitute.For<ICashServiceClient>()));

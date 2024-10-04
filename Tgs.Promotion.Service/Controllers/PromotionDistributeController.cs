@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.ComponentModel;
+using Microsoft.AspNetCore.Mvc;
 using Tgs.Promotion.ApplicationServices;
+using Tgs.Promotion.Models.PromotionDistribute;
 using Tgs.Promotion.Service.ViewModels;
 using Tgs.Promotion.Workers;
 using Tgs.ServiceUtility;
@@ -70,4 +72,19 @@ public class PromotionDistributeController : ControllerBase
 
 		return getService.GetAsync(command);
 	}
+
+	[HttpGet("{id}")]
+	[Description("Get promotion distribution")]
+	public ValueTask<PromotionDistributeModel> GetPromotionDistributionAsync(
+		[FromServices] IGetService<GetPromotionDistributeQuery, PromotionDistributeModel> getService,
+		Guid id) =>
+		getService.GetAsync(new GetPromotionDistributeQuery(id));
+
+	[HttpGet("detail/{promotionId}/{referenceId}")]
+	[Description("Get promotion distribution detail")]
+	public ValueTask<PromotionDistributeDetailModel> GetPromotionDistributionDetailAsync(
+		[FromServices] IGetService<GetPromotionDistributeDetailQuery, PromotionDistributeDetailModel> getService,
+		Guid promotionId,
+		Guid referenceId) =>
+		getService.GetAsync(new GetPromotionDistributeDetailQuery(promotionId, referenceId));
 }

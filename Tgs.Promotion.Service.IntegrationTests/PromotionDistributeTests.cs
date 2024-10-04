@@ -5,7 +5,10 @@ using Tgs.PlayerBucket.Client;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Domain.Entities;
+using Tgs.Promotion.PromotionDetailMessages;
 using Tgs.Service.PlayerBuckets;
+using TGS.Core.Infrastructures.Nats;
+using TGS.Core.Infrastructures.Nats.Interface;
 
 namespace Tgs.Promotion.Service.IntegrationTests;
 
@@ -305,5 +308,91 @@ public class PromotionDistributeTests
 		Assert.AreEqual(promotionId, actual.PromotionId);
 		Assert.AreEqual(brandId, actual.BrandId);
 		Assert.AreEqual(conditionHash, actual.ConditionHash);
+	}
+
+	[TestMethod]
+	public async Task Can_Get_Distribute()
+	{
+		var brandId = Guid.NewGuid();
+		var referenceId = Guid.NewGuid();
+		var distributeId = Guid.NewGuid();
+		var promotionId = Guid.NewGuid();
+
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = dbContext.PromotionDistributes.Add(new PromotionDistribute
+		{
+			Id = distributeId,
+			BrandId = brandId,
+			PromotionId = promotionId,
+			PlayerCode = "playerCode",
+			BonusAmount = 10,
+			ReferenceId = referenceId,
+			CreatedOn = DateTime.UtcNow,
+			SentOn = DateTime.UtcNow
+		});
+
+		_ = dbContext.PromotionRows.Add(new PromotionRow
+		{
+			Id = promotionId,
+			BrandId = brandId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now,
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}"
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.GetPromotionDistributeByReferenceIdAsync(referenceId);
+
+		Assert.IsNotNull(actual);
+		Assert.AreEqual(referenceId, actual.ReferenceId);
+		Assert.AreEqual(distributeId, actual.Id);
+		Assert.AreEqual(10, actual.BonusAmount);
+	}
+
+	[TestMethod]
+	public async Task Can_Get_Distribute_Detail()
+	{
+		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+		var fakePromotionDetailFactory = Substitute.For<IPromotionDetailFactory>();
+
+		var brandId = Guid.NewGuid();
+		var referenceId = Guid.NewGuid();
+		var promotionId = Guid.NewGuid();
+
+		await using var web = new TestPromotionApplication(hostBuilder => hostBuilder
+			.ConfigureServices(services => services
+				.AddSingleton(fakePromotionRepository)
+				.AddSingleton(fakePromotionDetailFactory)));
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		_ = fakePromotionRepository.GetPromotionMainInfoAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(
+			new PromotionMainInfo(promotionId, brandId, "name", (DateTime.UtcNow, DateTime.UtcNow), "FirstDeposit", 10, true));
+
+		var detail = """{ "bonusAmount": 10}""";
+
+		_ = fakePromotionDetailFactory.GetPromotionDetail(Arg.Any<string>()).GetDetailAsync(Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<TimeSpan?>(), Arg.Any<CancellationToken>())
+			.Returns(new DistributedDetailResponse { Detail = detail });
+
+		var actual = await sut.GetPromotionDistributeDetailAsync(promotionId,referenceId);
+
+		Assert.IsNotNull(actual);
+		Assert.AreEqual(brandId, actual.BrandId);
+		Assert.AreEqual(promotionId, actual.PromotionId);
+		Assert.AreEqual(referenceId, actual.ReferenceId);
+		Assert.AreEqual(10, actual!.Detail!.RootElement.GetProperty("bonusAmount").GetDecimal());
 	}
 }
