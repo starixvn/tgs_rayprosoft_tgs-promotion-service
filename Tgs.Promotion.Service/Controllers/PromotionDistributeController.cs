@@ -74,15 +74,15 @@ public class PromotionDistributeController : ControllerBase
 	}
 
 	[HttpGet("{id}")]
-	[Description("Get promotion distribute")]
-	public ValueTask<PromotionDistributeModel> GetPromotionDistributeAsync(
+	[Description("Get promotion distribution")]
+	public ValueTask<PromotionDistributeModel> GetPromotionDistributionAsync(
 		[FromServices] IGetService<GetPromotionDistributeQuery, PromotionDistributeModel> getService,
 		Guid id) =>
 		getService.GetAsync(new GetPromotionDistributeQuery(id));
 
 	[HttpGet("detail/{promotionId}/{referenceId}")]
-	[Description("Get promotion distribute detail")]
-	public ValueTask<PromotionDistributeDetailModel> GetPromotionDistributeDetailAsync(
+	[Description("Get promotion distribution detail")]
+	public ValueTask<PromotionDistributeDetailModel> GetPromotionDistributionDetailAsync(
 		[FromServices] IGetService<GetPromotionDistributeDetailQuery, PromotionDistributeDetailModel> getService,
 		Guid promotionId,
 		Guid referenceId) =>

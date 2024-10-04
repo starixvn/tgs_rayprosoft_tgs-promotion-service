@@ -15,8 +15,7 @@ internal class GetPromotionDistributeDetailQueryService(IPromotionRepository pro
 			return null;
 
 		var response = await promotionDetailFactory.GetPromotionDetail(promotion.PromotionType)
-			.GetDetailAsync(promotion.Id, query.ReferenceId, TimeSpan.FromSeconds(10),
-				cancellationToken: cancellationToken);
+			.GetDetailAsync(promotion.Id, query.ReferenceId, cancellationToken: cancellationToken);
 
 		return new PromotionDistributeDetailModel
 		{
