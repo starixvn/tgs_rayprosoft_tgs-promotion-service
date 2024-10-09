@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Tgs.PlayerBucket.Client;
@@ -361,6 +362,42 @@ public class PromotionDistributeTests
 	}
 
 	[TestMethod]
+	public async Task Cannot_Get_Distribute()
+	{
+		var brandId = Guid.NewGuid();
+		var referenceId = Guid.NewGuid();
+		var distributeId = Guid.NewGuid();
+		var promotionId = Guid.NewGuid();
+
+		await using var web = new TestPromotionApplication();
+
+		var httpClient = web.CreateClient();
+
+		var sut = new PromotionServiceClient(httpClient);
+
+		var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+		_ = dbContext.PromotionRows.Add(new PromotionRow
+		{
+			Id = promotionId,
+			BrandId = brandId,
+			Name = "Test Promotion",
+			From = DateTime.Now.AddDays(-10D),
+			To = DateTime.Now,
+			PromotionType = "TestType",
+			AutoSentPlayerBonus = true,
+			CampaignDetail = "{}"
+		});
+
+		_ = await dbContext.SaveChangesAsync();
+
+		var actual = await sut.GetPromotionDistributeByReferenceIdAsync(referenceId);
+
+		Assert.IsNull(actual);
+	}
+
+
+	[TestMethod]
 	public async Task Can_Get_Distribute_Detail()
 	{
 		var fakePromotionRepository = Substitute.For<IPromotionRepository>();
@@ -388,11 +425,17 @@ public class PromotionDistributeTests
 			.Returns(new DistributedDetailResponse { Detail = detail });
 
 		var actual = await sut.GetPromotionDistributeDetailAsync(promotionId,referenceId);
-
+		var d = actual.Detail.Deserialize<TestBonus>(new JsonSerializerOptions{ PropertyNameCaseInsensitive = true});
 		Assert.IsNotNull(actual);
 		Assert.AreEqual(brandId, actual.BrandId);
 		Assert.AreEqual(promotionId, actual.PromotionId);
 		Assert.AreEqual(referenceId, actual.ReferenceId);
 		Assert.AreEqual(10, actual!.Detail!.RootElement.GetProperty("bonusAmount").GetDecimal());
+		Assert.AreEqual(10, d.BonusAmount);
 	}
+}
+
+public class TestBonus
+{
+	public decimal? BonusAmount { get; set; }
 }

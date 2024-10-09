@@ -512,9 +512,13 @@ internal class PromotionServiceClient : IPromotionServiceClient
 
 		_ = response.EnsureSuccessStatusCode();
 
-		return JsonSerializer.Deserialize<PromotionDistributeModel>(
+		var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+		return string.IsNullOrWhiteSpace(responseContent)
+			? null
+			: JsonSerializer.Deserialize<PromotionDistributeModel>(
 			await response.Content.ReadAsStringAsync(cancellationToken),
-			_JsonSerializerOptions)!;
+			_JsonSerializerOptions);
 	}
 
 	public async ValueTask<PromotionDistributeDetailModel?> GetPromotionDistributeDetailAsync(Guid promotionId, Guid referenceId,
